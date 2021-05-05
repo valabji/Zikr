@@ -3,7 +3,6 @@
     "name": "Zikr",
     "slug": "Zikr",
     "privacy": "public",
-    "sdkVersion": "36.0.0",
     "platforms": [
       "ios",
       "android",
@@ -25,11 +24,9 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier":"com.valabji.zikr",
+      "bundleIdentifier": "com.valabji.zikr",
       "supportsTablet": true
     },
-    "android":{
-      
-    }
+    "android": {}
   }
 }
