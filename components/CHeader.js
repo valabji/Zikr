@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Dimensions, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import Clrs from "../constants/Colors";
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 const width = Dimensions.get("window").width
 
-export default function CustomHeader({ title, isHome, navigation }) {
+export default function CustomHeader({ title, isHome, Left, navigation }) {
   const Hbg = ({ color }) => {
     return <Svg
       xmlns="http://www.w3.org/2000/svg"
@@ -36,48 +36,47 @@ export default function CustomHeader({ title, isHome, navigation }) {
 
       elevation: 2,
     }}>
-      <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width,height:64 }}>
+      <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
         <Hbg color={Clrs.DGreen + "55"} />
         <Hbg color={Clrs.DGreen + "55"} />
+      </View>
+      {Left ?
+        <Left /> :
+        <View style={{ flex: 1 }}></View>
+      }
+      <View style={{ flex: 1.5, justifyContent: 'center' }}>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: Clrs.BYellow, fontSize: 18 }}>{title}</Text>
       </View>
       {
         isHome ?
           <View style={{ flex: 1, justifyContent: 'center' }}>
             <TouchableOpacity
               onPress={() => navigation.toggleDrawer()}
+              style={{ flexDirection: "row-reverse" }}
             >
               <Ionicons
                 name="md-menu"
                 size={30}
-                style={{ marginLeft: 5 }}
+                style={{ marginRight: 20 }}
                 color={Clrs.BYellow}
               />
             </TouchableOpacity>
           </View>
           :
-          <View style={{
-            flex: 1, justifyContent: 'center',
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 5,
-            },
-            shadowOpacity: 0.34,
-            shadowRadius: 6.27,
-
-            elevation: 10,
-          }}>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
+              style={{ flexDirection: "row-reverse" }}
             >
-              <Text style={{ width: 30, height: 30, marginLeft: 5 }}>{"(="}</Text>
+              <Feather
+                name="arrow-left"
+                size={30}
+                style={{ marginRight: 20 }}
+                color={Clrs.BYellow}
+              />
             </TouchableOpacity>
           </View>
       }
-      <View style={{ flex: 1.5, justifyContent: 'center' }}>
-        <Text style={{ textAlign: 'center',fontFamily:"Cairo_400Regular", fontWeight: 500, color: Clrs.BYellow, fontSize: 18 }}>{title}</Text>
-      </View>
-      <View style={{ flex: 1 }}></View>
     </LinearGradient>
   )
 }

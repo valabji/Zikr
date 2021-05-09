@@ -4,17 +4,15 @@ import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollVie
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 // import Azkar from '../constants/Azkar.js';
+import { mystore } from '../App';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { mystore } from '../App';
 // import React9Slice from 'react-9-slice';
 // import ImageCapInset from 'react-native-image-capinsets';
-
 const width = Dimensions.get("screen").width
 
 export default function HomeScreen({ navigation }) {
   const [s, setS] = React.useState(false)
-  const [st, setSt] = React.useState("")
   const [ft, setFt] = React.useState(true)
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
 
@@ -89,30 +87,15 @@ export default function HomeScreen({ navigation }) {
 
     }
   }
-
+  
   if (ft) {
     setFt(false)
     mystore.subscribe(chaged)
   }
-
   let p = ""
   return (
     <View style={{ flex: 1 }}>
-      <CustomHeader title="تطبيق ذِكْر" isHome={true} navigation={navigation}
-        Left={() => {
-          return <TouchableOpacity
-            onPress={() => {
-              setS(!s)
-            }}
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            {
-              s ?
-                <Feather name="rotate-cw" color={Clrs.BYellow} size={32} />
-                :
-                <Feather name="search" color={Clrs.BYellow} size={32} />
-            }
-          </TouchableOpacity>
-        }} />
+      <CustomHeader title="تطبيق ذِكْر" isHome={true} navigation={navigation} />
       {/* <React9Slice width={256}
           height={256}
           border={85}
@@ -128,32 +111,12 @@ export default function HomeScreen({ navigation }) {
         // source={require("../assets/images/bg.png")}
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
       >
-        <View style={{ width: width, alignItems: "center", justifyContent: "center", marginBottom: 3, marginTop: 3, display: s ? "flex" : "none" }}>
-          <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: Clrs.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: "#fff", borderRadius: 12 }}>
-            <TextInput
-              placeholder="بحث..."
-              placeholderTextColor={Clrs.BGreen}
-              onChangeText={v => {
-                setSt(v)
-              }}
-              style={{ width: width - 40, fontSize: 24, color: Clrs.BYellow, textAlign: "right" }} />
-          </View>
-        </View>
-        <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}>
-
+        <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
           {Azkar.map((i, index) => {
-            const cat = "" + i.category
-            let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-            let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-            if (cat != p) {
-              p = cat
-              if (!s || st == "" || ccat.includes(cst)) {
-                return <Item name={cat} fav={i.fav == true} index={index} onPress={() => {
-                  navigation.navigate("Screen2", { name: cat })
-                }} />
-              }
-            }
-
+            if (i.fav)
+              return <Item name={i.category} fav={i.fav == true} index={index} onPress={() => {
+                navigation.navigate("Screen2", { name: i.category })
+              }} />
           })}
         </ScrollView>
 

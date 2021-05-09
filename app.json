@@ -27,6 +27,9 @@
       "bundleIdentifier": "com.valabji.zikr",
       "supportsTablet": true
     },
-    "android": {}
+    "android": {
+      "package": "com.valabji.zikr"
+    },
+    "description": ""
   }
 }
