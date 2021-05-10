@@ -5,10 +5,31 @@ import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
+import { Audio } from 'expo-av';
+
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+  setTestDeviceIDAsync,
+} from 'expo-ads-admob';
+
+const Banner = "ca-app-pub-1740754568229700/6853520443"
+const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 
 export default function Screen2({ route, navigation }) {
   const name = route.params.name
+  const [sound, setSound] = React.useState();
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/sound/kik.mp3')
+    );
+    setSound(sound);
+    await sound.playAsync();
+  }
 
   let swp = React.createRef();;
   let size = 0;
@@ -21,12 +42,13 @@ export default function Screen2({ route, navigation }) {
     return <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => {
+        onPressIn={() => {
           if (i < z.count) {
+            playSound()
             setI(i + 1)
             console.log(i)
 
-            if (i == z.count-1) {
+            if (i == z.count - 1) {
               swp.scrollBy(1, true)
             }
           }
@@ -38,13 +60,14 @@ export default function Screen2({ route, navigation }) {
           marginTop: 6,
           fontFamily: "Cairo_400Regular",
         }}>{z.zekr}</Text>
-        <View style={{ borderTopWidth: 1,marginTop:20, height: 1, width: "100%", borderStyle: "dashed" }} />
-        <Text style={{
-          color: Clrs.BYellow,
-          fontSize: 14,
-          marginTop: 26,
-          fontFamily: "Cairo_400Regular",
-        }}> المرجع : {z.reference}</Text>
+        <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "dashed" }} />
+        {z.reference != "" &&
+          <Text style={{
+            color: Clrs.BYellow,
+            fontSize: 14,
+            marginTop: 26,
+            fontFamily: "Cairo_400Regular",
+          }}> المرجع : {z.reference}</Text>}
         <Text style={{
           color: Clrs.BYellow,
           fontSize: 14,
@@ -81,6 +104,13 @@ export default function Screen2({ route, navigation }) {
             >{i} / {z.count}</Text>
           </ImageBackground>
         </View>
+        <AdMobBanner
+          bannerSize="fullBanner"
+          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
+          servePersonalizedAds={true} // true or false
+          onDidFailToReceiveAdWithError={err => {
+            console.warn(err)
+          }} />
       </TouchableOpacity>
     </ScrollView>
   }

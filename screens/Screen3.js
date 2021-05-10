@@ -4,12 +4,44 @@ import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, Sc
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { Feather } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+  setTestDeviceIDAsync,
+} from 'expo-ads-admob';
+
+const Banner = "ca-app-pub-1740754568229700/6853520443"
+const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 
 export default function Screen2({ route, navigation }) {
   const [i, setI] = React.useState(0)
+  const [ft, setFt] = React.useState(true)
   //TODO: change to FALSE
   const [mv, setMv] = React.useState(false)
+  const [sound, setSound] = React.useState();
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/sound/kik.mp3')
+    );
+    setSound(sound);
+    await sound.playAsync();
+  }
+
+  if (ft) {
+    setFt(false)
+    setTimeout(() => {
+      AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
+        AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
+          AdMobInterstitial.showAdAsync()
+        })
+      })
+    }, 3000);
+  }
   return (
     <View style={{ flex: 1 }}>
       <Modal
@@ -20,29 +52,31 @@ export default function Screen2({ route, navigation }) {
           setMv(false)
         }}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <View style={{ backgroundColor: "white",
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 1,
-          },
-          shadowOpacity: 0.20,
-          shadowRadius: 1.41,
-          justifyContent: "center",alignItems:"center",
-          elevation: 2,
-          width: 240, height: 220, borderRadius: 20 }}>
+          <View style={{
+            backgroundColor: "white",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 1,
+            },
+            shadowOpacity: 0.20,
+            shadowRadius: 1.41,
+            justifyContent: "center", alignItems: "center",
+            elevation: 2,
+            width: 240, height: 220, borderRadius: 20
+          }}>
             <Feather name="info" size={64} color={Clrs.DYellow} />
             <Text style={{
               color: Clrs.DGreen,
               fontSize: 20,
-              textAlign:"right",
+              textAlign: "right",
               marginTop: 10,
               marginRight: 15,
               fontFamily: "Cairo_400Regular",
             }}
             >هل تريد تصفير العداد ؟</Text>
 
-            <View style={{ flexDirection: "row-reverse",width:"100%", marginTop: 20, justifyContent: "space-around" }}>
+            <View style={{ flexDirection: "row-reverse", width: "100%", marginTop: 20, justifyContent: "space-around" }}>
               <TouchableHighlight
                 onPress={() => {
                   setI(0)
@@ -98,9 +132,17 @@ export default function Screen2({ route, navigation }) {
             }}
           />
         </View> */}
+        <AdMobBanner
+          bannerSize="fullBanner"
+          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
+          servePersonalizedAds={true} // true or false
+          onDidFailToReceiveAdWithError={err => {
+            console.warn(err)
+          }} />
         <TouchableOpacity
-          onPress={() => {
+          onPressIn={() => {
             setI(i + 1)
+            playSound()
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >
@@ -116,7 +158,13 @@ export default function Screen2({ route, navigation }) {
             >{i}</Text>
           </ImageBackground>
         </TouchableOpacity>
-
+        <AdMobBanner
+          bannerSize="fullBanner"
+          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
+          servePersonalizedAds={true} // true or false
+          onDidFailToReceiveAdWithError={err => {
+            console.warn(err)
+          }} />
       </ImageBackground>
 
     </View>

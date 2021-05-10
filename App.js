@@ -91,7 +91,7 @@ export default function App(props) {
 const Drawer = createDrawerNavigator();
 function DNav() {
   return (
-    <Drawer.Navigator initialRouteName="Home"
+    <Drawer.Navigator initialRouteName="Screen3"
       drawerType="slide"
       drawerPosition="right"
       drawerContent={({ navigation }) => <View
@@ -191,7 +191,7 @@ function DNav() {
           onPress={() => {
             Share.share({
               message:
-                'حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nرابط الاندرويد\nرابط الايفون',
+                'حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nhttps://play.google.com/store/apps/details?id=com.valabji.khamsat.zikr',
             });
           }}
           style={{
