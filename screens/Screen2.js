@@ -21,14 +21,34 @@ const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 export default function Screen2({ route, navigation }) {
   const name = route.params.name
-  const [sound, setSound] = React.useState();
+  const [sound, setSound] = React.useState(null);
 
   async function playSound() {
-    const { sound } = await Audio.Sound.createAsync(
-      require('../assets/sound/kik.mp3')
-    );
-    setSound(sound);
-    await sound.playAsync();
+    let i = 0
+    if (sound == null) {
+      console.log("NULLLL")
+      i = 1
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/sound/kik.mp3')
+      );
+      setSound(sound);
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.didJustFinish) return;
+        sound.unloadAsync();
+      })
+
+    }
+    if (i == 1) {
+      sound.playAsync().then(() => {
+
+      })
+    } else {
+      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
+        sound.playAsync().then(() => {
+
+        })
+      })
+    }
   }
 
   let swp = React.createRef();;
@@ -104,13 +124,6 @@ export default function Screen2({ route, navigation }) {
             >{i} / {z.count}</Text>
           </ImageBackground>
         </View>
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} />
       </TouchableOpacity>
     </ScrollView>
   }
@@ -123,6 +136,13 @@ export default function Screen2({ route, navigation }) {
         source={require("../assets/images/bg.jpg")}
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
       >
+        <AdMobBanner
+          bannerSize="fullBanner"
+          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
+          servePersonalizedAds={true} // true or false
+          onDidFailToReceiveAdWithError={err => {
+            console.warn(err)
+          }} />
         <Swiper ref={(ref) => { swp = ref; }} style={{}} loop={false} showsButtons={false} showsPagination={false}  >
           {Azkar.map((i, index) => {
             if (i.category == name) {

@@ -1209,6 +1209,26 @@
     xcode "^3.0.1"
     xml2js "^0.4.23"
 
+"@expo/config-plugins@1.0.30":
+  version "1.0.30"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.30.tgz#5e7e7e06a6e2db1c83b809e3fea78f2d35ef8801"
+  integrity sha512-DS26sQj4uhN6AvtxyzHG9KzNr/J7NN8lHr1GBi417OSb6bJbf0E21jAvv033Abz0NpEDTVKOYpd3o7cxU1dMmw==
+  dependencies:
+    "@expo/config-types" "^40.0.0-beta.2"
+    "@expo/configure-splash-screen" "0.3.4"
+    "@expo/image-utils" "0.3.13"
+    "@expo/json-file" "8.2.29"
+    "@expo/plist" "0.0.12"
+    find-up "~5.0.0"
+    fs-extra "9.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    resolve-from "^5.0.0"
+    slash "^3.0.0"
+    slugify "^1.3.4"
+    xcode "^3.0.1"
+    xml2js "^0.4.23"
+
 "@expo/config-types@^40.0.0-beta.2":
   version "40.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-40.0.0-beta.2.tgz#4fea4ef5654d02218b02b0b3772529a9ce5b0471"
@@ -1224,6 +1244,26 @@
     "@babel/preset-env" "~7.12.13"
     "@babel/preset-typescript" "~7.12.13"
     "@expo/config-plugins" "1.0.28"
+    "@expo/config-types" "^40.0.0-beta.2"
+    "@expo/json-file" "8.2.29"
+    fs-extra "9.0.0"
+    getenv "^1.0.0"
+    glob "7.1.6"
+    require-from-string "^2.0.2"
+    resolve-from "^5.0.0"
+    semver "7.3.2"
+    slugify "^1.3.4"
+
+"@expo/config@3.3.40":
+  version "3.3.40"
+  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.40.tgz#5f9807826591c343801951cc4beb86a219024c2b"
+  integrity sha512-a3zl/x0BW/cey3elL8DGFuBtnTcNH3KAeYHqDxfYNk/Xj5ZqtMTWoukC8ES4WBvzt38NtMCDEEca4RiUIxS4uQ==
+  dependencies:
+    "@babel/core" "7.9.0"
+    "@babel/plugin-proposal-class-properties" "~7.12.13"
+    "@babel/preset-env" "~7.12.13"
+    "@babel/preset-typescript" "~7.12.13"
+    "@expo/config-plugins" "1.0.30"
     "@expo/config-types" "^40.0.0-beta.2"
     "@expo/json-file" "8.2.29"
     fs-extra "9.0.0"
@@ -1276,6 +1316,16 @@
     fs-extra "9.0.0"
     json5 "^1.0.1"
     write-file-atomic "^2.3.0"
+
+"@expo/metro-config@^0.1.16":
+  version "0.1.66"
+  resolved "https://registry.yarnpkg.com/@expo/metro-config/-/metro-config-0.1.66.tgz#5e9634333929ba7aee5b866b6e13eabd5ce029d2"
+  integrity sha512-v0rJYetTowzPCnGty/OkBWIBRiyR3zP0gB0Hqeq14Nm9yt1FQRnqbhl/xK5tDJ3w0UtQtY00LBllzFu8/VwgZQ==
+  dependencies:
+    "@expo/config" "3.3.40"
+    chalk "^4.1.0"
+    getenv "^1.0.0"
+    metro-react-native-babel-transformer "^0.59.0"
 
 "@expo/metro-config@^0.1.59", "@expo/metro-config@^0.1.63":
   version "0.1.64"
@@ -4015,6 +4065,15 @@ expo-structured-headers@~1.0.1:
   resolved "https://registry.yarnpkg.com/expo-structured-headers/-/expo-structured-headers-1.0.1.tgz#2f3117fc9480e01aa6705493d3213060c2dcf683"
   integrity sha512-U4frE8rT5x1LqZv5Ru/9CtzY8gh0wp1MfwTu5hetPydnwxXfWchuXvKgWRjEHglFU2X/29kYFY/J1UkPvCN8xg==
 
+expo-updates@^0.4.1:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.4.2.tgz#15862bc209fa3fb98d3fa16b7aac4edfcc33f182"
+  integrity sha512-89bvwemgmWWPGAHHnzSFCryWW3TmPNozcShwi7976KAlNcXM7Aitv7uifxtkdBt85TECFm5N6LY278psjyt8Dg==
+  dependencies:
+    "@expo/metro-config" "^0.1.16"
+    fbemitter "^2.1.1"
+    uuid "^3.4.0"
+
 expo-updates@~0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.5.4.tgz#ee1b395fee701fb230e7ae28729f4d7055dd3514"
@@ -4220,6 +4279,13 @@ fbjs@^3.0.0:
     promise "^7.1.1"
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.18"
+
+fiction-expo-restart@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/fiction-expo-restart/-/fiction-expo-restart-1.0.9.tgz#f964ae6ac928bcbef220aa7ee6348bf3f0320963"
+  integrity sha512-Y/lqq6Wvva3Zj4ds+FaGXRz224LOW5rFzpIfeGGOe/OAMfR7buhtcHUOjtny3O6w0Nj1UuG9c/0w8cKMPpp2kA==
+  dependencies:
+    expo-updates "^0.4.1"
 
 figures@^2.0.0:
   version "2.0.0"
@@ -7278,6 +7344,11 @@ react-native-screens@~3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-3.0.0.tgz#ee4c2d69abf7411603868b57214feec5e8f637fa"
   integrity sha512-35II5oxTaVp3OP8y0eLPOPpQkxG4fRKQ+dL1YSE1we5kCZFOU0l/Rn0T79HbyUu1LPwUZr6lZupPs0ULnRyMuQ==
+
+react-native-sound@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/react-native-sound/-/react-native-sound-0.11.0.tgz#ad60b55ba8c6dc89917f381ad3713f2738de530f"
+  integrity sha512-4bGAZfni6E2L695NQjOZwNLBQGXgBGYC4Sy+h99K5h0HqNZjCqR0+aLel+ezASxEJDpaH83gylNObXpiqJgdwg==
 
 react-native-svg@12.1.0:
   version "12.1.0"

@@ -23,7 +23,8 @@ import Constants from 'expo-constants';
 import Azkar from './constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore, createAction, createReducer } from '@reduxjs/toolkit';
-
+import { I18nManager } from "react-native";
+import { Restart } from 'fiction-expo-restart';
 
 const change = createAction('change')
 const changeReducer = createReducer({ "obj": { "x": "y", "ActiveS": true, "Azkar": [], "RandomNoti": 2342 } }, {
@@ -63,6 +64,11 @@ export default function App(props) {
         AsyncStorage.getItem("@zikr").then(res => {
           global.zikr = res
           mystore.dispatch({ type: 'change', "obj": { "Azkar": res != undefined ? JSON.parse(res) : Azkar } })
+          if (I18nManager.isRTL) {
+            I18nManager.forceRTL(false);
+            I18nManager.allowRTL(false);
+            Restart()
+          }
           setLoadingComplete(true);
           // SplashScreen.hide();
           SplashScreen.hideAsync();

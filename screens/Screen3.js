@@ -25,15 +25,70 @@ export default function Screen2({ route, navigation }) {
   const [sound, setSound] = React.useState();
 
   async function playSound() {
-    const { sound } = await Audio.Sound.createAsync(
-      require('../assets/sound/kik.mp3')
-    );
-    setSound(sound);
-    await sound.playAsync();
+    if (i == 0) {
+      sound.playAsync().then(() => {
+
+      })
+    } else {
+      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
+        sound.playAsync().then(() => {
+
+        })
+      })
+    }
+
+    /* sound.getStatusAsync().then(s => {
+      if (s.isLoaded) {
+        sound.playAsync().then(() => {
+
+        })
+      } else {
+        sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
+          sound.playAsync().then(() => {
+            
+          })
+        })
+      }
+    }) */
+
+
+
+
+
+    /* try {
+      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
+        console.warn("herwe")
+        sound.playAsync()
+      }).catch(e => {
+        console.log(e);
+        sound.playAsync()
+      })
+    } catch (error) {
+      console.log(error);
+      sound.playAsync()
+    }
+*/
   }
+
 
   if (ft) {
     setFt(false)
+    /*     Audio.setAudioModeAsync(
+          {
+            interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+          }
+        )
+     */
+    Audio.Sound.createAsync(
+      require('../assets/sound/kik.mp3')
+    ).then(({ sound }) => {
+      setSound(sound);
+      sound.setOnPlaybackStatusUpdate((status) => {
+        console.log("ST : "+JSON.stringify(status))
+        if (!status.didJustFinish) return;
+        sound.unloadAsync();
+      });
+    })
     setTimeout(() => {
       AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
         AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
@@ -81,6 +136,7 @@ export default function Screen2({ route, navigation }) {
                 onPress={() => {
                   setI(0)
                   setMv(false)
+                  sound.loadAsync(require('../assets/sound/kik.mp3'))
                 }}
                 style={{ backgroundColor: Clrs.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
