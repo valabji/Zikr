@@ -1,8 +1,11 @@
 {
   "main": "node_modules/expo/AppEntry.js",
+  "homepage": "https://valabji.github.io/zikr",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
+    "predeploy": "npx expo build:web",
+    "deploy": "gh-pages -d web-build",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
@@ -55,6 +58,7 @@
   "devDependencies": {
     "@babel/core": "~7.9.0",
     "babel-preset-expo": "8.3.0",
+    "gh-pages": "^4.0.0",
     "jest-expo": "^41.0.0"
   },
   "private": true
