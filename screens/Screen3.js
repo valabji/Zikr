@@ -1,101 +1,18 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { Feather } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
-
-const Banner = "ca-app-pub-1740754568229700/6853520443"
-const Interstatel = "ca-app-pub-1740754568229700/7975030420"
-
+import Modal from 'modal-react-native-web';
 
 export default function Screen2({ route, navigation }) {
   const [i, setI] = React.useState(0)
   const [ft, setFt] = React.useState(true)
-  //TODO: change to FALSE
   const [mv, setMv] = React.useState(false)
-  const [sound, setSound] = React.useState();
-
-  async function playSound() {
-    if (i == 0) {
-      sound.playAsync().then(() => {
-
-      })
-    } else {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        sound.playAsync().then(() => {
-
-        })
-      })
-    }
-
-    /* sound.getStatusAsync().then(s => {
-      if (s.isLoaded) {
-        sound.playAsync().then(() => {
-
-        })
-      } else {
-        sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-          sound.playAsync().then(() => {
-            
-          })
-        })
-      }
-    }) */
-
-
-
-
-
-    /* try {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        console.warn("herwe")
-        sound.playAsync()
-      }).catch(e => {
-        console.log(e);
-        sound.playAsync()
-      })
-    } catch (error) {
-      console.log(error);
-      sound.playAsync()
-    }
-*/
-  }
-
 
   if (ft) {
     setFt(false)
-    /*     Audio.setAudioModeAsync(
-          {
-            interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-          }
-        )
-     */
-    Audio.Sound.createAsync(
-      require('../assets/sound/kik.mp3')
-    ).then(({ sound }) => {
-      setSound(sound);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        console.log("ST : "+JSON.stringify(status))
-        if (!status.didJustFinish) return;
-        sound.unloadAsync();
-      });
-    })
-    setTimeout(() => {
-      AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
-        AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
-          AdMobInterstitial.showAdAsync()
-        })
-      })
-    }, 3000);
   }
   return (
     <View style={{ flex: 1 }}>
@@ -106,7 +23,7 @@ export default function Screen2({ route, navigation }) {
         onRequestClose={() => {
           setMv(false)
         }}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View style={{ flex: 1, display:mv?"flex":"none", justifyContent: "center", alignItems: "center" }}>
           <View style={{
             backgroundColor: "white",
             shadowColor: "#000",
@@ -136,7 +53,6 @@ export default function Screen2({ route, navigation }) {
                 onPress={() => {
                   setI(0)
                   setMv(false)
-                  sound.loadAsync(require('../assets/sound/kik.mp3'))
                 }}
                 style={{ backgroundColor: Clrs.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
@@ -188,17 +104,9 @@ export default function Screen2({ route, navigation }) {
             }}
           />
         </View> */}
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} />
         <TouchableOpacity
           onPressIn={() => {
             setI(i + 1)
-            playSound()
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >
@@ -214,13 +122,6 @@ export default function Screen2({ route, navigation }) {
             >{i}</Text>
           </ImageBackground>
         </TouchableOpacity>
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} />
       </ImageBackground>
 
     </View>

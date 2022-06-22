@@ -7,17 +7,6 @@ import Clrs from "../constants/Colors";
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../App';
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
-
-const Banner = "ca-app-pub-1740754568229700/6853520443"
-const Interstatel = "ca-app-pub-1740754568229700/7975030420"
-
 const width = Dimensions.get("screen").width
 
 export default function HomeScreen({ navigation }) {
@@ -101,13 +90,6 @@ export default function HomeScreen({ navigation }) {
   if (ft) {
     setFt(false)
     mystore.subscribe(chaged)
-    setTimeout(() => {
-      AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
-        AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
-          AdMobInterstitial.showAdAsync()
-        })
-      })
-    }, 3000);
   }
 
   let p = ""
@@ -154,13 +136,6 @@ export default function HomeScreen({ navigation }) {
               style={{ width: width - 40, fontSize: 24, color: Clrs.BYellow, textAlign: "right" }} />
           </View>
         </View>
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err=>{
-            console.warn(err)
-          }} />
         <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}>
 
           {Azkar.map((i, index) => {
@@ -170,7 +145,7 @@ export default function HomeScreen({ navigation }) {
             if (cat != p) {
               p = cat
               if (!s || st == "" || ccat.includes(cst)) {
-                return <Item name={cat} fav={i.fav == true} index={index} onPress={() => {
+                return <Item key={Math.random()*9999} name={cat} fav={i.fav == true} index={index} onPress={() => {
                   navigation.navigate("Screen2", { name: cat })
                 }} />
               }

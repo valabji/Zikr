@@ -4,58 +4,17 @@ import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollVie
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import Azkar from '../constants/Azkar.js';
-import Swiper from 'react-native-swiper'
-import { Audio } from 'expo-av';
-
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
-
-const Banner = "ca-app-pub-1740754568229700/6853520443"
-const Interstatel = "ca-app-pub-1740754568229700/7975030420"
-
+import Swiper from 'react-native-web-swiper'
+import Colors from '../constants/Colors';
 
 export default function Screen2({ route, navigation }) {
   const name = route.params.name
-  const [sound, setSound] = React.useState(null);
-
-  async function playSound() {
-    let i = 0
-    if (sound == null) {
-      console.log("NULLLL")
-      i = 1
-      const { sound } = await Audio.Sound.createAsync(
-        require('../assets/sound/kik.mp3')
-      );
-      setSound(sound);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.didJustFinish) return;
-        sound.unloadAsync();
-      })
-
-    }
-    if (i == 1) {
-      sound.playAsync().then(() => {
-
-      })
-    } else {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        sound.playAsync().then(() => {
-
-        })
-      })
-    }
-  }
-
-  let swp = React.createRef();;
+  const swiperRef = React.useRef(null);
   let size = 0;
 
-  const Item = ({ z, pn }) => {
-    if (z.count == 0 || z.count == null || z.count == undefined) {
+  const Item = ({ zx, pn }) => {
+    let z = { ...zx }
+    if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1
     }
     const [i, setI] = React.useState(0)
@@ -64,12 +23,9 @@ export default function Screen2({ route, navigation }) {
         activeOpacity={0.8}
         onPressIn={() => {
           if (i < z.count) {
-            playSound()
             setI(i + 1)
-            console.log(i)
-
             if (i == z.count - 1) {
-              swp.scrollBy(1, true)
+              swiperRef.current.goToNext();
             }
           }
         }}
@@ -132,32 +88,28 @@ export default function Screen2({ route, navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <CustomHeader title={name} isHome={false} navigation={navigation} />
-      <ImageBackground
-        source={require("../assets/images/bg.jpg")}
-        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
-      >
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} />
-        <Swiper ref={(ref) => { swp = ref; }} style={{}} loop={false} showsButtons={false} showsPagination={false}  >
-          {Azkar.map((i, index) => {
-            if (i.category == name) {
-              size++
-              return <View style={{ flex: 1 }}>
-                <View style={{
-                  flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
-                }}>
-                  <Item z={i} pn={size} />
+        <View style={{ flex: 1, height: "100%", width: "100%",backgroundColor:Colors.tabIconDefault }}>
+          <Swiper ref={swiperRef} style={{ flex: 1 }} loop={false} controlsEnabled={false}  >
+            {Azkar.map((i, index) => {
+              if (i.category == name) {
+                size++
+                return <View key={Math.random() * 9999} style={{ flex: 1 }}>
+                  <View style={{
+                    flex: 1,borderRadius: 10, borderWidth: 1, borderColor: Clrs.BYellow, borderStyle: "dashed",margin: 7, 
+                  }}>
+                    <ImageBackground
+                      source={require("../assets/images/bg.jpg")}
+                      imageStyle={{borderRadius:10}}
+                      style={{ flex: 1, padding: 10,borderRadius: 10,  resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
+                    >
+                      <Item zx={i} pn={size} />
+                    </ImageBackground>
+                  </View>
                 </View>
-              </View>
-            }
-          })}
-        </Swiper>
-      </ImageBackground>
+              }
+            })}
+          </Swiper>
+        </View>
     </View>
   );
 }
