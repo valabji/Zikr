@@ -9,12 +9,22 @@ import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import React9Slice from 'react-9-slice';
 // import ImageCapInset from 'react-native-image-capinsets';
-const width = Dimensions.get("screen").width
 
 export default function HomeScreen({ navigation }) {
   const [s, setS] = React.useState(false)
   const [ft, setFt] = React.useState(true)
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
+  
+  const [width, setWidth] = React.useState(Dimensions.get("window").width)
+  React.useEffect(() => {
+    const subscription = Dimensions.addEventListener(
+      "change",
+      ({ window }) => {
+        setWidth(window.width);
+      }
+    );
+    return () => subscription?.remove();
+  });
 
   const Item = ({ name, onPress, fav, index }) => {
     let size = 32
