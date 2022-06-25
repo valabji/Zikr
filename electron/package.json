@@ -1,0 +1,17 @@
+{
+  "name": "Zikr",
+  "version": "1.0.0",
+  "main": "main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . --icon=icon.icns"
+  },
+  "devDependencies": {
+    "electron": "^19.0.6",
+    "electron-packager": "^15.5.1"
+  },
+  "dependencies": {
+    "electron-serve": "^1.1.0"
+  }
+}
