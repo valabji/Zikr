@@ -1,6 +1,6 @@
 {
   "main": "node_modules/expo/AppEntry.js",
-  "homepage": "https://valabji.github.io/Zikr",
+  "homepage": "https://valabji.github.io/Zikr/",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
