@@ -197,7 +197,7 @@ function DNav() {
           onPress={() => {
             Share.share({
               message:
-                'حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nhttps://play.google.com/store/apps/details?id=com.valabji.khamsat.zikr',
+                'حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nhttps://play.google.com/store/apps/details?id=com.valabji.zikr',
             });
           }}
           style={{

@@ -24,18 +24,23 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.valabji.khamast.zikr",
+      "bundleIdentifier": "com.valabji.zikr",
       "supportsTablet": true,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
       }
     },
     "android": {
-      "package": "com.valabji.khamsat.zikr",
+      "package": "com.valabji.zikr",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
       }
     },
-    "description": ""
+    "description": "",
+    "extra": {
+      "eas": {
+        "projectId": "6e367270-b77c-4065-a7be-7a88db024aaf"
+      }
+    }
   }
 }
