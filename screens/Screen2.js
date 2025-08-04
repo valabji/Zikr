@@ -7,13 +7,13 @@ import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 import { Audio } from 'expo-av';
 
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
+// import {
+//   AdMobBanner,
+//   AdMobInterstitial,
+//   PublisherBanner,
+//   AdMobRewarded,
+//   setTestDeviceIDAsync,
+// } from 'expo-ads-admob';
 
 const Banner = "ca-app-pub-1740754568229700/6853520443"
 const Interstatel = "ca-app-pub-1740754568229700/7975030420"
@@ -136,18 +136,18 @@ export default function Screen2({ route, navigation }) {
         source={require("../assets/images/bg.jpg")}
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
       >
-        <AdMobBanner
+        {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
           servePersonalizedAds={true} // true or false
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
-          }} />
+          }} /> */}
         <Swiper ref={(ref) => { swp = ref; }} style={{}} loop={false} showsButtons={false} showsPagination={false}  >
           {Azkar.map((i, index) => {
             if (i.category == name) {
               size++
-              return <View style={{ flex: 1 }}>
+              return <View key={index} style={{ flex: 1 }}>
                 <View style={{
                   flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
                 }}>

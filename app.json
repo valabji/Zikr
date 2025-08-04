@@ -8,7 +8,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -32,6 +32,7 @@
     },
     "android": {
       "package": "com.valabji.zikr",
+      "versionCode": 2,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
       }
@@ -39,7 +40,7 @@
     "description": "",
     "extra": {
       "eas": {
-        "projectId": "6e367270-b77c-4065-a7be-7a88db024aaf"
+        "projectId": "93819d24-8936-4af0-a311-4c072ec22e92"
       }
     }
   }

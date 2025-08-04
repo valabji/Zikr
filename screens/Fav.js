@@ -114,7 +114,7 @@ export default function HomeScreen({ navigation }) {
         <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
           {Azkar.map((i, index) => {
             if (i.fav)
-              return <Item name={i.category} fav={i.fav == true} index={index} onPress={() => {
+              return <Item key={index} name={i.category} fav={i.fav == true} index={index} onPress={() => {
                 navigation.navigate("Screen2", { name: i.category })
               }} />
           })}

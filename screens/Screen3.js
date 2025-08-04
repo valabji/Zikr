@@ -5,13 +5,13 @@ import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { Feather } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
+// import {
+//   AdMobBanner,
+//   AdMobInterstitial,
+//   PublisherBanner,
+//   AdMobRewarded,
+//   setTestDeviceIDAsync,
+// } from 'expo-ads-admob';
 
 const Banner = "ca-app-pub-1740754568229700/6853520443"
 const Interstatel = "ca-app-pub-1740754568229700/7975030420"
@@ -89,13 +89,13 @@ export default function Screen2({ route, navigation }) {
         sound.unloadAsync();
       });
     })
-    setTimeout(() => {
-      AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
-        AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
-          AdMobInterstitial.showAdAsync()
-        })
-      })
-    }, 3000);
+    // setTimeout(() => {
+    //   AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
+    //     AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
+    //       AdMobInterstitial.showAdAsync()
+    //     })
+    //   })
+    // }, 3000);
   }
   return (
     <View style={{ flex: 1 }}>
@@ -188,13 +188,13 @@ export default function Screen2({ route, navigation }) {
             }}
           />
         </View> */}
-        <AdMobBanner
+        {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
           servePersonalizedAds={true} // true or false
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
-          }} />
+          }} /> */}
         <TouchableOpacity
           onPressIn={() => {
             setI(i + 1)
@@ -214,13 +214,13 @@ export default function Screen2({ route, navigation }) {
             >{i}</Text>
           </ImageBackground>
         </TouchableOpacity>
-        <AdMobBanner
+        {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
           servePersonalizedAds={true} // true or false
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
-          }} />
+          }} /> */}
       </ImageBackground>
 
     </View>

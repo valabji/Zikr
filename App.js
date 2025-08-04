@@ -14,7 +14,7 @@ import TabBarIcon from './components/TabBarIcon';
 import MainScreen from './screens/MainScreen'
 import Fav from './screens/Fav'
 import Screen3 from './screens/Screen3'
-import useLinking from './navigation/useLinking';
+import linkingOptions from './navigation/useLinking';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Clrs from "./constants/Colors";
 import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
@@ -24,7 +24,7 @@ import Azkar from './constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore, createAction, createReducer } from '@reduxjs/toolkit';
 import { I18nManager } from "react-native";
-import { Restart } from 'fiction-expo-restart';
+import { Restart } from './utils/restart';
 
 const change = createAction('change')
 const changeReducer = createReducer({ "obj": { "x": "y", "ActiveS": true, "Azkar": [], "RandomNoti": 2342 } }, {
@@ -39,9 +39,9 @@ const Stack = createStackNavigator();
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
-  const [initialNavigationState, setInitialNavigationState] = React.useState();
+  // const [initialNavigationState, setInitialNavigationState] = React.useState();
   const containerRef = React.useRef();
-  const { getInitialState } = useLinking(containerRef);
+  // const { getInitialState } = useLinking(containerRef);
   // global.azkar = JSON.stringify(Azkar)
   // Zikr.setAzkar(Azkar)
 
@@ -52,7 +52,7 @@ export default function App(props) {
     async function loadResourcesAndDataAsync() {
       try {
         SplashScreen.preventAutoHideAsync();
-        setInitialNavigationState(await getInitialState());
+        // setInitialNavigationState(await getInitialState());
         await Font.loadAsync({
           ...Ionicons.font,
           'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
@@ -84,7 +84,9 @@ export default function App(props) {
     return (
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
+        <NavigationContainer 
+          linking={linkingOptions}
+          ref={containerRef}>
           <Stack.Navigator>
             <Stack.Screen name="Home" component={DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
             <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
@@ -98,8 +100,11 @@ const Drawer = createDrawerNavigator();
 function DNav() {
   return (
     <Drawer.Navigator initialRouteName="Screen3"
-      drawerType="slide"
-      drawerPosition="right"
+      screenOptions={{
+        drawerPosition: "right",
+        drawerType: "slide",
+        headerShown: false,
+      }}
       drawerContent={({ navigation }) => <View
         style={{ width: "100%", height: "100%", backgroundColor: Clrs.BGreen }}>
         <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 20 }}>

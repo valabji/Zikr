@@ -55,7 +55,7 @@ export default function CustomHeader({ title, isHome, Left, navigation }) {
               style={{ flexDirection: "row-reverse" }}
             >
               <Ionicons
-                name="md-menu"
+                name="menu"
                 size={30}
                 style={{ marginRight: 20 }}
                 color={Clrs.BYellow}
