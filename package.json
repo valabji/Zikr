@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.11.0",
     "@expo-google-fonts/cairo": "^0.1.0",
     "@expo/vector-icons": "^14.1.0",
+    "i18n-js": "^4.2.0",
     "@mui/material": "^5.14.10",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/masked-view": "^0.1.11",

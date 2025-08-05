@@ -1,0 +1,42 @@
+{
+  "app": {
+    "name": "Zikr App",
+    "tasbih": "Tasbih"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "navigation": {
+    "main": "Main",
+    "home": "Home",
+    "favorites": "Favorites",
+    "allAzkar": "All Azkar",
+    "shareApp": "Share App",
+    "logout": "Logout"
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "counter": {
+    "resetConfirmation": "Do you want to reset the counter?",
+    "yes": "Yes",
+    "no": "No", 
+    "page": "Page {current} of {total}"
+  },
+  "zikr": {
+    "reference": "Reference: {text}"
+  },
+  "share": {
+    "message": "Download the Zikr app and share it with others to spread the benefit\nhttps://play.google.com/store/apps/details?id=com.valabji.zikr"
+  },
+  "language": {
+    "switch": "Change Language",
+    "current": "English"
+  }
+}

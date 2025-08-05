@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState, useCallback } from 'react';
 import { StackActions } from '@react-navigation/native';
+import { t } from '../locales/i18n';
 
 import {
   Text,
@@ -50,7 +51,7 @@ export default function Main({navigation}) {
         <View style={styles.inputContainer}>
           <TextInput
             value={email}
-            placeholder="Email"
+            placeholder={t('auth.email')}
             style={styles.input}
             selectionColor={COLORS.WHITE}
             placeholderTextColor={COLORS.WHITE}
@@ -61,7 +62,7 @@ export default function Main({navigation}) {
           <TextInput
             value={password}
             style={styles.input}
-            placeholder="Password"
+            placeholder={t('auth.password')}
             selectionColor={COLORS.WHITE}
             placeholderTextColor={COLORS.WHITE}
             secureTextEntry={!showPassword}
@@ -90,14 +91,14 @@ export default function Main({navigation}) {
               fontSize: SIZES.BASE * 1.6,
               paddingBottom: SIZES.PADDING * 2,
             }}>
-            Forgot your password?
+            }}>{t('auth.forgotPassword')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} style={styles.signin} onPress={() => handleLogin()}>
           {loading ? (
             <ActivityIndicator size={SIZES.FONT * 1.2} color={COLORS.PURPLE} />
           ) : (
-            <Text style={styles.signinLabel}>Sign in</Text>
+            <Text style={styles.signinLabel}>{t('auth.login')}</Text>
           )}
         </TouchableOpacity>
       </View>

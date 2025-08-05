@@ -32,7 +32,7 @@
     },
     "android": {
       "package": "com.valabji.zikr",
-      "versionCode": 2,
+      "versionCode": 3,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
       }

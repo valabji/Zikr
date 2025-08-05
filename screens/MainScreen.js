@@ -3,6 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
+import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -113,7 +114,7 @@ export default function HomeScreen({ navigation }) {
   let p = ""
   return (
     <View style={{ flex: 1 }}>
-      <CustomHeader title="تطبيق ذِكْر" isHome={true} navigation={navigation}
+      <CustomHeader title={t('app.name')} isHome={true} navigation={navigation}
         Left={() => {
           return <TouchableOpacity
             onPress={() => {
@@ -146,7 +147,7 @@ export default function HomeScreen({ navigation }) {
         <View style={{ width: width, alignItems: "center", justifyContent: "center", marginBottom: 3, marginTop: 3, display: s ? "flex" : "none" }}>
           <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: Clrs.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: "#fff", borderRadius: 12 }}>
             <TextInput
-              placeholder="بحث..."
+              placeholder={t('search.placeholder')}
               placeholderTextColor={Clrs.BGreen}
               onChangeText={v => {
                 setSt(v)

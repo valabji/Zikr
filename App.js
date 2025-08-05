@@ -6,7 +6,8 @@ import * as Font from 'expo-font';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { initializeLanguage, t, setLanguage } from './locales/i18n';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import LoginScreen from './screens/LoginScreen'
 import RegScreen from './screens/Register'
@@ -60,19 +61,17 @@ export default function App(props) {
       } catch (e) {
         console.warn(e);
       } finally {
-
-        AsyncStorage.getItem("@zikr").then(res => {
-          global.zikr = res
-          mystore.dispatch({ type: 'change', "obj": { "Azkar": res != undefined ? JSON.parse(res) : Azkar } })
-          if (I18nManager.isRTL) {
-            I18nManager.forceRTL(false);
-            I18nManager.allowRTL(false);
-            Restart()
-          }
-          setLoadingComplete(true);
-          // SplashScreen.hide();
-          SplashScreen.hideAsync();
-        })
+        await initializeLanguage(); // Initialize translations first
+        const zikrData = await AsyncStorage.getItem("@zikr");
+        global.zikr = zikrData;
+        mystore.dispatch({ 
+          type: 'change', 
+          obj: { 
+            "Azkar": zikrData != undefined ? JSON.parse(zikrData) : Azkar 
+          } 
+        });
+        setLoadingComplete(true);
+        await SplashScreen.hideAsync();
       }
     }
 
@@ -138,7 +137,7 @@ function DNav() {
             fontSize: 22,
             marginTop: 7,
             fontFamily: "Cairo_400Regular",
-          }}>{"المسبحة"}</Text>
+          }}>{t('app.tasbih')}</Text>
           <View style={{ flex: 1 }} />
           <Feather name="target" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
         </TouchableOpacity>
@@ -166,7 +165,7 @@ function DNav() {
             fontSize: 22,
             marginTop: 7,
             fontFamily: "Cairo_400Regular",
-          }}>{"الاذكار المفضلة"}</Text>
+          }}>{t('navigation.favorites')}</Text>
           <View style={{ flex: 1 }} />
           <Feather name="heart" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
         </TouchableOpacity>
@@ -194,15 +193,14 @@ function DNav() {
             fontSize: 22,
             marginTop: 7,
             fontFamily: "Cairo_400Regular",
-          }}>{"كل الاذكار"}</Text>
+          }}>{t('navigation.allAzkar')}</Text>
           <View style={{ flex: 1 }} />
           <Feather name="list" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             Share.share({
-              message:
-                'حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nhttps://play.google.com/store/apps/details?id=com.valabji.zikr',
+              message: t('share.message'),
             });
           }}
           style={{
@@ -225,9 +223,39 @@ function DNav() {
             fontSize: 22,
             marginTop: 7,
             fontFamily: "Cairo_400Regular",
-          }}>{"مشاركة التطبيق"}</Text>
+          }}>{t('navigation.shareApp')}</Text>
           <View style={{ flex: 1 }} />
           <Feather name="share-2" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            const currentLang = await AsyncStorage.getItem('@language') || 'ar';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            await setLanguage(newLang);
+            Restart();
+          }}
+          style={{
+            height: 64,
+            marginLeft: 5,
+            marginRight: 5,
+            marginTop: 5,
+            backgroundColor: Clrs.DGreen,
+            flexDirection: "row-reverse",
+          }}>
+          <Image
+            source={require("./assets/images/muslim.png")}
+            style={{
+              width: 64, height: 64
+            }}
+          />
+          <Text style={{
+            color: Clrs.BYellow,
+            fontSize: 22,
+            marginTop: 7,
+            fontFamily: "Cairo_400Regular",
+          }}>{t('language.switch')}</Text>
+          <View style={{ flex: 1 }} />
+          <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
         </TouchableOpacity>
       </View>}
     >

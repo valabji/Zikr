@@ -3,6 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
+import { t } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 // import {
@@ -129,7 +130,7 @@ export default function Screen2({ route, navigation }) {
               marginRight: 15,
               fontFamily: "Cairo_400Regular",
             }}
-            >هل تريد تصفير العداد ؟</Text>
+            >{t('counter.resetConfirmation')}</Text>
 
             <View style={{ flexDirection: "row-reverse", width: "100%", marginTop: 20, justifyContent: "space-around" }}>
               <TouchableHighlight
@@ -145,7 +146,7 @@ export default function Screen2({ route, navigation }) {
                   fontSize: 20,
                   lineHeight: 28,
                   fontFamily: "Cairo_400Regular",
-                }}>نعم</Text>
+                }}>{t('counter.yes')}</Text>
               </TouchableHighlight>
               <TouchableHighlight
                 onPress={() => {
@@ -158,7 +159,7 @@ export default function Screen2({ route, navigation }) {
                   fontSize: 20,
                   lineHeight: 28,
                   fontFamily: "Cairo_400Regular",
-                }}>لا</Text>
+                }}>{t('counter.no')}</Text>
               </TouchableHighlight>
 
             </View>
@@ -166,7 +167,7 @@ export default function Screen2({ route, navigation }) {
         </View>
       </Modal>
 
-      <CustomHeader title={"المسبحة"} isHome={true} navigation={navigation} Left={() => {
+      <CustomHeader title={t('app.tasbih')} isHome={true} navigation={navigation} Left={() => {
         return <TouchableOpacity
           onPress={() => {
             setMv(true)

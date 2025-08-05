@@ -1,0 +1,42 @@
+{
+  "app": {
+    "name": "تطبيق ذِكْر",
+    "tasbih": "المسبحة"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "تسجيل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
+  },
+  "navigation": {
+    "main": "الرئيسية",
+    "home": "الصفحة الرئيسية",
+    "favorites": "الاذكار المفضلة",
+    "allAzkar": "كل الاذكار",
+    "shareApp": "مشاركة التطبيق",
+    "logout": "تسجيل الخروج"
+  },
+  "search": {
+    "placeholder": "بحث..."
+  },
+  "counter": {
+    "resetConfirmation": "هل تريد تصفير العداد ؟",
+    "yes": "نعم",
+    "no": "لا",
+    "page": "صفحة {current} من {total}"
+  },
+  "zikr": {
+    "reference": "المرجع : {text}"
+  },
+  "share": {
+    "message": "حمل تطبيق الاذكار وانشره لغيرك لتعم الفائدة وتنال الثواب\nhttps://play.google.com/store/apps/details?id=com.valabji.zikr"
+  },
+  "language": {
+    "switch": "تغيير اللغة",
+    "current": "العربية"
+  }
+}
