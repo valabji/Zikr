@@ -1,11 +1,11 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
+import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { t } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import { useAudio } from '../utils/Sounds';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -14,90 +14,16 @@ import { Audio } from 'expo-av';
 //   setTestDeviceIDAsync,
 // } from 'expo-ads-admob';
 
-const Banner = "ca-app-pub-1740754568229700/6853520443"
-const Interstatel = "ca-app-pub-1740754568229700/7975030420"
+// const Banner = "ca-app-pub-1740754568229700/6853520443"
+// const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
+const audioSource = require('../assets/sound/kikhires.mp3');
 
 export default function Screen2({ route, navigation }) {
   const [i, setI] = React.useState(0)
-  const [ft, setFt] = React.useState(true)
-  //TODO: change to FALSE
   const [mv, setMv] = React.useState(false)
-  const [sound, setSound] = React.useState();
+  const player = useAudio();
 
-  async function playSound() {
-    if (i == 0) {
-      sound.playAsync().then(() => {
-
-      })
-    } else {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        sound.playAsync().then(() => {
-
-        })
-      })
-    }
-
-    /* sound.getStatusAsync().then(s => {
-      if (s.isLoaded) {
-        sound.playAsync().then(() => {
-
-        })
-      } else {
-        sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-          sound.playAsync().then(() => {
-            
-          })
-        })
-      }
-    }) */
-
-
-
-
-
-    /* try {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        console.warn("herwe")
-        sound.playAsync()
-      }).catch(e => {
-        console.log(e);
-        sound.playAsync()
-      })
-    } catch (error) {
-      console.log(error);
-      sound.playAsync()
-    }
-*/
-  }
-
-
-  if (ft) {
-    setFt(false)
-    /*     Audio.setAudioModeAsync(
-          {
-            interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-          }
-        )
-     */
-    Audio.Sound.createAsync(
-      require('../assets/sound/kik.mp3')
-    ).then(({ sound }) => {
-      setSound(sound);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        console.log("ST : "+JSON.stringify(status))
-        if (!status.didJustFinish) return;
-        sound.unloadAsync();
-      });
-    })
-    // setTimeout(() => {
-    //   AdMobInterstitial.setAdUnitID(Interstatel).then(() => {
-    //     AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).then(() => {
-    //       AdMobInterstitial.showAdAsync()
-    //     })
-    //   })
-    // }, 3000);
-  }
   return (
     <View style={{ flex: 1 }}>
       <Modal
@@ -117,17 +43,21 @@ export default function Screen2({ route, navigation }) {
             },
             shadowOpacity: 0.20,
             shadowRadius: 1.41,
-            justifyContent: "center", alignItems: "center",
+            justifyContent: "center",
+            alignItems: "center",
             elevation: 2,
-            width: 240, height: 220, borderRadius: 20
+            width: 240,
+            height: 220,
+            borderRadius: 20,
           }}>
             <Feather name="info" size={64} color={Clrs.DYellow} />
             <Text style={{
               color: Clrs.DGreen,
               fontSize: 20,
-              textAlign: "right",
+              textAlign: "center",
               marginTop: 10,
               marginRight: 15,
+              marginLeft: 15,
               fontFamily: "Cairo_400Regular",
             }}
             >{t('counter.resetConfirmation')}</Text>
@@ -137,7 +67,6 @@ export default function Screen2({ route, navigation }) {
                 onPress={() => {
                   setI(0)
                   setMv(false)
-                  sound.loadAsync(require('../assets/sound/kik.mp3'))
                 }}
                 style={{ backgroundColor: Clrs.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
@@ -199,7 +128,7 @@ export default function Screen2({ route, navigation }) {
         <TouchableOpacity
           onPressIn={() => {
             setI(i + 1)
-            playSound()
+            player.playClick();
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >

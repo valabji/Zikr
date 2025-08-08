@@ -8,7 +8,7 @@
       "android",
       "web"
     ],
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -32,16 +32,21 @@
     },
     "android": {
       "package": "com.valabji.zikr",
-      "versionCode": 3,
+      "versionCode": 4,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
       }
     },
     "description": "",
     "extra": {
+      "supportsRTL": true,
+      "forceRTL": true,
       "eas": {
         "projectId": "93819d24-8936-4af0-a311-4c072ec22e92"
       }
-    }
+    },
+    "plugins": [
+      "expo-audio"
+    ]
   }
 }

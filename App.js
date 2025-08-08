@@ -25,7 +25,7 @@ import Azkar from './constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore, createAction, createReducer } from '@reduxjs/toolkit';
 import { I18nManager } from "react-native";
-import { Restart } from './utils/restart';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const change = createAction('change')
 const changeReducer = createReducer({ "obj": { "x": "y", "ActiveS": true, "Azkar": [], "RandomNoti": 2342 } }, {
@@ -64,11 +64,11 @@ export default function App(props) {
         await initializeLanguage(); // Initialize translations first
         const zikrData = await AsyncStorage.getItem("@zikr");
         global.zikr = zikrData;
-        mystore.dispatch({ 
-          type: 'change', 
-          obj: { 
-            "Azkar": zikrData != undefined ? JSON.parse(zikrData) : Azkar 
-          } 
+        mystore.dispatch({
+          type: 'change',
+          obj: {
+            "Azkar": zikrData != undefined ? JSON.parse(zikrData) : Azkar
+          }
         });
         setLoadingComplete(true);
         await SplashScreen.hideAsync();
@@ -83,14 +83,14 @@ export default function App(props) {
     return (
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <NavigationContainer 
-          linking={linkingOptions}
-          ref={containerRef}>
-          <Stack.Navigator>
-            <Stack.Screen name="Home" component={DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
-            <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
-          </Stack.Navigator>
-        </NavigationContainer>
+          <NavigationContainer
+            linking={linkingOptions}
+            ref={containerRef}>
+            <Stack.Navigator>
+              <Stack.Screen name="Home" component={DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
+              <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: "#ddd" } }} />
+            </Stack.Navigator>
+          </NavigationContainer>
       </View>
     );
   }
@@ -98,9 +98,9 @@ export default function App(props) {
 const Drawer = createDrawerNavigator();
 function DNav() {
   return (
-    <Drawer.Navigator initialRouteName="Screen3"
+    <Drawer.Navigator initialRouteName="Home"
       screenOptions={{
-        drawerPosition: "right",
+        drawerPosition: I18nManager.isRTL ? "right" : "left",
         drawerType: "slide",
         headerShown: false,
       }}
@@ -124,10 +124,10 @@ function DNav() {
             marginRight: 5,
             marginTop: 30,
             backgroundColor: Clrs.DGreen,
-            flexDirection: "row-reverse",
+            flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
           }}>
           <Image
-            source={require("./assets/images/muslim.png")}
+            source={I18nManager.isRTL ? require("./assets/images/muslim.png") : require("./assets/images/muslim.en.png")}
             style={{
               width: 64, height: 64
             }}
@@ -139,7 +139,7 @@ function DNav() {
             fontFamily: "Cairo_400Regular",
           }}>{t('app.tasbih')}</Text>
           <View style={{ flex: 1 }} />
-          <Feather name="target" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+          <Feather name="target" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -152,10 +152,10 @@ function DNav() {
             marginRight: 5,
             marginTop: 5,
             backgroundColor: Clrs.DGreen,
-            flexDirection: "row-reverse",
+            flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
           }}>
           <Image
-            source={require("./assets/images/muslim.png")}
+            source={I18nManager.isRTL ? require("./assets/images/muslim.png") : require("./assets/images/muslim.en.png")}
             style={{
               width: 64, height: 64
             }}
@@ -167,7 +167,7 @@ function DNav() {
             fontFamily: "Cairo_400Regular",
           }}>{t('navigation.favorites')}</Text>
           <View style={{ flex: 1 }} />
-          <Feather name="heart" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+          <Feather name="heart" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -180,10 +180,10 @@ function DNav() {
             marginRight: 5,
             marginTop: 5,
             backgroundColor: Clrs.DGreen,
-            flexDirection: "row-reverse",
+            flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
           }}>
           <Image
-            source={require("./assets/images/muslim.png")}
+            source={I18nManager.isRTL ? require("./assets/images/muslim.png") : require("./assets/images/muslim.en.png")}
             style={{
               width: 64, height: 64
             }}
@@ -195,7 +195,7 @@ function DNav() {
             fontFamily: "Cairo_400Regular",
           }}>{t('navigation.allAzkar')}</Text>
           <View style={{ flex: 1 }} />
-          <Feather name="list" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+          <Feather name="list" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -210,10 +210,10 @@ function DNav() {
             marginRight: 5,
             marginTop: 5,
             backgroundColor: Clrs.DGreen,
-            flexDirection: "row-reverse",
+            flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
           }}>
           <Image
-            source={require("./assets/images/muslim.png")}
+            source={I18nManager.isRTL ? require("./assets/images/muslim.png") : require("./assets/images/muslim.en.png")}
             style={{
               width: 64, height: 64
             }}
@@ -225,14 +225,13 @@ function DNav() {
             fontFamily: "Cairo_400Regular",
           }}>{t('navigation.shareApp')}</Text>
           <View style={{ flex: 1 }} />
-          <Feather name="share-2" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+          <Feather name="share-2" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
             const currentLang = await AsyncStorage.getItem('@language') || 'ar';
             const newLang = currentLang === 'ar' ? 'en' : 'ar';
             await setLanguage(newLang);
-            Restart();
           }}
           style={{
             height: 64,
@@ -240,10 +239,10 @@ function DNav() {
             marginRight: 5,
             marginTop: 5,
             backgroundColor: Clrs.DGreen,
-            flexDirection: "row-reverse",
+            flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
           }}>
           <Image
-            source={require("./assets/images/muslim.png")}
+            source={I18nManager.isRTL ? require("./assets/images/muslim.png") : require("./assets/images/muslim.en.png")}
             style={{
               width: 64, height: 64
             }}
@@ -255,7 +254,7 @@ function DNav() {
             fontFamily: "Cairo_400Regular",
           }}>{t('language.switch')}</Text>
           <View style={{ flex: 1 }} />
-          <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20 }} />
+          <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
         </TouchableOpacity>
       </View>}
     >
@@ -293,7 +292,7 @@ function BNav() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Constants.statusBarHeight,
+    paddingTop: Platform.OS === 'ios' ? Constants.statusBarHeight : 0,
     backgroundColor: Clrs.DGreen,
   },
 });

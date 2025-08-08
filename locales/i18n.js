@@ -1,5 +1,6 @@
 import { I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Restart } from '../utils/restart'
 import ar from './ar.json';
 import en from './en.json';
 
@@ -10,7 +11,7 @@ const translations = {
 
 let currentLanguage = 'ar'; // Default language
 
-export const setLanguage = async (lang) => {
+export const setLanguage = async (lang,restart=true) => {
   if (translations[lang]) {
     currentLanguage = lang;
     await AsyncStorage.setItem('@language', lang);
@@ -21,6 +22,9 @@ export const setLanguage = async (lang) => {
     } else if (lang !== 'ar' && I18nManager.isRTL) {
       I18nManager.forceRTL(false);
       I18nManager.allowRTL(false);
+    }
+    if (restart) {
+      Restart(); // Restart the app to apply changes
     }
   }
 };
@@ -52,7 +56,7 @@ export const initializeLanguage = async () => {
   try {
     const savedLanguage = await AsyncStorage.getItem('@language');
     if (savedLanguage) {
-      await setLanguage(savedLanguage);
+      await setLanguage(savedLanguage,false);
     }
   } catch (error) {
     console.warn('Error loading language:', error);

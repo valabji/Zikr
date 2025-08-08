@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState, useCallback } from 'react';
 import { StackActions } from '@react-navigation/native';
+import { I18nManager } from 'react-native';
 import { t } from '../locales/i18n';
 
 import {
@@ -120,6 +121,8 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
     fontSize: SIZES.FONT,
     paddingVertical: SIZES.PADDING * 0.5,
+    textAlign: I18nManager.isRTL ? 'right' : 'left',
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   inputContainer: {
     marginBottom: SIZES.PADDING * 2,

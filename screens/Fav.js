@@ -1,8 +1,9 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
+import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { mystore } from '../App';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
@@ -23,31 +24,28 @@ export default function HomeScreen({ navigation }) {
       onPress={onPress}
       style={{
         width: width - 20,
-        // flex:0.8,
         height: 48,
         marginLeft: 10,
         marginRight: 10,
         marginTop: 5,
         backgroundColor: Clrs.DGreen,
-        flexDirection: "row-reverse",
+        flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
       }}>
       <Image
-        source={require("../assets/images/muslim.png")}
+        source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
         style={{
           width: 48, height: 48
         }}
       />
-      <View style={{ justifyContent: "center" }} >
+      <View style={{ 
+        justifyContent: "center",
+        flex: 1,
+        paddingHorizontal: 2
+      }} >
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
           color: Clrs.BYellow,
-          // fontSize:22,
-          // fontSize: name.length > 35 ? 12 : name.length > 25 ? 16 : 22,
           fontSize: 16,
-          // marginTop: 6,
-          marginRight: -20,
-          textAlign: "right",
-          width: width - 48 - 48,
-          // height: 32,
+          textAlign: I18nManager.isRTL ? "right" : "left",
           fontFamily: "Cairo_400Regular",
         }}>{name}</Text>
       </View>
@@ -74,7 +72,13 @@ export default function HomeScreen({ navigation }) {
           mystore.dispatch({ type: 'change', "obj": { "Azkar": Azkar2 } })
           AsyncStorage.setItem("@zikr", JSON.stringify(Azkar2))
         }}
-        style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }} >
+        style={{ 
+          width: 48, 
+          height: 48, 
+          alignItems: "center", 
+          justifyContent: "center",
+          [I18nManager.isRTL ? 'marginLeft' : 'marginRight']: 5
+        }} >
         <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -95,7 +99,7 @@ export default function HomeScreen({ navigation }) {
   let p = ""
   return (
     <View style={{ flex: 1 }}>
-      <CustomHeader title="تطبيق ذِكْر" isHome={true} navigation={navigation} />
+      <CustomHeader title={t('app.name')} isHome={true} navigation={navigation} />
       {/* <React9Slice width={256}
           height={256}
           border={85}
@@ -111,12 +115,22 @@ export default function HomeScreen({ navigation }) {
         // source={require("../assets/images/bg.png")}
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
       >
-        <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView 
+          style={{ flex: 1, width: "100%" }} 
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
           {Azkar.map((i, index) => {
             if (i.fav)
-              return <Item key={index} name={i.category} fav={i.fav == true} index={index} onPress={() => {
-                navigation.navigate("Screen2", { name: i.category })
-              }} />
+              return <Item 
+                key={index} 
+                name={i.category} 
+                fav={i.fav == true} 
+                index={index} 
+                onPress={() => {
+                  navigation.navigate("Screen2", { name: i.category })
+                }} 
+              />
           })}
         </ScrollView>
 

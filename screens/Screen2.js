@@ -1,11 +1,13 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
+import { t } from '../locales/i18n';
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 import { Audio } from 'expo-av';
+import { useAudio } from '../utils/Sounds.js';
 
 // import {
 //   AdMobBanner,
@@ -22,40 +24,14 @@ const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 export default function Screen2({ route, navigation }) {
   const name = route.params.name
   const [sound, setSound] = React.useState(null);
-
-  async function playSound() {
-    let i = 0
-    if (sound == null) {
-      console.log("NULLLL")
-      i = 1
-      const { sound } = await Audio.Sound.createAsync(
-        require('../assets/sound/kik.mp3')
-      );
-      setSound(sound);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.didJustFinish) return;
-        sound.unloadAsync();
-      })
-
-    }
-    if (i == 1) {
-      sound.playAsync().then(() => {
-
-      })
-    } else {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        sound.playAsync().then(() => {
-
-        })
-      })
-    }
-  }
+  const player = useAudio();
+  const reverse = true //I18nManager.isRTL;
 
   let swp = React.createRef();;
   let size = 0;
 
   const Item = ({ z, pn }) => {
-    if (z.count == 0 || z.count == null || z.count == undefined) {
+    if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1
     }
     const [i, setI] = React.useState(0)
@@ -64,12 +40,10 @@ export default function Screen2({ route, navigation }) {
         activeOpacity={0.8}
         onPressIn={() => {
           if (i < z.count) {
-            playSound()
+            player.playClick();
             setI(i + 1)
-            console.log(i)
-
             if (i == z.count - 1) {
-              swp.scrollBy(1, true)
+              swp.scrollBy(reverse ? -1 : 1, true)
             }
           }
         }}
@@ -79,15 +53,17 @@ export default function Screen2({ route, navigation }) {
           fontSize: 14,
           marginTop: 6,
           fontFamily: "Cairo_400Regular",
+          textAlign: I18nManager.isRTL ? "right" : "left",
+          writingDirection: I18nManager.isRTL ? "rtl" : "ltr"
         }}>{z.zekr}</Text>
-        <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "dashed" }} />
+        <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "solid" }} />
         {z.reference != "" &&
           <Text style={{
             color: Clrs.BYellow,
             fontSize: 14,
             marginTop: 26,
             fontFamily: "Cairo_400Regular",
-          }}> المرجع : {z.reference}</Text>}
+          }}>{t('zikr.reference', { text: z.reference })}</Text>}
         <Text style={{
           color: Clrs.BYellow,
           fontSize: 14,
@@ -109,7 +85,7 @@ export default function Screen2({ route, navigation }) {
                 color: Clrs.BYellow,
                 fontSize: 18,
               }}
-            >صفحة {pn} من {size}</Text>
+            >{t('counter.page', { current: (reverse ? size - pn + 1 : pn), total: size })}</Text>
           </View>
           <View style={{ flex: 1 }} />
           <ImageBackground
@@ -128,9 +104,14 @@ export default function Screen2({ route, navigation }) {
     </ScrollView>
   }
 
+  const azkarList = Azkar.filter(i => i.category == name);
+  size = azkarList.length;
+  if (reverse) {
+    azkarList.reverse();
+  }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, flexGrow: 1 }}>
       <CustomHeader title={name} isHome={false} navigation={navigation} />
       <ImageBackground
         source={require("../assets/images/bg.jpg")}
@@ -143,18 +124,21 @@ export default function Screen2({ route, navigation }) {
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
           }} /> */}
-        <Swiper ref={(ref) => { swp = ref; }} style={{}} loop={false} showsButtons={false} showsPagination={false}  >
-          {Azkar.map((i, index) => {
-            if (i.category == name) {
-              size++
-              return <View key={index} style={{ flex: 1 }}>
-                <View style={{
-                  flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
-                }}>
-                  <Item z={i} pn={size} />
-                </View>
-              </View>
+        <Swiper ref={(ref) => { swp = ref; }}
+          onContentSizeChange={() => {
+            if (reverse) {
+              swp.scrollBy(size, false);
             }
+          }}
+          style={{}} loop={false} showsButtons={false} showsPagination={false}  >
+          {azkarList.map((i, index) => {
+            return <View key={index} style={{ flex: 1 }}>
+              <View style={{
+                flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
+              }}>
+                <Item z={i} pn={index + 1} />
+              </View>
+            </View>
           })}
         </Swiper>
       </ImageBackground>
