@@ -18,6 +18,7 @@
     "favorites": "Favorites",
     "allAzkar": "All Azkar",
     "shareApp": "Share App",
+    "settings": "Settings",
     "logout": "Logout"
   },
   "search": {
@@ -38,5 +39,12 @@
   "language": {
     "switch": "عربي",
     "current": "English"
+  },
+  "settings": {
+    "initialScreen": "Initial Screen",
+    "language": "Language",
+    "clickVolume": "Click Sound Volume",
+    "default": "Default",
+    "save": "Save"
   }
 }

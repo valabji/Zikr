@@ -9,7 +9,7 @@ import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 import { Hbg } from './Hbg';
 const width = Dimensions.get("window").width
 
-export default function CustomHeader({ title, isHome, Left, navigation }) {
+export default function CustomHeader({ title, isHome, Left, Right, navigation }) {
   return (
     <LinearGradient colors={[Clrs.BGreen, Clrs.DGreen]} locations={[0, 1]} style={{
       flexDirection: I18nManager.isRTL ? "row" : "row-reverse", 
@@ -38,6 +38,8 @@ export default function CustomHeader({ title, isHome, Left, navigation }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: Clrs.BYellow, fontSize: 18 }}>{title}</Text>
       </View>
       {
+        Right ?
+          <Right /> :
         isHome ?
           <View style={{ flex: 1, justifyContent: 'center' }}>
             <TouchableOpacity

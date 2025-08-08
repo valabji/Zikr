@@ -17,6 +17,7 @@
     "home": "الصفحة الرئيسية",
     "favorites": "الاذكار المفضلة",
     "allAzkar": "كل الاذكار",
+    "settings": "الإعدادات",
     "shareApp": "مشاركة التطبيق",
     "logout": "تسجيل الخروج"
   },
@@ -38,5 +39,12 @@
   "language": {
     "switch": "English",
     "current": "العربية"
+  },
+  "settings": {
+    "initialScreen": "الشاشة الرئيسية",
+    "language": "اللغة",
+    "clickVolume": "مستوى صوت النقر",
+    "default": "افتراضي",
+    "save": "حفظ"
   }
 }
