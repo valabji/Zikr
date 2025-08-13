@@ -32,22 +32,23 @@ export function DNav() {
         headerShown: false,
       }}
       drawerContent={({ navigation }) => {
-        if (initialScreen) {
-          const routeMap = {
-            'All': 'Home',
-            'Fav': 'Fav',
-            'Tasbih': 'Screen3'
-          };
-          const routeName = routeMap[initialScreen] || 'Fav';
-          if (initialScreen !== 'Fav') {
-            // Small delay to ensure navigation is ready
+        // Handle initial screen navigation
+        useEffect(() => {
+          if (initialScreen && initialScreen !== 'Fav') {
+            const routeMap = {
+              'All': 'Home',
+              'Fav': 'Fav',
+              'Tasbih': 'Screen3'
+            };
+            const routeName = routeMap[initialScreen] || 'Fav';
             const timer = setTimeout(() => {
-              setInitialScreen(null); // Reset initial screen to avoid re-navigation
+              setInitialScreen(null);
               navigation.navigate(routeName);
             }, 100);
             return () => clearTimeout(timer);
           }
-        }
+        }, [initialScreen, navigation]);
+
         return (
           <View
             style={{ width: "100%", height: "100%", backgroundColor: Clrs.BGreen }}>

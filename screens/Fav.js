@@ -5,9 +5,9 @@ import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
-import { mystore } from '../App';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { mystore } from '../redux/store';
 // import React9Slice from 'react-9-slice';
 // import ImageCapInset from 'react-native-image-capinsets';
 const width = Dimensions.get("screen").width

@@ -7,7 +7,7 @@ import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { mystore } from '../App';
+import { mystore } from '../redux/store';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,

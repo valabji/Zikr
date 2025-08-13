@@ -13,17 +13,8 @@ import Screen2 from './screens/Screen2';
 import Constants from 'expo-constants';
 import Azkar from './constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { configureStore, createAction, createReducer } from '@reduxjs/toolkit';
 import { DNav } from './navigation/DrawerNavigation';
-
-const change = createAction('change')
-const changeReducer = createReducer({ "obj": { "x": "y", "ActiveS": true, "Azkar": [], "RandomNoti": 2342 } }, {
-  [change]: (state, action) => {
-    state.obj = action.obj
-    return state
-  },
-})
-export const mystore = configureStore({ reducer: changeReducer })
+import { mystore } from './redux/store';
 
 const Stack = createStackNavigator();
 

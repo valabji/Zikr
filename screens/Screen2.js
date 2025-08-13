@@ -6,7 +6,6 @@ import Clrs from "../constants/Colors";
 import { t } from '../locales/i18n';
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
-import { Audio } from 'expo-av';
 import { useAudio } from '../utils/Sounds.js';
 
 // import {
@@ -22,8 +21,8 @@ const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 
 export default function Screen2({ route, navigation }) {
-  const name = route.params.name
-  const [sound, setSound] = React.useState(null);
+  const name = route?.params?.name || "Azkar";
+  const [ft, setFt] = React.useState(true);
   const player = useAudio();
   const reverse = true //I18nManager.isRTL;
 
@@ -38,12 +37,13 @@ export default function Screen2({ route, navigation }) {
     return <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
       <TouchableOpacity
         activeOpacity={0.8}
-        onPressIn={() => {
+        onPress={() => {
           if (i < z.count) {
             player.playClick();
             setI(i + 1)
             if (i == z.count - 1) {
-              swp.scrollBy(reverse ? -1 : 1, true)
+              const scrollBy = reverse ? -1 : 1;
+              swp.scrollBy(scrollBy, false);
             }
           }
         }}
@@ -126,8 +126,10 @@ export default function Screen2({ route, navigation }) {
           }} /> */}
         <Swiper ref={(ref) => { swp = ref; }}
           onContentSizeChange={() => {
-            if (reverse) {
-              swp.scrollBy(size, false);
+            if (reverse && ft) {
+              setFt(false);
+              const scrollBy = size
+              swp.scrollBy(scrollBy, false);
             }
           }}
           style={{}} loop={false} showsButtons={false} showsPagination={false}  >
