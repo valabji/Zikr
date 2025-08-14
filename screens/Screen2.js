@@ -22,9 +22,8 @@ const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 export default function Screen2({ route, navigation }) {
   const name = route?.params?.name || "Azkar";
-  const [ft, setFt] = React.useState(true);
   const player = useAudio();
-  const reverse = true //I18nManager.isRTL;
+  const reverse = I18nManager.isRTL;
 
   let swp = React.createRef();;
   let size = 0;
@@ -53,7 +52,7 @@ export default function Screen2({ route, navigation }) {
           fontSize: 14,
           marginTop: 6,
           fontFamily: "Cairo_400Regular",
-          textAlign: I18nManager.isRTL ? "right" : "left",
+          textAlign: "left",
           writingDirection: I18nManager.isRTL ? "rtl" : "ltr"
         }}>{z.zekr}</Text>
         <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "solid" }} />
@@ -85,7 +84,7 @@ export default function Screen2({ route, navigation }) {
                 color: Clrs.BYellow,
                 fontSize: 18,
               }}
-            >{t('counter.page', { current: (reverse ? size - pn + 1 : pn), total: size })}</Text>
+            >{t('counter.page', { current: pn, total: size })}</Text>
           </View>
           <View style={{ flex: 1 }} />
           <ImageBackground
@@ -106,9 +105,6 @@ export default function Screen2({ route, navigation }) {
 
   const azkarList = Azkar.filter(i => i.category == name);
   size = azkarList.length;
-  if (reverse) {
-    azkarList.reverse();
-  }
 
   return (
     <View style={{ flex: 1, flexGrow: 1 }}>
@@ -126,8 +122,7 @@ export default function Screen2({ route, navigation }) {
           }} /> */}
         <Swiper ref={(ref) => { swp = ref; }}
           onContentSizeChange={() => {
-            if (reverse && ft) {
-              setFt(false);
+            if (reverse) {
               const scrollBy = size
               swp.scrollBy(scrollBy, false);
             }

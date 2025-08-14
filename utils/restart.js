@@ -1,13 +1,16 @@
 import * as Updates from 'expo-updates';
-import { Platform } from 'react-native';
+import { DevSettings, Platform } from 'react-native';
 
-const Restart = ()=>{
-    if(Platform.OS=="web")
-    {
+const Restart = () => {
+    if (Platform.OS == "web") {
         window.location.reload()
     }
-    else{
-        Updates.reloadAsync();
+    else {
+        if (__DEV__) {
+            DevSettings.reload();
+        } else {
+            Updates.reloadAsync()
+        }
     }
 }
 export { Restart }

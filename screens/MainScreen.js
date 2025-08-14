@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }) {
         marginHorizontal: 10,
         marginTop: 5,
         backgroundColor: Clrs.DGreen,
-        flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+        flexDirection: "row",
       }}>
       <Image
         source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
           color: Clrs.BYellow,
           fontSize: 16,
-          textAlign: I18nManager.isRTL ? "right" : "left",
+          textAlign: "left",
           fontFamily: "Cairo_400Regular",
         }}>{name}</Text>
       </View>
@@ -86,7 +86,7 @@ export default function HomeScreen({ navigation }) {
                   height: 48, 
                   alignItems: "center", 
                   justifyContent: "center",
-                  [I18nManager.isRTL ? 'marginLeft' : 'marginRight']: 5
+                  marginRight: 5
                 }} >
         <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} />
       </TouchableOpacity>

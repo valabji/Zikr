@@ -7,13 +7,18 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import Colors from '../constants/Colors';
 import Constants from 'expo-constants';
 import { createStackNavigator } from '@react-navigation/stack';
+import analytics from '@react-native-firebase/analytics';
 
 
 export const AppContainer = () => {
     const Stack = createStackNavigator();
-
+    analytics().logAppOpen();
+    analytics().logEvent('App_Loaded_Successfully', {
+        version: Constants.manifest.version,
+        platform: Platform.OS,
+    });
     return <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
         <NavigationContainer
             linking={linkingOptions}>
             <Stack.Navigator>

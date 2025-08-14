@@ -25,6 +25,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.valabji.zikr",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-1740754568229700~9479683785"
@@ -32,6 +33,7 @@
     },
     "android": {
       "package": "com.valabji.zikr",
+      "googleServicesFile": "./google-services.json",
       "versionCode": 5,
       "permissions": [
         "com.google.android.gms.permission.AD_ID"
@@ -42,14 +44,21 @@
     },
     "description": "",
     "extra": {
-      "supportsRTL": true,
-      "forceRTL": true,
       "eas": {
         "projectId": "93819d24-8936-4af0-a311-4c072ec22e92"
       }
     },
     "plugins": [
-      "expo-audio"
+      "expo-audio",
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ]
   }
 }

@@ -14,5 +14,6 @@ export default {
   BYellow:'#FFE29D',
   DYellow:'#D1955E',
   BGreen:'#003C34',
+  MGreen:'#002B25',
   DGreen:'#002520',
 };

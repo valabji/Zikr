@@ -17,10 +17,13 @@ export function DNav() {
 
   useEffect(() => {
     AsyncStorage.getItem('@initialScreen').then(screen => {
-      if (screen) {
-        setInitialScreen(screen);
-      }
-    });
+      AsyncStorage.getItem('@firstTimeSettings').then(ft => {
+        if (ft === null) {
+          setInitialScreen('Settings');
+        } else {
+          setInitialScreen(screen);
+        }
+    })});
   }, []);
 
   return (
@@ -38,7 +41,8 @@ export function DNav() {
             const routeMap = {
               'All': 'Home',
               'Fav': 'Fav',
-              'Tasbih': 'Screen3'
+              'Tasbih': 'Screen3',
+              'Settings': 'Settings',
             };
             const routeName = routeMap[initialScreen] || 'Fav';
             const timer = setTimeout(() => {
@@ -58,7 +62,7 @@ export function DNav() {
                 style={{ width: 128, height: 128 }}
               />
             </View>
-            <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: Clrs.BYellow, fontSize: 18 }}>{"تطبيق ذِكْر"}</Text>
+            <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: Clrs.BYellow, fontSize: 18 }}>{t("app.name")}</Text>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("Screen3")
@@ -70,7 +74,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 30,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -98,7 +102,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 5,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -126,7 +130,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 5,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -156,7 +160,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 5,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -185,7 +189,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 5,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
@@ -212,7 +216,7 @@ export function DNav() {
                 marginRight: 5,
                 marginTop: 5,
                 backgroundColor: Clrs.DGreen,
-                flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
+                flexDirection: "row",
               }}>
               <Image
                 source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}

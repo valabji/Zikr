@@ -12,7 +12,7 @@ const width = Dimensions.get("window").width
 export default function CustomHeader({ title, isHome, Left, Right, navigation }) {
   return (
     <LinearGradient colors={[Clrs.BGreen, Clrs.DGreen]} locations={[0, 1]} style={{
-      flexDirection: I18nManager.isRTL ? "row" : "row-reverse", 
+      flexDirection: "row",
       height: 64,
       elevation: 1,
 
@@ -30,44 +30,45 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation })
         <Hbg color={Clrs.DGreen + "55"} width={width} />
         <Hbg color={Clrs.DGreen + "55"} width={width} />
       </View>
-      {Left ?
-        <Left /> :
-        <View style={{ flex: 1 }}></View>
+      {
+        Right ?
+          <Right /> :
+          isHome ?
+            <View style={{ flex: 1, justifyContent: 'center'}}>
+              <TouchableOpacity
+                onPress={() => navigation.toggleDrawer()}
+                style={{ flexDirection: "row" }}
+              >
+                <Ionicons
+                  name="menu"
+                  size={30}
+                  style={{ marginLeft: 20 }}
+                  color={Clrs.BYellow}
+                />
+              </TouchableOpacity>
+            </View>
+            :
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ flexDirection: "row" }}
+              >
+                <Feather
+                  name={I18nManager.isRTL ? "arrow-right" : "arrow-left"}
+                  size={30}
+                  style={{ marginLeft: 20 }}
+                  color={Clrs.BYellow}
+                />
+              </TouchableOpacity>
+            </View>
       }
       <View style={{ flex: 1.5, justifyContent: 'center' }}>
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: Clrs.BYellow, fontSize: 18 }}>{title}</Text>
       </View>
-      {
-        Right ?
-          <Right /> :
-        isHome ?
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <TouchableOpacity
-              onPress={() => navigation.toggleDrawer()}
-              style={{ flexDirection: I18nManager.isRTL ? "row-reverse" : "row" }}
-            >
-              <Ionicons
-                name="menu"
-                size={30}
-                style={{ [I18nManager.isRTL ? "marginRight" : "marginLeft"]: 20 }}
-                color={Clrs.BYellow}
-              />
-            </TouchableOpacity>
-          </View>
-          :
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ flexDirection: I18nManager.isRTL ? "row-reverse" : "row" }}
-            >
-              <Feather
-                name={I18nManager.isRTL ? "arrow-right" : "arrow-left"}
-                size={30}
-                style={{ [I18nManager.isRTL ? "marginRight" : "marginLeft"]: 20 }}
-                color={Clrs.BYellow}
-              />
-            </TouchableOpacity>
-          </View>
+
+      {Left ?
+        <Left /> :
+        <View style={{ flex: 1 }}></View>
       }
     </LinearGradient>
   )
