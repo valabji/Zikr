@@ -134,7 +134,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.wrapper} testID="settings-screen">
       <CustomHeader title={t("navigation.settings")} navigation={navigation} Right={isFirstTime?()=>(<View style={{flex:1}} />):false} />
       <LinearGradient colors={[Colors.BGreen, Colors.DGreen]} style={styles.container}>
         
@@ -142,6 +142,7 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.settingTitle}>{t('settings.language')}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
+              testID="language-toggle"
               style={[
                 styles.langButton,
                 currentLang === 'en' && styles.activeLangButton

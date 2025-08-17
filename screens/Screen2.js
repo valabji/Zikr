@@ -92,6 +92,7 @@ export default function Screen2({ route, navigation }) {
             style={{ width: 96, height: 96, alignSelf: "center", justifyContent: "center", alignItems: "center" }}
           >
             <Text
+              testID="count-button"
               style={{
                 color: Clrs.BYellow,
                 fontSize: 18,
@@ -107,7 +108,7 @@ export default function Screen2({ route, navigation }) {
   size = azkarList.length;
 
   return (
-    <View style={{ flex: 1, flexGrow: 1 }}>
+    <View style={{ flex: 1, flexGrow: 1 }} testID="screen2-container">
       <CustomHeader title={name} isHome={false} navigation={navigation} />
       <ImageBackground
         source={require("../assets/images/bg.jpg")}
@@ -129,7 +130,7 @@ export default function Screen2({ route, navigation }) {
           }}
           style={{}} loop={false} showsButtons={false} showsPagination={false}  >
           {azkarList.map((i, index) => {
-            return <View key={index} style={{ flex: 1 }}>
+            return <View key={index} style={{ flex: 1 }} testID="azkar-item">
               <View style={{
                 flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
               }}>

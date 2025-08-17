@@ -9,23 +9,27 @@ import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 import { Hbg } from './Hbg';
 const width = Dimensions.get("window").width
 
-export default function CustomHeader({ title, isHome, Left, Right, navigation }) {
+export default function CustomHeader({ title, isHome, Left, Right, navigation, testID }) {
   return (
-    <LinearGradient colors={[Clrs.BGreen, Clrs.DGreen]} locations={[0, 1]} style={{
-      flexDirection: "row",
-      height: 64,
-      elevation: 1,
+    <LinearGradient 
+      testID={testID || "header-container"}
+      colors={[Clrs.BGreen, Clrs.DGreen]} 
+      locations={[0, 1]} 
+      style={{
+        flexDirection: "row",
+        height: 64,
+        elevation: 1,
 
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 1,
-      },
-      shadowOpacity: 0.20,
-      shadowRadius: 1.41,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.20,
+        shadowRadius: 1.41,
 
-      elevation: 2,
-    }}>
+        elevation: 2,
+      }}>
       <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
         <Hbg color={Clrs.DGreen + "55"} width={width} />
         <Hbg color={Clrs.DGreen + "55"} width={width} />
@@ -36,6 +40,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation })
           isHome ?
             <View style={{ flex: 1, justifyContent: 'center'}}>
               <TouchableOpacity
+                testID="menu-button"
                 onPress={() => navigation.toggleDrawer()}
                 style={{ flexDirection: "row" }}
               >
@@ -50,6 +55,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation })
             :
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <TouchableOpacity
+                testID="back-button"
                 onPress={() => navigation.goBack()}
                 style={{ flexDirection: "row" }}
               >

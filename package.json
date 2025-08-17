@@ -61,9 +61,12 @@
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.2.2",
     "babel-preset-expo": "~13.0.0",
+
     "jest": "^30.0.5",
     "jest-expo": "^53.0.9",
-    "react-test-renderer": "19.0.0"
+    "react-test-renderer": "19.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   },
   "private": true,
   "name": "zikr",

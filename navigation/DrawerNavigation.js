@@ -55,6 +55,7 @@ export function DNav() {
 
         return (
           <View
+            testID="drawer-container"
             style={{ width: "100%", height: "100%", backgroundColor: Clrs.BGreen }}>
             <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 20 }}>
               <Image
@@ -64,6 +65,7 @@ export function DNav() {
             </View>
             <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: Clrs.BYellow, fontSize: 18 }}>{t("app.name")}</Text>
             <TouchableOpacity
+              testID="screen3"
               onPress={() => {
                 navigation.navigate("Screen3")
               }}
@@ -92,6 +94,7 @@ export function DNav() {
               <Feather name="target" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
+              testID="fav-screen"
               onPress={() => {
                 navigation.navigate("Fav")
               }}
@@ -120,6 +123,7 @@ export function DNav() {
               <Feather name="heart" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
+              testID="main-screen"
               onPress={() => {
                 navigation.navigate("Home")
               }}
@@ -207,6 +211,7 @@ export function DNav() {
               <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
+              testID="settings-screen"
               onPress={() => {
                 navigation.navigate("Settings")
               }}

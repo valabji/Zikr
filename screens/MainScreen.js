@@ -31,6 +31,7 @@ export default function HomeScreen({ navigation }) {
     let size = 32
     const [fv, setFv] = React.useState(fav)
     return <TouchableOpacity
+      testID="zikr-item"
       onPress={onPress}
       style={{
         width: width - 20,
@@ -59,6 +60,7 @@ export default function HomeScreen({ navigation }) {
         }}>{name}</Text>
       </View>
       <TouchableOpacity
+        testID="fav-toggle"
         onPress={() => {
           var Azkar2 = []
           for (let i = 0; i < Azkar.length; i++) {
@@ -88,7 +90,7 @@ export default function HomeScreen({ navigation }) {
                   justifyContent: "center",
                   marginRight: 5
                 }} >
-        <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} />
+        <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} testID="fav-indicator" />
       </TouchableOpacity>
     </TouchableOpacity>
   }
@@ -115,10 +117,11 @@ export default function HomeScreen({ navigation }) {
 
   let p = ""
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="home-screen">
       <CustomHeader title={t('app.name')} isHome={true} navigation={navigation}
         Left={() => {
           return <TouchableOpacity
+            testID="search-toggle"
             onPress={() => {
               setS(!s)
             }}
@@ -149,6 +152,7 @@ export default function HomeScreen({ navigation }) {
         <View style={{ width: width, alignItems: "center", justifyContent: "center", marginBottom: 3, marginTop: 3, display: s ? "flex" : "none" }}>
           <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: Clrs.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: "#fff", borderRadius: 12 }}>
             <TextInput
+              testID="search-input"
               placeholder={t('search.placeholder')}
               placeholderTextColor={Clrs.BGreen}
               onChangeText={v => {

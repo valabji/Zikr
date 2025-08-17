@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation }) {
     let size = 32
     const [fv, setFv] = React.useState(fav)
     return <TouchableOpacity
+      testID="favorite-item"
       onPress={onPress}
       style={{
         width: width - 20,
@@ -50,6 +51,7 @@ export default function HomeScreen({ navigation }) {
         }}>{name}</Text>
       </View>
       <TouchableOpacity
+        testID="unfavorite-button"
         onPress={() => {
           var Azkar2 = []
           for (let i = 0; i < Azkar.length; i++) {
@@ -98,7 +100,7 @@ export default function HomeScreen({ navigation }) {
   }
   let p = ""
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="fav-screen-container">
       <CustomHeader title={t('app.name')} isHome={true} navigation={navigation} />
       {/* <React9Slice width={256}
           height={256}
@@ -120,18 +122,26 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          {Azkar.map((i, index) => {
-            if (i.fav)
-              return <Item 
-                key={index} 
-                name={i.category} 
-                fav={i.fav == true} 
-                index={index} 
-                onPress={() => {
-                  navigation.navigate("Screen2", { name: i.category })
-                }} 
-              />
-          })}
+          {Azkar.filter(i => i.fav).length === 0 ? 
+            <View testID="empty-state" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={{ color: Clrs.BYellow, fontSize: 18, textAlign: 'center' }}>
+                {t('no.favorites')}
+              </Text>
+            </View>
+            :
+            Azkar.map((i, index) => {
+              if (i.fav)
+                return <Item 
+                  key={index} 
+                  name={i.category} 
+                  fav={i.fav == true} 
+                  index={index} 
+                  onPress={() => {
+                    navigation.navigate("Screen2", { name: i.category })
+                  }} 
+                />
+            })
+          }
         </ScrollView>
 
       </ImageBackground>
