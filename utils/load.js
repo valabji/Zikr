@@ -5,6 +5,8 @@ import { initializeLanguage, } from '../locales/i18n';
 
 import Azkar from '../constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import analytics from '@react-native-firebase/analytics';
+
 import { mystore } from '../redux/store';
 
 export async function loadResourcesAndDataAsync() {
@@ -27,6 +29,15 @@ export async function loadResourcesAndDataAsync() {
             }
         });
         await SplashScreen.hideAsync();
+        try{
+        analytics().logAppOpen();
+        analytics().logEvent('App_Loaded_Successfully', {
+            version: Constants.manifest.version,
+            platform: Platform.OS,
+        });
+        } catch (error) {
+            console.error("Error logging app open event:", error);
+        }
         return true;
     }
 }

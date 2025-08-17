@@ -6,15 +6,17 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "test": "jest --watchAll"
-  },
-  "jest": {
-    "preset": "jest-expo"
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage",
+    "test:update": "jest --updateSnapshot",
+    "test:ci": "jest --ci"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@expo-google-fonts/cairo": "^0.1.0",
+    "@expo/metro-runtime": "~5.0.4",
     "@expo/vector-icons": "^14.1.0",
     "@mui/material": "^5.14.10",
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -56,10 +58,14 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.2.2",
     "babel-preset-expo": "~13.0.0",
-    "jest-expo": "^53.0.0"
+    "jest": "^30.0.5",
+    "jest-expo": "^53.0.9",
+    "react-test-renderer": "19.0.0"
   },
   "private": true,
-  "name": "Zikr",
+  "name": "zikr",
   "version": "1.0.0"
 }
