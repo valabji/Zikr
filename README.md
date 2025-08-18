@@ -145,20 +145,26 @@ zikr/
 ### Building for Production
 
 1. **Configure EAS Build:**
+
+> [!TIP]
+> incase you don't have different values for production and testing environments when asked just press a for all then Enter
+
    ```bash
-   npm install -g eas-cli
-   eas login
-   eas build:configure
+   yarn eas login
+   yarn eas:secret --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json
+   yarn eas:secret --name GOOGLE_SERVICES_PLIST --type file --value ./GoogleService-Info.plist
+   yarn eas:secret --name ADMOB_APPID --type string --value ca-app-pub-EXAMPLEADMOBID~00999
+   # Note: Replace the above with your actual AdMob App ID
    ```
 
 2. **Build for Android:**
    ```bash
-   eas build --platform android
+   yarn eas build --profile production --platform android
    ```
 
 3. **Build for iOS:**
    ```bash
-   eas build --platform ios
+   yarn eas build --profile production --platform ios
    ```
 
 ## 📱 App Screens
