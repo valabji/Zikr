@@ -12,6 +12,19 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },
+  "contribution": {
+    "title": "Contribute Translations",
+    "welcome": "Welcome, {name}!",
+    "yourContributions": "Your contributions: {count}",
+    "selectZikr": "Select a Zikr to Translate:",
+    "enterTranslation": "Your English Translation:",
+    "submitTranslation": "Submit Translation",
+    "translationPlaceholder": "Enter English translation...",
+    "searchPlaceholder": "Search Zikr...",
+    "loginRequired": "Please log in to contribute translations",
+    "submissionSuccess": "Thank you for your contribution! It will be reviewed and added to the app.",
+    "submissionError": "Please select a Zikr and enter a translation"
+  },
   "navigation": {
     "main": "Main",
     "home": "Home",
@@ -19,7 +32,9 @@
     "allAzkar": "All Azkar",
     "shareApp": "Share App",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "auth": "Login",
+    "contribute": "Contribute"
   },
   "search": {
     "placeholder": "Search..."

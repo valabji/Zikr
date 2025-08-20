@@ -4,7 +4,7 @@ import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollVie
 import { StackActions } from '@react-navigation/native';
 import Clrs from "../constants/Colors";
 import { t } from '../locales/i18n';
-import Azkar from '../constants/Azkar.js';
+import Azkar, { getZikrTranslation } from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 import { useAudio } from '../utils/Sounds.js';
 
@@ -33,6 +33,15 @@ export default function Screen2({ route, navigation }) {
       z.count = 1
     }
     const [i, setI] = React.useState(0)
+    const [translation, setTranslation] = React.useState(null)
+
+    React.useEffect(() => {
+      // Load translation for this zikr
+      getZikrTranslation(z.zekr, 'en').then(trans => {
+        setTranslation(trans)
+      })
+    }, [z.zekr])
+
     return <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
       <TouchableOpacity
         activeOpacity={0.8}
@@ -55,6 +64,39 @@ export default function Screen2({ route, navigation }) {
           textAlign: "left",
           writingDirection: I18nManager.isRTL ? "rtl" : "ltr"
         }}>{z.zekr}</Text>
+        
+        {/* Display English translation if available */}
+        {translation && (
+          <View style={{ marginTop: 15 }}>
+            <View style={{ borderTopWidth: 1, marginBottom: 10, height: 1, width: "100%", borderStyle: "dashed", borderColor: Clrs.BGreen }} />
+            <Text style={{
+              color: Clrs.BGreen,
+              fontSize: 12,
+              fontFamily: "Cairo_400Regular",
+              fontStyle: 'italic',
+              textAlign: "left"
+            }}>English Translation:</Text>
+            <Text style={{
+              color: Clrs.BYellow,
+              fontSize: 13,
+              marginTop: 5,
+              fontFamily: "Cairo_400Regular",
+              textAlign: "left",
+              opacity: 0.9
+            }}>{translation.text}</Text>
+            {translation.description && (
+              <Text style={{
+                color: Clrs.BGreen,
+                fontSize: 12,
+                marginTop: 8,
+                fontFamily: "Cairo_400Regular",
+                textAlign: "left",
+                fontStyle: 'italic'
+              }}>{translation.description}</Text>
+            )}
+          </View>
+        )}
+        
         <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "solid" }} />
         {z.reference != "" &&
           <Text style={{

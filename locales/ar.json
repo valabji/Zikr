@@ -12,6 +12,19 @@
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور"
   },
+  "contribution": {
+    "title": "المساهمة في الترجمة",
+    "welcome": "مرحباً، {name}!",
+    "yourContributions": "مساهماتك: {count}",
+    "selectZikr": "اختر ذكراً للترجمة:",
+    "enterTranslation": "الترجمة الإنجليزية:",
+    "submitTranslation": "إرسال الترجمة",
+    "translationPlaceholder": "اكتب الترجمة الإنجليزية...",
+    "searchPlaceholder": "بحث في الأذكار...",
+    "loginRequired": "يرجى تسجيل الدخول للمساهمة في الترجمة",
+    "submissionSuccess": "شكراً لك على مساهمتك! سيتم مراجعتها وإضافتها للتطبيق.",
+    "submissionError": "يرجى اختيار ذكر وإدخال ترجمة"
+  },
   "navigation": {
     "main": "الرئيسية",
     "home": "الصفحة الرئيسية",
@@ -19,7 +32,9 @@
     "allAzkar": "كل الاذكار",
     "settings": "الإعدادات",
     "shareApp": "مشاركة التطبيق",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "auth": "تسجيل الدخول",
+    "contribute": "المساهمة"
   },
   "search": {
     "placeholder": "بحث..."
