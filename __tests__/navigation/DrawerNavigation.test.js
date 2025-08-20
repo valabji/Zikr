@@ -3,6 +3,7 @@ import { render } from '@testing-library/react-native';
 import { DNav as DrawerNavigation } from '../../navigation/DrawerNavigation';
 import { Provider } from 'react-redux';
 import { mystore } from '../../redux/store';
+import { AuthProvider } from '../../contexts/AuthContext';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -47,9 +48,11 @@ jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
 describe('DrawerNavigation', () => {
   const renderWithProvider = (component) => {
     return render(
-      <Provider store={mystore}>
-        {component}
-      </Provider>
+      <AuthProvider>
+        <Provider store={mystore}>
+          {component}
+        </Provider>
+      </AuthProvider>
     );
   };
 
