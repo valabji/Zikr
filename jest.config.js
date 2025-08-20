@@ -1,8 +1,6 @@
 module.exports = {
-  preset: 'react-native',
+  preset: 'jest-expo',
   setupFiles: ['./jest.setup.js'],
-  // Disable Expo preset that's causing issues
-  // preset: 'jest-expo',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
   transformIgnorePatterns: [
     'node_modules/(?!(jest-)?react-native|@react-native|react-native|react-clone-referenced-element|@react-native-community|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|@sentry/.*)'
