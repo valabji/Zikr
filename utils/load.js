@@ -2,6 +2,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import { initializeLanguage, } from '../locales/i18n';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 import Azkar from '../constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
