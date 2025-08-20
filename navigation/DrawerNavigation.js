@@ -10,12 +10,10 @@ import { t, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useAuth } from '../contexts/AuthContext';
 
 const Drawer = createDrawerNavigator();
 export function DNav() {
   const [initialScreen, setInitialScreen] = useState(null);
-  const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     AsyncStorage.getItem('@initialScreen').then(screen => {
@@ -212,93 +210,34 @@ export function DNav() {
               <View style={{ flex: 1 }} />
               <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
-            {/* Authentication/Contribution Button */}
-            {isAuthenticated ? (
-              <>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("Contribute")
-                  }}
-                  style={{
-                    height: 64,
-                    marginLeft: 5,
-                    marginRight: 5,
-                    marginTop: 5,
-                    backgroundColor: Clrs.DGreen,
-                    flexDirection: "row",
-                  }}>
-                  <Image
-                    source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                    style={{
-                      width: 64, height: 64
-                    }}
-                  />
-                  <Text style={{
-                    color: Clrs.BYellow,
-                    fontSize: 22,
-                    marginTop: 7,
-                    fontFamily: "Cairo_400Regular",
-                  }}>{t('navigation.contribute')}</Text>
-                  <View style={{ flex: 1 }} />
-                  <Feather name="edit-3" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    logout();
-                  }}
-                  style={{
-                    height: 64,
-                    marginLeft: 5,
-                    marginRight: 5,
-                    marginTop: 5,
-                    backgroundColor: Clrs.DGreen,
-                    flexDirection: "row",
-                  }}>
-                  <Image
-                    source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                    style={{
-                      width: 64, height: 64
-                    }}
-                  />
-                  <Text style={{
-                    color: Clrs.BYellow,
-                    fontSize: 22,
-                    marginTop: 7,
-                    fontFamily: "Cairo_400Regular",
-                  }}>{t('navigation.logout')}</Text>
-                  <View style={{ flex: 1 }} />
-                  <Feather name="log-out" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
-                </TouchableOpacity>
-              </>
-            ) : (
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("Auth")
-                }}
+            {/* Contribution Button - always available */}
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Contribute")
+              }}
+              style={{
+                height: 64,
+                marginLeft: 5,
+                marginRight: 5,
+                marginTop: 5,
+                backgroundColor: Clrs.DGreen,
+                flexDirection: "row",
+              }}>
+              <Image
+                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
                 style={{
-                  height: 64,
-                  marginLeft: 5,
-                  marginRight: 5,
-                  marginTop: 5,
-                  backgroundColor: Clrs.DGreen,
-                  flexDirection: "row",
-                }}>
-                <Image
-                  source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                  style={{
-                    width: 64, height: 64
-                  }}
-                />
-                <Text style={{
-                  color: Clrs.BYellow,
-                  fontSize: 22,
-                  marginTop: 7,
-                  fontFamily: "Cairo_400Regular",
-                }}>{t('navigation.auth')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="user" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
-              </TouchableOpacity>
-            )}
+                  width: 64, height: 64
+                }}
+              />
+              <Text style={{
+                color: Clrs.BYellow,
+                fontSize: 22,
+                marginTop: 7,
+                fontFamily: "Cairo_400Regular",
+              }}>{t('navigation.contribute')}</Text>
+              <View style={{ flex: 1 }} />
+              <Feather name="edit-3" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+            </TouchableOpacity>
             <TouchableOpacity
               testID="settings-screen"
               onPress={() => {

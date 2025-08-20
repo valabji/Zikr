@@ -11,22 +11,18 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { useAuth } from '../contexts/AuthContext';
 import Colors from '../constants/Colors';
 import { t } from '../locales/i18n';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import analytics from '@react-native-firebase/analytics';
 import zikr from '../constants/Azkar';
 
 const ContributionScreen = ({ navigation }) => {
-  const { user } = useAuth();
   const [selectedZikr, setSelectedZikr] = useState(null);
   const [translation, setTranslation] = useState('');
   const [filteredZikr, setFilteredZikr] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [contributions, setContributions] = useState([]);
 
   useEffect(() => {
-    loadContributions();
     // Get unique zikr items (remove duplicates based on zekr text)
     const uniqueZikr = zikr.filter((item, index, self) =>
       index === self.findIndex(z => z.zekr === item.zekr)
@@ -50,17 +46,6 @@ const ContributionScreen = ({ navigation }) => {
     }
   }, [searchText]);
 
-  const loadContributions = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('@contributions');
-      if (stored) {
-        setContributions(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Error loading contributions:', error);
-    }
-  };
-
   const handleSubmitTranslation = async () => {
     if (!selectedZikr || !translation.trim()) {
       Alert.alert('Error', 'Please select a Zikr and enter a translation');
@@ -68,26 +53,19 @@ const ContributionScreen = ({ navigation }) => {
     }
 
     try {
-      const newContribution = {
-        id: Date.now(),
-        userId: user.id,
-        userName: user.name,
-        zikrId: selectedZikr.zekr, // Use zekr text as unique ID
-        zikrCategory: selectedZikr.category,
-        zikrText: selectedZikr.zekr,
-        translation: translation.trim(),
+      // Send contribution as Firebase Analytics event
+      await analytics().logEvent('translation_contribution', {
+        zikr_category: selectedZikr.category,
+        zikr_text: selectedZikr.zekr.substring(0, 100), // Limit text length for analytics
+        translation: translation.trim().substring(0, 200), // Limit translation length
         language: 'en', // Default to English for now
-        status: 'pending', // pending, approved, rejected
-        createdAt: new Date().toISOString(),
-      };
-
-      const updatedContributions = [...contributions, newContribution];
-      await AsyncStorage.setItem('@contributions', JSON.stringify(updatedContributions));
-      setContributions(updatedContributions);
+        timestamp: new Date().toISOString(),
+        contribution_id: Date.now().toString(),
+      });
 
       Alert.alert(
         'Success',
-        'Thank you for your contribution! It will be reviewed and added to the app.',
+        'Thank you for your contribution! Your translation has been submitted for review.',
         [
           {
             text: 'OK',
@@ -99,7 +77,8 @@ const ContributionScreen = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      Alert.alert('Error', 'Failed to submit contribution');
+      console.error('Error submitting contribution:', error);
+      Alert.alert('Error', 'Failed to submit contribution. Please try again.');
     }
   };
 
@@ -122,22 +101,6 @@ const ContributionScreen = ({ navigation }) => {
     );
   };
 
-  if (!user) {
-    return (
-      <LinearGradient colors={[Colors.BGreen, Colors.DGreen]} style={styles.container}>
-        <View style={styles.notAuthContainer}>
-          <Text style={styles.notAuthText}>Please log in to contribute translations</Text>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => navigation.navigate('Auth')}
-          >
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    );
-  }
-
   return (
     <LinearGradient colors={[Colors.BGreen, Colors.DGreen]} style={styles.container}>
       <View style={styles.header}>
@@ -148,13 +111,6 @@ const ContributionScreen = ({ navigation }) => {
           <Feather name="arrow-right" size={24} color={Colors.BYellow} />
         </TouchableOpacity>
         <Text style={styles.title}>Contribute Translations</Text>
-      </View>
-
-      <View style={styles.userInfo}>
-        <Text style={styles.welcomeText}>Welcome, {user.name}!</Text>
-        <Text style={styles.contributionsCount}>
-          Your contributions: {contributions.filter(c => c.userId === user.id).length}
-        </Text>
       </View>
 
       <View style={styles.searchContainer}>
@@ -229,49 +185,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginRight: 44,
-  },
-  notAuthContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notAuthText: {
-    fontSize: 18,
-    color: Colors.BYellow,
-    fontFamily: 'Cairo_400Regular',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  loginButton: {
-    backgroundColor: Colors.BYellow,
-    borderRadius: 8,
-    padding: 15,
-    paddingHorizontal: 30,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.DGreen,
-    fontFamily: 'Cairo_400Regular',
-  },
-  userInfo: {
-    backgroundColor: Colors.DGreen,
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 20,
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: Colors.BYellow,
-    fontFamily: 'Cairo_400Regular',
-    textAlign: 'center',
-  },
-  contributionsCount: {
-    fontSize: 14,
-    color: Colors.BGreen,
-    fontFamily: 'Cairo_400Regular',
-    textAlign: 'center',
-    marginTop: 5,
   },
   searchContainer: {
     flexDirection: 'row',
