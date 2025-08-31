@@ -50,7 +50,19 @@ export default {
             useFrameworks: "static"
           }
         }
-      ]
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash.png",
+          "dark": {
+            "image": "./assets/images/splash.png",
+            "backgroundColor": "#ffffff"
+          },
+          "resizeMode": "contain",
+          "imageWidth": 200
+        }]
     ]
   }
 };

@@ -45,7 +45,7 @@ export default function Screen2({ route, navigation }) {
             setI(i + 1)
             if (i == z.count - 1) {
               const scrollBy = reverse ? -1 : 1;
-              swp.scrollBy(scrollBy, false);
+              swp.scrollBy(scrollBy, true);
             }
           }
         }}

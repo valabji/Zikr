@@ -105,20 +105,11 @@ export default function Screen2({ route, navigation }) {
           onPress={() => {
             setMv(true)
           }}
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          style={{ flex: 1, justifyContent: "center", alignItems: "flex-end",paddingHorizontal:20 }}>
           <Feather name="rotate-cw" color={colors.BYellow} size={32} />
         </TouchableOpacity>
       }} />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {/* <View style={{ position: "absolute", top: 30, left: 0, justifyContent: "center", alignItems: "center", right: 0, width: "100%" }} >
-          <Image
-            source={require("../assets/images/ala.png")}
-            style={{
-              // opacity:0.5,
-              width: 300, height: 100,
-            }}
-          />
-        </View> */}
         {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id

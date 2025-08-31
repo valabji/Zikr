@@ -11,12 +11,12 @@ const width = Dimensions.get("window").width
 
 export default function CustomHeader({ title, isHome, Left, Right, navigation, testID }) {
   const colors = useColors();
-  
+
   return (
-    <LinearGradient 
+    <LinearGradient
       testID={testID || "header-container"}
-      colors={[colors.BGreen, colors.DGreen]} 
-      locations={[0, 1]} 
+      colors={[colors.BGreen, colors.DGreen]}
+      locations={[0, 1]}
       style={{
         flexDirection: "row",
         height: 64,
@@ -40,7 +40,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
         Right ?
           <Right /> :
           isHome ?
-            <View style={{ flex: 1, justifyContent: 'center'}}>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
               <TouchableOpacity
                 testID="menu-button"
                 onPress={() => navigation.toggleDrawer()}
@@ -75,7 +75,10 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
       </View>
 
       {Left ?
-        <Left /> :
+        <View style={{ flex: 1 }}>
+          <Left />
+        </View>
+        :
         <View style={{ flex: 1 }}></View>
       }
     </LinearGradient>

@@ -232,7 +232,7 @@ export default function SettingsScreen({ navigation }) {
       }
     };
     loadSettings();
-  }, [volume]);
+  }, [volume, theme, tempTheme, isFirstTime, navigation]);
 
   const handleVolumeChange = (value) => {
     setTempVolume(value);
@@ -243,6 +243,8 @@ export default function SettingsScreen({ navigation }) {
     playClick();
     setTempVolume(0.35);
     setTempTheme('originalGreen');
+    // Apply and save theme immediately when default is clicked
+    await setTheme('originalGreen');
     await handleLanguageChange('ar');
     setTempScreen('Fav');
   };
@@ -261,10 +263,14 @@ export default function SettingsScreen({ navigation }) {
       });
     }
 
-    // If language was changed, restart the app
-    if (languageChanged) {
-      await setLanguage(currentLang, true); // Restart app
-      return; // Don't continue with other saves since we're restarting
+    // Save volume if changed
+    if (tempVolume !== volume) {
+      setClickVolume(tempVolume);
+    }
+
+    // Save theme if changed
+    if (tempTheme !== theme) {
+      await setTheme(tempTheme);
     }
 
     // Save initial screen if changed
@@ -275,14 +281,16 @@ export default function SettingsScreen({ navigation }) {
       if (selectedScreen) {
         navigation.navigate(selectedScreen.route);
       }
+    }else{
+      navigation.goBack();
     }
 
-    // Save volume if changed
-    if (tempVolume !== volume) {
-      setClickVolume(tempVolume);
+    // If language was changed, restart the app
+    if (languageChanged) {
+      await setLanguage(currentLang, true); // Restart app
+      return; // Don't continue with other saves since we're restarting
     }
 
-    // Theme is already applied immediately when changed, no need to save again
   };
 
   const handleLanguageChange = async (lang) => {

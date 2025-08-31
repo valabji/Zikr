@@ -12,6 +12,7 @@ import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MuslimIconSvg } from '../components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
+import { LogoSvg } from '../components/LogoSvg';
 
 const Drawer = createDrawerNavigator();
 export function DNav() {
@@ -60,13 +61,14 @@ export function DNav() {
           <View
             testID="drawer-container"
             style={{ width: "100%", height: "100%", backgroundColor: colors.BGreen }}>
-            <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 20 }}>
-              <Image
-                source={require("../assets/images/logo.png")}
-                style={{ width: 128, height: 128 }}
+            <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
+              <LogoSvg
+                color={colors.BYellow}
+                spacing={80}
+                width={128}
+                height={148}
               />
             </View>
-            <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: colors.BYellow, fontSize: 18 }}>{t("app.name")}</Text>
             <TouchableOpacity
               testID="screen3"
               onPress={() => {

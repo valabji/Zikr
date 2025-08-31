@@ -52,9 +52,9 @@ export const themes = {
     text: '#8B4513',
     textSecondary: '#654321',
   },
-  brown: {
-    name: 'Brown',
-    nameAr: 'بني',
+  chocolate: {
+    name: 'Chocolate',
+    nameAr: 'شوكولاتة',
     primary: '#8D6E63',
     primaryMedium: '#A1887F',
     primaryDark: '#5D4037',
@@ -65,9 +65,9 @@ export const themes = {
     text: '#FFF8E1',
     textSecondary: '#F5E6A3',
   },
-  ladies: {
-    name: 'Ladies Theme',
-    nameAr: 'سمة السيدات',
+  lavender: {
+    name: 'Lavender',
+    nameAr: 'لافندر',
     primary: '#B39DDB',
     primaryMedium: '#C5B4E3',
     primaryDark: '#9575CD',

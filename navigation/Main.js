@@ -4,13 +4,14 @@ import linkingOptions from './useLinking';
 import Screen2 from '../screens/Screen2';
 import { DNav } from './DrawerNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { useColors } from '../constants/Colors';
+import { useColors, useIsBrightTheme } from '../constants/Colors';
 import Constants from 'expo-constants';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
 export const AppContainer = () => {
     const colors = useColors();
+    const isBrightTheme = useIsBrightTheme();
     const Stack = createStackNavigator();
     
     const styles = StyleSheet.create({
@@ -22,7 +23,7 @@ export const AppContainer = () => {
     });
     
     return <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
+        <StatusBar barStyle={isBrightTheme ? "dark-content" : "light-content"} backgroundColor={colors.DGreen} />
         <NavigationContainer
             linking={linkingOptions}>
             <Stack.Navigator>
