@@ -43,6 +43,7 @@
   "settings": {
     "initialScreen": "الشاشة الرئيسية",
     "language": "اللغة",
+    "theme": "المظهر",
     "clickVolume": "مستوى صوت النقر",
     "default": "افتراضي",
     "save": "حفظ"

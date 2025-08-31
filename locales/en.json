@@ -43,6 +43,7 @@
   "settings": {
     "initialScreen": "Initial Screen",
     "language": "Language",
+    "theme": "Theme",
     "clickVolume": "Click Sound Volume",
     "default": "Default",
     "save": "Save"

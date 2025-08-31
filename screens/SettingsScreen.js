@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useAudio } from '../utils/Sounds';
-import Colors from '../constants/Colors';
+import { useColors, useTheme } from '../constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomHeader from '../components/CHeader';
 import { setLanguage } from '../locales/i18n';
@@ -11,13 +11,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function SettingsScreen({ navigation }) {
+  const colors = useColors();
+  const { theme, setTheme, themes } = useTheme();
   const { volume, setClickVolume, playClick } = useAudio();
   const [currentLang, setCurrentLang] = useState('ar');
   const [initialScreen, setInitialScreen] = useState('Fav');
   const [isFirstTime, setIsFirstTime] = useState(true);
   const [tempScreen, setTempScreen] = useState('Fav');
   const [tempVolume, setTempVolume] = useState(0.35);
+  const [tempTheme, setTempTheme] = useState(theme);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [isThemeDropdownVisible, setThemeDropdownVisible] = useState(false);
   const [languageChanged, setLanguageChanged] = useState(false);
 
   const screens = [
@@ -25,6 +29,163 @@ export default function SettingsScreen({ navigation }) {
     { id: 'Fav', labelEn: 'Favorites', labelAr: 'الاذكار المفضلة', route: 'Fav' },
     { id: 'Tasbih', labelEn: 'Tasbih Counter', labelAr: 'المسبحة', route: 'Screen3' },
   ];
+
+  const styles = StyleSheet.create({
+    wrapper: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      padding: 20,
+    },
+    buttonSetting: {
+      paddingVertical: 10,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    dropdown: {
+      width: '80%',
+      maxHeight: 300,
+      backgroundColor: colors.DGreen,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.BYellow,
+      overflow: 'hidden',
+      shadowColor: colors.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 4.65,
+      elevation: 8,
+    },
+    dropdownItem: {
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.BYellow + '33',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    activeDropdownItem: {
+      backgroundColor: colors.BYellow,
+    },
+    dropdownText: {
+      color: colors.BYellow,
+      fontSize: 16,
+      textAlign: 'center',
+    },
+    activeDropdownText: {
+      color: colors.DGreen,
+      fontWeight: 'bold',
+    },
+    dropdownTrigger: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: colors.MGreen,
+      padding: 15,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.BYellow,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    dropdownTriggerText: {
+      color: colors.BYellow,
+      fontSize: 16,
+      fontWeight: 'bold',
+      textAlign: 'left',
+      flex: 1,
+      marginRight: 10,
+    },
+    setting: {
+      marginBottom: 20,
+      backgroundColor: colors.MGreen,
+      padding: 15,
+      borderRadius: 10,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginTop: 20,
+    },
+    button: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      minWidth: 120,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.22,
+      shadowRadius: 2.22,
+      elevation: 3,
+    },
+    langButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 25,
+      borderRadius: 8,
+      minWidth: 120,
+      backgroundColor: colors.MGreen,
+      borderWidth: 1,
+      borderColor: colors.BYellow,
+    },
+    activeLangButton: {
+      backgroundColor: colors.BYellow,
+    },
+    langButtonText: {
+      color: colors.BYellow,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    activeLangButtonText: {
+      color: colors.DGreen,
+    },
+    settingTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: colors.BYellow,
+    },
+    slider: {
+      width: '100%',
+      height: 40,
+    },
+    volumeText: {
+      textAlign: 'center',
+      marginTop: 5,
+      color: colors.BYellow,
+    },
+    buttonText: {
+      color: colors.DGreen,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+  });
 
   useEffect(() => {
     // Load current language and initial screen on mount
@@ -39,6 +200,9 @@ export default function SettingsScreen({ navigation }) {
         if (lang) {
           setCurrentLang(lang);
         }
+        
+        // Set temp theme to current theme
+        setTempTheme(theme);
         
         // If no screen is set, set default to 'Fav' and save it
         if (!screen) {
@@ -78,6 +242,7 @@ export default function SettingsScreen({ navigation }) {
   const handleDefault = async () => {
     playClick();
     setTempVolume(0.35);
+    setTempTheme('originalGreen');
     await handleLanguageChange('ar');
     setTempScreen('Fav');
   };
@@ -116,6 +281,8 @@ export default function SettingsScreen({ navigation }) {
     if (tempVolume !== volume) {
       setClickVolume(tempVolume);
     }
+
+    // Theme is already applied immediately when changed, no need to save again
   };
 
   const handleLanguageChange = async (lang) => {
@@ -133,10 +300,18 @@ export default function SettingsScreen({ navigation }) {
     setDropdownVisible(false);
   };
 
+  const handleThemeChange = async (themeKey) => {
+    playClick();
+    setTempTheme(themeKey);
+    // Apply theme immediately
+    await setTheme(themeKey);
+    setThemeDropdownVisible(false);
+  };
+
   return (
     <View style={styles.wrapper} testID="settings-screen">
       <CustomHeader title={t("navigation.settings")} navigation={navigation} Right={isFirstTime?()=>(<View style={{flex:1}} />):false} />
-      <LinearGradient colors={[Colors.BGreen, Colors.DGreen]} style={styles.container}>
+      <LinearGradient colors={[colors.BGreen, colors.DGreen]} style={styles.container}>
         
         <View style={styles.setting}>
           <Text style={styles.settingTitle}>{t('settings.language')}</Text>
@@ -168,6 +343,57 @@ export default function SettingsScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Theme Selection */}
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.theme')}</Text>
+          <TouchableOpacity 
+            style={styles.dropdownTrigger}
+            onPress={() => {
+              playClick();
+              setThemeDropdownVisible(true);
+            }}
+          >
+            <Text style={styles.dropdownTriggerText}>
+              {currentLang === 'ar' ? themes[tempTheme]?.nameAr : themes[tempTheme]?.name || 'Original Green'}
+            </Text>
+            <AntDesign name={isThemeDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Theme Dropdown Modal */}
+        <Modal
+          visible={isThemeDropdownVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setThemeDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1} 
+            onPress={() => setThemeDropdownVisible(false)}
+          >
+            <View style={styles.dropdown}>
+              <ScrollView>
+                {Object.entries(themes).map(([themeKey, themeData]) => (
+                  <TouchableOpacity
+                    key={themeKey}
+                    style={[
+                      styles.dropdownItem,
+                      tempTheme === themeKey && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleThemeChange(themeKey)}
+                  >
+                    <Text style={[
+                      styles.dropdownText,
+                      tempTheme === themeKey && styles.activeDropdownText
+                    ]}>{currentLang === 'ar' ? themeData.nameAr : themeData.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
 
         <Modal
           visible={isDropdownVisible}
@@ -213,7 +439,7 @@ export default function SettingsScreen({ navigation }) {
             <Text style={styles.dropdownTriggerText}>
               {screens.find(s => s.id === tempScreen)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Screen'}
             </Text>
-            <AntDesign name={isDropdownVisible ? "up" : "down"} size={20} color={Colors.BYellow} />
+            <AntDesign name={isDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
           </TouchableOpacity>
         </View>
 
@@ -225,9 +451,9 @@ export default function SettingsScreen({ navigation }) {
             maximumValue={1}
             value={tempVolume}
             onValueChange={handleVolumeChange}
-            minimumTrackTintColor={Colors.BYellow}
-            maximumTrackTintColor={Colors.DYellow}
-            thumbTintColor={Colors.BYellow}
+            minimumTrackTintColor={colors.BYellow}
+            maximumTrackTintColor={colors.DYellow}
+            thumbTintColor={colors.BYellow}
           />
           <Text style={styles.volumeText}>{Math.round(tempVolume * 100)}%</Text>
         </View>
@@ -235,13 +461,13 @@ export default function SettingsScreen({ navigation }) {
         <View style={[styles.setting, styles.buttonSetting]}>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: Colors.DYellow }]}
+              style={[styles.button, { backgroundColor: colors.DYellow }]}
               onPress={handleDefault}
             >
               <Text style={styles.buttonText}>{t('settings.default')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: Colors.BYellow }]}
+              style={[styles.button, { backgroundColor: colors.BYellow }]}
               onPress={handleSave}
             >
               <Text style={styles.buttonText}>{t('settings.save')}</Text>
@@ -252,157 +478,3 @@ export default function SettingsScreen({ navigation }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  buttonSetting: {
-    paddingVertical: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dropdown: {
-    width: '80%',
-    maxHeight: 300,
-    backgroundColor: Colors.DGreen,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.BYellow,
-    overflow: 'hidden',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  dropdownItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.BYellow + '33',
-  },
-  activeDropdownItem: {
-    backgroundColor: Colors.BYellow,
-  },
-  dropdownText: {
-    color: Colors.BYellow,
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  activeDropdownText: {
-    color: Colors.DGreen,
-    fontWeight: 'bold',
-  },
-  dropdownTrigger: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: Colors.MGreen,
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.BYellow,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  dropdownTriggerText: {
-    color: Colors.BYellow,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'left',
-    flex: 1,
-    marginRight: 10,
-  },
-  setting: {
-    marginBottom: 20,
-    backgroundColor: Colors.MGreen,
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    minWidth: 120,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3,
-  },
-  langButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 8,
-    minWidth: 120,
-    backgroundColor: Colors.MGreen,
-    borderWidth: 1,
-    borderColor: Colors.BYellow,
-  },
-  activeLangButton: {
-    backgroundColor: Colors.BYellow,
-  },
-  langButtonText: {
-    color: Colors.BYellow,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  activeLangButtonText: {
-    color: Colors.DGreen,
-  },
-  settingTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: Colors.BYellow,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  volumeText: {
-    textAlign: 'center',
-    marginTop: 5,
-    color: Colors.BYellow,
-  },
-  buttonText: {
-    color: Colors.DGreen,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});

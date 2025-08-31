@@ -1,11 +1,13 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, Modal, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet, I18nManager } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, I18nManager, Alert, BackHandler, Image, ImageBackground, Modal, TouchableHighlight } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import Clrs from "../constants/Colors";
+import { useColors, useIsBrightTheme } from "../constants/Colors";
 import { t } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import { useAudio } from '../utils/Sounds';
+import { BackgroundSvg2 } from '../components/BackgroundSvg2';
+import { StarSvgFilled } from '../components/StarSvg';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -20,12 +22,14 @@ import { useAudio } from '../utils/Sounds';
 const audioSource = require('../assets/sound/kikhires.mp3');
 
 export default function Screen2({ route, navigation }) {
+  const colors = useColors();
   const [i, setI] = React.useState(0)
   const [mv, setMv] = React.useState(false)
   const player = useAudio();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+      <BackgroundSvg2 color={colors.BYellow} />
       <Modal
         animationType="slide"
         transparent={true}
@@ -35,8 +39,8 @@ export default function Screen2({ route, navigation }) {
         }}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <View style={{
-            backgroundColor: "white",
-            shadowColor: "#000",
+            backgroundColor: colors.white,
+            shadowColor: colors.shadowColor,
             shadowOffset: {
               width: 0,
               height: 1,
@@ -50,9 +54,9 @@ export default function Screen2({ route, navigation }) {
             height: 220,
             borderRadius: 20,
           }}>
-            <Feather name="info" size={64} color={Clrs.DYellow} />
+            <Feather name="info" size={64} color={colors.DYellow} />
             <Text style={{
-              color: Clrs.DGreen,
+              color: colors.DGreen,
               fontSize: 20,
               textAlign: "center",
               marginTop: 10,
@@ -68,10 +72,10 @@ export default function Screen2({ route, navigation }) {
                   setI(0)
                   setMv(false)
                 }}
-                style={{ backgroundColor: Clrs.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
+                style={{ backgroundColor: colors.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
                 <Text style={{
-                  color: Clrs.DGreen,
+                  color: colors.DGreen,
                   fontSize: 20,
                   lineHeight: 28,
                   fontFamily: "Cairo_400Regular",
@@ -81,10 +85,10 @@ export default function Screen2({ route, navigation }) {
                 onPress={() => {
                   setMv(false)
                 }}
-                style={{ backgroundColor: Clrs.BGreen, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
+                style={{ backgroundColor: colors.BGreen, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
                 <Text style={{
-                  color: Clrs.BYellow,
+                  color: colors.BYellow,
                   fontSize: 20,
                   lineHeight: 28,
                   fontFamily: "Cairo_400Regular",
@@ -102,13 +106,10 @@ export default function Screen2({ route, navigation }) {
             setMv(true)
           }}
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Feather name="rotate-cw" color={Clrs.BYellow} size={32} />
+          <Feather name="rotate-cw" color={colors.BYellow} size={32} />
         </TouchableOpacity>
       }} />
-      <ImageBackground
-        source={require("../assets/images/bg2.jpg")}
-        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
-      >
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         {/* <View style={{ position: "absolute", top: 30, left: 0, justifyContent: "center", alignItems: "center", right: 0, width: "100%" }} >
           <Image
             source={require("../assets/images/ala.png")}
@@ -132,17 +133,17 @@ export default function Screen2({ route, navigation }) {
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >
-          <ImageBackground
-            source={require("../assets/images/Star.png")}
-            style={{ width: 256, height: 256, alignSelf: "center", justifyContent: "center", alignItems: "center" }}
-          >
+          <View style={{ width: 256, height: 256, alignSelf: "center", justifyContent: "center", alignItems: "center" }}>
+            <StarSvgFilled width={256} height={256} />
             <Text
               style={{
-                color: Clrs.BYellow,
+                position: 'absolute',
+                color: colors.primary,
                 fontSize: 32,
+                fontWeight: 'bold',
               }}
             >{i}</Text>
-          </ImageBackground>
+          </View>
         </TouchableOpacity>
         {/* <AdMobBanner
           bannerSize="fullBanner"
@@ -151,33 +152,8 @@ export default function Screen2({ route, navigation }) {
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
           }} /> */}
-      </ImageBackground>
+      </View>
 
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: { alignItems: "center" },
-  slide1: {
-    flex: 1,
-    backgroundColor: '#9DD6EB'
-  },
-  slide2: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#97CAE5'
-  },
-  slide3: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#92BBD9'
-  },
-  text: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold'
-  }
-})

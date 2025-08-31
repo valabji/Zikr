@@ -2,12 +2,14 @@ import * as React from 'react';
 import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import Clrs from "../constants/Colors";
+import { useColors } from "../constants/Colors";
 import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../redux/store';
+import { MuslimIconSvg } from '../components/MuslimIconSvg';
+import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -22,6 +24,7 @@ const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 const width = Dimensions.get("screen").width
 
 export default function HomeScreen({ navigation }) {
+  const colors = useColors();
   const [s, setS] = React.useState(false)
   const [st, setSt] = React.useState("")
   const [ft, setFt] = React.useState(true)
@@ -38,22 +41,21 @@ export default function HomeScreen({ navigation }) {
         height: 48,
         marginHorizontal: 10,
         marginTop: 5,
-        backgroundColor: Clrs.DGreen,
+        backgroundColor: colors.DGreen,
         flexDirection: "row",
       }}>
-      <Image
-        source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-        style={{
-          width: 48, height: 48
-        }}
-      />
+      {I18nManager.isRTL ? (
+        <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+      ) : (
+        <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+      )}
       <View style={{ 
         justifyContent: "center",
         flex: 1,
         paddingHorizontal: 2
       }}  >
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
-          color: Clrs.BYellow,
+          color: colors.BYellow,
           fontSize: 16,
           textAlign: "left",
           fontFamily: "Cairo_400Regular",
@@ -90,7 +92,7 @@ export default function HomeScreen({ navigation }) {
                   justifyContent: "center",
                   marginRight: 5
                 }} >
-        <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} testID="fav-indicator" />
+        <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} testID="fav-indicator" />
       </TouchableOpacity>
     </TouchableOpacity>
   }
@@ -128,9 +130,9 @@ export default function HomeScreen({ navigation }) {
             style={{ flex: 1, justifyContent: "center", alignItems: "flex-end",paddingHorizontal:20 }}>
             {
               s ?
-                <Feather name="rotate-cw" color={Clrs.BYellow} size={32} />
+                <Feather name="rotate-cw" color={colors.BYellow} size={32} />
                 :
-                <Feather name="search" color={Clrs.BYellow} size={32} />
+                <Feather name="search" color={colors.BYellow} size={32} />
             }
           </TouchableOpacity>
         }} />
@@ -147,18 +149,18 @@ export default function HomeScreen({ navigation }) {
       /> */}
       <ImageBackground
         // source={require("../assets/images/bg.png")}
-        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
+        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: colors.BGreen }}
       >
         <View style={{ width: width, alignItems: "center", justifyContent: "center", marginBottom: 3, marginTop: 3, display: s ? "flex" : "none" }}>
-          <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: Clrs.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: "#fff", borderRadius: 12 }}>
+          <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: colors.borderColor, borderRadius: 12 }}>
             <TextInput
               testID="search-input"
               placeholder={t('search.placeholder')}
-              placeholderTextColor={Clrs.BGreen}
+              placeholderTextColor={colors.BGreen}
               onChangeText={v => {
                 setSt(v)
               }}
-              style={{ width: width - 40, fontSize: 24, color: Clrs.BYellow, textAlign: "right" }} />
+              style={{ width: width - 40, fontSize: 24, color: colors.BYellow, textAlign: "right" }} />
           </View>
         </View>
         {/* <AdMobBanner

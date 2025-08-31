@@ -1,7 +1,15 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import TabBarIcon from '../../components/TabBarIcon';
-import Colors from '../../constants/Colors';
+import { useColors } from '../../constants/Colors';
+
+// Mock the useColors hook
+jest.mock('../../constants/Colors', () => ({
+  useColors: jest.fn(() => ({
+    BYellow: '#FFE29D',
+    tabIconDefault: '#ccc',
+  })),
+}));
 
 describe('TabBarIcon', () => {
   const defaultProps = {
@@ -18,7 +26,7 @@ describe('TabBarIcon', () => {
     );
     
     const icon = UNSAFE_getByType('Ionicons');
-    expect(icon.props.color).toBe(Colors.BYellow);
+    expect(icon.props.color).toBe('#FFE29D'); // BYellow
   });
 
   it('renders correctly with unfocused state', () => {
@@ -30,7 +38,7 @@ describe('TabBarIcon', () => {
     );
     
     const icon = UNSAFE_getByType('Ionicons');
-    expect(icon.props.color).toBe(Colors.tabIconDefault);
+    expect(icon.props.color).toBe('#ccc'); // tabIconDefault
   });
 
   it('applies correct icon name', () => {

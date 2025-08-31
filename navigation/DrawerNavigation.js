@@ -1,7 +1,7 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useEffect, useState } from "react";
 import { I18nManager, Share } from "react-native";
-import Clrs from "../constants/Colors";
+import { useColors } from "../constants/Colors";
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
 import Fav from '../screens/Fav';
@@ -10,9 +10,12 @@ import { t, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MuslimIconSvg } from '../components/MuslimIconSvg';
+import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 
 const Drawer = createDrawerNavigator();
 export function DNav() {
+  const colors = useColors();
   const [initialScreen, setInitialScreen] = useState(null);
 
   useEffect(() => {
@@ -56,14 +59,14 @@ export function DNav() {
         return (
           <View
             testID="drawer-container"
-            style={{ width: "100%", height: "100%", backgroundColor: Clrs.BGreen }}>
+            style={{ width: "100%", height: "100%", backgroundColor: colors.BGreen }}>
             <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 20 }}>
               <Image
                 source={require("../assets/images/logo.png")}
                 style={{ width: 128, height: 128 }}
               />
             </View>
-            <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: Clrs.BYellow, fontSize: 18 }}>{t("app.name")}</Text>
+            <Text style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "500", color: colors.BYellow, fontSize: 18 }}>{t("app.name")}</Text>
             <TouchableOpacity
               testID="screen3"
               onPress={() => {
@@ -75,23 +78,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 30,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('app.tasbih')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="target" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="target" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="fav-screen"
@@ -104,23 +106,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 5,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.favorites')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="heart" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="main-screen"
@@ -133,23 +134,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 5,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.allAzkar')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="list" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -163,23 +163,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 5,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.shareApp')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="share-2" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="share-2" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={async () => {
@@ -192,23 +191,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 5,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('language.switch')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="globe" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="globe" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="settings-screen"
@@ -220,23 +218,22 @@ export function DNav() {
                 marginLeft: 5,
                 marginRight: 5,
                 marginTop: 5,
-                backgroundColor: Clrs.DGreen,
+                backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              <Image
-                source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-                style={{
-                  width: 64, height: 64
-                }}
-              />
+              {I18nManager.isRTL ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
               <Text style={{
-                color: Clrs.BYellow,
+                color: colors.BYellow,
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.settings')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="settings" size={24} color={Clrs.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
             </TouchableOpacity>
           </View>)
       }}

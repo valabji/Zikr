@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
 import { loadResourcesAndDataAsync } from './utils/load';
 import { AppContainer } from './navigation/Main';
+import { ThemeProvider } from './constants/ThemeProvider';
 
 
 export default function App(props) {
@@ -18,6 +19,10 @@ export default function App(props) {
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return null;
   } else {
-    return <AppContainer />;
+    return (
+      <ThemeProvider>
+        <AppContainer />
+      </ThemeProvider>
+    );
   }
 }

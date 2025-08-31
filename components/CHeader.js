@@ -4,23 +4,25 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { t } from '../locales/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
-import Clrs from "../constants/Colors";
+import { useColors } from "../constants/Colors";
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 import { Hbg } from './Hbg';
 const width = Dimensions.get("window").width
 
 export default function CustomHeader({ title, isHome, Left, Right, navigation, testID }) {
+  const colors = useColors();
+  
   return (
     <LinearGradient 
       testID={testID || "header-container"}
-      colors={[Clrs.BGreen, Clrs.DGreen]} 
+      colors={[colors.BGreen, colors.DGreen]} 
       locations={[0, 1]} 
       style={{
         flexDirection: "row",
         height: 64,
         elevation: 1,
 
-        shadowColor: "#000",
+        shadowColor: colors.shadowColor,
         shadowOffset: {
           width: 0,
           height: 1,
@@ -31,8 +33,8 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
         elevation: 2,
       }}>
       <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
-        <Hbg color={Clrs.DGreen + "55"} width={width} />
-        <Hbg color={Clrs.DGreen + "55"} width={width} />
+        <Hbg color={colors.DGreen + "55"} width={width} />
+        <Hbg color={colors.DGreen + "55"} width={width} />
       </View>
       {
         Right ?
@@ -48,7 +50,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
                   name="menu"
                   size={30}
                   style={{ marginLeft: 20 }}
-                  color={Clrs.BYellow}
+                  color={colors.BYellow}
                 />
               </TouchableOpacity>
             </View>
@@ -63,13 +65,13 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
                   name={I18nManager.isRTL ? "arrow-right" : "arrow-left"}
                   size={30}
                   style={{ marginLeft: 20 }}
-                  color={Clrs.BYellow}
+                  color={colors.BYellow}
                 />
               </TouchableOpacity>
             </View>
       }
       <View style={{ flex: 1.5, justifyContent: 'center' }}>
-        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: Clrs.BYellow, fontSize: 18 }}>{title}</Text>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: colors.BYellow, fontSize: 18 }}>{title}</Text>
       </View>
 
       {Left ?

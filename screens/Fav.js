@@ -1,18 +1,21 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import Clrs from "../constants/Colors";
+import { useColors } from "../constants/Colors";
 import { t } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../redux/store';
+import { MuslimIconSvg } from '../components/MuslimIconSvg';
+import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 // import React9Slice from 'react-9-slice';
 // import ImageCapInset from 'react-native-image-capinsets';
 const width = Dimensions.get("screen").width
 
 export default function HomeScreen({ navigation }) {
+  const colors = useColors();
   const [s, setS] = React.useState(false)
   const [ft, setFt] = React.useState(true)
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
@@ -29,22 +32,21 @@ export default function HomeScreen({ navigation }) {
         marginLeft: 10,
         marginRight: 10,
         marginTop: 5,
-        backgroundColor: Clrs.DGreen,
+        backgroundColor: colors.DGreen,
         flexDirection: "row",
       }}>
-      <Image
-        source={I18nManager.isRTL ? require("../assets/images/muslim.png") : require("../assets/images/muslim.en.png")}
-        style={{
-          width: 48, height: 48
-        }}
-      />
+      {I18nManager.isRTL ? (
+        <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+      ) : (
+        <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+      )}
       <View style={{ 
         justifyContent: "center",
         flex: 1,
         paddingHorizontal: 2
       }} >
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
-          color: Clrs.BYellow,
+          color: colors.BYellow,
           fontSize: 16,
           textAlign: "left",
           fontFamily: "Cairo_400Regular",
@@ -81,7 +83,7 @@ export default function HomeScreen({ navigation }) {
           justifyContent: "center",
           marginRight: 5
         }} >
-        <AntDesign name={fv ? "heart" : "hearto"} color={Clrs.BYellow} size={32} />
+        <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} />
       </TouchableOpacity>
     </TouchableOpacity>
   }
@@ -115,7 +117,7 @@ export default function HomeScreen({ navigation }) {
       /> */}
       <ImageBackground
         // source={require("../assets/images/bg.png")}
-        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
+        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: colors.BGreen }}
       >
         <ScrollView 
           style={{ flex: 1, width: "100%" }} 
@@ -124,7 +126,7 @@ export default function HomeScreen({ navigation }) {
         >
           {Azkar.filter(i => i.fav).length === 0 ? 
             <View testID="empty-state" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ color: Clrs.BYellow, fontSize: 18, textAlign: 'center' }}>
+              <Text style={{ color: colors.BYellow, fontSize: 18, textAlign: 'center' }}>
                 {t('no.favorites')}
               </Text>
             </View>
