@@ -57,12 +57,17 @@ export default function Screen2({ route, navigation }) {
             player.playClick();
             setI(i + 1)
             if (i == z.count - 1) {
-              const scrollBy = reverse ? -1 : 1;
               if (Platform.OS === 'web') {
                 // react-native-web-swiper uses different method
-                swp?.goTo?.(Math.max(0, pn + scrollBy - 1));
+                if (reverse) {
+                let next = size-pn-1
+                swp?.goTo?.(next);
+                }else{
+                swp?.goTo?.(pn);
+                }
               } else {
                 // react-native-swiper
+              const scrollBy = reverse ? -1 : 1;
                 swp?.scrollBy?.(scrollBy, true);
               }
             }
