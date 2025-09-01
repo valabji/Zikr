@@ -2,6 +2,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import linkingOptions from './useLinking';
 import Screen2 from '../screens/Screen2';
+import ContributeScreen from '../screens/ContributeScreen';
 import { DNav } from './DrawerNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { useColors, useIsBrightTheme } from '../constants/Colors';
@@ -29,6 +30,7 @@ export const AppContainer = () => {
             <Stack.Navigator>
                 <Stack.Screen name="Home" component={DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="Contribute" component={ContributeScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
             </Stack.Navigator>
         </NavigationContainer>
     </View>

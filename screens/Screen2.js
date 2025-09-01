@@ -3,7 +3,8 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
-import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
+import { Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 // Try different import approach for web swiper
@@ -145,10 +146,38 @@ export default function Screen2({ route, navigation }) {
     }
   }, []);
 
+  // Contribution button component for header
+  const ContributionButton = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Contribute')}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          ...getDirectionalSpacing(0, 20),
+        }}
+      >
+        <Feather
+          name="edit"
+          size={20}
+          color={colors.BYellow}
+          style={{ marginRight: isRTL() ? 0 : 5, marginLeft: isRTL() ? 5 : 0 }}
+        />
+        <Text style={{
+          color: colors.BYellow,
+          fontSize: 14,
+          fontFamily: "Cairo_400Regular",
+        }}>
+          {t('navigation.helpImprove')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
       <BackgroundSvg1 color={colors.BYellow} />
-      <CustomHeader title={name} isHome={false} navigation={navigation} />
+      <CustomHeader title={name} isHome={false} navigation={navigation} Left={ContributionButton} />
       <View style={{ 
         flex: 1, 
         alignItems: 'center', 

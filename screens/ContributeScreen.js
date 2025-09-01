@@ -13,12 +13,13 @@ import { useColors } from '../constants/Colors';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
+import { CONTRIBUTE_CONSTANTS } from '../constants/ContributeConstants';
 
 export default function ContributeScreen({ navigation }) {
   const colors = useColors();
 
   const openExcelSheet = () => {
-    const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBPd_n5b0kvOR4ImV-vmh3509yAvDFAjysFeMvJMYcUJzd8H2jY8MQEd_1rPjBFwSr1_SRmpdNsvzq/pub?output=xlsx';
+    const url = CONTRIBUTE_CONSTANTS.EXCEL_SHEET_URL;
     Linking.openURL(url).catch(() => {
       Alert.alert(
         t('contribute.error'),
@@ -27,8 +28,8 @@ export default function ContributeScreen({ navigation }) {
     });
   };
 
-  const openEmail = (subject = 'Zikr Contribution') => {
-    const emailUrl = `mailto:zikr@valabji.com?subject=${subject}`;
+  const openEmail = (subject = CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.DEFAULT) => {
+    const emailUrl = `mailto:${CONTRIBUTE_CONSTANTS.EMAIL_ADDRESS}?subject=${subject}`;
     Linking.openURL(emailUrl).catch(() => {
       Alert.alert(
         t('contribute.error'),
@@ -38,7 +39,7 @@ export default function ContributeScreen({ navigation }) {
   };
 
   const copyEmail = () => {
-    Clipboard.setString('zikr@valabji.com');
+    Clipboard.setString(CONTRIBUTE_CONSTANTS.EMAIL_ADDRESS);
     Alert.alert(
       t('contribute.copied'),
       t('contribute.emailCopied')
@@ -46,7 +47,7 @@ export default function ContributeScreen({ navigation }) {
   };
 
   const openGitHub = () => {
-    const githubUrl = 'https://github.com/valabji/Zikr';
+    const githubUrl = CONTRIBUTE_CONSTANTS.GITHUB_URL;
     Linking.openURL(githubUrl).catch(() => {
       Alert.alert(
         t('contribute.error'),
@@ -58,34 +59,34 @@ export default function ContributeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
       <CHeader navigation={navigation} title={t('navigation.contribute')} />
-      
+
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20 }}
+        contentContainerStyle={{ padding: CONTRIBUTE_CONSTANTS.SPACING.CONTAINER_PADDING }}
         showsVerticalScrollIndicator={false}
       >
         <View style={{
           backgroundColor: colors.DGreen,
-          borderRadius: 15,
-          padding: 20,
-          marginBottom: 20
+          borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.LARGE,
+          padding: CONTRIBUTE_CONSTANTS.SPACING.CARD_PADDING,
+          marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
         }}>
           <Text style={{
             color: colors.BYellow,
-            fontSize: 24,
+            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.TITLE,
             fontFamily: "Cairo_600SemiBold",
             textAlign: 'center',
-            marginBottom: 15
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
           }}>
             {t('contribute.title')}
           </Text>
-          
+
           <Text style={{
             color: colors.BYellow,
-            fontSize: 16,
+            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
             fontFamily: "Cairo_400Regular",
-            lineHeight: 24,
-            marginBottom: 20,
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.DEFAULT,
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM,
             textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.description')}
@@ -95,32 +96,32 @@ export default function ContributeScreen({ navigation }) {
         {/* For Normal Users */}
         <View style={{
           backgroundColor: colors.DGreen,
-          borderRadius: 15,
-          padding: 20,
-          marginBottom: 20
+          borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.LARGE,
+          padding: CONTRIBUTE_CONSTANTS.SPACING.CARD_PADDING,
+          marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
         }}>
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 15
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
           }}>
-            <Feather name="users" size={24} color={colors.BYellow} />
+            <Feather name="users" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_LARGE} color={colors.BYellow} />
             <Text style={{
               color: colors.BYellow,
-              fontSize: 20,
+              fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SUBTITLE,
               fontFamily: "Cairo_600SemiBold",
-              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
+              ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.forUsers')}
             </Text>
           </View>
-          
+
           <Text style={{
             color: colors.BYellow,
-            fontSize: 14,
+            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
             fontFamily: "Cairo_400Regular",
-            lineHeight: 22,
-            marginBottom: 20,
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL,
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM,
             textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.usersDescription')}
@@ -130,20 +131,20 @@ export default function ContributeScreen({ navigation }) {
             onPress={openExcelSheet}
             style={{
               backgroundColor: colors.BGreen,
-              borderRadius: 10,
-              padding: 15,
+              borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.MEDIUM,
+              padding: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 20
+              marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
             }}
           >
-            <Feather name="download" size={20} color={colors.BYellow} />
+            <Feather name="download" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_MEDIUM} color={colors.BYellow} />
             <Text style={{
               color: colors.BYellow,
-              fontSize: 16,
+              fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
               fontFamily: "Cairo_500Medium",
-              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
+              ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.downloadExcel')}
             </Text>
@@ -152,40 +153,41 @@ export default function ContributeScreen({ navigation }) {
           {/* Email Section */}
           <View style={{
             backgroundColor: colors.BGreen,
-            borderRadius: 10,
-            padding: 15,
-            marginBottom: 20
+            borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.MEDIUM,
+            padding: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
           }}>
             <Text style={{
               color: colors.BYellow,
-              fontSize: 16,
+              fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
               fontFamily: "Cairo_600SemiBold",
-              marginBottom: 15
+              marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
             }}>
               {t('contribute.contactUs')}
             </Text>
-            
+
             {/* Email Address with Copy */}
             <View style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginBottom: 15,
+              marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
               backgroundColor: colors.DGreen,
-              borderRadius: 8,
-              padding: 12
+              borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+              padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING + 2
             }}>
-              <Feather name="mail" size={18} color={colors.BYellow} />
+              <Feather name="mail" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
               <Text style={{
                 color: colors.BYellow,
-                fontSize: 14,
+                fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
                 fontFamily: "Cairo_400Regular",
-                ...getDirectionalMixedSpacing({ marginLeft: 8 }),
+                textAlign: getRTLTextAlign('left'),
+                ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING }),
                 flex: 1
               }}>
-                zikr@valabji.com
+                {CONTRIBUTE_CONSTANTS.EMAIL_ADDRESS}
               </Text>
               <TouchableOpacity onPress={copyEmail} testID="copy-email">
-                <Feather name="copy" size={18} color={colors.BYellow} />
+                <Feather name="copy" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
               </TouchableOpacity>
             </View>
 
@@ -196,25 +198,25 @@ export default function ContributeScreen({ navigation }) {
               justifyContent: 'space-between'
             }}>
               <TouchableOpacity
-                onPress={() => openEmail('Zikr Reference Checking')}
+                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.REFERENCE_CHECKING)}
                 style={{
                   backgroundColor: colors.DGreen,
-                  borderRadius: 8,
-                  padding: 10,
+                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 8,
-                  width: '48%',
-                  height: 54
+                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
+                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
                 }}
               >
-                <Feather name="check-circle" size={16} color={colors.BYellow} />
+                <Feather name="check-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                 <Text style={{
                   color: colors.BYellow,
-                  fontSize: 12,
+                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
                   fontFamily: "Cairo_500Medium",
-                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
+                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -223,25 +225,25 @@ export default function ContributeScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => openEmail('Zikr Translation Help')}
+                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.TRANSLATION)}
                 style={{
                   backgroundColor: colors.DGreen,
-                  borderRadius: 8,
-                  padding: 10,
+                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 8,
-                  width: '48%',
-                  height: 54
+                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
+                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
                 }}
               >
-                <Feather name="globe" size={16} color={colors.BYellow} />
+                <Feather name="globe" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                 <Text style={{
                   color: colors.BYellow,
-                  fontSize: 12,
+                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
                   fontFamily: "Cairo_500Medium",
-                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
+                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -250,25 +252,25 @@ export default function ContributeScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => openEmail('Zikr App Suggestions')}
+                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.SUGGESTIONS)}
                 style={{
                   backgroundColor: colors.DGreen,
-                  borderRadius: 8,
-                  padding: 10,
+                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 8,
-                  width: '48%',
-                  height: 54
+                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
+                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
                 }}
               >
-                <Feather name="message-circle" size={16} color={colors.BYellow} />
+                <Feather name="message-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                 <Text style={{
                   color: colors.BYellow,
-                  fontSize: 12,
+                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
                   fontFamily: "Cairo_500Medium",
-                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
+                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -277,24 +279,24 @@ export default function ContributeScreen({ navigation }) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => openEmail('Zikr Bug Report')}
+                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.BUG_REPORT)}
                 style={{
                   backgroundColor: colors.DGreen,
-                  borderRadius: 8,
-                  padding: 10,
+                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '48%',
-                  height: 54
+                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
                 }}
               >
-                <Feather name="alert-triangle" size={16} color={colors.BYellow} />
+                <Feather name="alert-triangle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                 <Text style={{
                   color: colors.BYellow,
-                  fontSize: 12,
+                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
                   fontFamily: "Cairo_500Medium",
-                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
+                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -308,32 +310,32 @@ export default function ContributeScreen({ navigation }) {
         {/* For Developers */}
         <View style={{
           backgroundColor: colors.DGreen,
-          borderRadius: 15,
-          padding: 20,
-          marginBottom: 20
+          borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.LARGE,
+          padding: CONTRIBUTE_CONSTANTS.SPACING.CARD_PADDING,
+          marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
         }}>
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 15
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
           }}>
-            <Feather name="code" size={24} color={colors.BYellow} />
+            <Feather name="code" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_LARGE} color={colors.BYellow} />
             <Text style={{
               color: colors.BYellow,
-              fontSize: 20,
+              fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SUBTITLE,
               fontFamily: "Cairo_600SemiBold",
-              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
+              ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.forDevelopers')}
             </Text>
           </View>
-          
+
           <Text style={{
             color: colors.BYellow,
-            fontSize: 14,
+            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
             fontFamily: "Cairo_400Regular",
-            lineHeight: 22,
-            marginBottom: 20,
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL,
+            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM,
             textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.developersDescription')}
@@ -343,19 +345,19 @@ export default function ContributeScreen({ navigation }) {
             onPress={openGitHub}
             style={{
               backgroundColor: colors.BGreen,
-              borderRadius: 10,
-              padding: 15,
+              borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.MEDIUM,
+              padding: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <Feather name="github" size={20} color={colors.BYellow} />
+            <Feather name="github" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_MEDIUM} color={colors.BYellow} />
             <Text style={{
               color: colors.BYellow,
-              fontSize: 16,
+              fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
               fontFamily: "Cairo_500Medium",
-              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
+              ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.openGitHub')}
             </Text>
@@ -364,16 +366,16 @@ export default function ContributeScreen({ navigation }) {
 
         <View style={{
           backgroundColor: colors.DGreen,
-          borderRadius: 15,
-          padding: 20,
-          marginBottom: 30
+          borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.LARGE,
+          padding: CONTRIBUTE_CONSTANTS.SPACING.CARD_PADDING,
+          marginBottom: CONTRIBUTE_CONSTANTS.SPACING.LARGE_MARGIN_BOTTOM
         }}>
           <Text style={{
             color: colors.BYellow,
-            fontSize: 14,
+            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
             fontFamily: "Cairo_400Regular",
             textAlign: 'center',
-            lineHeight: 22,
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL,
             fontStyle: 'italic'
           }}>
             {t('contribute.thankYou')}
