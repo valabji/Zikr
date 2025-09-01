@@ -1,11 +1,21 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
 import { t } from '../locales/i18n';
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
+// Try different import approach for web swiper
+let WebSwiper;
+if (Platform.OS === 'web') {
+  try {
+    WebSwiper = require('react-native-web-swiper').default;
+  } catch (error) {
+    console.warn('Failed to load react-native-web-swiper:', error);
+    WebSwiper = Swiper; // Fallback to regular swiper
+  }
+}
 import { useAudio } from '../utils/Sounds.js';
 import { BackgroundSvg1 } from '../components/BackgroundSvg1';
 import { StarSvgFilled } from '../components/StarSvg';
@@ -31,6 +41,9 @@ export default function Screen2({ route, navigation }) {
   let swp = React.createRef();;
   let size = 0;
 
+  // Choose the appropriate swiper based on platform
+  const SwiperComponent = Platform.OS === 'web' ? (WebSwiper || Swiper) : Swiper;
+
   const Item = ({ z, pn }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1
@@ -45,7 +58,13 @@ export default function Screen2({ route, navigation }) {
             setI(i + 1)
             if (i == z.count - 1) {
               const scrollBy = reverse ? -1 : 1;
-              swp.scrollBy(scrollBy, true);
+              if (Platform.OS === 'web') {
+                // react-native-web-swiper uses different method
+                swp?.goTo?.(Math.max(0, pn + scrollBy - 1));
+              } else {
+                // react-native-swiper
+                swp?.scrollBy?.(scrollBy, true);
+              }
             }
           }
         }}
@@ -110,11 +129,32 @@ export default function Screen2({ route, navigation }) {
   const azkarList = Azkar.filter(i => i.category == name);
   size = azkarList.length;
 
+  // Debug logging for web platform
+  React.useEffect(() => {
+    if (Platform.OS === 'web') {
+      console.log('Running on web platform');
+      console.log('WebSwiper loaded:', !!WebSwiper);
+      console.log('WebSwiper === Swiper:', WebSwiper === Swiper);
+      console.log('Using component:', SwiperComponent.name || 'Unknown');
+      console.log('Azkar list length:', size);
+    }
+  }, []);
+
   return (
     <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
       <BackgroundSvg1 color={colors.BYellow} />
       <CustomHeader title={name} isHome={false} navigation={navigation} />
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ 
+        flex: 1, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        ...(Platform.OS === 'web' && { 
+          width: '100%', 
+          height: '100%',
+          maxWidth: '100vw',
+          maxHeight: '100vh'
+        })
+      }}>
         {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
@@ -122,24 +162,61 @@ export default function Screen2({ route, navigation }) {
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
           }} /> */}
-        <Swiper ref={(ref) => { swp = ref; }}
-          onContentSizeChange={() => {
-            if (reverse) {
-              const scrollBy = size
-              swp.scrollBy(scrollBy, false);
+        <SwiperComponent 
+          ref={(ref) => { swp = ref; }}
+          style={Platform.OS === 'web' ? { 
+            flex: 1, 
+            width: '100%', 
+            height: '100%',
+            minWidth: 300,
+            minHeight: 400
+          } : {}} 
+          loop={false} 
+          showsButtons={false} 
+          showsPagination={false}
+          // Only apply web-specific props if we're using WebSwiper successfully
+          {...(Platform.OS === 'web' && WebSwiper && WebSwiper !== Swiper && {
+            controlsEnabled: false,
+            swipeControlsEnabled: true,
+            from: reverse ? size - 1 : 0,
+            containerStyle: {
+              width: '100%',
+              height: '100%',
+              flex: 1
             }
-          }}
-          style={{}} loop={false} showsButtons={false} showsPagination={false}  >
+          })}
+          {...(Platform.OS !== 'web' && {
+            onContentSizeChange: () => {
+              if (reverse) {
+                const scrollBy = size
+                swp?.scrollBy?.(scrollBy, false);
+              }
+            }
+          })}
+        >
           {azkarList.map((i, index) => {
-            return <View key={index} style={{ flex: 1 }} testID="azkar-item">
+            const slideContent = (
               <View style={{
                 flex: 1, borderWidth: 1, borderColor: colors.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
               }}>
                 <Item z={i} pn={index + 1} />
               </View>
-            </View>
+            );
+
+            return (
+              <View key={index} style={{ 
+                flex: 1,
+                ...(Platform.OS === 'web' && {
+                  width: '100%',
+                  minWidth: 300,
+                  height: '100%'
+                })
+              }} testID="azkar-item">
+                {slideContent}
+              </View>
+            );
           })}
-        </Swiper>
+        </SwiperComponent>
       </View>
     </View>
   );
