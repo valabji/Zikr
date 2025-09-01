@@ -50,6 +50,9 @@
     "default": "Default",
     "save": "Save"
   },
+  "favorites": {
+    "empty": "No favorites added yet. Tap the heart icon to add azkar to your favorites."
+  },
   "contribute": {
     "title": "Help Us Improve Zikr",
     "description": "Your contribution helps make Zikr better for everyone. Whether you're a regular user or a developer, there are ways you can help:",

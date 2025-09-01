@@ -4,7 +4,6 @@ import { I18nManager, Share } from "react-native";
 import { useColors } from "../constants/Colors";
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
-import Fav from '../screens/Fav';
 import SettingsScreen from '../screens/SettingsScreen';
 import ContributeScreen from '../screens/ContributeScreen';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
@@ -33,7 +32,7 @@ export function DNav() {
 
   return (
     <Drawer.Navigator
-      initialRouteName="Fav"
+      initialRouteName="Home"
       screenOptions={{
         drawerPosition: isRTL() ? "right" : "left",
         drawerType: "slide",
@@ -42,17 +41,19 @@ export function DNav() {
       drawerContent={({ navigation }) => {
         // Handle initial screen navigation
         useEffect(() => {
-          if (initialScreen && initialScreen !== 'Fav') {
+          if (initialScreen) {
             const routeMap = {
               'All': 'Home',
-              'Fav': 'Fav',
+              'Fav': 'Home',
               'Tasbih': 'Screen3',
               'Settings': 'Settings',
             };
-            const routeName = routeMap[initialScreen] || 'Fav';
+            const routeName = routeMap[initialScreen] || 'Home';
+            const routeParams = initialScreen === 'Fav' ? { showFavorites: true } : { showFavorites: false };
+            
             const timer = setTimeout(() => {
               setInitialScreen(null);
-              navigation.navigate(routeName);
+              navigation.navigate(routeName, routeParams);
             }, 100);
             return () => clearTimeout(timer);
           }
@@ -101,7 +102,7 @@ export function DNav() {
             <TouchableOpacity
               testID="fav-screen"
               onPress={() => {
-                navigation.navigate("Fav")
+                navigation.navigate("Home", { showFavorites: true })
               }}
               style={{
                 // width: "100%",
@@ -129,7 +130,7 @@ export function DNav() {
             <TouchableOpacity
               testID="main-screen"
               onPress={() => {
-                navigation.navigate("Home")
+                navigation.navigate("Home", { showFavorites: false })
               }}
               style={{
                 // width: "100%",
@@ -266,7 +267,6 @@ export function DNav() {
     >
       <Drawer.Screen name="Screen3" component={Screen3} />
       <Drawer.Screen name="Home" component={MainScreen} />
-      <Drawer.Screen name="Fav" component={Fav} />
       <Drawer.Screen name="Contribute" component={ContributeScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator >

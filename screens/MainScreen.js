@@ -21,14 +21,27 @@ import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 const Banner = "ca-app-pub-1740754568229700/6853520443"
 const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
-const width = Dimensions.get("screen").width
-
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
   const colors = useColors();
   const [s, setS] = React.useState(false)
   const [st, setSt] = React.useState("")
   const [ft, setFt] = React.useState(true)
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
+  const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'))
+  
+  // Get showFavorites parameter from route params, default to false (show all)
+  const showFavorites = route?.params?.showFavorites || false
+
+  // Listen for dimension changes
+  React.useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setScreenDimensions(window)
+    })
+
+    return () => subscription?.remove()
+  }, [])
+
+  const width = screenDimensions.width
 
   const Item = ({ name, onPress, fav, index }) => {
     let size = 32
@@ -39,7 +52,7 @@ export default function HomeScreen({ navigation }) {
       style={{
         width: width - 20,
         height: 48,
-        marginHorizontal: 10,
+        ...getDirectionalMixedSpacing({ marginLeft: 10, marginRight: 10 }),
         marginTop: 5,
         backgroundColor: colors.DGreen,
         flexDirection: "row",
@@ -187,22 +200,56 @@ export default function HomeScreen({ navigation }) {
           onDidFailToReceiveAdWithError={err=>{
             console.warn(err)
           }} /> */}
-        <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}>
-
-          {Azkar.map((i, index) => {
-            const cat = "" + i.category
-            let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-            let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-            if (cat != p) {
-              p = cat
-              if (!s || st == "" || ccat.includes(cst)) {
-                return <Item key={index} name={cat} fav={i.fav == true} index={index} onPress={() => {
-                  navigation.navigate("Screen2", { name: cat })
-                }} />
+        <ScrollView 
+          style={{ flex: 1, width: "100%" }} 
+          contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+          showsVerticalScrollIndicator={false}
+        >
+          {showFavorites ? (
+            // Favorites view with search
+            Azkar.filter(i => i.fav).length === 0 ? 
+              <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ color: colors.BYellow, fontSize: 18, textAlign: 'center', fontFamily: "Cairo_400Regular" }}>
+                  {t('favorites.empty')}
+                </Text>
+              </View>
+              :
+              Azkar.map((i, index) => {
+                if (i.fav) {
+                  const cat = "" + i.category
+                  let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
+                  let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
+                  
+                  // Apply search filter to favorites too
+                  if (!s || st == "" || ccat.includes(cst)) {
+                    return <Item 
+                      key={index} 
+                      name={i.category} 
+                      fav={i.fav == true} 
+                      index={index} 
+                      onPress={() => {
+                        navigation.navigate("Screen2", { name: i.category })
+                      }} 
+                    />
+                  }
+                }
+              })
+          ) : (
+            // All items view with search functionality
+            Azkar.map((i, index) => {
+              const cat = "" + i.category
+              let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
+              let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
+              if (cat != p) {
+                p = cat
+                if (!s || st == "" || ccat.includes(cst)) {
+                  return <Item key={index} name={cat} fav={i.fav == true} index={index} onPress={() => {
+                    navigation.navigate("Screen2", { name: cat })
+                  }} />
+                }
               }
-            }
-
-          })}
+            })
+          )}
         </ScrollView>
 
       </ImageBackground>

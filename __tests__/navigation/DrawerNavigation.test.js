@@ -34,7 +34,6 @@ jest.mock('../../locales/i18n', () => ({
 // Mock screens
 jest.mock('../../screens/MainScreen', () => 'MainScreen');
 jest.mock('../../screens/Screen3', () => 'Screen3');
-jest.mock('../../screens/Fav', () => 'Fav');
 jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
 jest.mock('../../screens/ContributeScreen', () => 'ContributeScreen');
 
