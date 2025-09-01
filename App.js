@@ -3,6 +3,7 @@ import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
 import { loadResourcesAndDataAsync } from './utils/load';
 import { AppContainer } from './navigation/Main';
 import { ThemeProvider } from './constants/ThemeProvider';
+import RTLStyleLoader from './components/RTLStyleLoader';
 
 
 export default function App(props) {
@@ -21,6 +22,7 @@ export default function App(props) {
   } else {
     return (
       <ThemeProvider>
+        <RTLStyleLoader />
         <AppContainer />
       </ThemeProvider>
     );

@@ -10,7 +10,7 @@ import {
   Clipboard
 } from 'react-native';
 import { useColors } from '../constants/Colors';
-import { t } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
 
@@ -85,7 +85,8 @@ export default function ContributeScreen({ navigation }) {
             fontSize: 16,
             fontFamily: "Cairo_400Regular",
             lineHeight: 24,
-            marginBottom: 20
+            marginBottom: 20,
+            textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.description')}
           </Text>
@@ -108,7 +109,7 @@ export default function ContributeScreen({ navigation }) {
               color: colors.BYellow,
               fontSize: 20,
               fontFamily: "Cairo_600SemiBold",
-              marginLeft: 10,
+              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
             }}>
               {t('contribute.forUsers')}
             </Text>
@@ -119,7 +120,8 @@ export default function ContributeScreen({ navigation }) {
             fontSize: 14,
             fontFamily: "Cairo_400Regular",
             lineHeight: 22,
-            marginBottom: 20
+            marginBottom: 20,
+            textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.usersDescription')}
           </Text>
@@ -141,7 +143,7 @@ export default function ContributeScreen({ navigation }) {
               color: colors.BYellow,
               fontSize: 16,
               fontFamily: "Cairo_500Medium",
-              marginLeft: 10,
+              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
             }}>
               {t('contribute.downloadExcel')}
             </Text>
@@ -177,7 +179,7 @@ export default function ContributeScreen({ navigation }) {
                 color: colors.BYellow,
                 fontSize: 14,
                 fontFamily: "Cairo_400Regular",
-                marginLeft: 8,
+                ...getDirectionalMixedSpacing({ marginLeft: 8 }),
                 flex: 1
               }}>
                 zikr@valabji.com
@@ -212,7 +214,7 @@ export default function ContributeScreen({ navigation }) {
                   color: colors.BYellow,
                   fontSize: 12,
                   fontFamily: "Cairo_500Medium",
-                  marginLeft: 6,
+                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -239,7 +241,7 @@ export default function ContributeScreen({ navigation }) {
                   color: colors.BYellow,
                   fontSize: 12,
                   fontFamily: "Cairo_500Medium",
-                  marginLeft: 6,
+                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -266,7 +268,7 @@ export default function ContributeScreen({ navigation }) {
                   color: colors.BYellow,
                   fontSize: 12,
                   fontFamily: "Cairo_500Medium",
-                  marginLeft: 6,
+                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -292,7 +294,7 @@ export default function ContributeScreen({ navigation }) {
                   color: colors.BYellow,
                   fontSize: 12,
                   fontFamily: "Cairo_500Medium",
-                  marginLeft: 6,
+                  ...getDirectionalMixedSpacing({ marginLeft: 6 }),
                   textAlign: 'center',
                   flex: 1
                 }}>
@@ -320,7 +322,7 @@ export default function ContributeScreen({ navigation }) {
               color: colors.BYellow,
               fontSize: 20,
               fontFamily: "Cairo_600SemiBold",
-              marginLeft: 10,
+              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
             }}>
               {t('contribute.forDevelopers')}
             </Text>
@@ -331,7 +333,8 @@ export default function ContributeScreen({ navigation }) {
             fontSize: 14,
             fontFamily: "Cairo_400Regular",
             lineHeight: 22,
-            marginBottom: 20
+            marginBottom: 20,
+            textAlign: getRTLTextAlign('left')
           }}>
             {t('contribute.developersDescription')}
           </Text>
@@ -352,7 +355,7 @@ export default function ContributeScreen({ navigation }) {
               color: colors.BYellow,
               fontSize: 16,
               fontFamily: "Cairo_500Medium",
-              marginLeft: 10,
+              ...getDirectionalMixedSpacing({ marginLeft: 10 }),
             }}>
               {t('contribute.openGitHub')}
             </Text>

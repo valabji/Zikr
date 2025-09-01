@@ -1,9 +1,9 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors } from "../constants/Colors";
-import { t } from '../locales/i18n';
+import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -44,7 +44,7 @@ export default function HomeScreen({ navigation }) {
         backgroundColor: colors.DGreen,
         flexDirection: "row",
       }}>
-      {I18nManager.isRTL ? (
+      {isRTL() ? (
         <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
       ) : (
         <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
@@ -57,7 +57,7 @@ export default function HomeScreen({ navigation }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
           color: colors.BYellow,
           fontSize: 16,
-          textAlign: "left",
+          textAlign: getRTLTextAlign('left'),
           fontFamily: "Cairo_400Regular",
         }}>{name}</Text>
       </View>
@@ -90,7 +90,7 @@ export default function HomeScreen({ navigation }) {
                   height: 48, 
                   alignItems: "center", 
                   justifyContent: "center",
-                  marginRight: 5
+                  ...getDirectionalMixedSpacing({ marginRight: 5 })
                 }} >
         <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} testID="fav-indicator" />
       </TouchableOpacity>
@@ -152,7 +152,19 @@ export default function HomeScreen({ navigation }) {
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: colors.BGreen }}
       >
         <View style={{ width: width, alignItems: "center", justifyContent: "center", marginBottom: 3, marginTop: 3, display: s ? "flex" : "none" }}>
-          <View style={{ width: width - 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.DGreen, width: width - 20, paddingTop: 10, paddingBottom: 10, paddingLeft: 15, paddingRight: 15, borderWidth: 1, borderColor: colors.borderColor, borderRadius: 12 }}>
+          <View style={{ 
+            width: width - 20, 
+            alignItems: "center", 
+            justifyContent: "center", 
+            backgroundColor: colors.DGreen, 
+            width: width - 20, 
+            paddingTop: 10, 
+            paddingBottom: 10, 
+            ...getDirectionalMixedSpacing({ paddingLeft: 15, paddingRight: 15 }),
+            borderWidth: 1, 
+            borderColor: colors.borderColor, 
+            borderRadius: 12 
+          }}>
             <TextInput
               testID="search-input"
               placeholder={t('search.placeholder')}
@@ -160,7 +172,12 @@ export default function HomeScreen({ navigation }) {
               onChangeText={v => {
                 setSt(v)
               }}
-              style={{ width: width - 40, fontSize: 24, color: colors.BYellow, textAlign: "right" }} />
+              style={{ 
+                width: width - 40, 
+                fontSize: 24, 
+                color: colors.BYellow, 
+                textAlign: getRTLTextAlign('right')
+              }} />
           </View>
         </View>
         {/* <AdMobBanner

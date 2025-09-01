@@ -3,7 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, I18nManager, Alert, BackHandler, Image, ImageBackground, Modal, TouchableHighlight } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
-import { t } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import { useAudio } from '../utils/Sounds';
 import { BackgroundSvg2 } from '../components/BackgroundSvg2';
@@ -60,8 +60,7 @@ export default function Screen2({ route, navigation }) {
               fontSize: 20,
               textAlign: "center",
               marginTop: 10,
-              marginRight: 15,
-              marginLeft: 15,
+              ...getDirectionalMixedSpacing({ marginRight: 15, marginLeft: 15 }),
               fontFamily: "Cairo_400Regular",
             }}
             >{t('counter.resetConfirmation')}</Text>

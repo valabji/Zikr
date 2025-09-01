@@ -34,6 +34,19 @@ export default {
         googleMobileAdsAppId: process.env.ADMOB_APPID
       }
     },
+    web: {
+      bundler: "metro",
+      favicon: "./assets/images/icon.png",
+      config: {
+        firebase: {
+          measurementId: process.env.MEASUREMENT_ID
+        }
+      },
+      meta: {
+        viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
+        themeColor: "#000000"
+      }
+    },
     description: "",
     extra: {
       eas: {

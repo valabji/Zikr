@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Dimensions, Text, View, I18nManager } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { t } from '../locales/i18n';
+import { t, isRTL, getDirectionalSpacing } from '../locales/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from "../constants/Colors";
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
@@ -49,7 +49,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
                 <Ionicons
                   name="menu"
                   size={30}
-                  style={{ marginLeft: 20 }}
+                  style={{ ...getDirectionalSpacing(20, 0) }}
                   color={colors.BYellow}
                 />
               </TouchableOpacity>
@@ -62,9 +62,9 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
                 style={{ flexDirection: "row" }}
               >
                 <Feather
-                  name={I18nManager.isRTL ? "arrow-right" : "arrow-left"}
+                  name={isRTL() ? "arrow-right" : "arrow-left"}
                   size={30}
-                  style={{ marginLeft: 20 }}
+                  style={{ ...getDirectionalSpacing(20, 0) }}
                   color={colors.BYellow}
                 />
               </TouchableOpacity>

@@ -6,7 +6,7 @@ import { useColors, useTheme } from '../constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomHeader from '../components/CHeader';
 import { setLanguage } from '../locales/i18n';
-import { t } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -106,9 +106,8 @@ export default function SettingsScreen({ navigation }) {
       color: colors.BYellow,
       fontSize: 16,
       fontWeight: 'bold',
-      textAlign: 'left',
       flex: 1,
-      marginRight: 10,
+      ...getDirectionalMixedSpacing({ marginRight: 10 }),
     },
     setting: {
       marginBottom: 20,
@@ -362,7 +361,7 @@ export default function SettingsScreen({ navigation }) {
               setThemeDropdownVisible(true);
             }}
           >
-            <Text style={styles.dropdownTriggerText}>
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
               {currentLang === 'ar' ? themes[tempTheme]?.nameAr : themes[tempTheme]?.name || 'Original Green'}
             </Text>
             <AntDesign name={isThemeDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
@@ -444,7 +443,7 @@ export default function SettingsScreen({ navigation }) {
               setDropdownVisible(true);
             }}
           >
-            <Text style={styles.dropdownTriggerText}>
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
               {screens.find(s => s.id === tempScreen)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Screen'}
             </Text>
             <AntDesign name={isDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />

@@ -3,7 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, I18nManager } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors } from "../constants/Colors";
-import { t } from '../locales/i18n';
+import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,13 +29,12 @@ export default function HomeScreen({ navigation }) {
       style={{
         width: width - 20,
         height: 48,
-        marginLeft: 10,
-        marginRight: 10,
+        ...getDirectionalMixedSpacing({ marginLeft: 10, marginRight: 10 }),
         marginTop: 5,
         backgroundColor: colors.DGreen,
         flexDirection: "row",
       }}>
-      {I18nManager.isRTL ? (
+      {isRTL() ? (
         <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
       ) : (
         <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
@@ -48,7 +47,7 @@ export default function HomeScreen({ navigation }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
           color: colors.BYellow,
           fontSize: 16,
-          textAlign: "left",
+          textAlign: getRTLTextAlign('left'),
           fontFamily: "Cairo_400Regular",
         }}>{name}</Text>
       </View>
@@ -81,7 +80,7 @@ export default function HomeScreen({ navigation }) {
           height: 48, 
           alignItems: "center", 
           justifyContent: "center",
-          marginRight: 5
+          ...getDirectionalMixedSpacing({ marginRight: 5 })
         }} >
         <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} />
       </TouchableOpacity>

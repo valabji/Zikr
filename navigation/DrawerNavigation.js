@@ -7,7 +7,7 @@ import MainScreen from '../screens/MainScreen';
 import Fav from '../screens/Fav';
 import SettingsScreen from '../screens/SettingsScreen';
 import ContributeScreen from '../screens/ContributeScreen';
-import { t, setLanguage } from '../locales/i18n';
+import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -35,7 +35,7 @@ export function DNav() {
     <Drawer.Navigator
       initialRouteName="Fav"
       screenOptions={{
-        drawerPosition: I18nManager.isRTL ? "right" : "left",
+        drawerPosition: isRTL() ? "right" : "left",
         drawerType: "slide",
         headerShown: false,
       }}
@@ -78,13 +78,12 @@ export function DNav() {
               style={{
                 // width: "100%",
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 30,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -94,9 +93,10 @@ export function DNav() {
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
+                textAlign: getRTLTextAlign('left'),
               }}>{t('app.tasbih')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="target" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="target" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="fav-screen"
@@ -106,13 +106,12 @@ export function DNav() {
               style={{
                 // width: "100%",
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -122,9 +121,10 @@ export function DNav() {
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
+                textAlign: getRTLTextAlign('left'),
               }}>{t('navigation.favorites')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="main-screen"
@@ -134,13 +134,12 @@ export function DNav() {
               style={{
                 // width: "100%",
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -150,9 +149,10 @@ export function DNav() {
                 fontSize: 22,
                 marginTop: 7,
                 fontFamily: "Cairo_400Regular",
+                textAlign: getRTLTextAlign('left'),
               }}>{t('navigation.allAzkar')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -163,13 +163,12 @@ export function DNav() {
               style={{
                 // width: "100%",
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -181,7 +180,7 @@ export function DNav() {
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.shareApp')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="share-2" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="share-2" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="contribute-screen"
@@ -190,13 +189,12 @@ export function DNav() {
               }}
               style={{
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -208,7 +206,7 @@ export function DNav() {
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.contribute')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="help-circle" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="help-circle" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={async () => {
@@ -218,13 +216,12 @@ export function DNav() {
               }}
               style={{
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -236,7 +233,7 @@ export function DNav() {
                 fontFamily: "Cairo_400Regular",
               }}>{t('language.switch')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="globe" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="globe" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
               testID="settings-screen"
@@ -245,13 +242,12 @@ export function DNav() {
               }}
               style={{
                 height: 64,
-                marginLeft: 5,
-                marginRight: 5,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>
-              {I18nManager.isRTL ? (
+              {isRTL() ? (
                 <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
@@ -263,7 +259,7 @@ export function DNav() {
                 fontFamily: "Cairo_400Regular",
               }}>{t('navigation.settings')}</Text>
               <View style={{ flex: 1 }} />
-              <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, marginLeft: 20, marginRight: 20 }} />
+              <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
           </View>)
       }}

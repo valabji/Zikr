@@ -3,7 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
-import { t } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 // Try different import approach for web swiper
@@ -36,7 +36,7 @@ export default function Screen2({ route, navigation }) {
   const colors = useColors();
   const name = route?.params?.name || "Azkar";
   const player = useAudio();
-  const reverse = I18nManager.isRTL;
+  const reverse = isRTL();
 
   let swp = React.createRef();;
   let size = 0;
@@ -69,13 +69,13 @@ export default function Screen2({ route, navigation }) {
           }
         }}
         style={{ height: "100%" }}>
-        <Text style={{
+                <Text style={{
           color: colors.BYellow,
           fontSize: 14,
           marginTop: 6,
           fontFamily: "Cairo_400Regular",
-          textAlign: "left",
-          writingDirection: I18nManager.isRTL ? "rtl" : "ltr"
+          textAlign: getRTLTextAlign('left'),
+          writingDirection: isRTL() ? "rtl" : "ltr"
         }}>{z.zekr}</Text>
         <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderColor: colors.BYellow, borderStyle: "solid" }} />
         {z.reference != "" &&
