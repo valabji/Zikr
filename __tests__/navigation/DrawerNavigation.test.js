@@ -36,13 +36,7 @@ jest.mock('../../screens/MainScreen', () => 'MainScreen');
 jest.mock('../../screens/Screen3', () => 'Screen3');
 jest.mock('../../screens/Fav', () => 'Fav');
 jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
-
-// Mock screens
-jest.mock('../../screens/MainScreen', () => 'MainScreen');
-jest.mock('../../screens/Screen2', () => 'Screen2');
-jest.mock('../../screens/Screen3', () => 'Screen3');
-jest.mock('../../screens/Fav', () => 'Fav');
-jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
+jest.mock('../../screens/ContributeScreen', () => 'ContributeScreen');
 
 describe('DrawerNavigation', () => {
   const renderWithProvider = (component) => {

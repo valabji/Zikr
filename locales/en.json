@@ -19,6 +19,7 @@
     "allAzkar": "All Azkar",
     "shareApp": "Share App",
     "settings": "Settings",
+    "contribute": "Contribute",
     "logout": "Logout"
   },
   "search": {
@@ -26,6 +27,7 @@
   },
   "counter": {
     "resetConfirmation": "Do you want to reset the counter?",
+    "resetCounters": "Reset Counters",
     "yes": "Yes",
     "no": "No", 
     "page": "Page {current} of {total}"
@@ -47,5 +49,28 @@
     "clickVolume": "Click Sound Volume",
     "default": "Default",
     "save": "Save"
+  },
+  "contribute": {
+    "title": "Help Us Improve Zikr",
+    "description": "Your contribution helps make Zikr better for everyone. Whether you're a regular user or a developer, there are ways you can help:",
+    "forUsers": "For Users",
+    "usersDescription": "Help us verify references, check authenticity, improve translations, send your suggestions for new features or improvements, and report any bugs you encounter. Download our Excel sheet with all Azkar and send your contributions to our email.",
+    "downloadExcel": "Download Excel Sheet",
+    "contactUs": "Contact Us",
+    "referenceChecking": "Reference Checking",
+    "translation": "Translation",
+    "suggestions": "Suggestions", 
+    "bugReports": "Bug Reports",
+    "reportReference": "Report Reference Issue",
+    "helpTranslation": "Help with Translation",
+    "copied": "Copied!",
+    "emailCopied": "Email address copied to clipboard",
+    "forDevelopers": "For Developers",
+    "developersDescription": "Zikr is open source! Contribute code, fix bugs, add features, or improve the app. Check out our GitHub repository.",
+    "openGitHub": "View on GitHub",
+    "thankYou": "Thank you for helping us make Zikr better for everyone!",
+    "error": "Error",
+    "linkError": "Could not open the link. Please try again later.",
+    "emailError": "Could not open email client. Please try again later."
   }
 }
