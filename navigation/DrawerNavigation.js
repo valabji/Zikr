@@ -1,6 +1,6 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useEffect, useState } from "react";
-import { I18nManager, Share } from "react-native";
+import { I18nManager, Share, ScrollView } from "react-native";
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import Screen3 from '../screens/Screen3'
@@ -66,14 +66,18 @@ export function DNav() {
           <View
             testID="drawer-container"
             style={{ width: "100%", height: "100%", backgroundColor: colors.BGreen }}>
-            <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
-              <LogoSvg
-                color={colors.BYellow}
-                spacing={80}
-                width={128}
-                height={148}
-              />
-            </View>
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
+                <LogoSvg
+                  color={colors.BYellow}
+                  spacing={80}
+                  width={128}
+                  height={148}
+                />
+              </View>
             <TouchableOpacity
               testID="screen3"
               onPress={() => {
@@ -328,6 +332,7 @@ export function DNav() {
               <View style={{ flex: 1 }} />
               <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
+            </ScrollView>
           </View>)
       }}
     >

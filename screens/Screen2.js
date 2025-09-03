@@ -187,14 +187,6 @@ export default function Screen2({ route, navigation }) {
           color={colors.BYellow}
           style={{ marginRight: isRTL() ? 0 : 5, marginLeft: isRTL() ? 5 : 0 }}
         />
-        <Text style={[
-          textStyles.bodySmall,
-          {
-            color: colors.BYellow,
-          }
-        ]}>
-          {t('navigation.helpImprove')}
-        </Text>
       </TouchableOpacity>
     </View>
   );
