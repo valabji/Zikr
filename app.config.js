@@ -37,6 +37,7 @@ export default {
     web: {
       bundler: "metro",
       favicon: "./assets/images/icon.png",
+      output: "single",
       config: {},
       meta: {
         viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
