@@ -16,7 +16,7 @@ let currentLanguage = 'ar'; // Default language
 
 // Web RTL support
 const setWebRTL = (isRTL) => {
-  if (Platform.OS === 'web') {
+  if (Platform?.OS === 'web') {
     applyRTLToDocument(isRTL);
     applyWebRTLStyles(isRTL);
   }
@@ -46,7 +46,7 @@ export const setLanguage = async (lang, restart = true) => {
     const isRTL = lang === 'ar';
 
     // Handle RTL for mobile (React Native)
-    if (Platform.OS !== 'web') {
+    if (Platform?.OS !== 'web') {
       if (isRTL && !I18nManager.isRTL) {
         I18nManager.allowRTL(true);
         I18nManager.forceRTL(true);
@@ -89,7 +89,7 @@ export const t = (key, params = {}) => {
 
 // Get current language direction
 export const isRTL = () => {
-  if (Platform.OS === 'web') {
+  if (Platform?.OS === 'web') {
     return currentLanguage === 'ar';
   }
   return I18nManager.isRTL;
@@ -146,7 +146,7 @@ export const formatArabicDate = (date) => {
 // Note: Only needed for web - mobile platforms handle RTL automatically via I18nManager
 export const getDirectionalSpacing = (leftValue, rightValue) => {
   // On mobile, let I18nManager handle RTL automatically
-  if (Platform.OS !== 'web') {
+  if (Platform?.OS !== 'web') {
     return { marginLeft: leftValue, marginRight: rightValue };
   }
   
@@ -158,7 +158,7 @@ export const getDirectionalSpacing = (leftValue, rightValue) => {
 
 export const getDirectionalPadding = (leftValue, rightValue) => {
   // On mobile, let I18nManager handle RTL automatically
-  if (Platform.OS !== 'web') {
+  if (Platform?.OS !== 'web') {
     return { paddingLeft: leftValue, paddingRight: rightValue };
   }
   
@@ -175,7 +175,7 @@ export const getDirectionalMixedSpacing = ({
   paddingRight 
 }) => {
   // On mobile, let I18nManager handle RTL automatically
-  if (Platform.OS !== 'web') {
+  if (Platform?.OS !== 'web') {
     const spacing = {};
     if (marginLeft !== undefined) spacing.marginLeft = marginLeft;
     if (marginRight !== undefined) spacing.marginRight = marginRight;
@@ -232,7 +232,7 @@ export const initializeLanguage = async () => {
       } else {
         moment.locale('en');
       }
-      await setLanguage(currentLanguage, Platform.OS !== 'web');
+      await setLanguage(currentLanguage, Platform?.OS !== 'web');
     }
   } catch (error) {
     console.warn('Error loading language:', error);
@@ -256,7 +256,7 @@ export const initializeLanguage = async () => {
 // Get RTL-aware text alignment
 export const getRTLTextAlign = (defaultAlign = 'left') => {
   // On mobile, let I18nManager handle RTL automatically
-  if (Platform.OS !== 'web') {
+  if (Platform?.OS !== 'web') {
     return defaultAlign;
   }
   

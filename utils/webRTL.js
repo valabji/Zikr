@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
  * Web-specific utilities for RTL support
  */
 
-export const isWeb = Platform.OS === 'web';
+export const isWeb = Platform?.OS === 'web';
 
 /**
  * Apply RTL direction to document

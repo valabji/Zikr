@@ -1,14 +1,39 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { DNav as DrawerNavigation } from '../../navigation/DrawerNavigation';
 import { Provider } from 'react-redux';
 import { mystore } from '../../redux/store';
+
+// Mock react-native-svg
+jest.mock('react-native-svg', () => {
+  const React = require('react');
+  return {
+    Svg: ({ children, ...props }) => React.createElement('Svg', props, children),
+    Circle: 'Circle',
+    Path: ({ children, ...props }) => React.createElement('Path', props, children),
+    Polygon: 'Polygon',
+    G: ({ children, ...props }) => React.createElement('G', props, children),
+  };
+});
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),
 }));
+
+// Mock expo-location
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getCurrentPositionAsync: jest.fn(() => Promise.resolve({
+    coords: {
+      latitude: 37.7749,
+      longitude: -122.4194,
+    },
+  })),
+}));
+
+// IMPORT AFTER MOCKS
+import { DNav as DrawerNavigation } from '../../navigation/DrawerNavigation';
 
 // Mock navigation container and drawer
 jest.mock('@react-navigation/native', () => ({
@@ -29,6 +54,7 @@ jest.mock('@react-navigation/drawer', () => ({
 jest.mock('../../locales/i18n', () => ({
   t: (key) => key,
   setLanguage: jest.fn(() => Promise.resolve()),
+  isRTL: jest.fn(() => false),
 }));
 
 // Mock screens

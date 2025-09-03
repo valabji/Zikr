@@ -10,7 +10,7 @@ import Azkar from '../constants/Azkar.js';
 import Swiper from 'react-native-swiper'
 // Try different import approach for web swiper
 let WebSwiper;
-if (Platform.OS === 'web') {
+if (Platform?.OS === 'web') {
   try {
     WebSwiper = require('react-native-web-swiper').default;
   } catch (error) {
@@ -47,7 +47,7 @@ export default function Screen2({ route, navigation }) {
   let size = 0;
 
   // Choose the appropriate swiper based on platform
-  const SwiperComponent = Platform.OS === 'web' ? (WebSwiper || Swiper) : Swiper;
+  const SwiperComponent = Platform?.OS === 'web' ? (WebSwiper || Swiper) : Swiper;
 
   // Load font size when screen comes into focus
   useFocusEffect(

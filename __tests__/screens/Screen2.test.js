@@ -11,6 +11,9 @@ const mockNavigation = {
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => mockNavigation,
+  useFocusEffect: jest.fn((callback) => {
+    callback();
+  }),
 }));
 
 // Mock Sound utils
