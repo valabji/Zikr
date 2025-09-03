@@ -68,18 +68,11 @@ export default function PrayerTimesScreen({ navigation }) {
 
   // Calculate and update prayer times
   const updatePrayerTimes = useCallback((locationData = location, calculationMethod2, madhab2) => {
-    console.log('Updating prayer times...');
-    console.log('Location Data:', locationData);
-    console.log('Calculation Method:', calculationMethod2);
-    console.log('Madhab:', madhab2);
     if (!locationData) return;
     if (!calculationMethod2 || !madhab2) {
       calculationMethod2 = calculationMethod || PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD
       madhab2 = madhab || PRAYER_CONSTANTS.DEFAULT_MADHAB
     }
-    console.log('Final Calculation Method:', calculationMethod2);
-    console.log('Final Madhab:', madhab2);
-
     const times = calculatePrayerTimes(
       locationData.latitude,
       locationData.longitude,

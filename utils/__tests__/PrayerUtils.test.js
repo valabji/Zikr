@@ -5,8 +5,6 @@ import { PRAYER_CONSTANTS } from '../../constants/PrayerConstants';
 describe('PrayerUtils', () => {
   // Test Qibla calculation
   it('should calculate Qibla direction correctly', () => {
-    console.log('Testing Qibla calculation...');
-    
     // Test from New York (should be around 58 degrees)
     const nyQibla = calculateQiblaDirection(40.7128, -74.0060);
     console.log(`Qibla from New York: ${nyQibla}°`);

@@ -28,7 +28,6 @@ export async function loadResourcesAndDataAsync() {
             notes: 'working from env',
             platform: Platform?.OS,
         });
-        console.log("Firebase initialized successfully");
     } catch (e) {
         console.warn(e);
     } finally {

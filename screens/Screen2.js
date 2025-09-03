@@ -159,17 +159,6 @@ export default function Screen2({ route, navigation }) {
   const azkarList = Azkar.filter(i => i.category == name);
   size = azkarList.length;
 
-  // Debug logging for web platform
-  React.useEffect(() => {
-    if (Platform.OS === 'web') {
-      console.log('Running on web platform');
-      console.log('WebSwiper loaded:', !!WebSwiper);
-      console.log('WebSwiper === Swiper:', WebSwiper === Swiper);
-      console.log('Using component:', SwiperComponent.name || 'Unknown');
-      console.log('Azkar list length:', size);
-    }
-  }, []);
-
   // Contribution button component for header
   const ContributionButton = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}>

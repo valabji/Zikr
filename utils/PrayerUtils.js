@@ -293,8 +293,6 @@ export const searchLocations = async (query) => {
     return validLocations;
 
   } catch (error) {
-    console.log('Nominatim search failed, using default locations:', error);
-    
     // Fallback to default locations if API fails
     const filtered = PRAYER_CONSTANTS.DEFAULT_LOCATIONS.filter(location =>
       location.name.toLowerCase().includes(query.toLowerCase()) ||

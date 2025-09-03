@@ -50,8 +50,8 @@ export const PRAYER_CONSTANTS = {
 
   // Qibla direction - Kaaba coordinates
   KAABA_COORDINATES: {
-    latitude: 21.4225,
-    longitude: 39.8262
+    latitude: 21.4224779,
+    longitude: 39.8251832
   },
 
   // Default locations for fallback
