@@ -6,6 +6,8 @@ import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ContributeScreen from '../screens/ContributeScreen';
+import PrayerTimesScreen from '../screens/PrayerTimesScreen';
+import QiblaScreen from '../screens/QiblaScreen';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
@@ -156,6 +158,60 @@ export function DNav() {
               <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
             <TouchableOpacity
+              testID="prayer-times-screen"
+              onPress={() => {
+                navigation.navigate("PrayerTimes")
+              }}
+              style={{
+                height: 64,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                marginTop: 5,
+                backgroundColor: colors.DGreen,
+                flexDirection: "row",
+              }}>
+              {isRTL() ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
+              <Text style={{
+                color: colors.BYellow,
+                fontSize: 22,
+                marginTop: 7,
+                fontFamily: "Cairo_400Regular",
+                textAlign: getRTLTextAlign('left'),
+              }}>{t('navigation.prayerTimes')}</Text>
+              <View style={{ flex: 1 }} />
+              <Feather name="clock" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              testID="qibla-screen"
+              onPress={() => {
+                navigation.navigate("Qibla")
+              }}
+              style={{
+                height: 64,
+                ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                marginTop: 5,
+                backgroundColor: colors.DGreen,
+                flexDirection: "row",
+              }}>
+              {isRTL() ? (
+                <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              ) : (
+                <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+              )}
+              <Text style={{
+                color: colors.BYellow,
+                fontSize: 22,
+                marginTop: 7,
+                fontFamily: "Cairo_400Regular",
+                textAlign: getRTLTextAlign('left'),
+              }}>{t('navigation.qibla')}</Text>
+              <View style={{ flex: 1 }} />
+              <Feather name="compass" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => {
                 Share.share({
                   message: t('share.message'),
@@ -267,6 +323,8 @@ export function DNav() {
     >
       <Drawer.Screen name="Screen3" component={Screen3} />
       <Drawer.Screen name="Home" component={MainScreen} />
+      <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
+      <Drawer.Screen name="Qibla" component={QiblaScreen} />
       <Drawer.Screen name="Contribute" component={ContributeScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator >

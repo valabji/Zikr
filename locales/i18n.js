@@ -4,6 +4,8 @@ import { Restart } from '../utils/restart';
 import { applyRTLToDocument, applyWebRTLStyles } from '../utils/webRTL';
 import ar from './ar.json';
 import en from './en.json';
+import moment from 'moment-timezone';
+import 'moment/locale/ar';
 
 const translations = {
   ar,
@@ -24,6 +26,22 @@ export const setLanguage = async (lang, restart = true) => {
   if (translations[lang]) {
     currentLanguage = lang;
     await AsyncStorage.setItem('@language', lang);
+
+    // Set moment locale but configure to use English numerals
+    if (lang === 'ar') {
+      moment.locale('ar');
+      // Override the Arabic locale to use English numerals
+      moment.updateLocale('ar', {
+        preparse: function (string) {
+          return string;
+        },
+        postformat: function (string) {
+          return string;
+        }
+      });
+    } else {
+      moment.locale('en');
+    }
 
     const isRTL = lang === 'ar';
 
@@ -79,6 +97,50 @@ export const isRTL = () => {
 
 // Get current language
 export const getCurrentLanguage = () => currentLanguage;
+
+// Arabic time formatting helpers
+export const formatArabicTime = (time, use24Hour = false) => {
+  if (!time) return '';
+  
+  if (currentLanguage === 'ar') {
+    // Force English locale for numbers but keep Arabic AM/PM
+    const timeStr = time.locale('en').format(use24Hour ? 'HH:mm' : 'h:mm A');
+    
+    // Convert AM/PM to Arabic but keep English numerals
+    const arabicTimeStr = timeStr
+      .replace(/AM/g, 'ص')
+      .replace(/PM/g, 'م');
+    
+    return arabicTimeStr;
+  }
+  
+  return time.format(use24Hour ? 'HH:mm' : 'h:mm A');
+};
+
+export const formatArabicCountdown = (timeString) => {
+  if (!timeString || currentLanguage !== 'ar') return timeString;
+  
+  // Convert time units to Arabic but keep English numerals
+  return timeString
+    .replace(/h/g, 'س')
+    .replace(/m/g, 'د')
+    .replace(/s/g, 'ث');
+};
+
+export const formatArabicDate = (date) => {
+  if (currentLanguage === 'ar') {
+    // Get Arabic day and month names but with English numerals
+    const dayName = date.locale('ar').format('dddd');
+    const monthName = date.locale('ar').format('MMMM');
+    const dayNumber = date.locale('en').format('D');
+    const year = date.locale('en').format('YYYY');
+    
+    // Construct date with Arabic text but English numerals
+    return `${dayName}، ${dayNumber} ${monthName} ${year}`;
+  }
+  
+  return date.format('dddd, MMMM Do YYYY');
+};
 
 // Utility functions for RTL-aware spacing (for use outside of React components)
 // Note: Only needed for web - mobile platforms handle RTL automatically via I18nManager
@@ -156,10 +218,38 @@ export const initializeLanguage = async () => {
     if (savedLanguage) {
       await setLanguage(savedLanguage, false);
     } else {
+      // Set default moment locale with English numerals
+      if (currentLanguage === 'ar') {
+        moment.locale('ar');
+        moment.updateLocale('ar', {
+          preparse: function (string) {
+            return string;
+          },
+          postformat: function (string) {
+            return string;
+          }
+        });
+      } else {
+        moment.locale('en');
+      }
       await setLanguage(currentLanguage, Platform.OS !== 'web');
     }
   } catch (error) {
     console.warn('Error loading language:', error);
+    // Fallback: set moment locale with English numerals
+    if (currentLanguage === 'ar') {
+      moment.locale('ar');
+      moment.updateLocale('ar', {
+        preparse: function (string) {
+          return string;
+        },
+        postformat: function (string) {
+          return string;
+        }
+      });
+    } else {
+      moment.locale('en');
+    }
   }
 };
 
@@ -167,7 +257,7 @@ export const initializeLanguage = async () => {
 export const getRTLTextAlign = (defaultAlign = 'left') => {
   // On mobile, let I18nManager handle RTL automatically
   if (Platform.OS !== 'web') {
-    return 'auto';
+    return defaultAlign;
   }
   
   // On web, manually handle RTL

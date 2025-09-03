@@ -53,6 +53,19 @@ export const useColors = () => {
       text: currentTheme.text,
       textSecondary: currentTheme.textSecondary,
       
+      // Prayer time colors (theme-based)
+      currentPrayer: currentTheme.currentPrayer,
+      nextPrayer: currentTheme.nextPrayer,
+      pastPrayer: currentTheme.pastPrayer,
+      
+      // Notice and warning colors (theme-based)
+      noticeBackground: currentTheme.noticeBackground,
+      noticeText: currentTheme.noticeText,
+      noticeAccent: currentTheme.noticeAccent,
+      warningBackground: currentTheme.warningBackground,
+      warningText: currentTheme.warningText,
+      warningAccent: currentTheme.warningAccent,
+      
       // Common Colors (theme-independent)
       white: '#FFFFFF',
       black: '#000000',

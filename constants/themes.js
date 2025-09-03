@@ -12,6 +12,17 @@ export const themes = {
     surface: '#002B25',
     text: '#FFE29D',
     textSecondary: '#D1955E',
+    // Prayer time colors
+    currentPrayer: '#4CAF50',
+    nextPrayer: '#FF9800',
+    pastPrayer: '#7E7E7E',
+    // Notice and warning colors
+    noticeBackground: '#1B4D3E',
+    noticeText: '#FFE29D',
+    noticeAccent: '#4CAF50',
+    warningBackground: '#3D2914',
+    warningText: '#FFE29D',
+    warningAccent: '#FF9800',
   },
   goldOnWhite: {
     name: 'Gold on White',
@@ -25,6 +36,17 @@ export const themes = {
     surface: '#F5F5F5',
     text: '#D1955E',
     textSecondary: '#B8804A',
+    // Prayer time colors
+    currentPrayer: '#4CAF50',
+    nextPrayer: '#FF9800',
+    pastPrayer: '#9E9E9E',
+    // Notice and warning colors
+    noticeBackground: '#E3F2FD',
+    noticeText: '#1976D2',
+    noticeAccent: '#2196F3',
+    warningBackground: '#FFF3E0',
+    warningText: '#E65100',
+    warningAccent: '#FF9800',
   },
   goldOnDark: {
     name: 'Gold on Dark',
@@ -38,6 +60,17 @@ export const themes = {
     surface: '#2A2A2A',
     text: '#FFE29D',
     textSecondary: '#D1955E',
+    // Prayer time colors
+    currentPrayer: '#66BB6A',
+    nextPrayer: '#FFB74D',
+    pastPrayer: '#757575',
+    // Notice and warning colors
+    noticeBackground: '#1A2E3A',
+    noticeText: '#FFE29D',
+    noticeAccent: '#42A5F5',
+    warningBackground: '#3A2A1A',
+    warningText: '#FFE29D',
+    warningAccent: '#FFB74D',
   },
   paige: {
     name: 'Paige',
@@ -51,6 +84,17 @@ export const themes = {
     surface: '#E6E6D1',
     text: '#8B4513',
     textSecondary: '#654321',
+    // Prayer time colors
+    currentPrayer: '#4CAF50',
+    nextPrayer: '#FF8C00',
+    pastPrayer: '#8D6E63',
+    // Notice and warning colors
+    noticeBackground: '#E8F5E8',
+    noticeText: '#2E7D32',
+    noticeAccent: '#4CAF50',
+    warningBackground: '#FFF8E1',
+    warningText: '#E65100',
+    warningAccent: '#FF8C00',
   },
   chocolate: {
     name: 'Chocolate',
@@ -64,6 +108,17 @@ export const themes = {
     surface: '#A1887F',
     text: '#FFF8E1',
     textSecondary: '#F5E6A3',
+    // Prayer time colors
+    currentPrayer: '#66BB6A',
+    nextPrayer: '#FFB74D',
+    pastPrayer: '#795548',
+    // Notice and warning colors
+    noticeBackground: '#6D4C41',
+    noticeText: '#FFF8E1',
+    noticeAccent: '#81C784',
+    warningBackground: '#5D4037',
+    warningText: '#FFF8E1',
+    warningAccent: '#FFB74D',
   },
   lavender: {
     name: 'Lavender',
@@ -77,5 +132,16 @@ export const themes = {
     surface: '#C5B4E3',
     text: '#FFF9E6',
     textSecondary: '#F0E6D2',
+    // Prayer time colors
+    currentPrayer: '#66BB6A',
+    nextPrayer: '#FFB74D',
+    pastPrayer: '#9E9E9E',
+    // Notice and warning colors
+    noticeBackground: '#7E57C2',
+    noticeText: '#FFF9E6',
+    noticeAccent: '#81C784',
+    warningBackground: '#6A1B9A',
+    warningText: '#FFF9E6',
+    warningAccent: '#FFB74D',
   }
 };
