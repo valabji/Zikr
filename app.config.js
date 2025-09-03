@@ -37,11 +37,7 @@ export default {
     web: {
       bundler: "metro",
       favicon: "./assets/images/icon.png",
-      config: {
-        firebase: {
-          measurementId: process.env.MEASUREMENT_ID
-        }
-      },
+      config: {},
       meta: {
         viewport: "width=device-width, initial-scale=1, shrink-to-fit=no",
         themeColor: "#000000"
@@ -55,7 +51,6 @@ export default {
     },
     plugins: [
       "expo-audio",
-      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {

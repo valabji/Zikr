@@ -5,9 +5,13 @@ import { initializeLanguage, } from '../locales/i18n';
 
 import Azkar from '../constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import analytics from '@react-native-firebase/analytics';
+import { initializeApp } from "firebase/app";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 import { mystore } from '../redux/store';
+import {nativeApplicationVersion} from 'expo-application'
+import { Platform } from 'react-native';
+
 
 export async function loadResourcesAndDataAsync() {
     try {
@@ -16,6 +20,15 @@ export async function loadResourcesAndDataAsync() {
             ...Ionicons.font,
             'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
         });
+        const firebaseConfig = JSON.parse(process.env.EXPO_PUBLIC_FIREBASE_CONFIG);
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        logEvent(analytics, 'App_Loaded_Successfully', {
+            version: nativeApplicationVersion,
+            notes: 'working from env',
+            platform: Platform?.OS,
+        });
+        console.log("Firebase initialized successfully");
     } catch (e) {
         console.warn(e);
     } finally {
@@ -29,15 +42,6 @@ export async function loadResourcesAndDataAsync() {
             }
         });
         await SplashScreen.hideAsync();
-        try{
-        analytics().logAppOpen();
-        analytics().logEvent('App_Loaded_Successfully', {
-            version: Constants.manifest.version,
-            platform: Platform.OS,
-        });
-        } catch (error) {
-            console.error("Error logging app open event:", error);
-        }
         return true;
     }
 }
