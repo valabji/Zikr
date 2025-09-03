@@ -76,21 +76,24 @@ export default function Screen2({ route, navigation }) {
               if (Platform.OS === 'web') {
                 // react-native-web-swiper uses different method
                 if (reverse) {
-                let next = size-pn-1
-                swp?.goTo?.(next);
-                }else{
-                swp?.goTo?.(pn);
+                  let next = size - pn - 1
+                  swp?.goTo?.(next);
+                } else {
+                  swp?.goTo?.(pn);
                 }
               } else {
                 // react-native-swiper
-              const scrollBy = reverse ? -1 : 1;
+                let scrollBy = reverse ? -1 : 1;
+                if (pn === 1 && reverse) {
+                  scrollBy = -2;
+                }
                 swp?.scrollBy?.(scrollBy, true);
               }
             }
           }
         }}
         style={{ height: "100%" }}>
-                <Text style={[
+        <Text style={[
           textStyles.bodySmall,
           {
             color: colors.BYellow,
@@ -184,12 +187,12 @@ export default function Screen2({ route, navigation }) {
     <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
       <BackgroundSvg1 color={colors.BYellow} />
       <CustomHeader title={name} isHome={false} navigation={navigation} Left={ContributionButton} />
-      <View style={{ 
-        flex: 1, 
-        alignItems: 'center', 
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
         justifyContent: 'center',
-        ...(Platform.OS === 'web' && { 
-          width: '100%', 
+        ...(Platform.OS === 'web' && {
+          width: '100%',
           height: '100%',
           maxWidth: '100vw',
           maxHeight: '100vh'
@@ -202,17 +205,17 @@ export default function Screen2({ route, navigation }) {
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
           }} /> */}
-        <SwiperComponent 
+        <SwiperComponent
           ref={(ref) => { swp = ref; }}
-          style={Platform.OS === 'web' ? { 
-            flex: 1, 
-            width: '100%', 
+          style={Platform.OS === 'web' ? {
+            flex: 1,
+            width: '100%',
             height: '100%',
             minWidth: 300,
             minHeight: 400
-          } : {}} 
-          loop={false} 
-          showsButtons={false} 
+          } : {}}
+          loop={false}
+          showsButtons={false}
           showsPagination={false}
           // Only apply web-specific props if we're using WebSwiper successfully
           {...(Platform.OS === 'web' && WebSwiper && WebSwiper !== Swiper && {
@@ -244,7 +247,7 @@ export default function Screen2({ route, navigation }) {
             );
 
             return (
-              <View key={index} style={{ 
+              <View key={index} style={{
                 flex: 1,
                 ...(Platform.OS === 'web' && {
                   width: '100%',
