@@ -22,7 +22,7 @@ export const calculateQiblaDirection = (latitude, longitude) => {
   let bearing = Math.atan2(y, x) * (180 / Math.PI);
   bearing = (bearing + 360) % 360;
 
-  return Math.round(bearing);
+  return Math.round(bearing * 10) / 10; // Round to 1 decimal place
 };
 
 /**

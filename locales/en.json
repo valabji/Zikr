@@ -117,15 +117,18 @@
     "unknownLocation": "Unknown Location",
     "compassEnabled": "Compass enabled",
     "compassDisabled": "Compass not available",
+    "compassNotAvailableNotice": "Device compass unavailable. Use external compass or map to find the bearing direction shown above.",
     "instructions": "How to use",
-    "instructionsWithCompass": "Hold your device flat and point the orange arrow towards the Qibla direction. The compass will automatically adjust based on your device orientation.",
-    "instructionsWithoutCompass": "Point the orange arrow in the direction shown by the degree value. Use a physical compass if needed to find the correct direction.",
+    "instructionsWithCompass": "Hold device flat. Turn until the orange arrow aligns with North (N) on the compass. The arrow points to Qibla.",
+    "instructionsWithoutCompass": "Face the bearing direction shown above (e.g., NE, SW). Use a physical compass or map to find this direction. The orange arrow shows Qibla relative to North.",
     "changeLocation": "Change Location",
     "compassAccuracy": "Compass Accuracy Notice",
     "compassAccuracyText": "Mobile phone compass accuracy can vary and may not always be reliable. If you're unsure about your phone's compass accuracy, use a physical compass with the degree value shown ({degrees}°) for the most precise Qibla direction.",
     "direction": "Direction",
     "bearing": "Bearing",
-    "arrowIndicator": "Orange arrow points to Qibla"
+    "currentHeading": "Current",
+    "arrowIndicator": "Orange arrow points to Qibla",
+    "aligned": "Qibla direction aligned!"
   },
   "locationSettings": {
     "title": "Location Settings",
