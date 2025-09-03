@@ -9,6 +9,7 @@ import {
   ScrollView
 } from 'react-native';
 import { useColors } from '../constants/Colors';
+import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
@@ -212,13 +213,14 @@ export default function QiblaScreen({ navigation }) {
           alignItems: 'center'
         }}>
           <Feather name="compass" size={48} color={colors.BYellow} />
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-            fontFamily: "Cairo_400Regular",
-            marginTop: 15,
-            textAlign: 'center'
-          }}>
+          <Text style={[
+            PRAYER_CONSTANTS.FONT_STYLES.BODY,
+            {
+              color: colors.BYellow,
+              marginTop: 15,
+              textAlign: 'center'
+            }
+          ]}>
             {t('qibla.loading')}
           </Text>
         </View>
@@ -524,13 +526,15 @@ export default function QiblaScreen({ navigation }) {
             marginBottom: 10
           }}>
             <Feather name="map-pin" size={20} color={colors.BYellow} />
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-              fontFamily: "Cairo_600SemiBold",
-              textAlign: 'center',
-              ...getDirectionalMixedSpacing({ marginLeft: 6 })
-            }}>
+            <Text style={[
+              PRAYER_CONSTANTS.FONT_STYLES.SUBTITLE,
+              {
+                color: colors.BYellow,
+                textAlign: 'center',
+                fontWeight: '600',
+                ...getDirectionalMixedSpacing({ marginLeft: 6 })
+              }
+            ]}>
               {location ? `${location.city}, ${location.country}` : t('qibla.unknownLocation')}
             </Text>
           </View>
@@ -552,12 +556,14 @@ export default function QiblaScreen({ navigation }) {
               size={16} 
               color={compassEnabled ? "#22c55e" : "#ef4444"} 
             />
-            <Text style={{
-              color: compassEnabled ? "#22c55e" : "#ef4444",
-              fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
-              fontFamily: "Cairo_500Medium",
-              ...getDirectionalMixedSpacing({ marginLeft: 6 })
-            }}>
+            <Text style={[
+              PRAYER_CONSTANTS.FONT_STYLES.CAPTION,
+              {
+                color: compassEnabled ? "#22c55e" : "#ef4444",
+                fontWeight: '500',
+                ...getDirectionalMixedSpacing({ marginLeft: 6 })
+              }
+            ]}>
               {compassEnabled ? t('qibla.compassEnabled') : t('qibla.compassDisabled')}
             </Text>
           </View>
@@ -570,60 +576,69 @@ export default function QiblaScreen({ navigation }) {
             paddingHorizontal: 20
           }}>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
-                fontFamily: "Cairo_400Regular",
-                opacity: 0.7
-              }}>
+              <Text style={[
+                PRAYER_CONSTANTS.FONT_STYLES.CAPTION,
+                {
+                  color: colors.BYellow,
+                  opacity: 0.7
+                }
+              ]}>
                 {t('qibla.direction')}
               </Text>
-              <Text style={{
-                color: isQiblaAligned ? '#22c55e' : '#FF6B35',
-                fontSize: PRAYER_CONSTANTS.FONT_SIZES.QIBLA_DEGREE,
-                fontFamily: "Cairo_700Bold",
-                textAlign: 'center'
-              }}>
+              <Text style={[
+                PRAYER_CONSTANTS.FONT_STYLES.QIBLA_DEGREE,
+                {
+                  color: isQiblaAligned ? '#22c55e' : '#FF6B35',
+                  fontWeight: '700',
+                  textAlign: 'center'
+                }
+              ]}>
                 {Math.round(qiblaDirection * 10) / 10}°
               </Text>
             </View>
 
             {compassEnabled && (
               <View style={{ alignItems: 'center' }}>
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
-                  fontFamily: "Cairo_400Regular",
-                  opacity: 0.7
-                }}>
+                <Text style={[
+                  PRAYER_CONSTANTS.FONT_STYLES.CAPTION,
+                  {
+                    color: colors.BYellow,
+                    opacity: 0.7
+                  }
+                ]}>
                   {t('qibla.currentHeading')}
                 </Text>
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                  fontFamily: "Cairo_600SemiBold",
-                  textAlign: 'center'
-                }}>
+                <Text style={[
+                  PRAYER_CONSTANTS.FONT_STYLES.BODY,
+                  {
+                    color: colors.BYellow,
+                    fontWeight: '600',
+                    textAlign: 'center'
+                  }
+                ]}>
                   {Math.round(currentHeading * 10) / 10}°
                 </Text>
               </View>
             )}
             
             <View style={{ alignItems: 'center' }}>
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
-                fontFamily: "Cairo_400Regular",
-                opacity: 0.7
-              }}>
+              <Text style={[
+                PRAYER_CONSTANTS.FONT_STYLES.CAPTION,
+                {
+                  color: colors.BYellow,
+                  opacity: 0.7
+                }
+              ]}>
                 {t('qibla.bearing')}
               </Text>
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                fontFamily: "Cairo_600SemiBold",
-                textAlign: 'center'
-              }}>
+              <Text style={[
+                PRAYER_CONSTANTS.FONT_STYLES.BODY,
+                {
+                  color: colors.BYellow,
+                  fontWeight: '600',
+                  textAlign: 'center'
+                }
+              ]}>
                 {qiblaDirection >= 0 && qiblaDirection < 22.5 ? 'N' :
                  qiblaDirection >= 22.5 && qiblaDirection < 67.5 ? 'NE' :
                  qiblaDirection >= 67.5 && qiblaDirection < 112.5 ? 'E' :
@@ -656,12 +671,14 @@ export default function QiblaScreen({ navigation }) {
             marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
           }}>
             <Feather name="info" size={20} color={colors.BYellow} />
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-              fontFamily: "Cairo_600SemiBold",
-              ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
-            }}>
+            <Text style={[
+              PRAYER_CONSTANTS.FONT_STYLES.BODY,
+              {
+                color: colors.BYellow,
+                fontWeight: '600',
+                ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
+              }
+            ]}>
               {t('qibla.instructions')}
             </Text>
           </View>
@@ -698,7 +715,7 @@ export default function QiblaScreen({ navigation }) {
             <Text style={{
               color: isQiblaAligned ? '#22c55e' : '#FF6B35',
               fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
-              fontFamily: "Cairo_500Medium",
+              fontFamily: "Cairo_400Regular",
               opacity: 0.9
             }}>
               {isQiblaAligned ? t('qibla.aligned') : t('qibla.arrowIndicator')}
@@ -733,7 +750,7 @@ export default function QiblaScreen({ navigation }) {
               <Text style={{
                 color: '#FFC107',
                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
-                fontFamily: "Cairo_600SemiBold",
+                fontFamily: "Cairo_400Regular",
                 ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
               }}>
                 {t('qibla.compassDisabled')}
@@ -779,7 +796,7 @@ export default function QiblaScreen({ navigation }) {
               <Text style={{
                 color: '#FF6B35',
                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
-                fontFamily: "Cairo_600SemiBold",
+                fontFamily: "Cairo_400Regular",
                 ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
               }}>
                 {t('qibla.compassAccuracy')}
@@ -823,8 +840,8 @@ export default function QiblaScreen({ navigation }) {
           <Feather name="map-pin" size={20} color={colors.BYellow} />
           <Text style={{
             color: colors.BYellow,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-            fontFamily: "Cairo_600SemiBold",
+            ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+            fontFamily: "Cairo_400Regular",
             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
           }}>
             {t('qibla.changeLocation')}

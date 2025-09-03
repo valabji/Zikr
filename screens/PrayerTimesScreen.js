@@ -9,6 +9,7 @@ import {
   Platform
 } from 'react-native';
 import { useColors } from '../constants/Colors';
+import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign, formatArabicTime, formatArabicCountdown, formatArabicDate } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
@@ -229,8 +230,7 @@ export default function PrayerTimesScreen({ navigation }) {
       >
         <Text style={{
           color: textColor,
-          fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-          fontFamily: "Cairo_600SemiBold"
+          ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
         }}>
           {t(`prayerTimes.${prayerName}`)}
         </Text>
@@ -239,7 +239,7 @@ export default function PrayerTimesScreen({ navigation }) {
           <Text style={{
             color: textColor,
             fontSize: PRAYER_CONSTANTS.FONT_SIZES.PRAYER_TIME,
-            fontFamily: "Cairo_500Medium"
+            fontFamily: "Cairo_400Regular",
           }}>
             {formatArabicTime(time)}
           </Text>
@@ -272,7 +272,7 @@ export default function PrayerTimesScreen({ navigation }) {
           <Feather name="clock" size={48} color={colors.BYellow} />
           <Text style={{
             color: colors.BYellow,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+            ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
             fontFamily: "Cairo_400Regular",
             marginTop: 15,
             textAlign: 'center'
@@ -315,7 +315,7 @@ export default function PrayerTimesScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               textAlign: getRTLTextAlign('left'),
               marginBottom: 5
             }}>
@@ -364,7 +364,7 @@ export default function PrayerTimesScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: PRAYER_CONSTANTS.FONT_SIZES.TITLE,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               marginBottom: 5
             }}>
               {t(`prayerTimes.${nextPrayer.name}`)}
@@ -372,8 +372,8 @@ export default function PrayerTimesScreen({ navigation }) {
             {timeUntilNext && (
               <Text style={{
                 color: colors.BYellow,
-                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                fontFamily: "Cairo_500Medium"
+                ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+              fontFamily: "Cairo_400Regular"
               }}>
                 {t('prayerTimes.in')} {formatArabicCountdown(timeUntilNext)}
               </Text>
@@ -398,8 +398,8 @@ export default function PrayerTimesScreen({ navigation }) {
             <Feather name="alert-circle" size={20} color={colors.noticeAccent} />
             <Text style={{
               color: colors.noticeAccent,
-              fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-              fontFamily: "Cairo_600SemiBold",
+              ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+              fontFamily: "Cairo_400Regular",
               ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
             }}>
               {t('common.prayerTimesDisclaimer')}
@@ -427,7 +427,7 @@ export default function PrayerTimesScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               textAlign: 'center',
               marginBottom: PRAYER_CONSTANTS.SPACING.BUTTON_PADDING
             }}>
@@ -474,8 +474,8 @@ export default function PrayerTimesScreen({ navigation }) {
           <Feather name="settings" size={20} color={colors.BYellow} />
           <Text style={{
             color: colors.BYellow,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-            fontFamily: "Cairo_500Medium",
+            ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+            fontFamily: "Cairo_400Regular",
             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
           }}>
             {t('prayerTimes.settings')}

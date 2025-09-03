@@ -1,4 +1,6 @@
 // Constants for Prayer Times and Qibla features
+import { FONT_FAMILY } from './Fonts';
+
 export const PRAYER_CONSTANTS = {
   // API URLs
   IPINFO_URL: 'https://ipinfo.io/json',
@@ -94,6 +96,17 @@ export const PRAYER_CONSTANTS = {
     CAPTION: 12,
     PRAYER_TIME: 18,
     QIBLA_DEGREE: 28
+  },
+
+  // Font styles that include both size and family
+  FONT_STYLES: {
+    TITLE: { fontSize: 24, fontFamily: FONT_FAMILY },
+    SUBTITLE: { fontSize: 20, fontFamily: FONT_FAMILY },
+    BODY: { fontSize: 16, fontFamily: FONT_FAMILY },
+    SMALL_BODY: { fontSize: 14, fontFamily: FONT_FAMILY },
+    CAPTION: { fontSize: 12, fontFamily: FONT_FAMILY },
+    PRAYER_TIME: { fontSize: 18, fontFamily: FONT_FAMILY },
+    QIBLA_DEGREE: { fontSize: 28, fontFamily: FONT_FAMILY }
   },
 
   // Animation constants

@@ -10,6 +10,7 @@ import {
   Clipboard
 } from 'react-native';
 import { useColors } from '../constants/Colors';
+import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
@@ -71,13 +72,15 @@ export default function ContributeScreen({ navigation }) {
           padding: CONTRIBUTE_CONSTANTS.SPACING.CARD_PADDING,
           marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
         }}>
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.TITLE,
-            fontFamily: "Cairo_600SemiBold",
-            textAlign: 'center',
-            marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
-          }}>
+          <Text style={[
+            CONTRIBUTE_CONSTANTS.FONT_STYLES.TITLE,
+            {
+              color: colors.BYellow,
+              fontWeight: '600',
+              textAlign: 'center',
+              marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
+            }
+          ]}>
             {t('contribute.title')}
           </Text>
 
@@ -109,7 +112,7 @@ export default function ContributeScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SUBTITLE,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.forUsers')}
@@ -143,7 +146,7 @@ export default function ContributeScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
-              fontFamily: "Cairo_500Medium",
+              fontFamily: "Cairo_400Regular",
               ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.downloadExcel')}
@@ -160,7 +163,7 @@ export default function ContributeScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               marginBottom: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING
             }}>
               {t('contribute.contactUs')}
@@ -215,7 +218,7 @@ export default function ContributeScreen({ navigation }) {
                 <Text style={{
                   color: colors.BYellow,
                   fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_500Medium",
+                  fontFamily: "Cairo_400Regular",
                   ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
@@ -242,7 +245,7 @@ export default function ContributeScreen({ navigation }) {
                 <Text style={{
                   color: colors.BYellow,
                   fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_500Medium",
+                  fontFamily: "Cairo_400Regular",
                   ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
@@ -269,7 +272,7 @@ export default function ContributeScreen({ navigation }) {
                 <Text style={{
                   color: colors.BYellow,
                   fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_500Medium",
+                  fontFamily: "Cairo_400Regular",
                   ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
@@ -295,7 +298,7 @@ export default function ContributeScreen({ navigation }) {
                 <Text style={{
                   color: colors.BYellow,
                   fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_500Medium",
+                  fontFamily: "Cairo_400Regular",
                   ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
                   textAlign: 'center',
                   flex: 1
@@ -323,7 +326,7 @@ export default function ContributeScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SUBTITLE,
-              fontFamily: "Cairo_600SemiBold",
+              fontFamily: "Cairo_400Regular",
               ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.forDevelopers')}
@@ -356,7 +359,7 @@ export default function ContributeScreen({ navigation }) {
             <Text style={{
               color: colors.BYellow,
               fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.BODY,
-              fontFamily: "Cairo_500Medium",
+              fontFamily: "Cairo_400Regular",
               ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING }),
             }}>
               {t('contribute.openGitHub')}

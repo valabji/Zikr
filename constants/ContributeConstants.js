@@ -1,4 +1,6 @@
 // Constants for ContributeScreen
+import { FONT_FAMILY } from './Fonts';
+
 export const CONTRIBUTE_CONSTANTS = {
   // URLs
   EXCEL_SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBPd_n5b0kvOR4ImV-vmh3509yAvDFAjysFeMvJMYcUJzd8H2jY8MQEd_1rPjBFwSr1_SRmpdNsvzq/pub?output=xlsx',
@@ -42,6 +44,24 @@ export const CONTRIBUTE_CONSTANTS = {
     ICON_MEDIUM: 20,
     ICON_SMALL: 18,
     ICON_TINY: 16
+  },
+
+  // Font styles that include both size and family
+  FONT_STYLES: {
+    TITLE: { fontSize: 24, fontFamily: FONT_FAMILY },
+    SUBTITLE: { fontSize: 20, fontFamily: FONT_FAMILY },
+    BODY: { fontSize: 16, fontFamily: FONT_FAMILY },
+    SMALL_BODY: { fontSize: 14, fontFamily: FONT_FAMILY },
+    SMALL: { fontSize: 12, fontFamily: FONT_FAMILY }
+  },
+
+  // Font styles that include both size and family
+  FONT_STYLES: {
+    TITLE: { fontSize: 24, fontFamily: FONT_FAMILY },
+    SUBTITLE: { fontSize: 20, fontFamily: FONT_FAMILY },
+    BODY: { fontSize: 16, fontFamily: FONT_FAMILY },
+    SMALL_BODY: { fontSize: 14, fontFamily: FONT_FAMILY },
+    SMALL: { fontSize: 12, fontFamily: FONT_FAMILY }
   },
   
   LINE_HEIGHTS: {

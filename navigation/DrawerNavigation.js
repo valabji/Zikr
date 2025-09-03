@@ -2,6 +2,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useEffect, useState } from "react";
 import { I18nManager, Share } from "react-native";
 import { useColors } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -91,13 +92,14 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-                textAlign: getRTLTextAlign('left'),
-              }}>{t('app.tasbih')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                  textAlign: getRTLTextAlign('left'),
+                }
+              ]}>{t('app.tasbih')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="target" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -119,13 +121,14 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-                textAlign: getRTLTextAlign('left'),
-              }}>{t('navigation.favorites')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                  textAlign: getRTLTextAlign('left'),
+                }
+              ]}>{t('navigation.favorites')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -147,13 +150,14 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-                textAlign: getRTLTextAlign('left'),
-              }}>{t('navigation.allAzkar')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                  textAlign: getRTLTextAlign('left'),
+                }
+              ]}>{t('navigation.allAzkar')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -174,13 +178,14 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-                textAlign: getRTLTextAlign('left'),
-              }}>{t('navigation.prayerTimes')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                  textAlign: getRTLTextAlign('left'),
+                }
+              ]}>{t('navigation.prayerTimes')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="clock" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -201,13 +206,14 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-                textAlign: getRTLTextAlign('left'),
-              }}>{t('navigation.qibla')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                  textAlign: getRTLTextAlign('left'),
+                }
+              ]}>{t('navigation.qibla')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="compass" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -230,12 +236,13 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-              }}>{t('navigation.shareApp')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                }
+              ]}>{t('navigation.shareApp')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="share-2" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -256,12 +263,13 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-              }}>{t('navigation.contribute')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                }
+              ]}>{t('navigation.contribute')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="help-circle" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -283,12 +291,13 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-              }}>{t('language.switch')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                }
+              ]}>{t('language.switch')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="globe" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>
@@ -309,12 +318,13 @@ export function DNav() {
               ) : (
                 <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
               )}
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 22,
-                marginTop: 7,
-                fontFamily: "Cairo_400Regular",
-              }}>{t('navigation.settings')}</Text>
+              <Text style={[
+                textStyles.navigation,
+                {
+                  color: colors.BYellow,
+                  marginTop: 7,
+                }
+              ]}>{t('navigation.settings')}</Text>
               <View style={{ flex: 1 }} />
               <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
             </TouchableOpacity>

@@ -3,6 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar.js';
@@ -75,28 +76,31 @@ export default function Screen2({ route, navigation }) {
           }
         }}
         style={{ height: "100%" }}>
-                <Text style={{
-          color: colors.BYellow,
-          fontSize: 14,
-          marginTop: 6,
-          fontFamily: "Cairo_400Regular",
-          textAlign: getRTLTextAlign('left'),
-          writingDirection: isRTL() ? "rtl" : "ltr"
-        }}>{z.zekr}</Text>
+                <Text style={[
+          textStyles.bodySmall,
+          {
+            color: colors.BYellow,
+            marginTop: 6,
+            textAlign: getRTLTextAlign('left'),
+            writingDirection: isRTL() ? "rtl" : "ltr"
+          }
+        ]}>{z.zekr}</Text>
         <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderColor: colors.BYellow, borderStyle: "solid" }} />
         {z.reference != "" &&
-          <Text style={{
+          <Text style={[
+            textStyles.bodySmall,
+            {
+              color: colors.BYellow,
+              marginTop: 26,
+            }
+          ]}>{t('zikr.reference', { text: z.reference })}</Text>}
+        <Text style={[
+          textStyles.bodySmall,
+          {
             color: colors.BYellow,
-            fontSize: 14,
-            marginTop: 26,
-            fontFamily: "Cairo_400Regular",
-          }}>{t('zikr.reference', { text: z.reference })}</Text>}
-        <Text style={{
-          color: colors.BYellow,
-          fontSize: 14,
-          marginTop: 6,
-          fontFamily: "Cairo_400Regular",
-        }}>{z.description}</Text>
+            marginTop: 6,
+          }
+        ]}>{z.description}</Text>
         <View style={{ flex: 1 }} />
         <View style={{ borderTopWidth: 0, height: 0, width: "100%", borderStyle: "dotted" }} />
         <View style={{ flex: 1 }} />
@@ -106,12 +110,14 @@ export default function Screen2({ route, navigation }) {
 
           >
             <Text
-              style={{
-                textAlign: "right",
-                fontFamily: "Cairo_400Regular",
-                color: colors.BYellow,
-                fontSize: 18,
-              }}
+              style={[
+                textStyles.body,
+                {
+                  textAlign: "right",
+                  color: colors.BYellow,
+                  fontSize: 18,
+                }
+              ]}
             >{t('counter.page', { current: pn, total: size })}</Text>
           </View>
           <View style={{ flex: 1 }} />
@@ -119,12 +125,15 @@ export default function Screen2({ route, navigation }) {
             <StarSvgFilled width={96} height={96} />
             <Text
               testID="count-button"
-              style={{
-                position: 'absolute',
-                color: colors.primary,
-                fontSize: 18,
-                fontWeight: 'bold',
-              }}
+              style={[
+                textStyles.body,
+                {
+                  position: 'absolute',
+                  color: colors.primary,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                }
+              ]}
             >{i} / {z.count}</Text>
           </View>
         </View>
@@ -163,11 +172,12 @@ export default function Screen2({ route, navigation }) {
           color={colors.BYellow}
           style={{ marginRight: isRTL() ? 0 : 5, marginLeft: isRTL() ? 5 : 0 }}
         />
-        <Text style={{
-          color: colors.BYellow,
-          fontSize: 14,
-          fontFamily: "Cairo_400Regular",
-        }}>
+        <Text style={[
+          textStyles.bodySmall,
+          {
+            color: colors.BYellow,
+          }
+        ]}>
           {t('navigation.helpImprove')}
         </Text>
       </TouchableOpacity>

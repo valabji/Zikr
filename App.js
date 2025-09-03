@@ -12,12 +12,14 @@ export default function App(props) {
   let [fontsLoaded] = useFonts({
     Cairo_400Regular,
   });
+  
   React.useEffect(() => {
     loadResourcesAndDataAsync().then(() => {
       setLoadingComplete(true);
     })
   }, []);
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
+  
+  if (!isLoadingComplete || !fontsLoaded) {
     return null;
   } else {
     return (

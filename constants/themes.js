@@ -1,8 +1,12 @@
 // Single source of truth for all theme definitions
+import { FONT_FAMILY } from './Fonts';
+
 export const themes = {
   originalGreen: {
     name: 'Original Green',
     nameAr: 'الأخضر الأصلي',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#003C34',
     primaryMedium: '#002B25',
     primaryDark: '#002520',
@@ -27,6 +31,8 @@ export const themes = {
   goldOnWhite: {
     name: 'Gold on White',
     nameAr: 'الذهبي على الأبيض',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#FFFFFF',
     primaryMedium: '#F5F5F5',
     primaryDark: '#E0E0E0',
@@ -51,6 +57,8 @@ export const themes = {
   goldOnDark: {
     name: 'Gold on Dark',
     nameAr: 'الذهبي على الأسود',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#1A1A1A',
     primaryMedium: '#2A2A2A',
     primaryDark: '#0A0A0A',
@@ -75,6 +83,8 @@ export const themes = {
   paige: {
     name: 'Paige',
     nameAr: 'بيج',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#F5F5DC',
     primaryMedium: '#E6E6D1',
     primaryDark: '#D4D4B8',
@@ -99,6 +109,8 @@ export const themes = {
   chocolate: {
     name: 'Chocolate',
     nameAr: 'شوكولاتة',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#8D6E63',
     primaryMedium: '#A1887F',
     primaryDark: '#5D4037',
@@ -123,6 +135,8 @@ export const themes = {
   lavender: {
     name: 'Lavender',
     nameAr: 'لافندر',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
     primary: '#B39DDB',
     primaryMedium: '#C5B4E3',
     primaryDark: '#9575CD',

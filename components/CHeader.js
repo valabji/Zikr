@@ -5,6 +5,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { t, isRTL, getDirectionalSpacing } from '../locales/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 import { Hbg } from './Hbg';
 const width = Dimensions.get("window").width
@@ -71,7 +72,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
             </View>
       }
       <View style={{ flex: 1.5, justifyContent: 'center' }}>
-        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{ textAlign: 'center', fontFamily: "Cairo_400Regular", fontWeight: "normal", color: colors.BYellow, fontSize: 18 }}>{title}</Text>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={[textStyles.header, { textAlign: 'center', color: colors.BYellow }]}>{title}</Text>
       </View>
 
       {Left ?

@@ -304,7 +304,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             <Text style={{
                 color: colors.BYellow,
                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                fontFamily: "Cairo_500Medium",
+                fontFamily: "Cairo_400Regular",
                 marginBottom: 2
             }}>
                 {item.name}
@@ -341,7 +341,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                     <Text style={{
                         color: colors.BYellow,
                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-                        fontFamily: "Cairo_600SemiBold",
+                        fontFamily: "Cairo_400Regular",
                         ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                     }}>
                         {title}
@@ -389,7 +389,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
                                     fontFamily: "Cairo_400Regular"
                                 }}>
-                                    <Text style={{ fontFamily: "Cairo_600SemiBold" }}>
+                                    <Text style={{ fontFamily: "Cairo_400Regular" }}>
                                         {t('locationSettings.currentLocation')}:
                                     </Text>
                                     {' '}
@@ -410,7 +410,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
                                         fontFamily: "Cairo_400Regular"
                                     }}>
-                                        <Text style={{ fontFamily: "Cairo_600SemiBold" }}>
+                                        <Text style={{ fontFamily: "Cairo_400Regular" }}>
                                             {t('locationSettings.newLocation')}:
                                         </Text>
                                         {' '}
@@ -424,7 +424,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 <Text style={{
                                     color: colors.BYellow,
                                     fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                    fontFamily: "Cairo_600SemiBold",
+                                    fontFamily: "Cairo_400Regular",
                                     marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
                                 }}>
                                     {t('locationSettings.searchLocation')}
@@ -497,7 +497,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 <Text style={{
                                     color: colors.BYellow,
                                     fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                    fontFamily: "Cairo_600SemiBold",
+                                    fontFamily: "Cairo_400Regular",
                                     marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
                                 }}>
                                     {t('locationSettings.autoLocate')}
@@ -529,7 +529,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         <Text style={{
                                             color: colors.BYellow,
                                             fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
-                                            fontFamily: "Cairo_500Medium",
+                                            fontFamily: "Cairo_400Regular",
                                             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                                         }}>
                                             {t('locationSettings.useGPS')}
@@ -558,7 +558,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         <Text style={{
                                             color: colors.BYellow,
                                             fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
-                                            fontFamily: "Cairo_500Medium",
+                                            fontFamily: "Cairo_400Regular",
                                             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                                         }}>
                                             {t('locationSettings.useIP')}
@@ -601,7 +601,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <Text style={{
                                         color: colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: "Cairo_600SemiBold",
+                                        fontFamily: "Cairo_400Regular",
                                         marginBottom: 5
                                     }}>
                                         {t('prayerSettings.calculationMethod')}
@@ -642,7 +642,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <Text style={{
                                         color: colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: "Cairo_600SemiBold",
+                                        fontFamily: "Cairo_400Regular",
                                         marginBottom: 5
                                     }}>
                                         {t('prayerSettings.madhab')}
@@ -682,7 +682,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 <Text style={{
                                     color: colors.BYellow,
                                     fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                    fontFamily: "Cairo_600SemiBold"
+                                    fontFamily: "Cairo_400Regular"
                                 }}>
                                     {t('prayerSettings.notifications')}
                                 </Text>
@@ -706,7 +706,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <Text style={{
                                         color: colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: "Cairo_600SemiBold",
+                                        fontFamily: "Cairo_400Regular",
                                         marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
                                     }}>
                                         {t('prayerSettings.notifyFor')}
@@ -722,7 +722,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             <Text style={{
                                                 color: colors.BYellow,
                                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                                fontFamily: "Cairo_500Medium"
+                                                fontFamily: "Cairo_400Regular"
                                             }}>
                                                 {t(`prayerTimes.${prayer}`)}
                                             </Text>
@@ -762,7 +762,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                     <Text style={{
                         color: colors.DGreen,
                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                        fontFamily: "Cairo_600SemiBold",
+                        fontFamily: "Cairo_400Regular",
                         ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                     }}>
                         {t('settings.save')}
@@ -787,7 +787,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         <Text style={{
                             color: colors.noticeAccent,
                             fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                            fontFamily: "Cairo_600SemiBold",
+                            fontFamily: "Cairo_400Regular",
                             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                         }}>
                             {t('common.prayerTimesDisclaimer')}
@@ -846,7 +846,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             <Text style={{
                                 color: colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-                                fontFamily: "Cairo_600SemiBold",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center'
                             }}>
                                 {t('prayerSettings.calculationMethod')}
@@ -870,7 +870,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <Text style={{
                                         color: calculationMethod === method ? colors.DGreen : colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: calculationMethod === method ? "Cairo_600SemiBold" : "Cairo_400Regular",
+                                        fontFamily: calculationMethod === method ? "Cairo_400Regular" : "Cairo_400Regular",
                                         textAlign: 'center',
                                         flex: 1
                                     }}>
@@ -922,7 +922,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             <Text style={{
                                 color: colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-                                fontFamily: "Cairo_600SemiBold",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center'
                             }}>
                                 {t('prayerSettings.madhab')}
@@ -944,7 +944,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             <Text style={{
                                 color: madhab === 'Shafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Shafi' ? "Cairo_600SemiBold" : "Cairo_400Regular",
+                                fontFamily: madhab === 'Shafi' ? "Cairo_400Regular" : "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>
@@ -965,7 +965,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             <Text style={{
                                 color: madhab === 'Hanafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Hanafi' ? "Cairo_600SemiBold" : "Cairo_400Regular",
+                                fontFamily: madhab === 'Hanafi' ? "Cairo_400Regular" : "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>

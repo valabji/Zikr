@@ -3,6 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, I18nManager, Alert, BackHandler, Image, ImageBackground, Modal, TouchableHighlight } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing } from '../locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import { useAudio } from '../utils/Sounds';
@@ -55,14 +56,15 @@ export default function Screen2({ route, navigation }) {
             borderRadius: 20,
           }}>
             <Feather name="info" size={64} color={colors.DYellow} />
-            <Text style={{
-              color: colors.DGreen,
-              fontSize: 20,
-              textAlign: "center",
-              marginTop: 10,
-              ...getDirectionalMixedSpacing({ marginRight: 15, marginLeft: 15 }),
-              fontFamily: "Cairo_400Regular",
-            }}
+            <Text style={[
+              textStyles.subtitle,
+              {
+                color: colors.DGreen,
+                textAlign: "center",
+                marginTop: 10,
+                ...getDirectionalMixedSpacing({ marginRight: 15, marginLeft: 15 }),
+              }
+            ]}
             >{t('counter.resetConfirmation')}</Text>
 
             <View style={{ flexDirection: "row-reverse", width: "100%", marginTop: 20, justifyContent: "space-around" }}>
@@ -73,12 +75,13 @@ export default function Screen2({ route, navigation }) {
                 }}
                 style={{ backgroundColor: colors.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
-                <Text style={{
-                  color: colors.DGreen,
-                  fontSize: 20,
-                  lineHeight: 28,
-                  fontFamily: "Cairo_400Regular",
-                }}>{t('counter.yes')}</Text>
+                <Text style={[
+                  textStyles.subtitle,
+                  {
+                    color: colors.DGreen,
+                    lineHeight: 28,
+                  }
+                ]}>{t('counter.yes')}</Text>
               </TouchableHighlight>
               <TouchableHighlight
                 onPress={() => {
@@ -86,12 +89,13 @@ export default function Screen2({ route, navigation }) {
                 }}
                 style={{ backgroundColor: colors.BGreen, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: 20,
-                  lineHeight: 28,
-                  fontFamily: "Cairo_400Regular",
-                }}>{t('counter.no')}</Text>
+                <Text style={[
+                  textStyles.subtitle,
+                  {
+                    color: colors.BYellow,
+                    lineHeight: 28,
+                  }
+                ]}>{t('counter.no')}</Text>
               </TouchableHighlight>
 
             </View>
@@ -126,12 +130,15 @@ export default function Screen2({ route, navigation }) {
           <View style={{ width: 256, height: 256, alignSelf: "center", justifyContent: "center", alignItems: "center" }}>
             <StarSvgFilled width={256} height={256} />
             <Text
-              style={{
-                position: 'absolute',
-                color: colors.primary,
-                fontSize: 32,
-                fontWeight: 'bold',
-              }}
+              style={[
+                textStyles.base,
+                {
+                  position: 'absolute',
+                  color: colors.primary,
+                  fontSize: 32,
+                  fontWeight: 'bold',
+                }
+              ]}
             >{i}</Text>
           </View>
         </TouchableOpacity>

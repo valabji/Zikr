@@ -3,6 +3,7 @@ import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
@@ -67,12 +68,13 @@ export default function HomeScreen({ navigation, route }) {
         flex: 1,
         paddingHorizontal: 2
       }}  >
-        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={{
-          color: colors.BYellow,
-          fontSize: 16,
-          textAlign: getRTLTextAlign('left'),
-          fontFamily: "Cairo_400Regular",
-        }}>{name}</Text>
+        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={[
+          textStyles.body,
+          {
+            color: colors.BYellow,
+            textAlign: getRTLTextAlign('left'),
+          }
+        ]}>{name}</Text>
       </View>
       <TouchableOpacity
         testID="fav-toggle"
@@ -185,12 +187,14 @@ export default function HomeScreen({ navigation, route }) {
               onChangeText={v => {
                 setSt(v)
               }}
-              style={{ 
-                width: width - 40, 
-                fontSize: 24, 
-                color: colors.BYellow, 
-                textAlign: getRTLTextAlign('right')
-              }} />
+              style={[
+                textStyles.withFont({
+                  width: width - 40,
+                  fontSize: 24,
+                  color: colors.BYellow,
+                  textAlign: getRTLTextAlign('right')
+                })
+              ]} />
           </View>
         </View>
         {/* <AdMobBanner
@@ -209,7 +213,7 @@ export default function HomeScreen({ navigation, route }) {
             // Favorites view with search
             Azkar.filter(i => i.fav).length === 0 ? 
               <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ color: colors.BYellow, fontSize: 18, textAlign: 'center', fontFamily: "Cairo_400Regular" }}>
+                <Text style={[textStyles.body, { color: colors.BYellow, textAlign: 'center' }]}>
                   {t('favorites.empty')}
                 </Text>
               </View>

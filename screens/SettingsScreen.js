@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'rea
 import Slider from '@react-native-community/slider';
 import { useAudio } from '../utils/Sounds';
 import { useColors, useTheme } from '../constants/Colors';
+import { textStyles } from '../constants/Fonts';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomHeader from '../components/CHeader';
 import { setLanguage } from '../locales/i18n';
@@ -76,8 +77,8 @@ export default function SettingsScreen({ navigation }) {
       backgroundColor: colors.BYellow,
     },
     dropdownText: {
+      ...textStyles.body,
       color: colors.BYellow,
-      fontSize: 16,
       textAlign: 'center',
     },
     activeDropdownText: {
@@ -103,8 +104,8 @@ export default function SettingsScreen({ navigation }) {
       elevation: 5,
     },
     dropdownTriggerText: {
+      ...textStyles.body,
       color: colors.BYellow,
-      fontSize: 16,
       fontWeight: 'bold',
       flex: 1,
       ...getDirectionalMixedSpacing({ marginRight: 10 }),
@@ -155,16 +156,16 @@ export default function SettingsScreen({ navigation }) {
       backgroundColor: colors.BYellow,
     },
     langButtonText: {
+      ...textStyles.body,
       color: colors.BYellow,
       textAlign: 'center',
       fontWeight: 'bold',
-      fontSize: 16,
     },
     activeLangButtonText: {
       color: colors.DGreen,
     },
     settingTitle: {
-      fontSize: 16,
+      ...textStyles.body,
       fontWeight: 'bold',
       marginBottom: 10,
       color: colors.BYellow,
@@ -179,10 +180,10 @@ export default function SettingsScreen({ navigation }) {
       color: colors.BYellow,
     },
     buttonText: {
+      ...textStyles.body,
       color: colors.DGreen,
       textAlign: 'center',
       fontWeight: 'bold',
-      fontSize: 16,
     },
   });
 

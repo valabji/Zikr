@@ -42,6 +42,9 @@ export const useColors = () => {
     const currentTheme = themes[theme] || themes.originalGreen;
     
     return {
+      // Font configuration from theme
+      fontFamily: currentTheme.fontFamily,
+      
       // Theme-based colors
       primary: currentTheme.primary,
       primaryMedium: currentTheme.primaryMedium,
