@@ -50,6 +50,7 @@
     "language": "Language",
     "theme": "Theme",
     "clickVolume": "Click Sound Volume",
+    "fontSize": "Zikr Font Size",
     "default": "Default",
     "save": "Save"
   },

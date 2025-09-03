@@ -50,6 +50,7 @@
     "language": "اللغة",
     "theme": "المظهر",
     "clickVolume": "مستوى صوت النقر",
+    "fontSize": "حجم خط الأذكار",
     "default": "افتراضي",
     "save": "حفظ"
   },

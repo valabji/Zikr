@@ -10,6 +10,7 @@ import { setLanguage } from '../locales/i18n';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
+import Azkar from '../constants/Azkar';
 
 export default function SettingsScreen({ navigation }) {
   const colors = useColors();
@@ -21,6 +22,8 @@ export default function SettingsScreen({ navigation }) {
   const [tempScreen, setTempScreen] = useState('Fav');
   const [tempVolume, setTempVolume] = useState(0.35);
   const [tempTheme, setTempTheme] = useState(theme);
+  const [tempFontSize, setTempFontSize] = useState(18);
+  const [fontSize, setFontSize] = useState(18);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isThemeDropdownVisible, setThemeDropdownVisible] = useState(false);
   const [languageChanged, setLanguageChanged] = useState(false);
@@ -38,6 +41,9 @@ export default function SettingsScreen({ navigation }) {
     container: {
       flex: 1,
       padding: 20,
+    },
+    scrollContent: {
+      paddingBottom: 20,
     },
     buttonSetting: {
       paddingVertical: 10,
@@ -179,6 +185,32 @@ export default function SettingsScreen({ navigation }) {
       marginTop: 5,
       color: colors.BYellow,
     },
+    fontSizeText: {
+      textAlign: 'center',
+      marginTop: 5,
+      color: colors.BYellow,
+    },
+    previewContainer: {
+      marginTop: 15,
+      padding: 15,
+      backgroundColor: colors.DGreen,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.BYellow + '33',
+    },
+    previewLabel: {
+      ...textStyles.body,
+      color: colors.BYellow,
+      textAlign: 'center',
+      marginBottom: 10,
+      fontSize: 14,
+      opacity: 0.8,
+    },
+    previewText: {
+      color: colors.BYellow,
+      textAlign: getRTLTextAlign('left'),
+      ...textStyles.base
+    },
     buttonText: {
       ...textStyles.body,
       color: colors.DGreen,
@@ -191,10 +223,11 @@ export default function SettingsScreen({ navigation }) {
     // Load current language and initial screen on mount
     const loadSettings = async () => {
       try {
-        const [lang, screen, firstTime] = await Promise.all([
+        const [lang, screen, firstTime, storedFontSize] = await Promise.all([
           AsyncStorage.getItem('@language'),
           AsyncStorage.getItem('@initialScreen'),
-          AsyncStorage.getItem('@firstTimeSettings')
+          AsyncStorage.getItem('@firstTimeSettings'),
+          AsyncStorage.getItem('@fontSize')
         ]);
         
         if (lang) {
@@ -203,6 +236,12 @@ export default function SettingsScreen({ navigation }) {
         
         // Set temp theme to current theme
         setTempTheme(theme);
+        
+        // Load font size
+        const defaultFontSize = 18;
+        const currentFontSize = storedFontSize ? parseInt(storedFontSize) : defaultFontSize;
+        setFontSize(currentFontSize);
+        setTempFontSize(currentFontSize);
         
         // If no screen is set, set default to 'Fav' and save it
         if (!screen) {
@@ -239,10 +278,15 @@ export default function SettingsScreen({ navigation }) {
     playClick(value);
   };
 
+  const handleFontSizeChange = (value) => {
+    setTempFontSize(Math.round(value));
+  };
+
   const handleDefault = async () => {
     playClick();
     setTempVolume(0.35);
     setTempTheme('originalGreen');
+    setTempFontSize(18);
     // Apply and save theme immediately when default is clicked
     await setTheme('originalGreen');
     await handleLanguageChange('ar');
@@ -271,6 +315,12 @@ export default function SettingsScreen({ navigation }) {
     // Save theme if changed
     if (tempTheme !== theme) {
       await setTheme(tempTheme);
+    }
+
+    // Save font size if changed
+    if (tempFontSize !== fontSize) {
+      await AsyncStorage.setItem('@fontSize', tempFontSize.toString());
+      setFontSize(tempFontSize);
     }
 
     // Save initial screen if changed
@@ -320,6 +370,7 @@ export default function SettingsScreen({ navigation }) {
     <View style={styles.wrapper} testID="settings-screen">
       <CustomHeader title={t("navigation.settings")} navigation={navigation} Right={isFirstTime?()=>(<View style={{flex:1}} />):false} />
       <LinearGradient colors={[colors.BGreen, colors.DGreen]} style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         <View style={styles.setting}>
           <Text style={styles.settingTitle}>{t('settings.language')}</Text>
@@ -466,6 +517,31 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.volumeText}>{Math.round(tempVolume * 100)}%</Text>
         </View>
 
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.fontSize')}</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={12}
+            maximumValue={28}
+            value={tempFontSize}
+            onValueChange={handleFontSizeChange}
+            minimumTrackTintColor={colors.BYellow}
+            maximumTrackTintColor={colors.DYellow}
+            thumbTintColor={colors.BYellow}
+            step={1}
+          />
+          <Text style={styles.fontSizeText}>{tempFontSize}px</Text>
+          
+          <View style={styles.previewContainer}>
+            <Text style={styles.previewLabel}>
+              {currentLang === 'ar' ? 'معاينة' : 'Preview'}
+            </Text>
+            <Text style={[styles.previewText, { fontSize: tempFontSize }]}>
+              {Azkar && Azkar.length > 0 ? Azkar[0].zekr : 'الحمد لله وحده، والصلاة والسلام على من لا نبي بعده'}
+            </Text>
+          </View>
+        </View>
+
         <View style={[styles.setting, styles.buttonSetting]}>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -482,6 +558,7 @@ export default function SettingsScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
+        </ScrollView>
       </LinearGradient>
     </View>
   );

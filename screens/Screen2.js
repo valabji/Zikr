@@ -21,6 +21,8 @@ if (Platform.OS === 'web') {
 import { useAudio } from '../utils/Sounds.js';
 import { BackgroundSvg1 } from '../components/BackgroundSvg1';
 import { StarSvgFilled } from '../components/StarSvg';
+import { getFontSize } from '../utils/FontSize';
+import { useFocusEffect } from '@react-navigation/native';
 
 // import {
 //   AdMobBanner,
@@ -39,12 +41,24 @@ export default function Screen2({ route, navigation }) {
   const name = route?.params?.name || "Azkar";
   const player = useAudio();
   const reverse = isRTL();
+  const [zikrFontSize, setZikrFontSize] = React.useState(18);
 
   let swp = React.createRef();;
   let size = 0;
 
   // Choose the appropriate swiper based on platform
   const SwiperComponent = Platform.OS === 'web' ? (WebSwiper || Swiper) : Swiper;
+
+  // Load font size when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadFontSize = async () => {
+        const fontSize = await getFontSize();
+        setZikrFontSize(fontSize);
+      };
+      loadFontSize();
+    }, [])
+  );
 
   const Item = ({ z, pn }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
@@ -81,6 +95,7 @@ export default function Screen2({ route, navigation }) {
           {
             color: colors.BYellow,
             marginTop: 6,
+            fontSize: zikrFontSize,
             textAlign: getRTLTextAlign('left'),
             writingDirection: isRTL() ? "rtl" : "ltr"
           }
