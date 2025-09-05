@@ -24,14 +24,22 @@ export default function SettingsScreen({ navigation }) {
   const [tempTheme, setTempTheme] = useState(theme);
   const [tempFontSize, setTempFontSize] = useState(18);
   const [fontSize, setFontSize] = useState(18);
+  const [tempViewMode, setTempViewMode] = useState('swiper');
+  const [viewMode, setViewMode] = useState('swiper');
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isThemeDropdownVisible, setThemeDropdownVisible] = useState(false);
+  const [isViewModeDropdownVisible, setViewModeDropdownVisible] = useState(false);
   const [languageChanged, setLanguageChanged] = useState(false);
 
   const screens = [
     { id: 'All', labelEn: 'All Azkar', labelAr: 'كل الاذكار', route: 'Home' },
     { id: 'Fav', labelEn: 'Favorites', labelAr: 'الاذكار المفضلة', route: 'Fav' },
     { id: 'Tasbih', labelEn: 'Tasbih Counter', labelAr: 'المسبحة', route: 'Screen3' },
+  ];
+
+  const viewModes = [
+    { id: 'swiper', labelEn: 'Swiper (Page by Page)', labelAr: 'التمرير (صفحة بصفحة)' },
+    { id: 'onePageScroll', labelEn: 'One Page Scroll', labelAr: 'التمرير المستمر' },
   ];
 
   const styles = StyleSheet.create({
@@ -223,11 +231,12 @@ export default function SettingsScreen({ navigation }) {
     // Load current language and initial screen on mount
     const loadSettings = async () => {
       try {
-        const [lang, screen, firstTime, storedFontSize] = await Promise.all([
+        const [lang, screen, firstTime, storedFontSize, storedViewMode] = await Promise.all([
           AsyncStorage.getItem('@language'),
           AsyncStorage.getItem('@initialScreen'),
           AsyncStorage.getItem('@firstTimeSettings'),
-          AsyncStorage.getItem('@fontSize')
+          AsyncStorage.getItem('@fontSize'),
+          AsyncStorage.getItem('@viewMode')
         ]);
         
         if (lang) {
@@ -242,6 +251,12 @@ export default function SettingsScreen({ navigation }) {
         const currentFontSize = storedFontSize ? parseInt(storedFontSize) : defaultFontSize;
         setFontSize(currentFontSize);
         setTempFontSize(currentFontSize);
+        
+        // Load view mode
+        const defaultViewMode = 'swiper';
+        const currentViewMode = storedViewMode || defaultViewMode;
+        setViewMode(currentViewMode);
+        setTempViewMode(currentViewMode);
         
         // If no screen is set, set default to 'Fav' and save it
         if (!screen) {
@@ -291,6 +306,7 @@ export default function SettingsScreen({ navigation }) {
     await setTheme('originalGreen');
     await handleLanguageChange('ar');
     setTempScreen('Fav');
+    setTempViewMode('swiper');
   };
 
   const handleSave = async () => {
@@ -321,6 +337,12 @@ export default function SettingsScreen({ navigation }) {
     if (tempFontSize !== fontSize) {
       await AsyncStorage.setItem('@fontSize', tempFontSize.toString());
       setFontSize(tempFontSize);
+    }
+
+    // Save view mode if changed
+    if (tempViewMode !== viewMode) {
+      await AsyncStorage.setItem('@viewMode', tempViewMode);
+      setViewMode(tempViewMode);
     }
 
     // Save initial screen if changed
@@ -364,6 +386,12 @@ export default function SettingsScreen({ navigation }) {
     // Apply theme immediately
     await setTheme(themeKey);
     setThemeDropdownVisible(false);
+  };
+
+  const handleViewModeChange = (mode) => {
+    playClick();
+    setTempViewMode(mode);
+    setViewModeDropdownVisible(false);
   };
 
   return (
@@ -454,6 +482,40 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         </Modal>
 
+        {/* View Mode Dropdown Modal */}
+        <Modal
+          visible={isViewModeDropdownVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setViewModeDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1} 
+            onPress={() => setViewModeDropdownVisible(false)}
+          >
+            <View style={styles.dropdown}>
+              <ScrollView>
+                {viewModes.map((mode) => (
+                  <TouchableOpacity
+                    key={mode.id}
+                    style={[
+                      styles.dropdownItem,
+                      tempViewMode === mode.id && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleViewModeChange(mode.id)}
+                  >
+                    <Text style={[
+                      styles.dropdownText,
+                      tempViewMode === mode.id && styles.activeDropdownText
+                    ]}>{currentLang === 'ar' ? mode.labelAr : mode.labelEn}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
         <Modal
           visible={isDropdownVisible}
           transparent={true}
@@ -499,6 +561,22 @@ export default function SettingsScreen({ navigation }) {
               {screens.find(s => s.id === tempScreen)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Screen'}
             </Text>
             <AntDesign name={isDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.viewMode')}</Text>
+          <TouchableOpacity 
+            style={styles.dropdownTrigger}
+            onPress={() => {
+              playClick();
+              setViewModeDropdownVisible(true);
+            }}
+          >
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
+              {viewModes.find(s => s.id === tempViewMode)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select View Mode'}
+            </Text>
+            <AntDesign name={isViewModeDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
           </TouchableOpacity>
         </View>
 

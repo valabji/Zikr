@@ -51,6 +51,9 @@
     "theme": "Theme",
     "clickVolume": "Click Sound Volume",
     "fontSize": "Zikr Font Size",
+    "viewMode": "Azkar View Mode",
+    "swiper": "Swiper (Page by Page)",
+    "onePageScroll": "One Page Scroll",
     "default": "Default",
     "save": "Save"
   },
