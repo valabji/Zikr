@@ -9,6 +9,7 @@ import { Feather } from '@expo/vector-icons';
 import { useAudio } from '../utils/Sounds';
 import { BackgroundSvg2 } from '../components/BackgroundSvg2';
 import { StarSvgFilled } from '../components/StarSvg';
+import vibrationManager from '../utils/Vibration';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -124,6 +125,7 @@ export default function Screen2({ route, navigation }) {
           onPressIn={() => {
             setI(i + 1)
             player.playClick();
+            vibrationManager.vibrateForTasbih();
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >

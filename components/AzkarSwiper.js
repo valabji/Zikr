@@ -6,6 +6,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
+import vibrationManager from '../utils/Vibration';
 
 // Try different import approach for web swiper
 let WebSwiper;
@@ -42,7 +43,9 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
             if (i < z.count) {
               player.playClick();
               setI(i + 1);
+              vibrationManager.vibrateForAzkarCount();
               if (i == z.count - 1) {
+                vibrationManager.vibrateForNextZikr();
                 if (Platform.OS === 'web') {
                   // react-native-web-swiper uses different method
                   if (reverse) {

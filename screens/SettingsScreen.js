@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Platform } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useAudio } from '../utils/Sounds';
 import { useColors, useTheme } from '../constants/Colors';
@@ -11,6 +11,7 @@ import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar';
+import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 
 export default function SettingsScreen({ navigation }) {
   const colors = useColors();
@@ -29,7 +30,16 @@ export default function SettingsScreen({ navigation }) {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isThemeDropdownVisible, setThemeDropdownVisible] = useState(false);
   const [isViewModeDropdownVisible, setViewModeDropdownVisible] = useState(false);
+  const [isTasbihVibrationDropdownVisible, setTasbihVibrationDropdownVisible] = useState(false);
+  const [isAzkarVibrationDropdownVisible, setAzkarVibrationDropdownVisible] = useState(false);
+  const [isIntensityDropdownVisible, setIntensityDropdownVisible] = useState(false);
   const [languageChanged, setLanguageChanged] = useState(false);
+  const [tempTasbihVibration, setTempTasbihVibration] = useState(false);
+  const [tempAzkarVibration, setTempAzkarVibration] = useState(VIBRATION_TYPES.OFF);
+  const [tempVibrationIntensity, setTempVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
+  const [tasbihVibration, setTasbihVibration] = useState(false);
+  const [azkarVibration, setAzkarVibration] = useState(VIBRATION_TYPES.OFF);
+  const [vibrationIntensity, setVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
 
   const screens = [
     { id: 'All', labelEn: 'All Azkar', labelAr: 'كل الاذكار', route: 'Home' },
@@ -40,6 +50,23 @@ export default function SettingsScreen({ navigation }) {
   const viewModes = [
     { id: 'swiper', labelEn: 'Swiper (Page by Page)', labelAr: 'التمرير (صفحة بصفحة)' },
     { id: 'onePageScroll', labelEn: 'One Page Scroll', labelAr: 'التمرير المستمر' },
+  ];
+
+  const vibrationOptions = [
+    { id: VIBRATION_TYPES.OFF, labelEn: 'Off', labelAr: 'إيقاف' },
+    { id: VIBRATION_TYPES.ON_NEXT, labelEn: 'Only when moving to next zikr', labelAr: 'فقط عند الانتقال للذكر التالي' },
+    { id: VIBRATION_TYPES.ON_EVERY, labelEn: 'On every zikr count', labelAr: 'عند كل عدة ذكر' },
+  ];
+
+  const tasbihVibrationOptions = [
+    { id: false, labelEn: 'Off', labelAr: 'إيقاف' },
+    { id: true, labelEn: 'On', labelAr: 'تشغيل' },
+  ];
+
+  const intensityOptions = [
+    { id: VIBRATION_INTENSITY.LIGHT, labelEn: 'Light', labelAr: 'خفيف' },
+    { id: VIBRATION_INTENSITY.MEDIUM, labelEn: 'Medium', labelAr: 'متوسط' },
+    { id: VIBRATION_INTENSITY.HEAVY, labelEn: 'Heavy', labelAr: 'قوي' },
   ];
 
   const styles = StyleSheet.create({
@@ -258,6 +285,18 @@ export default function SettingsScreen({ navigation }) {
         setViewMode(currentViewMode);
         setTempViewMode(currentViewMode);
         
+        // Load vibration settings
+        await vibrationManager.initialize();
+        const currentTasbihVibration = vibrationManager.getTasbihSetting();
+        const currentAzkarVibration = vibrationManager.getAzkarSetting();
+        const currentIntensity = vibrationManager.getIntensity();
+        setTasbihVibration(currentTasbihVibration);
+        setTempTasbihVibration(currentTasbihVibration);
+        setAzkarVibration(currentAzkarVibration);
+        setTempAzkarVibration(currentAzkarVibration);
+        setVibrationIntensity(currentIntensity);
+        setTempVibrationIntensity(currentIntensity);
+        
         // If no screen is set, set default to 'Fav' and save it
         if (!screen) {
           await AsyncStorage.setItem('@initialScreen', 'Fav');
@@ -307,6 +346,9 @@ export default function SettingsScreen({ navigation }) {
     await handleLanguageChange('ar');
     setTempScreen('Fav');
     setTempViewMode('swiper');
+    setTempTasbihVibration(false);
+    setTempAzkarVibration(VIBRATION_TYPES.OFF);
+    setTempVibrationIntensity(VIBRATION_INTENSITY.LIGHT);
   };
 
   const handleSave = async () => {
@@ -343,6 +385,22 @@ export default function SettingsScreen({ navigation }) {
     if (tempViewMode !== viewMode) {
       await AsyncStorage.setItem('@viewMode', tempViewMode);
       setViewMode(tempViewMode);
+    }
+
+    // Save vibration settings if changed
+    if (tempTasbihVibration !== tasbihVibration) {
+      await vibrationManager.setTasbihVibration(tempTasbihVibration);
+      setTasbihVibration(tempTasbihVibration);
+    }
+
+    if (tempAzkarVibration !== azkarVibration) {
+      await vibrationManager.setAzkarVibration(tempAzkarVibration);
+      setAzkarVibration(tempAzkarVibration);
+    }
+
+    if (tempVibrationIntensity !== vibrationIntensity) {
+      await vibrationManager.setVibrationIntensity(tempVibrationIntensity);
+      setVibrationIntensity(tempVibrationIntensity);
     }
 
     // Save initial screen if changed
@@ -392,6 +450,24 @@ export default function SettingsScreen({ navigation }) {
     playClick();
     setTempViewMode(mode);
     setViewModeDropdownVisible(false);
+  };
+
+  const handleTasbihVibrationChange = (setting) => {
+    playClick();
+    setTempTasbihVibration(setting);
+    setTasbihVibrationDropdownVisible(false);
+  };
+
+  const handleAzkarVibrationChange = (setting) => {
+    playClick();
+    setTempAzkarVibration(setting);
+    setAzkarVibrationDropdownVisible(false);
+  };
+
+  const handleIntensityChange = (intensity) => {
+    playClick();
+    setTempVibrationIntensity(intensity);
+    setIntensityDropdownVisible(false);
   };
 
   return (
@@ -516,6 +592,114 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         </Modal>
 
+        {/* Tasbih Vibration Dropdown Modal - Mobile Only */}
+        {Platform.OS !== 'web' && (
+        <Modal
+          visible={isTasbihVibrationDropdownVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setTasbihVibrationDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1} 
+            onPress={() => setTasbihVibrationDropdownVisible(false)}
+          >
+            <View style={styles.dropdown}>
+              <ScrollView>
+                {tasbihVibrationOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.id.toString()}
+                    style={[
+                      styles.dropdownItem,
+                      tempTasbihVibration === option.id && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleTasbihVibrationChange(option.id)}
+                  >
+                    <Text style={[
+                      styles.dropdownText,
+                      tempTasbihVibration === option.id && styles.activeDropdownText
+                    ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        )}
+
+        {/* Azkar Vibration Dropdown Modal - Mobile Only */}
+        {Platform.OS !== 'web' && (
+        <Modal
+          visible={isAzkarVibrationDropdownVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setAzkarVibrationDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1} 
+            onPress={() => setAzkarVibrationDropdownVisible(false)}
+          >
+            <View style={styles.dropdown}>
+              <ScrollView>
+                {vibrationOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[
+                      styles.dropdownItem,
+                      tempAzkarVibration === option.id && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleAzkarVibrationChange(option.id)}
+                  >
+                    <Text style={[
+                      styles.dropdownText,
+                      tempAzkarVibration === option.id && styles.activeDropdownText
+                    ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        )}
+
+        {/* Vibration Intensity Dropdown Modal - Mobile Only */}
+        {Platform.OS !== 'web' && (
+        <Modal
+          visible={isIntensityDropdownVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIntensityDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1} 
+            onPress={() => setIntensityDropdownVisible(false)}
+          >
+            <View style={styles.dropdown}>
+              <ScrollView>
+                {intensityOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[
+                      styles.dropdownItem,
+                      tempVibrationIntensity === option.id && styles.activeDropdownItem
+                    ]}
+                    onPress={() => handleIntensityChange(option.id)}
+                  >
+                    <Text style={[
+                      styles.dropdownText,
+                      tempVibrationIntensity === option.id && styles.activeDropdownText
+                    ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        )}
+
         <Modal
           visible={isDropdownVisible}
           transparent={true}
@@ -579,6 +763,59 @@ export default function SettingsScreen({ navigation }) {
             <AntDesign name={isViewModeDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
           </TouchableOpacity>
         </View>
+
+        {/* Vibration Settings - Mobile Only */}
+        {Platform.OS !== 'web' && (
+        <>
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.vibrationTasbih')}</Text>
+          <TouchableOpacity 
+            style={styles.dropdownTrigger}
+            onPress={() => {
+              playClick();
+              setTasbihVibrationDropdownVisible(true);
+            }}
+          >
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
+              {tasbihVibrationOptions.find(s => s.id === tempTasbihVibration)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Vibration'}
+            </Text>
+            <AntDesign name={isTasbihVibrationDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.vibrationAzkar')}</Text>
+          <TouchableOpacity 
+            style={styles.dropdownTrigger}
+            onPress={() => {
+              playClick();
+              setAzkarVibrationDropdownVisible(true);
+            }}
+          >
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
+              {vibrationOptions.find(s => s.id === tempAzkarVibration)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Vibration'}
+            </Text>
+            <AntDesign name={isAzkarVibrationDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.setting}>
+          <Text style={styles.settingTitle}>{t('settings.vibrationIntensity')}</Text>
+          <TouchableOpacity 
+            style={styles.dropdownTrigger}
+            onPress={() => {
+              playClick();
+              setIntensityDropdownVisible(true);
+            }}
+          >
+            <Text style={[styles.dropdownTriggerText, { textAlign: getRTLTextAlign('left') }]}>
+              {intensityOptions.find(s => s.id === tempVibrationIntensity)?.[currentLang === 'ar' ? 'labelAr' : 'labelEn'] || 'Select Intensity'}
+            </Text>
+            <AntDesign name={isIntensityDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
+        </>
+        )}
 
         <View style={styles.setting}>
           <Text style={styles.settingTitle}>{t('settings.clickVolume')}</Text>

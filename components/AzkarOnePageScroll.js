@@ -5,6 +5,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
+import vibrationManager from '../utils/Vibration';
 
 export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
   const colors = useColors();
@@ -32,6 +33,10 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
             if (i < z.count) {
               player.playClick();
               setI(i + 1);
+              vibrationManager.vibrateForAzkarCount();
+              if (i == z.count - 1) {
+                vibrationManager.vibrateForNextZikr();
+              }
             }
           }}
           style={{ flex: 1 }}
