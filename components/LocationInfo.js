@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { t, getDirectionalMixedSpacing } from '../locales/i18n';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
+import CompassMethodModal from './CompassMethodModal';
 
 const LocationInfo = ({
     location,
@@ -19,6 +20,7 @@ const LocationInfo = ({
     onSwapCompassMethod
 }) => {
     const colors = useColors();
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const getBearingText = (direction) => {
         if (direction >= 0 && direction < 22.5) return 'N';
@@ -33,29 +35,12 @@ const LocationInfo = ({
     };
 
     const handleMethodSwap = () => {
-        Alert.alert(
-            t('qibla.switchCompassMethod'),
-            t('qibla.chooseMethod'),
-            [
-                {
-                    text: t('qibla.autoSelect'),
-                    onPress: () => onSwapCompassMethod('auto'),
-                    style: 'default'
-                },
-                ...(availableMethods.includes('location') ? [{
-                    text: t('qibla.gpsLocation'),
-                    onPress: () => onSwapCompassMethod('location')
-                }] : []),
-                ...(availableMethods.includes('magnetometer') ? [{
-                    text: t('qibla.magnetometer'),
-                    onPress: () => onSwapCompassMethod('magnetometer')
-                }] : []),
-                {
-                    text: t('qibla.cancel'),
-                    style: 'cancel'
-                }
-            ]
-        );
+        setIsModalVisible(true);
+    };
+
+    const handleMethodSelect = (method) => {
+        onSwapCompassMethod(method);
+        setIsModalVisible(false);
     };
 
     return (
@@ -348,6 +333,14 @@ const LocationInfo = ({
                     </Text>
                 </View>
             </View>
+
+            {/* Compass Method Modal */}
+            <CompassMethodModal
+                visible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                availableMethods={availableMethods}
+                onMethodSelect={handleMethodSelect}
+            />
         </View>
     );
 };

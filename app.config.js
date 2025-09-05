@@ -4,7 +4,7 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.4",
+    version: "1.1.5",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
@@ -28,7 +28,7 @@ export default {
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 7,
+      versionCode: 8,
       permissions: [
         // Location permissions - needed for prayer times and Qibla direction
         "android.permission.ACCESS_COARSE_LOCATION",
