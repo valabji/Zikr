@@ -16,7 +16,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
-    
+
     return (
       <View style={{
         borderWidth: 1,
@@ -51,16 +51,16 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
               writingDirection: isRTL() ? "rtl" : "ltr"
             }
           ]}>{z.zekr}</Text>
-          
-          <View style={{ 
-            borderTopWidth: 1, 
-            marginTop: 20, 
-            height: 1, 
-            width: "100%", 
-            borderColor: colors.BYellow, 
-            borderStyle: "solid" 
+
+          <View style={{
+            borderTopWidth: 1,
+            marginTop: 20,
+            height: 1,
+            width: "100%",
+            borderColor: colors.BYellow,
+            borderStyle: "solid"
           }} />
-          
+
           {z.reference != "" &&
             <Text style={[
               textStyles.bodySmall,
@@ -70,7 +70,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
               }
             ]}>{t('zikr.reference', { text: z.reference })}</Text>
           }
-          
+
           <Text style={[
             textStyles.bodySmall,
             {
@@ -78,19 +78,19 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
               marginTop: 6,
             }
           ]}>{z.description}</Text>
-          
+
           <View style={{ height: 20 }} />
-          
-          <View style={{ 
-            height: 96, 
+
+          <View style={{
+            height: 96,
             flexDirection: "row-reverse",
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <View style={{ 
-              flex: 1, 
-              justifyContent: "center", 
-              alignItems: "center" 
+            <View style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center"
             }}>
               <Text
                 style={[
@@ -103,12 +103,12 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
                 ]}
               >{t('counter.page', { current: pn, total: totalCount })}</Text>
             </View>
-            
-            <View style={{ 
-              width: 96, 
-              height: 96, 
-              justifyContent: "center", 
-              alignItems: "center" 
+
+            <View style={{
+              width: 96,
+              height: 96,
+              justifyContent: "center",
+              alignItems: "center"
             }}>
               <StarSvgFilled width={96} height={96} />
               <Text
@@ -131,19 +131,19 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
   };
 
   return (
-    <ScrollView 
-      style={{ flex: 1, width: '100%' }}
-      contentContainerStyle={{ 
-        paddingBottom: 20,
+    <ScrollView
+      style={{ flex: 1, width: '100%', marginBottom: 40 }}
+      contentContainerStyle={{
+        paddingBottom: 40,
         flexGrow: 1
       }}
       showsVerticalScrollIndicator={true}
     >
       {azkarList.map((item, index) => (
-        <Item 
-          key={index} 
-          z={item} 
-          pn={index + 1} 
+        <Item
+          key={index}
+          z={item}
+          pn={index + 1}
           totalCount={azkarList.length}
         />
       ))}

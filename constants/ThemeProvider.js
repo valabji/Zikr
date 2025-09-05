@@ -5,6 +5,7 @@ import { themes } from './themes';
 
 export const ThemeProvider = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState('originalGreen');
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
   // Load theme from storage on app start
   useEffect(() => {
@@ -16,6 +17,9 @@ export const ThemeProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading theme:', error);
+      } finally {
+        // Mark theme as loaded regardless of success/failure
+        setIsThemeLoaded(true);
       }
     };
 
@@ -36,7 +40,8 @@ export const ThemeProvider = ({ children }) => {
       value={{ 
         theme: currentTheme, 
         setTheme, 
-        themes 
+        themes,
+        isThemeLoaded
       }}
     >
       {children}

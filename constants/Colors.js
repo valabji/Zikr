@@ -7,6 +7,7 @@ export const ThemeContext = createContext({
   theme: 'originalGreen',
   setTheme: () => {},
   themes: themes,
+  isThemeLoaded: false,
 });
 
 export const useTheme = () => {
@@ -17,6 +18,7 @@ export const useTheme = () => {
       theme: 'originalGreen',
       setTheme: () => {},
       themes: themes,
+      isThemeLoaded: true, // Assume loaded if no provider
     };
   }
   return context;

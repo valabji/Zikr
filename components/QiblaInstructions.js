@@ -60,7 +60,7 @@ const QiblaInstructions = ({
             {t('qibla.instructions')}
           </Text>
         </View>
-        
+
         <Text style={{
           color: colors.BYellow,
           fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
@@ -69,12 +69,12 @@ const QiblaInstructions = ({
           opacity: 0.9,
           textAlign: getRTLTextAlign('left')
         }}>
-          {compassEnabled 
+          {compassEnabled
             ? t('qibla.instructionsWithCompass')
             : t('qibla.instructionsWithoutCompass')
           }
         </Text>
-        
+
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -88,7 +88,7 @@ const QiblaInstructions = ({
             height: 12,
             backgroundColor: getAlignmentColor(),
             borderRadius: 2,
-            ...getDirectionalMixedSpacing({marginRight:8})
+            ...getDirectionalMixedSpacing({ marginRight: 8 })
           }} />
           <Text style={{
             color: getAlignmentColor(),
@@ -136,7 +136,7 @@ const QiblaInstructions = ({
                 {t('qibla.compassDisabled')}
               </Text>
             </View>
-            
+
             {/* Retry Button */}
             <TouchableOpacity
               onPress={onRetryCompass}
@@ -172,7 +172,7 @@ const QiblaInstructions = ({
               </View>
             </TouchableOpacity>
           </View>
-          
+
           <Text style={{
             color: colors.BYellow,
             fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
@@ -218,7 +218,7 @@ const QiblaInstructions = ({
               {t('qibla.compassAccuracy')}
             </Text>
           </View>
-          
+
           <Text style={{
             color: colors.BYellow,
             fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
@@ -244,6 +244,7 @@ const QiblaInstructions = ({
           justifyContent: 'center',
           width: '100%',
           marginTop: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+          marginBottom: 40,
           borderWidth: 2,
           borderColor: colors.BYellow,
           shadowColor: '#000',

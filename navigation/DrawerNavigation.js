@@ -314,6 +314,7 @@ export function DNav() {
                 height: 64,
                 ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                 marginTop: 5,
+                marginBottom:40,
                 backgroundColor: colors.DGreen,
                 flexDirection: "row",
               }}>

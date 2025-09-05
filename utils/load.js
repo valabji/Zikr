@@ -40,7 +40,7 @@ export async function loadResourcesAndDataAsync() {
                 "Azkar": zikrData != undefined ? JSON.parse(zikrData) : Azkar
             }
         });
-        await SplashScreen.hideAsync();
+        // Don't hide splash screen here - let App.js handle it after theme loads
         return true;
     }
 }
