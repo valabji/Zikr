@@ -4,12 +4,12 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 
-const QiblaCompass = ({ 
-  qiblaDirection, 
-  isQiblaAligned, 
-  compassEnabled, 
-  compassRotationValue, 
-  rotationValue 
+const QiblaCompass = ({
+  qiblaDirection,
+  isQiblaAligned,
+  compassEnabled,
+  compassRotationValue,
+  rotationValue
 }) => {
   const colors = useColors();
 
@@ -170,12 +170,14 @@ const QiblaCompass = ({
               borderBottomColor: colors.BYellow,
             }} />
           </Animated.View>
-          
+
           {/* Qibla Direction Indicator (always points to Qibla) */}
           <Animated.View
             style={{
               position: 'absolute',
               justifyContent: 'center',
+              height: '100%',
+              width: '100%',
               alignItems: 'center',
               transform: compassEnabled ? [
                 {
@@ -205,14 +207,14 @@ const QiblaCompass = ({
               borderRightColor: 'transparent',
               borderBottomColor: isQiblaAligned ? '#22c55e' : '#FF6B35',
               position: 'absolute',
-              top: -75,
+              top: 20,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.3,
               shadowRadius: 4,
               elevation: 5
             }} />
-            
+
             {/* Qibla Arrow Tail */}
             <View style={{
               width: 5,
@@ -220,7 +222,7 @@ const QiblaCompass = ({
               backgroundColor: isQiblaAligned ? '#22c55e' : '#FF6B35',
               borderRadius: 3,
               position: 'absolute',
-              top: -10,
+              top: 40,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.3,
@@ -244,7 +246,7 @@ const QiblaCompass = ({
             borderWidth: 2,
             borderColor: '#fff'
           }} />
-          
+
           {/* Qibla Label */}
           <Animated.View
             style={{
