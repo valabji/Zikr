@@ -29,7 +29,43 @@ export default {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       versionCode: 6,
-      permissions: ["com.google.android.gms.permission.AD_ID"],
+      permissions: [
+        // Location permissions - needed for prayer times and Qibla direction
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        
+        // Network permissions - needed for Firebase, updates, and web functionality
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        
+        // Ad-related permissions - needed for AdMob functionality
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_ADSERVICES_AD_ID",
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+        "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
+        
+        // Device permissions - useful for user feedback and background tasks
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        
+        // App-specific permission
+        "com.valabji.zikr.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+      ],
+      blockedPermissions: [
+        // Audio permissions - not needed (app only plays simple sounds)
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        
+        // Storage permissions - not needed (app uses internal storage only)
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        
+        // Development/debug permissions - not needed in production
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        
+        // Sensor permission - not needed (magnetometer works without this)
+        "android.permission.ACTIVITY_RECOGNITION"
+      ],
       config: {
         googleMobileAdsAppId: process.env.ADMOB_APPID
       }
