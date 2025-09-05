@@ -13,6 +13,7 @@ const LocationInfo = ({
     qiblaDirection,
     currentHeading,
     isQiblaAligned,
+    isQiblaClose,
     compassEnabled,
     compassMethod,
     compassAccuracy,
@@ -21,6 +22,13 @@ const LocationInfo = ({
 }) => {
     const colors = useColors();
     const [isModalVisible, setIsModalVisible] = useState(false);
+
+    // Determine direction color based on alignment state
+    const getDirectionColor = () => {
+        if (isQiblaAligned) return '#22c55e'; // Green - aligned
+        if (isQiblaClose) return '#FFC107'; // Yellow - close
+        return '#FF6B35'; // Orange - not close
+    };
 
     const getBearingText = (direction) => {
         if (direction >= 0 && direction < 22.5) return 'N';
@@ -250,7 +258,7 @@ const LocationInfo = ({
                             t(compassAccuracy <= 5 ? 'qibla.accuracyExcellent' :
                                 compassAccuracy <= 15 ? 'qibla.accuracyGood' : 'qibla.accuracyPoor',
                                 { degrees: compassAccuracy.toFixed(1) }) :
-                            String(compassAccuracy) || 'null/undefined'
+                            String(compassAccuracy) || t('qibla.noData')
                         }
                     </Text>
                 </View>
@@ -278,7 +286,7 @@ const LocationInfo = ({
                     <Text style={[
                         PRAYER_CONSTANTS.FONT_STYLES.QIBLA_DEGREE,
                         {
-                            color: isQiblaAligned ? '#22c55e' : '#FF6B35',
+                            color: getDirectionColor(),
                             fontWeight: '700',
                             textAlign: 'center'
                         }

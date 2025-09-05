@@ -8,11 +8,25 @@ import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 const QiblaInstructions = ({
   compassEnabled,
   isQiblaAligned,
+  isQiblaClose,
   qiblaDirection,
   onRetryCompass,
   onNavigateToSettings
 }) => {
   const colors = useColors();
+
+  // Determine alignment color and text
+  const getAlignmentColor = () => {
+    if (isQiblaAligned) return '#22c55e'; // Green - aligned
+    if (isQiblaClose) return '#FFC107'; // Yellow - close
+    return '#FF6B35'; // Orange - not close
+  };
+
+  const getAlignmentText = () => {
+    if (isQiblaAligned) return t('qibla.aligned');
+    if (isQiblaClose) return t('qibla.closeToQibla');
+    return t('qibla.arrowIndicator');
+  };
 
   return (
     <>
@@ -72,17 +86,17 @@ const QiblaInstructions = ({
           <View style={{
             width: 12,
             height: 12,
-            backgroundColor: isQiblaAligned ? '#22c55e' : '#FF6B35',
+            backgroundColor: getAlignmentColor(),
             borderRadius: 2,
             ...getDirectionalMixedSpacing({marginRight:8})
           }} />
           <Text style={{
-            color: isQiblaAligned ? '#22c55e' : '#FF6B35',
+            color: getAlignmentColor(),
             fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
             fontFamily: "Cairo_400Regular",
             opacity: 0.9
           }}>
-            {isQiblaAligned ? t('qibla.aligned') : t('qibla.arrowIndicator')}
+            {getAlignmentText()}
           </Text>
         </View>
       </View>

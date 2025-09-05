@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import QiblaCompass from '../components/QiblaCompass';
 import LocationInfo from '../components/LocationInfo';
 import QiblaInstructions from '../components/QiblaInstructions';
 import { useQiblaCompass } from '../hooks/useQiblaCompass';
+import { useAudio } from '../utils/Sounds';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
@@ -19,11 +20,16 @@ import { calculateQiblaDirection } from '../utils/PrayerUtils';
 
 export default function QiblaScreen({ navigation }) {
   const colors = useColors();
+  const { playClick } = useAudio();
   const [location, setLocation] = useState(null);
   const [qiblaDirection, setQiblaDirection] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isQiblaAligned, setIsQiblaAligned] = useState(false);
+  const [isQiblaClose, setIsQiblaClose] = useState(false);
+  const [currentAngleDifference, setCurrentAngleDifference] = useState(0);
   const rotationValue = useRef(new Animated.Value(0)).current;
+  const previousAlignment = useRef(false);
+  const alignmentUpdateThrottle = useRef(0);
 
   // Use the compass hook
   const {
@@ -107,6 +113,18 @@ export default function QiblaScreen({ navigation }) {
     };
   }, [navigation, compassEnabled]);
 
+  // Throttled alignment calculation to improve performance during fast rotation
+  const calculateAlignmentStates = useCallback((angleDifference) => {
+    const alignmentThreshold = 1.0;
+    const closeThreshold = 10.0;
+    const normalizedDifference = Math.min(angleDifference, 360 - angleDifference);
+    
+    const isAligned = normalizedDifference <= alignmentThreshold;
+    const isClose = normalizedDifference <= closeThreshold;
+    
+    return { isAligned, isClose: isClose && !isAligned, normalizedDifference };
+  }, []);
+
   // Animate compass rotation
   useEffect(() => {
     if (qiblaDirection !== null && qiblaDirection !== undefined) {
@@ -128,19 +146,38 @@ export default function QiblaScreen({ navigation }) {
         }
       }
       
-      // Check if Qibla is aligned (within ±1 degree)
-      const alignmentThreshold = 0.5;
+      // Calculate alignment states
       const angleDifference = Math.abs(targetAngle);
-      const normalizedDifference = Math.min(angleDifference, 360 - angleDifference);
-      setIsQiblaAligned(normalizedDifference <= alignmentThreshold);
+      const { isAligned, isClose, normalizedDifference } = calculateAlignmentStates(angleDifference);
+      
+      // Update angle difference immediately for color calculations
+      setCurrentAngleDifference(normalizedDifference);
+      
+      // Throttle alignment state updates to reduce re-renders during fast rotation
+      const now = Date.now();
+      if (now - alignmentUpdateThrottle.current > 100) { // Update every 100ms max
+        setIsQiblaAligned(isAligned);
+        setIsQiblaClose(isClose);
+        alignmentUpdateThrottle.current = now;
+      }
       
       Animated.timing(rotationValue, {
         toValue: targetAngle,
-        duration: compassEnabled ? 200 : PRAYER_CONSTANTS.ANIMATION.COMPASS_ROTATION_DURATION,
+        duration: compassEnabled ? 150 : PRAYER_CONSTANTS.ANIMATION.COMPASS_ROTATION_DURATION, // Slightly faster for smoother updates
         useNativeDriver: false,
       }).start();
     }
-  }, [qiblaDirection, compassEnabled, currentHeading]);
+  }, [qiblaDirection, compassEnabled, currentHeading, calculateAlignmentStates]);
+
+  // Play sound when Qibla becomes aligned
+  useEffect(() => {
+    if (isQiblaAligned && !previousAlignment.current && compassEnabled) {
+      // Only play sound if transitioning from not aligned to aligned
+      // and only when compass is enabled (to avoid false positives)
+      playClick();
+    }
+    previousAlignment.current = isQiblaAligned;
+  }, [isQiblaAligned, compassEnabled, playClick]);
 
   if (loading) {
     return (
@@ -185,9 +222,11 @@ export default function QiblaScreen({ navigation }) {
         <QiblaCompass
           qiblaDirection={qiblaDirection}
           isQiblaAligned={isQiblaAligned}
+          isQiblaClose={isQiblaClose}
           compassEnabled={compassEnabled}
           compassRotationValue={compassRotationValue}
           rotationValue={rotationValue}
+          currentAngleDifference={currentAngleDifference}
         />
 
         {/* Location Info */}
@@ -198,6 +237,7 @@ export default function QiblaScreen({ navigation }) {
           qiblaDirection={qiblaDirection}
           currentHeading={currentHeading}
           isQiblaAligned={isQiblaAligned}
+          isQiblaClose={isQiblaClose}
           compassEnabled={compassEnabled}
           compassMethod={compassMethod}
           compassAccuracy={compassAccuracy}
@@ -209,6 +249,7 @@ export default function QiblaScreen({ navigation }) {
         <QiblaInstructions
           compassEnabled={compassEnabled}
           isQiblaAligned={isQiblaAligned}
+          isQiblaClose={isQiblaClose}
           qiblaDirection={qiblaDirection}
           onRetryCompass={initializeCompass}
           onNavigateToSettings={() => navigation.navigate('UnifiedPrayerSettings')}

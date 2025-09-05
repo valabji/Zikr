@@ -21,7 +21,7 @@ const [modalVisible, setModalVisible] = useState(false);
 <CompassMethodModal
     visible={modalVisible}
     onClose={() => setModalVisible(false)}
-    availableMethods={['location', 'magnetometer']}
+    availableMethods={['trueHeading', 'magHeading', 'magnetometer']}
     onMethodSelect={(method) => {
         console.log('Selected:', method);
         handleMethodChange(method);

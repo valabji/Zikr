@@ -67,21 +67,28 @@ const CompassMethodModal = ({
             id: 'auto',
             title: t('qibla.autoSelect'),
             icon: 'zap',
-            description: 'Automatically select the best available method',
+            description: t('qibla.autoSelectDescription'),
             color: '#22c55e'
         },
-        ...(availableMethods.includes('location') ? [{
-            id: 'location',
-            title: t('qibla.gpsLocation'),
+        ...(availableMethods.includes('magHeading') ? [{
+            id: 'magHeading',
+            title: t('qibla.gpsMagneticEnhanced'),
+            icon: 'compass',
+            description: t('qibla.gpsMagneticEnhancedDescription'),
+            color: '#8b5cf6'
+        }] : []),
+        ...(availableMethods.includes('trueHeading') ? [{
+            id: 'trueHeading',
+            title: t('qibla.gps'),
             icon: 'map-pin',
-            description: 'Use GPS location for compass direction',
+            description: t('qibla.gpsDescription'),
             color: '#3b82f6'
         }] : []),
         ...(availableMethods.includes('magnetometer') ? [{
             id: 'magnetometer',
             title: t('qibla.magnetometer'),
             icon: 'compass',
-            description: 'Use device magnetometer sensor',
+            description: t('qibla.magnetometerDescription'),
             color: '#f59e0b'
         }] : [])
     ];

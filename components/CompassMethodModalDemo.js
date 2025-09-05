@@ -9,7 +9,7 @@ const CompassMethodModalDemo = () => {
     const [selectedMethod, setSelectedMethod] = useState(null);
     const colors = useColors();
 
-    const availableMethods = ['location', 'magnetometer'];
+    const availableMethods = ['trueHeading', 'magHeading', 'magnetometer'];
 
     const handleMethodSelect = (method) => {
         setSelectedMethod(method);

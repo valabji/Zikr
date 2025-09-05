@@ -7,11 +7,21 @@ import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 const QiblaCompass = ({
   qiblaDirection,
   isQiblaAligned,
+  isQiblaClose,
   compassEnabled,
   compassRotationValue,
-  rotationValue
+  rotationValue,
+  currentAngleDifference = 0 // Add this prop for real-time color updates
 }) => {
   const colors = useColors();
+
+  // Determine arrow color based on angle difference for real-time updates
+  const getArrowColor = () => {
+    // Use currentAngleDifference if provided for more responsive color changes
+    if (currentAngleDifference <= 1.0) return '#22c55e'; // Green - aligned
+    if (currentAngleDifference <= 10.0) return '#FFC107'; // Yellow - close
+    return '#FF6B35'; // Orange - not close
+  };
 
   return (
     <View style={{
@@ -205,7 +215,7 @@ const QiblaCompass = ({
               borderBottomWidth: 65,
               borderLeftColor: 'transparent',
               borderRightColor: 'transparent',
-              borderBottomColor: isQiblaAligned ? '#22c55e' : '#FF6B35',
+              borderBottomColor: getArrowColor(),
               position: 'absolute',
               top: 20,
               shadowColor: '#000',
@@ -219,7 +229,7 @@ const QiblaCompass = ({
             <View style={{
               width: 5,
               height: 50,
-              backgroundColor: isQiblaAligned ? '#22c55e' : '#FF6B35',
+              backgroundColor: getArrowColor(),
               borderRadius: 3,
               position: 'absolute',
               top: 40,

@@ -20,6 +20,8 @@ export const useQiblaCompass = () => {
   const compassRotationValue = useRef(new Animated.Value(0)).current;
   const magnetometerSubscription = useRef(null);
   const headingSubscription = useRef(null);
+  const lastHeadingUpdate = useRef(0);
+  const headingThrottle = 50; // Update every 50ms max for smoother performance
 
   // Calculate heading from magnetometer data (fallback)
   const calculateHeading = (x, y, z) => {
@@ -35,8 +37,8 @@ export const useQiblaCompass = () => {
     return heading;
   };
 
-  // Setup expo-location heading (preferred method)
-  const setupLocationHeading = async () => {
+  // Setup expo-location true heading method
+  const setupLocationTrueHeading = async () => {
     // Check if we're on web - location services work differently
     if (Platform.OS === 'web') {
       return false;
@@ -112,8 +114,8 @@ export const useQiblaCompass = () => {
         const gpsCoords = {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
-          city: 'GPS Location',
-          country: 'Current Position'
+          city: t('qibla.gpsLocationName'),
+          country: t('qibla.currentPosition')
         };
         
         setGpsLocation(gpsCoords);
@@ -123,32 +125,151 @@ export const useQiblaCompass = () => {
         setUsingGpsLocation(false);
       }
 
-      // Start watching heading
+      // Start watching heading with throttling
       headingSubscription.current = await Location.watchHeadingAsync((headingData) => {
+        // Throttle updates for better performance
+        const now = Date.now();
+        if (now - lastHeadingUpdate.current < headingThrottle) return;
+        lastHeadingUpdate.current = now;
         
-        const heading = headingData.trueHeading !== -1 ? headingData.trueHeading : headingData.magHeading;
-        setCurrentHeading(heading);
-        
-        // Update method and accuracy info based on actual heading data
+        // Only use true heading for this method
         if (headingData.trueHeading !== -1) {
-          setCompassMethod(t('qibla.methodGpsTrueHeading'));
+          const heading = headingData.trueHeading;
+          setCurrentHeading(heading);
+          setCompassMethod(t('qibla.methodGps'));
           setCompassAccuracy(headingData.accuracy || null);
-        } else {
-          setCompassMethod(t('qibla.methodMagneticHeading'));
-          setCompassAccuracy(headingData.accuracy || null);
+          
+          // Smooth compass rotation
+          animateCompassRotation(-heading);
         }
+      });
+
+      // Set initial compass state
+      setCompassEnabled(true);
+      setCompassMethod(t('qibla.methodGps'));
+      setCompassAccuracy(t('qibla.initializing'));
+      return { gpsLocation };
+    } catch (error) {
+      console.error('Error setting up GPS true heading:', error);
+      setCompassEnabled(false);
+      setCompassMethod(t('qibla.methodUnavailable'));
+      setCompassAccuracy(null);
+      return false;
+    }
+  };
+
+  // Setup expo-location magnetic enhanced GPS method
+  const setupLocationMagneticEnhanced = async () => {
+    // Check if we're on web - location services work differently
+    if (Platform.OS === 'web') {
+      return false;
+    }
+
+    try {
+      // Check current permission status
+      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
+      
+      if (currentStatus !== 'granted') {
+        // Check if there's a saved location (indicates user has completed initial setup)
+        const savedLocation = await AsyncStorage.getItem('@prayer_location');
+        
+        // Only show the custom permission dialog if user has already set up a location
+        if (savedLocation) {
+          // Check if user has chosen to not show permission dialog again
+          const dontShowAgain = await AsyncStorage.getItem('qibla_location_permission_dismissed');
+          
+          if (!dontShowAgain) {
+            // Show custom permission dialog
+            const userChoice = await new Promise((resolve) => {
+              Alert.alert(
+                t('qibla.locationPermissionTitle'),
+                t('qibla.locationPermissionMessage'),
+                [
+                  {
+                    text: t('qibla.dontShowAgain'),
+                    onPress: async () => {
+                      await AsyncStorage.setItem('qibla_location_permission_dismissed', 'true');
+                      resolve('dismiss');
+                    },
+                    style: 'destructive'
+                  },
+                  {
+                    text: t('qibla.noThanks'),
+                    onPress: () => resolve('decline'),
+                    style: 'cancel'
+                  },
+                  {
+                    text: t('qibla.allowLocation'),
+                    onPress: () => resolve('allow'),
+                    style: 'default'
+                  }
+                ]
+              );
+            });
+            
+            if (userChoice === 'dismiss' || userChoice === 'decline') {
+              return false;
+            }
+          }
+        }
+        
+        // Request permission (either first setup or user chose to allow)
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          return false;
+        }
+      }
+
+      const hasCompass = await Location.hasServicesEnabledAsync();
+      if (!hasCompass) {
+        return false;
+      }
+
+      // Get current GPS location for more accurate Qibla calculation
+      try {
+        const currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+          timeout: 10000,
+        });
+        
+        const gpsCoords = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+          city: t('qibla.gpsLocationName'),
+          country: t('qibla.currentPosition')
+        };
+        
+        setGpsLocation(gpsCoords);
+        setUsingGpsLocation(true);
+        
+      } catch (locationError) {
+        setUsingGpsLocation(false);
+      }
+
+      // Start watching heading with throttling
+      headingSubscription.current = await Location.watchHeadingAsync((headingData) => {
+        // Throttle updates for better performance
+        const now = Date.now();
+        if (now - lastHeadingUpdate.current < headingThrottle) return;
+        lastHeadingUpdate.current = now;
+        
+        // Only use magnetic heading for this method
+        const heading = headingData.magHeading;
+        setCurrentHeading(heading);
+        setCompassMethod(t('qibla.methodGpsMagneticEnhanced'));
+        setCompassAccuracy(headingData.accuracy || null);
         
         // Smooth compass rotation
         animateCompassRotation(-heading);
       });
 
-      // Set initial compass state - don't wait for first heading update
+      // Set initial compass state
       setCompassEnabled(true);
-      setCompassMethod(t('qibla.gpsLocation')); // Set initial method
-      setCompassAccuracy('Initializing...'); // Set initial accuracy
+      setCompassMethod(t('qibla.methodGpsMagneticEnhanced'));
+      setCompassAccuracy(t('qibla.initializing'));
       return { gpsLocation };
     } catch (error) {
-      console.error('Error setting up location heading:', error);
+      console.error('Error setting up GPS magnetic enhanced:', error);
       setCompassEnabled(false);
       setCompassMethod(t('qibla.methodUnavailable'));
       setCompassAccuracy(null);
@@ -190,11 +311,16 @@ export const useQiblaCompass = () => {
       setCompassMethod(t('qibla.methodMagnetometer'));
       setCompassAccuracy(t('qibla.accuracyLow'));
       
-      // Set update interval (4 times per second for smooth animation)
-      Magnetometer.setUpdateInterval(250);
+      // Set update interval (optimized for smooth animation with throttling)
+      Magnetometer.setUpdateInterval(150); // Faster sensor updates
       
-      // Subscribe to magnetometer updates
+      // Subscribe to magnetometer updates with throttling
       magnetometerSubscription.current = Magnetometer.addListener((data) => {
+        // Throttle updates for better performance
+        const now = Date.now();
+        if (now - lastHeadingUpdate.current < headingThrottle) return;
+        lastHeadingUpdate.current = now;
+        
         setMagnetometerData(data);
         const heading = calculateHeading(data.x, data.y, data.z);
         setCurrentHeading(heading);
@@ -240,7 +366,7 @@ export const useQiblaCompass = () => {
     
     Animated.timing(compassRotationValue, {
       toValue: finalAngle,
-      duration: 200, // Fast smooth updates
+      duration: 100, // Faster updates for more responsive rotation during fast movement
       useNativeDriver: false,
     }).start();
   };
@@ -249,13 +375,14 @@ export const useQiblaCompass = () => {
   const checkAvailableMethods = async () => {
     const methods = [];
     
-    // Check location heading availability - include it even if permission not granted
-    // so we can show the permission dialog, but not on web
+    // Check location heading availability - include both true and magnetic enhanced GPS
+    // so we can show them as separate options, but not on web
     try {
       if (Platform.OS !== 'web') {
         const hasServices = await Location.hasServicesEnabledAsync();
         if (hasServices) {
-          methods.push('location');
+          methods.push('trueHeading');
+          methods.push('magHeading');
         }
       }
     } catch (error) {
@@ -289,18 +416,28 @@ export const useQiblaCompass = () => {
       setAvailableMethods(methods);
       
       // If forced to use specific method
-      if (forceMethod === 'location' && methods.includes('location')) {
-        return await setupLocationHeading();
+      if (forceMethod === 'trueHeading' && methods.includes('trueHeading')) {
+        return await setupLocationTrueHeading();
+      }
+      
+      if (forceMethod === 'magHeading' && methods.includes('magHeading')) {
+        return await setupLocationMagneticEnhanced();
       }
       
       if (forceMethod === 'magnetometer' && methods.includes('magnetometer')) {
         return await setupMagnetometer();
       }
       
-      // Auto-selection: First try expo-location heading (more accurate)
-      if (methods.includes('location')) {
-        const locationResult = await setupLocationHeading();
-        if (locationResult) return locationResult;
+      // Auto-selection: First try GPS magnetic enhanced (more reliable)
+      if (methods.includes('magHeading')) {
+        const magHeadingResult = await setupLocationMagneticEnhanced();
+        if (magHeadingResult) return magHeadingResult;
+      }
+      
+      // If magnetic enhanced fails, try GPS true heading
+      if (methods.includes('trueHeading')) {
+        const trueHeadingResult = await setupLocationTrueHeading();
+        if (trueHeadingResult) return trueHeadingResult;
       }
       
       // If location heading fails, fallback to magnetometer
@@ -329,10 +466,14 @@ export const useQiblaCompass = () => {
     cleanupCompass();
     setForceMethod(method);
     
-    if (method === 'location') {
+    if (method === 'trueHeading') {
       // Reset the "don't show again" preference when user explicitly chooses location method
       await AsyncStorage.removeItem('qibla_location_permission_dismissed');
-      return await setupLocationHeading();
+      return await setupLocationTrueHeading();
+    } else if (method === 'magHeading') {
+      // Reset the "don't show again" preference when user explicitly chooses location method
+      await AsyncStorage.removeItem('qibla_location_permission_dismissed');
+      return await setupLocationMagneticEnhanced();
     } else if (method === 'magnetometer') {
       return await setupMagnetometer();
     } else if (method === 'auto') {
