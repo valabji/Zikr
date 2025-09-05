@@ -40,16 +40,12 @@ export default {
         
         // Ad-related permissions - needed for AdMob functionality
         "com.google.android.gms.permission.AD_ID",
-        "android.permission.ACCESS_ADSERVICES_AD_ID",
-        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+
+        // Analytics Permission for the reporting of install
         "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
         
         // Device permissions - useful for user feedback and background tasks
         "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK",
-        
-        // App-specific permission
-        "com.valabji.zikr.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
       ],
       blockedPermissions: [
         // Audio permissions - not needed (app only plays simple sounds)
