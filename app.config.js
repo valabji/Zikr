@@ -33,17 +33,17 @@ export default {
         // Location permissions - needed for prayer times and Qibla direction
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        
+
         // Network permissions - needed for Firebase, updates, and web functionality
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
-        
+
         // Ad-related permissions - needed for AdMob functionality
         "com.google.android.gms.permission.AD_ID",
 
         // Analytics Permission for the reporting of install
         "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE",
-        
+
         // Device permissions - useful for user feedback and background tasks
         "android.permission.VIBRATE",
       ],
@@ -51,14 +51,14 @@ export default {
         // Audio permissions - not needed (app only plays simple sounds)
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        
+
         // Storage permissions - not needed (app uses internal storage only)
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        
+
         // Development/debug permissions - not needed in production
         "android.permission.SYSTEM_ALERT_WINDOW",
-        
+
         // Sensor permission - not needed (magnetometer works without this)
         "android.permission.ACTIVITY_RECOGNITION"
       ],
@@ -84,6 +84,7 @@ export default {
     },
     plugins: [
       "expo-audio",
+      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {

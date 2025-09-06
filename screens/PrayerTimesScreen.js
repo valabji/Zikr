@@ -256,7 +256,7 @@ export default function PrayerTimesScreen({ navigation }) {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
-        <CHeader navigation={navigation} title={t('navigation.prayerTimes')} />
+        <CHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
         <View style={{
           flex: 1,
           justifyContent: 'center',
@@ -279,7 +279,7 @@ export default function PrayerTimesScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
-      <CHeader navigation={navigation} title={t('navigation.prayerTimes')} />
+      <CHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
 
       <ScrollView
         style={{ flex: 1 }}

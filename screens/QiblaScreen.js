@@ -68,13 +68,13 @@ export default function QiblaScreen({ navigation }) {
     setLoading(true);
     try {
       await loadLocation();
-      
+
       const compassResult = await initializeCompass();
-      
+
       // If GPS location was obtained from compass hook, update qibla direction
       if (compassResult && compassResult.gpsLocation) {
         const direction = calculateQiblaDirection(
-          compassResult.gpsLocation.latitude, 
+          compassResult.gpsLocation.latitude,
           compassResult.gpsLocation.longitude
         );
         setQiblaDirection(direction);
@@ -88,7 +88,7 @@ export default function QiblaScreen({ navigation }) {
 
   useEffect(() => {
     initializeData();
-    
+
     // Cleanup on unmount
     return () => {
       cleanupCompass();
@@ -100,7 +100,7 @@ export default function QiblaScreen({ navigation }) {
     const unsubscribe = navigation.addListener('blur', () => {
       cleanupCompass();
     });
-    
+
     const refocus = navigation.addListener('focus', () => {
       if (compassEnabled) {
         initializeCompass();
@@ -118,10 +118,10 @@ export default function QiblaScreen({ navigation }) {
     const alignmentThreshold = 1.0;
     const closeThreshold = 10.0;
     const normalizedDifference = Math.min(angleDifference, 360 - angleDifference);
-    
+
     const isAligned = normalizedDifference <= alignmentThreshold;
     const isClose = normalizedDifference <= closeThreshold;
-    
+
     return { isAligned, isClose: isClose && !isAligned, normalizedDifference };
   }, []);
 
@@ -129,14 +129,14 @@ export default function QiblaScreen({ navigation }) {
   useEffect(() => {
     if (qiblaDirection !== null && qiblaDirection !== undefined) {
       let targetAngle = qiblaDirection;
-      
+
       // If compass is enabled, adjust for current heading
       if (compassEnabled) {
         targetAngle = qiblaDirection - currentHeading;
       }
-      
+
       const currentValue = rotationValue._value;
-      
+
       // Handle 0-360 degree wrap around
       if (Math.abs(targetAngle - currentValue) > 180) {
         if (targetAngle > currentValue) {
@@ -145,14 +145,14 @@ export default function QiblaScreen({ navigation }) {
           targetAngle += 360;
         }
       }
-      
+
       // Calculate alignment states
       const angleDifference = Math.abs(targetAngle);
       const { isAligned, isClose, normalizedDifference } = calculateAlignmentStates(angleDifference);
-      
+
       // Update angle difference immediately for color calculations
       setCurrentAngleDifference(normalizedDifference);
-      
+
       // Throttle alignment state updates to reduce re-renders during fast rotation
       const now = Date.now();
       if (now - alignmentUpdateThrottle.current > 100) { // Update every 100ms max
@@ -160,7 +160,7 @@ export default function QiblaScreen({ navigation }) {
         setIsQiblaClose(isClose);
         alignmentUpdateThrottle.current = now;
       }
-      
+
       Animated.timing(rotationValue, {
         toValue: targetAngle,
         duration: compassEnabled ? 150 : PRAYER_CONSTANTS.ANIMATION.COMPASS_ROTATION_DURATION, // Slightly faster for smoother updates
@@ -182,7 +182,7 @@ export default function QiblaScreen({ navigation }) {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
-        <CHeader navigation={navigation} title={t('navigation.qibla')} />
+        <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
         <View style={{
           flex: 1,
           justifyContent: 'center',
@@ -206,9 +206,8 @@ export default function QiblaScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
-      <CHeader navigation={navigation} title={t('navigation.qibla')} />
-      
-      <ScrollView 
+      <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING,

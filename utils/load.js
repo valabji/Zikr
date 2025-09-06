@@ -5,12 +5,9 @@ import { initializeLanguage, } from '../locales/i18n';
 
 import Azkar from '../constants/Azkar.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from "firebase/app";
-import { getAnalytics, logEvent } from "firebase/analytics";
 
 import { mystore } from '../redux/store';
-import {nativeApplicationVersion} from 'expo-application'
-import { Platform } from 'react-native';
+import loadFirebaseAnalytics from './firebase/load';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -20,14 +17,7 @@ export async function loadResourcesAndDataAsync() {
             ...Ionicons.font,
             'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
         });
-        const firebaseConfig = JSON.parse(process.env.EXPO_PUBLIC_FIREBASE_CONFIG);
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        logEvent(analytics, 'App_Loaded_Successfully', {
-            version: nativeApplicationVersion,
-            notes: 'working from env',
-            platform: Platform?.OS,
-        });
+        await loadFirebaseAnalytics();
     } catch (e) {
         console.warn(e);
     } finally {
