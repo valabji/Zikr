@@ -7,3 +7,28 @@ google-services.json
 GoogleService-Info.plist
 coverage/
 android/
+
+# Ignore Yarn's cache & build state
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Ignore temporary files
+.pnp.*
+.pnp
+.pnp.js
+.pnp.data.json
+
+# Ignore optional Yarn error logs
+.yarn-error.log
+
+# Ignore Yarn release artifacts (if you ever run yarn set version from sources)
+.yarn/releases
+
+# Ignore Yarn SDKS (auto-generated VSCode helpers)
+.yarn/sdks
+
+# Do NOT ignore the Yarn configuration files
+!.yarnrc.yml
+!.yarn
