@@ -9,7 +9,7 @@ import CustomHeader from '../components/CHeader';
 import { setLanguage } from '../locales/i18n';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign, isRTL } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 
@@ -89,6 +89,10 @@ export default function SettingsScreen({ navigation }) {
     },
     scrollContent: {
       padding: 20,
+      ...(Platform.OS === 'web' && { 
+        paddingBottom: 100 
+      }),
+      paddingBottom: 100, // Add padding for floating button
     },
     buttonSetting: {
       paddingVertical: 10,
@@ -741,7 +745,6 @@ export default function SettingsScreen({ navigation }) {
             <Text style={styles.settingTitle}>{t('settings.autoSave')}</Text>
             <View style={styles.autoSaveContainer}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.autoSaveText}>{t('settings.autoSave')}</Text>
                 <Text style={styles.autoSaveDescription}>{t('settings.autoSaveDescription')}</Text>
               </View>
               <TouchableOpacity
@@ -1111,40 +1114,109 @@ export default function SettingsScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Save and Default buttons - only show when auto save is disabled */}
-          {!autoSave && (
-            <View style={[styles.setting, styles.buttonSetting]}>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: colors.DYellow }]}
-                  onPress={handleDefault}
-                >
-                  <Text style={styles.buttonText}>{t('settings.default')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: colors.BYellow }]}
-                  onPress={handleSave}
-                >
-                  <Text style={styles.buttonText}>{t('settings.save')}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
-          {/* Default button - only show when auto save is enabled */}
-          {autoSave && (
-            <View style={[styles.setting, styles.buttonSetting]}>
-              <View style={styles.buttonContainerFullWidth}>
-                <TouchableOpacity
-                  style={[styles.buttonFullWidth, { backgroundColor: colors.DYellow }]}
-                  onPress={handleDefault}
-                >
-                  <Text style={styles.buttonText}>{t('settings.default')}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
         </ScrollView>
+
+        {/* Floating Save Button - only show when auto save is disabled */}
+        {!autoSave && (
+          <TouchableOpacity
+            onPress={handleSave}
+            style={{
+              position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+              bottom: Platform.OS === 'web' ? 20 : 30,
+              ...getDirectionalMixedSpacing({ right: 20 }),
+              backgroundColor: colors.BYellow,
+              borderRadius: 28,
+              width: 56,
+              height: 56,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4.65,
+              elevation: 8,
+              zIndex: 1000,
+              ...(Platform.OS === 'web' && {
+                cursor: 'pointer',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              })
+            }}
+          >
+            <Feather name="save" size={24} color={colors.DGreen} />
+          </TouchableOpacity>
+        )}
+
+        {/* Floating Default Button - only show when auto save is disabled */}
+        {!autoSave && (
+          <TouchableOpacity
+            onPress={handleDefault}
+            style={{
+              position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+              bottom: Platform.OS === 'web' ? 20 : 30,
+              ...getDirectionalMixedSpacing({ right: 90 }),
+              backgroundColor: colors.DYellow,
+              borderRadius: 28,
+              width: 56,
+              height: 56,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4.65,
+              elevation: 8,
+              zIndex: 1000,
+              ...(Platform.OS === 'web' && {
+                cursor: 'pointer',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              })
+            }}
+          >
+            <Feather name="rotate-ccw" size={24} color={colors.DGreen} />
+          </TouchableOpacity>
+        )}
+
+        {/* Floating Default Button - also show when auto save is enabled */}
+        {autoSave && (
+          <TouchableOpacity
+            onPress={handleDefault}
+            style={{
+              position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+              bottom: Platform.OS === 'web' ? 20 : 30,
+              ...getDirectionalMixedSpacing({ right: 20 }),
+              backgroundColor: colors.DYellow,
+              borderRadius: 28,
+              width: 56,
+              height: 56,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4.65,
+              elevation: 8,
+              zIndex: 1000,
+              ...(Platform.OS === 'web' && {
+                cursor: 'pointer',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              })
+            }}
+          >
+            <Feather name="rotate-ccw" size={24} color={colors.DGreen} />
+          </TouchableOpacity>
+        )}
       </LinearGradient>
     </View>
   );
