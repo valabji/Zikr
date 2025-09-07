@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import Swiper from 'react-native-swiper';
+import Swiper from 'react-native-web-swiper';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
@@ -8,33 +8,19 @@ import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
 
-// Try different import approach for web swiper
-let WebSwiper;
-if (Platform?.OS === 'web') {
-  try {
-    WebSwiper = require('react-native-web-swiper').default;
-  } catch (error) {
-    console.warn('Failed to load react-native-web-swiper:', error);
-    WebSwiper = Swiper; // Fallback to regular swiper
-  }
-}
-
 export default function AzkarSwiper({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
-  const reverse = isRTL();
-  let swp = React.createRef();
+  const reverse = Platform.OS === 'web' && isRTL();
+  const swp = React.useRef(null);
   const size = azkarList.length;
-
-  // Choose the appropriate swiper based on platform
-  const SwiperComponent = Platform?.OS === 'web' ? (WebSwiper || Swiper) : Swiper;
 
   const Item = ({ z, pn }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
-    
+
     return (
       <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
         <TouchableOpacity
@@ -43,25 +29,22 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
             if (i < z.count) {
               player.playClick();
               setI(i + 1);
-              vibrationManager.vibrateForAzkarCount();
               if (i == z.count - 1) {
                 vibrationManager.vibrateForNextZikr();
-                if (Platform.OS === 'web') {
-                  // react-native-web-swiper uses different method
-                  if (reverse) {
-                    let next = size - pn - 1;
-                    swp?.goTo?.(next);
-                  } else {
-                    swp?.goTo?.(pn);
+                // react-native-web-swiper navigation
+                if (reverse) {
+                  let next = size - pn - 1;
+                  if (swp?.current && swp?.current?.goTo) {
+                    swp.current.goTo(next);
                   }
                 } else {
-                  // react-native-swiper
-                  let scrollBy = reverse ? -1 : 1;
-                  if (pn === 1 && reverse) {
-                    scrollBy = -2;
+                  let next = pn; // Move to next slide (pn is 1-indexed, but goTo expects 0-indexed)
+                  if (swp?.current && swp?.current?.goTo) {
+                    swp.current.goTo(next);
                   }
-                  swp?.scrollBy?.(scrollBy, true);
                 }
+              } else {
+                vibrationManager.vibrateForAzkarCount();
               }
             }
           }}
@@ -136,46 +119,27 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
   return (
     <View style={{
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...(Platform.OS === 'web' && {
-        width: '100%',
-        height: '100%',
-        maxWidth: '100vw',
-        maxHeight: '100vh'
-      })
+      width: '100%',
+      height: '100%',
     }}>
-      <SwiperComponent
-        ref={(ref) => { swp = ref; }}
-        style={Platform.OS === 'web' ? {
+      <Swiper
+        ref={swp}
+        style={{
           flex: 1,
           width: '100%',
-          height: '100%',
-          minWidth: 300,
-          minHeight: 400
-        } : {}}
+          height: '100%'
+        }}
         loop={false}
-        showsButtons={false}
-        showsPagination={false}
-        // Only apply web-specific props if we're using WebSwiper successfully
-        {...(Platform.OS === 'web' && WebSwiper && WebSwiper !== Swiper && {
-          controlsEnabled: false,
-          swipeControlsEnabled: true,
-          from: reverse ? size - 1 : 0,
-          containerStyle: {
-            width: '100%',
-            height: '100%',
-            flex: 1
-          }
-        })}
-        {...(Platform.OS !== 'web' && {
-          onContentSizeChange: () => {
-            if (reverse) {
-              const scrollBy = size;
-              swp?.scrollBy?.(scrollBy, false);
-            }
-          }
-        })}
+        controlsEnabled={false}
+        swipeControlsEnabled={true}
+        from={reverse ? size - 1 : 0}
+        containerStyle={{
+          flex: 1,
+          width: '100%',
+          height: '100%'
+        }}
+        minDistanceForAction={0.1}
+        stackDepth={1}
       >
         {azkarList.map((i, index) => {
           const slideContent = (
@@ -189,17 +153,15 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
           return (
             <View key={index} style={{
               flex: 1,
-              ...(Platform.OS === 'web' && {
-                width: '100%',
-                minWidth: 300,
-                height: '100%'
-              })
+              width: '100%',
+              height: '100%',
+              minHeight: 400
             }} testID="azkar-item">
               {slideContent}
             </View>
           );
         })}
-      </SwiperComponent>
+      </Swiper>
     </View>
   );
 }

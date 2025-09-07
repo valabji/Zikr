@@ -32,6 +32,7 @@ export default {
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
+        backgroundImage: "./assets/images/icon_bg.png",
         backgroundColor: "#ffffff"
       },
       permissions: [

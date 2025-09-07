@@ -75,12 +75,11 @@ jest.mock('react-native/Libraries/StyleSheet/flattenStyle', () => {
   };
 });
 
-// Mock react-native-swiper
-jest.mock('react-native-swiper', () => {
+// Mock react-native-web-swiper
+jest.mock('react-native-web-swiper', () => {
   const React = require('react');
   return React.forwardRef((props, ref) => {
     React.useImperativeHandle(ref, () => ({
-      scrollBy: jest.fn(),
       goTo: jest.fn(),
     }));
     return React.createElement('View', { ...props, testID: props.testID || 'swiper' }, props.children);
@@ -88,16 +87,6 @@ jest.mock('react-native-swiper', () => {
 });
 
 // Mock react-native-web-swiper
-jest.mock('react-native-web-swiper', () => ({
-  default: require('react').forwardRef((props, ref) => {
-    const React = require('react');
-    React.useImperativeHandle(ref, () => ({
-      goTo: jest.fn(),
-    }));
-    return React.createElement('View', { ...props, testID: props.testID || 'web-swiper' }, props.children);
-  })
-}));
-
 // Setup global mock for StyleSheet flatten
 global.flattenStyle = jest.fn((style) => {
   if (style === null || typeof style !== "object") {

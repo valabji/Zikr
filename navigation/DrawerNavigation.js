@@ -253,6 +253,7 @@ export function DNav() {
             <TouchableOpacity
               testID="contribute-screen"
               onPress={() => {
+                navigation.toggleDrawer()
                 navigation.navigate("Contribute")
               }}
               style={{

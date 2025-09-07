@@ -39,7 +39,7 @@ jest.mock('../../components/StarSvg', () => ({
   StarSvgFilled: ({ width, height }) => 'StarSvgFilled'
 }));
 
-jest.mock('react-native-swiper', () => 'Swiper');
+jest.mock('react-native-web-swiper', () => 'Swiper');
 
 const mockAzkarList = [
   {
