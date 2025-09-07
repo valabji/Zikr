@@ -1,2 +1,8 @@
 node_modules
 .expo
+.DS_Store
+.env
+dist/
+google-services.json
+GoogleService-Info.plist
+coverage/

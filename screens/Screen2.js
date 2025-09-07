@@ -1,188 +1,106 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TouchableHighlight, StyleSheet } from 'react-native'
+import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import Clrs from "../constants/Colors";
+import { useColors, useIsBrightTheme } from "../constants/Colors";
+import { textStyles } from '../constants/Fonts';
+import { t, isRTL, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
+import { Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar.js';
-import Swiper from 'react-native-swiper'
-import { Audio } from 'expo-av';
+import AzkarSwiper from '../components/AzkarSwiper';
+import AzkarOnePageScroll from '../components/AzkarOnePageScroll';
+import { useAudio } from '../utils/Sounds.js';
+import { BackgroundSvg1 } from '../components/BackgroundSvg1';
+import { getFontSize } from '../utils/FontSize';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from 'expo-ads-admob';
+// import {
+//   AdMobBanner,
+//   AdMobInterstitial,
+//   PublisherBanner,
+//   AdMobRewarded,
+//   setTestDeviceIDAsync,
+// } from 'expo-ads-admob';
 
 const Banner = "ca-app-pub-1740754568229700/6853520443"
 const Interstatel = "ca-app-pub-1740754568229700/7975030420"
 
 
 export default function Screen2({ route, navigation }) {
-  const name = route.params.name
-  const [sound, setSound] = React.useState(null);
+  const colors = useColors();
+  const name = route?.params?.name || "Azkar";
+  const player = useAudio();
+  const reverse = isRTL();
+  const [zikrFontSize, setZikrFontSize] = React.useState(18);
+  const [viewMode, setViewMode] = React.useState('swiper');
 
-  async function playSound() {
-    let i = 0
-    if (sound == null) {
-      console.log("NULLLL")
-      i = 1
-      const { sound } = await Audio.Sound.createAsync(
-        require('../assets/sound/kik.mp3')
-      );
-      setSound(sound);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.didJustFinish) return;
-        sound.unloadAsync();
-      })
+  // Load font size and view mode when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadSettings = async () => {
+        const [fontSize, savedViewMode] = await Promise.all([
+          getFontSize(),
+          AsyncStorage.getItem('@viewMode')
+        ]);
+        setZikrFontSize(fontSize);
+        setViewMode(savedViewMode || 'swiper');
+      };
+      loadSettings();
+    }, [])
+  );
 
-    }
-    if (i == 1) {
-      sound.playAsync().then(() => {
+  const azkarList = Azkar.filter(i => i.category == name);
 
-      })
-    } else {
-      sound.loadAsync(require('../assets/sound/kik.mp3')).then(() => {
-        sound.playAsync().then(() => {
-
-        })
-      })
-    }
-  }
-
-  let swp = React.createRef();;
-  let size = 0;
-
-  const Item = ({ z, pn }) => {
-    if (z.count == 0 || z.count == null || z.count == undefined) {
-      z.count = 1
-    }
-    const [i, setI] = React.useState(0)
-    return <ScrollView style={{ flex: 1, width: "100%" }} contentContainerStyle={{ flexGrow: 1 }}>
+  // Contribution button component for header
+  const ContributionButton = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}>
       <TouchableOpacity
-        activeOpacity={0.8}
-        onPressIn={() => {
-          if (i < z.count) {
-            playSound()
-            setI(i + 1)
-            console.log(i)
-
-            if (i == z.count - 1) {
-              swp.scrollBy(1, true)
-            }
-          }
+        onPress={() => navigation.navigate('Contribute')}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          ...getDirectionalSpacing(0, 20),
         }}
-        style={{ height: "100%" }}>
-        <Text style={{
-          color: Clrs.BYellow,
-          fontSize: 14,
-          marginTop: 6,
-          fontFamily: "Cairo_400Regular",
-        }}>{z.zekr}</Text>
-        <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderStyle: "dashed" }} />
-        {z.reference != "" &&
-          <Text style={{
-            color: Clrs.BYellow,
-            fontSize: 14,
-            marginTop: 26,
-            fontFamily: "Cairo_400Regular",
-          }}> المرجع : {z.reference}</Text>}
-        <Text style={{
-          color: Clrs.BYellow,
-          fontSize: 14,
-          marginTop: 6,
-          fontFamily: "Cairo_400Regular",
-        }}>{z.description}</Text>
-        <View style={{ flex: 1 }} />
-        <View style={{ borderTopWidth: 0, height: 0, width: "100%", borderStyle: "dotted" }} />
-        <View style={{ flex: 1 }} />
-        <View style={{ height: 96, flexDirection: "row-reverse" }}>
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-
-          >
-            <Text
-              style={{
-                textAlign: "right",
-                fontFamily: "Cairo_400Regular",
-                color: Clrs.BYellow,
-                fontSize: 18,
-              }}
-            >صفحة {pn} من {size}</Text>
-          </View>
-          <View style={{ flex: 1 }} />
-          <ImageBackground
-            source={require("../assets/images/Star.png")}
-            style={{ width: 96, height: 96, alignSelf: "center", justifyContent: "center", alignItems: "center" }}
-          >
-            <Text
-              style={{
-                color: Clrs.BYellow,
-                fontSize: 18,
-              }}
-            >{i} / {z.count}</Text>
-          </ImageBackground>
-        </View>
+      >
+        <Feather
+          name="edit"
+          size={20}
+          color={colors.BYellow}
+          style={{ marginRight: isRTL() ? 0 : 5, marginLeft: isRTL() ? 5 : 0 }}
+        />
       </TouchableOpacity>
-    </ScrollView>
-  }
-
+    </View>
+  );
 
   return (
-    <View style={{ flex: 1 }}>
-      <CustomHeader title={name} isHome={false} navigation={navigation} />
-      <ImageBackground
-        source={require("../assets/images/bg.jpg")}
-        style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: Clrs.BGreen }}
-      >
-        <AdMobBanner
+    <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
+      <BackgroundSvg1 color={colors.BYellow} />
+      <CustomHeader title={name} isHome={false} navigation={navigation} Left={ContributionButton} />
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...(Platform.OS === 'web' && {
+          width: '100%',
+          height: '100%',
+          maxWidth: '100vw',
+          maxHeight: '100vh'
+        })
+      }}>
+        {/* <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
           servePersonalizedAds={true} // true or false
           onDidFailToReceiveAdWithError={err => {
             console.warn(err)
-          }} />
-        <Swiper ref={(ref) => { swp = ref; }} style={{}} loop={false} showsButtons={false} showsPagination={false}  >
-          {Azkar.map((i, index) => {
-            if (i.category == name) {
-              size++
-              return <View style={{ flex: 1 }}>
-                <View style={{
-                  flex: 1, borderWidth: 1, borderColor: Clrs.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
-                }}>
-                  <Item z={i} pn={size} />
-                </View>
-              </View>
-            }
-          })}
-        </Swiper>
-      </ImageBackground>
+          }} /> */}
+        {viewMode === 'swiper' ? (
+          <AzkarSwiper azkarList={azkarList} zikrFontSize={zikrFontSize} />
+        ) : (
+          <AzkarOnePageScroll azkarList={azkarList} zikrFontSize={zikrFontSize} />
+        )}
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: { alignItems: "center" },
-  slide1: {
-    flex: 1,
-    backgroundColor: '#9DD6EB'
-  },
-  slide2: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#97CAE5'
-  },
-  slide3: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#92BBD9'
-  },
-  text: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold'
-  }
-})

@@ -1,0 +1,206 @@
+/* RTL Web Support Styles */
+
+/* Global RTL styles */
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* RTL-specific adjustments for common elements */
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Text input RTL support */
+html[dir="rtl"] input,
+html[dir="rtl"] textarea {
+  text-align: right;
+}
+
+html[dir="ltr"] input,
+html[dir="ltr"] textarea {
+  text-align: left;
+}
+
+/* Flex direction adjustments for RTL */
+html[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* Margin and padding adjustments */
+html[dir="rtl"] .margin-left {
+  margin-left: 0;
+  margin-right: var(--margin-value, 16px);
+}
+
+html[dir="rtl"] .margin-right {
+  margin-right: 0;
+  margin-left: var(--margin-value, 16px);
+}
+
+html[dir="rtl"] .padding-left {
+  padding-left: 0;
+  padding-right: var(--padding-value, 16px);
+}
+
+html[dir="rtl"] .padding-right {
+  padding-right: 0;
+  padding-left: var(--padding-value, 16px);
+}
+
+/* Border adjustments */
+html[dir="rtl"] .border-left {
+  border-left: none;
+  border-right: var(--border-value, 1px solid #ccc);
+}
+
+html[dir="rtl"] .border-right {
+  border-right: none;
+  border-left: var(--border-value, 1px solid #ccc);
+}
+
+/* Position adjustments */
+html[dir="rtl"] .left-0 {
+  left: auto;
+  right: 0;
+}
+
+html[dir="rtl"] .right-0 {
+  right: auto;
+  left: 0;
+}
+
+/* Transform adjustments for icons and arrows */
+html[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Arabic font improvements */
+html[dir="rtl"] {
+  font-family: 'Cairo', 'Helvetica Neue', Arial, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* Navigation and menu RTL adjustments */
+html[dir="rtl"] .nav-item {
+  margin-left: 0;
+  margin-right: 16px;
+}
+
+html[dir="rtl"] .nav-item:last-child {
+  margin-right: 0;
+}
+
+/* Drawer/sidebar RTL adjustments */
+html[dir="rtl"] .drawer-left {
+  left: auto;
+  right: 0;
+}
+
+html[dir="rtl"] .drawer-right {
+  right: auto;
+  left: 0;
+}
+
+/* Button and action items RTL */
+html[dir="rtl"] .button-with-icon {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .icon-left {
+  margin-left: 8px;
+  margin-right: 0;
+}
+
+html[dir="rtl"] .icon-right {
+  margin-right: 8px;
+  margin-left: 0;
+}
+
+/* Card and content RTL adjustments */
+html[dir="rtl"] .card-content {
+  text-align: right;
+}
+
+html[dir="ltr"] .card-content {
+  text-align: left;
+}
+
+/* List items RTL */
+html[dir="rtl"] .list-item {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .list-item-content {
+  text-align: right;
+}
+
+/* Animation adjustments for RTL */
+html[dir="rtl"] .slide-in-left {
+  animation: slideInRight 0.3s ease-in-out;
+}
+
+html[dir="rtl"] .slide-in-right {
+  animation: slideInLeft 0.3s ease-in-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Form elements RTL */
+html[dir="rtl"] .form-group {
+  text-align: right;
+}
+
+html[dir="rtl"] .form-label {
+  text-align: right;
+}
+
+/* Tab navigation RTL */
+html[dir="rtl"] .tab-navigation {
+  flex-direction: row-reverse;
+}
+
+/* Badge and notification RTL */
+html[dir="rtl"] .badge-top-right {
+  right: auto;
+  left: -8px;
+}
+
+html[dir="rtl"] .badge-top-left {
+  left: auto;
+  right: -8px;
+}
+
+/* Responsive RTL adjustments */
+@media (max-width: 768px) {
+  html[dir="rtl"] .mobile-nav {
+    flex-direction: row-reverse;
+  }
+  
+  html[dir="rtl"] .mobile-content {
+    padding-left: 0;
+    padding-right: 16px;
+  }
+}
