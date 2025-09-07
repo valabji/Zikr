@@ -3,6 +3,12 @@
     "name": "تطبيق ذِكْر",
     "tasbih": "المسبحة"
   },
+  "ios": {
+    "CFBundleDisplayName": "ذِكْر"
+  },
+  "android": {
+    "app_name": "ذِكْر"
+  },
   "auth": {
     "login": "تسجيل الدخول",
     "register": "تسجيل",

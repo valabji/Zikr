@@ -3,6 +3,12 @@
     "name": "Zikr App",
     "tasbih": "Tasbih"
   },
+  "ios": {
+    "CFBundleDisplayName": "Zikr"
+  },
+  "android": {
+    "app_name": "Zikr"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",

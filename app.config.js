@@ -23,6 +23,9 @@ export default {
       supportsTablet: true,
       config: {
         googleMobileAdsAppId: process.env.ADMOB_APPID
+      },
+      infoPlist: {
+        CFBundleAllowMixedLocalizations: true
       }
     },
     android: {
@@ -111,6 +114,10 @@ export default {
           "resizeMode": "contain",
           "imageWidth": 200
         }]
-    ]
-  }
+    ],
+    locales: {
+      "ar": "./locales/ar.json",
+      "en": "./locales/en.json"
+    }
+  },
 };
