@@ -48,6 +48,8 @@
   "settings": {
     "initialScreen": "Initial Screen",
     "language": "Language",
+    "autoSave": "Auto Save",
+    "autoSaveDescription": "Automatically save changes when made",
     "theme": "Theme",
     "clickVolume": "Click Sound Volume",
     "fontSize": "Zikr Font Size",

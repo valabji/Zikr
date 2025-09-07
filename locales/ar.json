@@ -48,6 +48,8 @@
   "settings": {
     "initialScreen": "الشاشة الرئيسية",
     "language": "اللغة",
+    "autoSave": "الحفظ التلقائي",
+    "autoSaveDescription": "حفظ التغييرات تلقائياً عند إجرائها",
     "theme": "المظهر",
     "clickVolume": "مستوى صوت النقر",
     "fontSize": "حجم خط الأذكار",
