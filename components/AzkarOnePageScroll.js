@@ -132,9 +132,9 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
 
   return (
     <ScrollView
-      style={{ flex: 1, width: '100%', marginBottom: 40 }}
+      style={{ flex: 1, width: '100%' }}
       contentContainerStyle={{
-        paddingBottom: 40,
+        paddingBottom: 80,
         flexGrow: 1
       }}
       showsVerticalScrollIndicator={true}

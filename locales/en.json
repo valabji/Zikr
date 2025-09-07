@@ -3,6 +3,12 @@
     "name": "Zikr App",
     "tasbih": "Tasbih"
   },
+  "ios": {
+    "CFBundleDisplayName": "Zikr"
+  },
+  "android": {
+    "app_name": "Zikr"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -48,6 +54,8 @@
   "settings": {
     "initialScreen": "Initial Screen",
     "language": "Language",
+    "autoSave": "Auto Save",
+    "autoSaveDescription": "Automatically save changes when made",
     "theme": "Theme",
     "clickVolume": "Click Sound Volume",
     "fontSize": "Zikr Font Size",
@@ -186,7 +194,7 @@
     "noLocationSet": "No location set",
     "autoLocate": "Auto Locate",
     "useGPS": "Use GPS",
-    "useIP": "Use IP Location",
+    "useIP": "Approximate Location",
     "searchLocation": "Search Location",
     "searchPlaceholder": "Search for a city or location...",
     "popularLocations": "Popular Locations",
@@ -206,7 +214,7 @@
     "permissionDeniedMessage": "Location permission is required to use GPS. Please enable it in your device settings."
   },
   "prayerSettings": {
-    "title": "Prayer Settings",
+    "title": "Prayer & Qibla Settings",
     "locationSettings": "Location Settings",
     "calculationMethod": "Calculation Method",
     "calculationMethodDescription": "Choose the prayer time calculation method based on your location or preference.",
@@ -229,7 +237,7 @@
     "savePrayerSettings": "Save Prayer Settings",
     "locationSettingsSection": "Location Settings",
     "prayerSettingsSection": "Prayer Settings",
-    "calculationSettingsSection": "Calculation Settings",
+    "calculationSettingsSection": "Prayer Times Calculation",
     "prayerNotificationsSection": "Prayer Notifications",
     "moreOptions": "... More Options",
     "additionalMethods": "Additional calculation methods:",

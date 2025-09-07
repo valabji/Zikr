@@ -195,117 +195,127 @@ export default function ContributeScreen({ navigation }) {
             </View>
 
             {/* Email Options */}
-            <View style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between'
-            }}>
-              <TouchableOpacity
-                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.REFERENCE_CHECKING)}
-                style={{
-                  backgroundColor: colors.DGreen,
-                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
-                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
-                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
-                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                }}
-              >
-                <Feather name="check-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_400Regular",
-                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
-                  textAlign: 'center',
-                  flex: 1
-                }}>
-                  {t('contribute.referenceChecking')}
-                </Text>
-              </TouchableOpacity>
+            <View>
+              {/* Top row: Suggestions and Translation */}
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING
+              }}>
+                <TouchableOpacity
+                  onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.SUGGESTIONS)}
+                  style={{
+                    backgroundColor: colors.DGreen,
+                    borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                    padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                    minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
+                  }}
+                >
+                  <Feather name="message-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
+                    fontFamily: "Cairo_400Regular",
+                    ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
+                    textAlign: 'center',
+                    flex: 1,
+                    flexWrap: 'wrap'
+                  }}>
+                    {t('contribute.suggestions')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.TRANSLATION)}
-                style={{
-                  backgroundColor: colors.DGreen,
-                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
-                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
-                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
-                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                }}
-              >
-                <Feather name="globe" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_400Regular",
-                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
-                  textAlign: 'center',
-                  flex: 1
-                }}>
-                  {t('contribute.translation')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.TRANSLATION)}
+                  style={{
+                    backgroundColor: colors.DGreen,
+                    borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                    padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                    minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
+                  }}
+                >
+                  <Feather name="globe" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
+                    fontFamily: "Cairo_400Regular",
+                    ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
+                    textAlign: 'center',
+                    flex: 1,
+                    flexWrap: 'wrap'
+                  }}>
+                    {t('contribute.translation')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-              <TouchableOpacity
-                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.SUGGESTIONS)}
-                style={{
-                  backgroundColor: colors.DGreen,
-                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
-                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: CONTRIBUTE_CONSTANTS.SPACING.TINY_PADDING,
-                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
-                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                }}
-              >
-                <Feather name="message-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_400Regular",
-                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
-                  textAlign: 'center',
-                  flex: 1
-                }}>
-                  {t('contribute.suggestions')}
-                </Text>
-              </TouchableOpacity>
+              {/* Bottom row: Reference Checking and Bug Reports */}
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between'
+              }}>
+                <TouchableOpacity
+                  onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.REFERENCE_CHECKING)}
+                  style={{
+                    backgroundColor: colors.DGreen,
+                    borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                    padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING + 2,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                    minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT + 10
+                  }}
+                >
+                  <Feather name="check-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                    fontFamily: "Cairo_400Regular",
+                    ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
+                    textAlign: 'center',
+                    flex: 1,
+                    flexWrap: 'wrap'
+                  }}>
+                    {t('contribute.referenceChecking')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.BUG_REPORT)}
-                style={{
-                  backgroundColor: colors.DGreen,
-                  borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
-                  padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
-                  height: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                }}
-              >
-                <Feather name="alert-triangle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL,
-                  fontFamily: "Cairo_400Regular",
-                  ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
-                  textAlign: 'center',
-                  flex: 1
-                }}>
-                  {t('contribute.bugReports')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.BUG_REPORT)}
+                  style={{
+                    backgroundColor: colors.DGreen,
+                    borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
+                    padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING + 2,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
+                    minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT + 10
+                  }}
+                >
+                  <Feather name="alert-triangle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                    fontFamily: "Cairo_400Regular",
+                    ...getDirectionalMixedSpacing({ marginLeft: CONTRIBUTE_CONSTANTS.SPACING.EXTRA_SMALL_PADDING }),
+                    textAlign: 'center',
+                    flex: 1,
+                    flexWrap: 'wrap'
+                  }}>
+                    {t('contribute.bugReports')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>

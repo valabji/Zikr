@@ -38,14 +38,24 @@ export function useAudio() {
     };
 
     return {
-        playClick: async (volume=false) => {
-            if (volume) {
-                player.volume = volume;
+        playClick: async (customVolume=false) => {
+            let actualVolume;
+            if (customVolume !== false) {
+                // Use custom volume for preview (like slider)
+                actualVolume = customVolume;
+                player.volume = customVolume;
             } else {
-                await loadVolume(); // Ensure volume is loaded
+                // Use stored volume from AsyncStorage for all other clicks
+                await loadVolume();
+                actualVolume = volume;
+                player.volume = volume;
             }
-            player.seekTo(0);
-            player.play();
+            
+            // Only play if volume is greater than 0
+            if (actualVolume > 0) {
+                player.seekTo(0);
+                player.play();
+            }
         },
         volume,
         setClickVolume
