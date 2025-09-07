@@ -214,7 +214,7 @@
     "permissionDeniedMessage": "Location permission is required to use GPS. Please enable it in your device settings."
   },
   "prayerSettings": {
-    "title": "Prayer Settings",
+    "title": "Prayer & Qibla Settings",
     "locationSettings": "Location Settings",
     "calculationMethod": "Calculation Method",
     "calculationMethodDescription": "Choose the prayer time calculation method based on your location or preference.",
@@ -237,7 +237,7 @@
     "savePrayerSettings": "Save Prayer Settings",
     "locationSettingsSection": "Location Settings",
     "prayerSettingsSection": "Prayer Settings",
-    "calculationSettingsSection": "Calculation Settings",
+    "calculationSettingsSection": "Prayer Times Calculation",
     "prayerNotificationsSection": "Prayer Notifications",
     "moreOptions": "... More Options",
     "additionalMethods": "Additional calculation methods:",

@@ -172,7 +172,11 @@ export const getDirectionalMixedSpacing = ({
   marginLeft, 
   marginRight, 
   paddingLeft, 
-  paddingRight 
+  paddingRight,
+  left,
+  right,
+  top,
+  bottom
 }) => {
   // On mobile, let I18nManager handle RTL automatically
   if (Platform?.OS !== 'web') {
@@ -181,6 +185,10 @@ export const getDirectionalMixedSpacing = ({
     if (marginRight !== undefined) spacing.marginRight = marginRight;
     if (paddingLeft !== undefined) spacing.paddingLeft = paddingLeft;
     if (paddingRight !== undefined) spacing.paddingRight = paddingRight;
+    if (left !== undefined) spacing.left = left;
+    if (right !== undefined) spacing.right = right;
+    if (top !== undefined) spacing.top = top;
+    if (bottom !== undefined) spacing.bottom = bottom;
     return spacing;
   }
   
@@ -207,6 +215,21 @@ export const getDirectionalMixedSpacing = ({
       if (paddingRight !== undefined) spacing.paddingRight = paddingRight;
     }
   }
+  
+  // Handle absolute positioning properties
+  if (left !== undefined || right !== undefined) {
+    if (rtl) {
+      if (left !== undefined) spacing.right = left;
+      if (right !== undefined) spacing.left = right;
+    } else {
+      if (left !== undefined) spacing.left = left;
+      if (right !== undefined) spacing.right = right;
+    }
+  }
+  
+  // Top and bottom don't need RTL transformation
+  if (top !== undefined) spacing.top = top;
+  if (bottom !== undefined) spacing.bottom = bottom;
   
   return spacing;
 };

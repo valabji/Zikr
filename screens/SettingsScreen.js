@@ -51,7 +51,7 @@ export default function SettingsScreen({ navigation }) {
     { id: 'All', labelEn: 'All Azkar', labelAr: 'كل الاذكار', route: 'Home' },
     { id: 'Fav', labelEn: 'Favorites', labelAr: 'الاذكار المفضلة', route: 'Fav' },
     { id: 'Tasbih', labelEn: 'Tasbih Counter', labelAr: 'المسبحة', route: 'Screen3' },
-    { id: 'PrayerTimes', labelEn: 'Prayer Times', labelAr: 'أوقات الصلاة', route: 'PrayerTimesScreen' },
+    { id: 'PrayerTimes', labelEn: 'Prayer Times', labelAr: 'مواقيت الصلاة', route: 'PrayerTimesScreen' },
     { id: 'Qibla', labelEn: 'Qibla Direction', labelAr: 'اتجاه القبلة', route: 'QiblaScreen' },
   ];
 

@@ -49,7 +49,6 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     });
 
     // UI states
-    const [expandedSection, setExpandedSection] = useState(null);
     const [isCalculationMethodModalVisible, setCalculationMethodModalVisible] = useState(false);
     const [isMadhabModalVisible, setMadhabModalVisible] = useState(false);
 
@@ -104,7 +103,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             setIsSearching(true);
             try {
                 const results = await searchLocations(query);
-                setSearchResults(results);
+                // Filter out duplicates based on name and country
+                const uniqueResults = results.filter((item, index, self) => 
+                    index === self.findIndex((t) => 
+                        t.name === item.name && t.country === item.country
+                    )
+                );
+                setSearchResults(uniqueResults);
             } catch (error) {
                 Alert.alert(t('locationSettings.error'), t('locationSettings.searchError'));
             } finally {
@@ -260,16 +265,19 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
 
     useEffect(() => {
         loadSettings();
+        
+        // Web-specific: Ensure body can scroll
+        if (Platform.OS === 'web') {
+            document.body.style.overflow = 'auto';
+            document.body.style.height = 'auto';
+        }
+        
         return () => {
             if (searchTimeoutRef.current) {
                 clearTimeout(searchTimeoutRef.current);
             }
         };
     }, []);
-
-    const toggleSection = (section) => {
-        setExpandedSection(expandedSection === section ? null : section);
-    };
 
     // Helper function to get prayer-specific icons
     const getPrayerIcon = (prayer) => {
@@ -320,65 +328,64 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         </TouchableOpacity>
     );
 
-    const renderCollapsibleSection = (title, icon, content, sectionKey) => (
+    const renderSection = (title, icon, content) => (
         <View style={{
             backgroundColor: colors.DGreen,
             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
             marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
-            overflow: 'hidden'
+            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
         }}>
-            <TouchableOpacity
-                onPress={() => toggleSection(sectionKey)}
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
-                }}
-            >
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <Feather name={icon} size={24} color={colors.BYellow} />
-                    <Text style={{
-                        color: colors.BYellow,
-                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
-                        fontFamily: "Cairo_400Regular",
-                        ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
-                    }}>
-                        {title}
-                    </Text>
-                </View>
-                <Feather
-                    name={expandedSection === sectionKey ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color={colors.BYellow}
-                />
-            </TouchableOpacity>
-
-            {expandedSection === sectionKey && (
-                <View style={{
-                    paddingHorizontal: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
-                    paddingBottom: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
-                    borderTopWidth: 1,
-                    borderTopColor: colors.BYellow + '20'
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+            }}>
+                <Feather name={icon} size={24} color={colors.BYellow} />
+                <Text style={{
+                    color: colors.BYellow,
+                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
+                    fontFamily: "Cairo_400Regular",
+                    ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                 }}>
-                    {content}
-                </View>
-            )}
+                    {title}
+                </Text>
+            </View>
+            {content}
         </View>
     );
 
     return (
-        <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+        <View style={{ 
+            flex: 1, 
+            backgroundColor: colors.BGreen,
+            ...(Platform.OS === 'web' && { 
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column'
+            })
+        }}>
             <CHeader navigation={navigation} title={t('prayerSettings.title')} />
 
             <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={{ padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING }}
+                style={{ 
+                    flex: 1,
+                    ...(Platform.OS === 'web' && { 
+                        WebkitOverflowScrolling: 'touch',
+                        overflowY: 'auto'
+                    })
+                }}
+                contentContainerStyle={{ 
+                    padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING,
+                    ...(Platform.OS === 'web' && { 
+                        paddingBottom: 50 
+                    })
+                }}
                 showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}
             >
                 {/* Location Settings Section */}
-                {renderCollapsibleSection(
-                    t('prayerSettings.locationSettingsSection'),
+                {renderSection(
+                    t('locationSettings.title'),
                     'map-pin',
                     (
                         <>
@@ -461,13 +468,51 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 </View>
 
                                 {searchResults.length > 0 && (
-                                    <FlatList
-                                        data={searchResults}
-                                        renderItem={renderLocationItem}
-                                        keyExtractor={(item, index) => `search-${index}`}
-                                        style={{ maxHeight: 200 }}
-                                        showsVerticalScrollIndicator={false}
-                                    />
+                                    Platform.OS === 'web' ? (
+                                        <View style={{ maxHeight: 200, overflow: 'auto' }}>
+                                            {searchResults.map((item, index) => (
+                                                <TouchableOpacity
+                                                    key={`search-${index}`}
+                                                    onPress={() => setSelectedLocation(item)}
+                                                    style={{
+                                                        backgroundColor: selectedLocation?.name === item.name ? colors.nextPrayer : colors.DGreen,
+                                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                                        marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
+                                                        borderWidth: 1,
+                                                        borderColor: selectedLocation?.name === item.name ? colors.BYellow : 'transparent'
+                                                    }}
+                                                >
+                                                    <Text style={{
+                                                        color: colors.BYellow,
+                                                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                        fontFamily: "Cairo_400Regular",
+                                                        marginBottom: 2
+                                                    }}>
+                                                        {item.name}
+                                                    </Text>
+                                                    <Text style={{
+                                                        color: colors.BYellow,
+                                                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                        fontFamily: "Cairo_400Regular",
+                                                        opacity: 0.8
+                                                    }}>
+                                                        {item.country}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    ) : (
+                                        <FlatList
+                                            data={searchResults}
+                                            renderItem={renderLocationItem}
+                                            keyExtractor={(item, index) => `search-${index}`}
+                                            style={{ maxHeight: 200 }}
+                                            showsVerticalScrollIndicator={false}
+                                            scrollEnabled={true}
+                                            nestedScrollEnabled={false}
+                                        />
+                                    )
                                 )}
 
                                 {searchQuery.length >= PRAYER_CONSTANTS.LOCATION_SEARCH.MIN_QUERY_LENGTH &&
@@ -504,32 +549,40 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 </Text>
 
                                 <View style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between'
+                                    flexDirection: 'column',
+                                    gap: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
                                 }}>
                                     <TouchableOpacity
                                         onPress={getCurrentLocation}
                                         disabled={isGettingLocation}
                                         style={{
                                             backgroundColor: colors.BGreen,
-                                            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
-                                            padding: PRAYER_CONSTANTS.SPACING.BUTTON_PADDING,
-                                            flex: 0.48,
+                                            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+                                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            opacity: isGettingLocation ? 0.7 : 1
+                                            justifyContent: 'flex-start',
+                                            opacity: isGettingLocation ? 0.7 : 1,
+                                            borderWidth: 1,
+                                            borderColor: colors.BYellow + '40',
+                                            shadowColor: colors.BGreen,
+                                            shadowOffset: { width: 0, height: 2 },
+                                            shadowOpacity: 0.25,
+                                            shadowRadius: 3.84,
+                                            elevation: 5,
+                                            minHeight: 50
                                         }}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
                                         ) : (
-                                            <Feather name="crosshair" size={18} color={colors.BYellow} />
+                                            <Feather name="crosshair" size={20} color={colors.BYellow} />
                                         )}
                                         <Text style={{
                                             color: colors.BYellow,
-                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
                                             fontFamily: "Cairo_400Regular",
+                                            fontWeight: '500',
                                             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                                         }}>
                                             {t('locationSettings.useGPS')}
@@ -541,24 +594,32 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         disabled={isGettingLocation}
                                         style={{
                                             backgroundColor: colors.BGreen,
-                                            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
-                                            padding: PRAYER_CONSTANTS.SPACING.BUTTON_PADDING,
-                                            flex: 0.48,
+                                            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+                                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            opacity: isGettingLocation ? 0.7 : 1
+                                            justifyContent: 'flex-start',
+                                            opacity: isGettingLocation ? 0.7 : 1,
+                                            borderWidth: 1,
+                                            borderColor: colors.BYellow + '40',
+                                            shadowColor: colors.BGreen,
+                                            shadowOffset: { width: 0, height: 2 },
+                                            shadowOpacity: 0.25,
+                                            shadowRadius: 3.84,
+                                            elevation: 5,
+                                            minHeight: 50
                                         }}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
                                         ) : (
-                                            <Feather name="wifi" size={18} color={colors.BYellow} />
+                                            <Feather name="wifi" size={20} color={colors.BYellow} />
                                         )}
                                         <Text style={{
                                             color: colors.BYellow,
-                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
                                             fontFamily: "Cairo_400Regular",
+                                            fontWeight: '500',
                                             ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
                                         }}>
                                             {t('locationSettings.useIP')}
@@ -567,12 +628,11 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 </View>
                             </View>
                         </>
-                    ),
-                    'location'
+                    )
                 )}
 
                 {/* Prayer Calculation Settings Section */}
-                {renderCollapsibleSection(
+                {renderSection(
                     t('prayerSettings.calculationSettingsSection'),
                     'compass',
                     (
@@ -659,12 +719,11 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 <AntDesign name={isMadhabModalVisible ? "up" : "down"} size={20} color={colors.BYellow} />
                             </TouchableOpacity>
                         </>
-                    ),
-                    'calculation'
+                    )
                 )}
 
                 {/* Notification Settings Section */}
-                {renderCollapsibleSection(
+                {renderSection(
                     t('prayerSettings.prayerNotificationsSection'),
                     'bell',
                     (
@@ -739,35 +798,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 </View>
                             )}
                         </>
-                    ),
-                    'notifications'
+                    )
                 )}
 
-                {/* Save All Settings Button */}
-                <TouchableOpacity
-                    onPress={saveAllSettings}
-                    disabled={!selectedLocation && !currentLocation}
-                    style={{
-                        backgroundColor: (selectedLocation || currentLocation) ? colors.BYellow : colors.pastPrayer,
-                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
-                        padding: PRAYER_CONSTANTS.SPACING.BUTTON_PADDING,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
-                        opacity: (selectedLocation || currentLocation) ? 1 : 0.5
-                    }}
-                >
-                    <Feather name="save" size={20} color={colors.DGreen} />
-                    <Text style={{
-                        color: colors.DGreen,
-                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                        fontFamily: "Cairo_400Regular",
-                        ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING })
-                    }}>
-                        {t('settings.save')}
-                    </Text>
-                </TouchableOpacity>
+
 
                 {/* Disclaimer */}
                 <View style={{
@@ -805,6 +839,40 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                     </Text>
                 </View>
             </ScrollView>
+
+            {/* Floating Save Button */}
+            <TouchableOpacity
+                onPress={saveAllSettings}
+                disabled={!selectedLocation && !currentLocation}
+                style={{
+                    position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+                    bottom: Platform.OS === 'web' ? 20 : 30,
+                    ...getDirectionalMixedSpacing({ right: 20 }),
+                    backgroundColor: (selectedLocation || currentLocation) ? colors.BYellow : colors.pastPrayer,
+                    borderRadius: 28,
+                    width: 56,
+                    height: 56,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: (selectedLocation || currentLocation) ? 1 : 0.5,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4.65,
+                    elevation: 8,
+                    zIndex: 1000,
+                    ...(Platform.OS === 'web' && {
+                        cursor: (selectedLocation || currentLocation) ? 'pointer' : 'not-allowed',
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        MozUserSelect: 'none',
+                        msUserSelect: 'none'
+                    })
+                }}
+            >
+                <Feather name="save" size={24} color={colors.DGreen} />
+            </TouchableOpacity>
 
             {/* Calculation Method Modal */}
             <Modal
@@ -852,7 +920,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 {t('prayerSettings.calculationMethod')}
                             </Text>
                         </View>
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        <ScrollView 
+                            showsVerticalScrollIndicator={false}
+                            style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}
+                        >
                             {Object.values(PRAYER_CONSTANTS.CALCULATION_METHODS).map((method) => (
                                 <TouchableOpacity
                                     key={method}
