@@ -7,7 +7,7 @@ import { textStyles } from '../constants/Fonts';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomHeader from '../components/CHeader';
 import { setLanguage } from '../locales/i18n';
-import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing, getRTLTextAlign, isRTL } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar';
@@ -295,6 +295,13 @@ export default function SettingsScreen({ navigation }) {
     slider: {
       width: '100%',
       height: 40,
+    },
+    sliderRTL: {
+      width: '100%',
+      height: 40,
+      ...(Platform.OS === 'web' && {
+        transform: 'scaleX(-1)',
+      }),
     },
     volumeText: {
       textAlign: 'center',
@@ -1065,7 +1072,7 @@ export default function SettingsScreen({ navigation }) {
           <View style={styles.setting}>
             <Text style={styles.settingTitle}>{t('settings.clickVolume')}</Text>
             <Slider
-              style={styles.slider}
+              style={Platform.OS === 'web' && isRTL() ? styles.sliderRTL : styles.slider}
               minimumValue={0}
               maximumValue={1}
               value={tempVolume}
@@ -1081,7 +1088,7 @@ export default function SettingsScreen({ navigation }) {
           <View style={styles.setting}>
             <Text style={styles.settingTitle}>{t('settings.fontSize')}</Text>
             <Slider
-              style={styles.slider}
+              style={Platform.OS === 'web' && isRTL() ? styles.sliderRTL : styles.slider}
               minimumValue={12}
               maximumValue={28}
               value={tempFontSize}

@@ -194,7 +194,7 @@
     "noLocationSet": "No location set",
     "autoLocate": "Auto Locate",
     "useGPS": "Use GPS",
-    "useIP": "Use IP Location",
+    "useIP": "Approximate Location",
     "searchLocation": "Search Location",
     "searchPlaceholder": "Search for a city or location...",
     "popularLocations": "Popular Locations",

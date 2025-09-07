@@ -194,7 +194,7 @@
     "noLocationSet": "لم يتم تعيين موقع",
     "autoLocate": "تحديد الموقع تلقائياً",
     "useGPS": "استخدام GPS",
-    "useIP": "استخدام موقع IP",
+    "useIP": "موقع تقريبي",
     "searchLocation": "البحث عن موقع",
     "searchPlaceholder": "ابحث عن مدينة أو موقع...",
     "popularLocations": "المواقع الشائعة",
