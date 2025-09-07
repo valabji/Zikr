@@ -17,7 +17,13 @@
     "test:watch": "jest --watchAll",
     "test:coverage": "jest --coverage",
     "test:update": "jest --updateSnapshot",
-    "test:ci": "jest --ci"
+    "test:ci": "jest --ci",
+    "version": "node versioning.js",
+    "version:auto": "node versioning.js --auto",
+    "version:patch": "node versioning.js --patch",
+    "version:minor": "node versioning.js --minor",
+    "version:major": "node versioning.js --major",
+    "version:preview": "node versioning.js --preview"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -85,5 +91,5 @@
   },
   "private": true,
   "name": "zikr",
-  "version": "1.0.0"
+  "version": "1.1.6"
 }
