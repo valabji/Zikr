@@ -341,6 +341,7 @@ export function DNav() {
       <Drawer.Screen name="Home" component={MainScreen} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator >
   );
 }

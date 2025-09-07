@@ -29,6 +29,11 @@ export default {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       versionCode: 8,
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/splash_noname.png",
+        monochromeImage: "./assets/images/logo_noname.png",
+        backgroundColor: "#ffffff"
+      },
       permissions: [
         // Location permissions - needed for prayer times and Qibla direction
         "android.permission.ACCESS_COARSE_LOCATION",

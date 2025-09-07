@@ -3,7 +3,7 @@
   "homepage": "https://zikr.valabji.com/",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
+    "android": "rm -rf android && expo run:android",
     "eas": "source .env && npx cross-env@latest EAS_PROJECT_ID=$EAS_PROJECT_ID npx eas-cli@latest",
     "eas:secret": "yarn eas env:create --scope project --visibility=secret ",
     "eas-build-pre-install": "./pre-install",

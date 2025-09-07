@@ -75,10 +75,12 @@ export default function SettingsScreen({ navigation }) {
     },
     container: {
       flex: 1,
-      padding: 20,
+      ...(Platform.OS === 'web' && {
+        maxHeight: 'calc(100vh - 64px)', // Subtract header height
+      }),
     },
     scrollContent: {
-      paddingBottom: 20,
+      padding: 20,
     },
     buttonSetting: {
       paddingVertical: 10,
@@ -473,8 +475,15 @@ export default function SettingsScreen({ navigation }) {
   return (
     <View style={styles.wrapper} testID="settings-screen">
       <CustomHeader title={t("navigation.settings")} navigation={navigation} Right={isFirstTime?()=>(<View style={{flex:1}} />):false} />
-      <LinearGradient colors={[colors.BGreen, colors.DGreen]} style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <LinearGradient 
+        colors={[colors.BGreen, colors.DGreen]} 
+        style={styles.container}
+      >
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={styles.scrollContent}
+          style={Platform.OS === 'web' ? { flex: 1 } : undefined}
+        >
         
         <View style={styles.setting}>
           <Text style={styles.settingTitle}>{t('settings.language')}</Text>
