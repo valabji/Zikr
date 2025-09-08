@@ -1,7 +1,15 @@
 #!/bin/bash
 
 # This is a file called "pre-install" in the root of the project
+# Remove the yarn-path configuration that causes issues in cloud builds
+if [ -f ".yarnrc.yml" ]; then
+    sed -i.bak '/^yarnPath:/d' .yarnrc.yml
+fi
 
+corepack enable
+yarn set version 3.6.4
+yarn
+yarn prebuild
 if [[ "$EAS_BUILD_PLATFORM" == "android" ]]; then
 cat $GOOGLE_SERVICES_JSON > "android/app/google-services.json"
 cat android/app/google-services.json

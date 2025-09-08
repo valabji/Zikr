@@ -4,11 +4,12 @@
   "scripts": {
     "start": "expo start",
     "android": "rm -rf android && expo run:android",
-    "eas": "source .env && npx cross-env@latest EAS_PROJECT_ID=$EAS_PROJECT_ID npx eas-cli@latest",
+    "eas": "npx dotenv-cli@latest -e .env npx eas-cli@latest",
     "eas:secret": "yarn eas env:create --scope project --visibility=secret ",
     "eas-build-pre-install": "./pre-install",
     "build:android": "yarn eas build --profile production --platform android",
     "predeploy": "npx expo export -p web --output-dir dist",
+    "prebuild": "expo prebuild -p android --clean",
     "deploy": "gh-pages -d dist --cname zikr.valabji.com",
     "ios": "expo run:ios",
     "web": "expo start --web",
