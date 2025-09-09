@@ -722,8 +722,8 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                     )
                 )}
 
-                {/* Notification Settings Section */}
-                {renderSection(
+                {/* Notification Settings Section - Hidden until notification logic is implemented */}
+                {false && renderSection(
                     t('prayerSettings.prayerNotificationsSection'),
                     'bell',
                     (

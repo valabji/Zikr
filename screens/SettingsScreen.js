@@ -89,8 +89,8 @@ export default function SettingsScreen({ navigation }) {
     },
     scrollContent: {
       padding: 20,
-      ...(Platform.OS === 'web' && { 
-        paddingBottom: 100 
+      ...(Platform.OS === 'web' && {
+        paddingBottom: 100
       }),
       paddingBottom: 100, // Add padding for floating button
     },
@@ -826,7 +826,10 @@ export default function SettingsScreen({ navigation }) {
               onPress={() => setViewModeDropdownVisible(false)}
             >
               <View style={styles.dropdown}>
-                <ScrollView>
+                <ScrollView
+                  showsVerticalScrollIndicator={true}
+                  persistentScrollbar={true}
+                >
                   {viewModes.map((mode) => (
                     <TouchableOpacity
                       key={mode.id}

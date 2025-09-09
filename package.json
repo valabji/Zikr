@@ -7,7 +7,7 @@
     "eas": "npx dotenv-cli@latest -e .env npx eas-cli@latest",
     "eas:secret": "yarn eas env:create --scope project --visibility=secret ",
     "eas-build-pre-install": "./pre-install",
-    "build:android": "yarn eas build --profile production --platform android",
+    "build:android": "yarn version && yarn eas build --profile production --platform android",
     "predeploy": "npx expo export -p web --output-dir dist",
     "prebuild": "expo prebuild -p android --clean",
     "deploy": "gh-pages -d dist --cname zikr.valabji.com",
@@ -92,6 +92,6 @@
   },
   "private": true,
   "name": "zikr",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "packageManager": "yarn@3.6.4"
 }
