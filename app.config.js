@@ -14,7 +14,11 @@ export default {
       backgroundColor: "#ffffff"
     },
     updates: {
-      fallbackToCacheTimeout: 0
+      fallbackToCacheTimeout: 0,
+      url: "https://u.expo.dev/93819d24-8936-4af0-a311-4c072ec22e92",
+    },
+    runtimeVersion: {
+      policy: "appVersion"
     },
     assetBundlePatterns: ["**/*"],
     ios: {
@@ -93,7 +97,6 @@ export default {
     },
     plugins: [
       "expo-audio",
-      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {
