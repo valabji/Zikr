@@ -4,7 +4,7 @@
   "scripts": {
     "start": "expo start",
     "android": "rm -rf android && expo run:android",
-    "eas": "npx dotenv-cli@latest -e .env npx eas-cli@latest",
+    "eas": "npx dotenv-cli@latest -e .env -- npx eas-cli@latest",
     "eas:secret": "yarn eas env:create --scope project --visibility=secret ",
     "eas-build-pre-install": "./pre-install",
     "build:android": "yarn version && yarn eas build --profile production --platform android",
@@ -92,6 +92,6 @@
   },
   "private": true,
   "name": "zikr",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "packageManager": "yarn@3.6.4"
 }
