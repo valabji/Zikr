@@ -64,6 +64,8 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         maghrib: true,
         isha: true
     });
+    const [initialValuesSet, setInitialValuesSet] = useState(false);
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
 
     // Load all settings
     const loadSettings = async () => {
@@ -97,14 +99,20 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         } catch (error) {
             console.error('Error loading settings:', error);
         }
-
-        // Set initial values for change detection
-        setInitialLocation(currentLocation);
-        setInitialCalculationMethod(calculationMethod);
-        setInitialMadhab(madhab);
-        setInitialNotificationsEnabled(notificationsEnabled);
-        setInitialNotificationTimes({ ...notificationTimes });
+        setSettingsLoaded(true);
     };
+
+    // Set initial values for change detection only once after settings are loaded
+    useEffect(() => {
+        if (settingsLoaded && !initialValuesSet) {
+            setInitialLocation(currentLocation);
+            setInitialCalculationMethod(calculationMethod);
+            setInitialMadhab(madhab);
+            setInitialNotificationsEnabled(notificationsEnabled);
+            setInitialNotificationTimes({ ...notificationTimes });
+            setInitialValuesSet(true);
+        }
+    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, notificationTimes]);
 
     // Location search with debouncing
     const handleSearch = async (query) => {
