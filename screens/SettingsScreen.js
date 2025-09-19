@@ -1264,30 +1264,69 @@ export default function SettingsScreen({ navigation }) {
           <Modal
             visible={isThemeDropdownVisible}
             transparent={true}
-            animationType="slide"
+            animationType="fade"
             onRequestClose={() => setThemeDropdownVisible(false)}
           >
             <TouchableOpacity
-              style={styles.modalOverlay}
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
               activeOpacity={1}
               onPress={() => setThemeDropdownVisible(false)}
             >
-              <View style={styles.dropdown}>
-                <View style={styles.bottomSheetHandle} />
-                <ScrollView>
+              <View style={{
+                width: '85%',
+                maxHeight: '70%',
+                backgroundColor: colors.DGreen,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.BYellow,
+                overflow: 'hidden',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4.65,
+                elevation: 8,
+              }}>
+                <View style={{
+                  backgroundColor: colors.BGreen,
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.BYellow + '33',
+                }}>
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: 18,
+                    fontFamily: "Cairo_400Regular",
+                    textAlign: 'center',
+                  }}>{t('settings.theme')}</Text>
+                </View>
+                <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                   {Object.entries(themes).map(([themeKey, themeData]) => (
                     <TouchableOpacity
                       key={themeKey}
-                      style={[
-                        styles.dropdownItem,
-                        tempTheme === themeKey && styles.activeDropdownItem
-                      ]}
+                      style={{
+                        padding: 16,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.BYellow + '20',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: tempTheme === themeKey ? colors.BYellow : 'transparent',
+                      }}
                       onPress={() => handleThemeChange(themeKey)}
                     >
-                      <Text style={[
-                        styles.dropdownText,
-                        tempTheme === themeKey && styles.activeDropdownText
-                      ]}>{currentLang === 'ar' ? themeData.nameAr : themeData.name}</Text>
+                      <Text style={{
+                        color: tempTheme === themeKey ? colors.DGreen : colors.BYellow,
+                        fontSize: 16,
+                        fontFamily: "Cairo_400Regular",
+                        textAlign: 'center',
+                        flex: 1,
+                        fontWeight: tempTheme === themeKey ? 'bold' : 'normal',
+                      }}>{currentLang === 'ar' ? themeData.nameAr : themeData.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -1299,33 +1338,69 @@ export default function SettingsScreen({ navigation }) {
           <Modal
             visible={isViewModeDropdownVisible}
             transparent={true}
-            animationType="slide"
+            animationType="fade"
             onRequestClose={() => setViewModeDropdownVisible(false)}
           >
             <TouchableOpacity
-              style={styles.modalOverlay}
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
               activeOpacity={1}
               onPress={() => setViewModeDropdownVisible(false)}
             >
-              <View style={styles.dropdown}>
-                <View style={styles.bottomSheetHandle} />
-                <ScrollView
-                  showsVerticalScrollIndicator={true}
-                  persistentScrollbar={true}
-                >
+              <View style={{
+                width: '85%',
+                maxHeight: '70%',
+                backgroundColor: colors.DGreen,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.BYellow,
+                overflow: 'hidden',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4.65,
+                elevation: 8,
+              }}>
+                <View style={{
+                  backgroundColor: colors.BGreen,
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.BYellow + '33',
+                }}>
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: 18,
+                    fontFamily: "Cairo_400Regular",
+                    textAlign: 'center',
+                  }}>{t('settings.viewMode')}</Text>
+                </View>
+                <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                   {viewModes.map((mode) => (
                     <TouchableOpacity
                       key={mode.id}
-                      style={[
-                        styles.dropdownItem,
-                        tempViewMode === mode.id && styles.activeDropdownItem
-                      ]}
+                      style={{
+                        padding: 16,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.BYellow + '20',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: tempViewMode === mode.id ? colors.BYellow : 'transparent',
+                      }}
                       onPress={() => handleViewModeChange(mode.id)}
                     >
-                      <Text style={[
-                        styles.dropdownText,
-                        tempViewMode === mode.id && styles.activeDropdownText
-                      ]}>{currentLang === 'ar' ? mode.labelAr : mode.labelEn}</Text>
+                      <Text style={{
+                        color: tempViewMode === mode.id ? colors.DGreen : colors.BYellow,
+                        fontSize: 16,
+                        fontFamily: "Cairo_400Regular",
+                        textAlign: 'center',
+                        flex: 1,
+                        fontWeight: tempViewMode === mode.id ? 'bold' : 'normal',
+                      }}>{currentLang === 'ar' ? mode.labelAr : mode.labelEn}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -1338,30 +1413,69 @@ export default function SettingsScreen({ navigation }) {
             <Modal
               visible={isTasbihVibrationDropdownVisible}
               transparent={true}
-              animationType="slide"
+              animationType="fade"
               onRequestClose={() => setTasbihVibrationDropdownVisible(false)}
             >
               <TouchableOpacity
-                style={styles.modalOverlay}
+                style={{
+                  flex: 1,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 activeOpacity={1}
                 onPress={() => setTasbihVibrationDropdownVisible(false)}
               >
-                <View style={styles.dropdown}>
-                  <View style={styles.bottomSheetHandle} />
-                  <ScrollView>
+                <View style={{
+                  width: '85%',
+                  maxHeight: '70%',
+                  backgroundColor: colors.DGreen,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: colors.BYellow,
+                  overflow: 'hidden',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4.65,
+                  elevation: 8,
+                }}>
+                  <View style={{
+                    backgroundColor: colors.BGreen,
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.BYellow + '33',
+                  }}>
+                    <Text style={{
+                      color: colors.BYellow,
+                      fontSize: 18,
+                      fontFamily: "Cairo_400Regular",
+                      textAlign: 'center',
+                    }}>{t('settings.vibrationTasbih')}</Text>
+                  </View>
+                  <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                     {tasbihVibrationOptions.map((option) => (
                       <TouchableOpacity
                         key={option.id.toString()}
-                        style={[
-                          styles.dropdownItem,
-                          tempTasbihVibration === option.id && styles.activeDropdownItem
-                        ]}
+                        style={{
+                          padding: 16,
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.BYellow + '20',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          backgroundColor: tempTasbihVibration === option.id ? colors.BYellow : 'transparent',
+                        }}
                         onPress={() => handleTasbihVibrationChange(option.id)}
                       >
-                        <Text style={[
-                          styles.dropdownText,
-                          tempTasbihVibration === option.id && styles.activeDropdownText
-                        ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                        <Text style={{
+                          color: tempTasbihVibration === option.id ? colors.DGreen : colors.BYellow,
+                          fontSize: 16,
+                          fontFamily: "Cairo_400Regular",
+                          textAlign: 'center',
+                          flex: 1,
+                          fontWeight: tempTasbihVibration === option.id ? 'bold' : 'normal',
+                        }}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -1375,30 +1489,69 @@ export default function SettingsScreen({ navigation }) {
             <Modal
               visible={isAzkarVibrationDropdownVisible}
               transparent={true}
-              animationType="slide"
+              animationType="fade"
               onRequestClose={() => setAzkarVibrationDropdownVisible(false)}
             >
               <TouchableOpacity
-                style={styles.modalOverlay}
+                style={{
+                  flex: 1,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 activeOpacity={1}
                 onPress={() => setAzkarVibrationDropdownVisible(false)}
               >
-                <View style={styles.dropdown}>
-                  <View style={styles.bottomSheetHandle} />
-                  <ScrollView>
+                <View style={{
+                  width: '85%',
+                  maxHeight: '70%',
+                  backgroundColor: colors.DGreen,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: colors.BYellow,
+                  overflow: 'hidden',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4.65,
+                  elevation: 8,
+                }}>
+                  <View style={{
+                    backgroundColor: colors.BGreen,
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.BYellow + '33',
+                  }}>
+                    <Text style={{
+                      color: colors.BYellow,
+                      fontSize: 18,
+                      fontFamily: "Cairo_400Regular",
+                      textAlign: 'center',
+                    }}>{t('settings.vibrationAzkar')}</Text>
+                  </View>
+                  <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                     {vibrationOptions.map((option) => (
                       <TouchableOpacity
                         key={option.id}
-                        style={[
-                          styles.dropdownItem,
-                          tempAzkarVibration === option.id && styles.activeDropdownItem
-                        ]}
+                        style={{
+                          padding: 16,
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.BYellow + '20',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          backgroundColor: tempAzkarVibration === option.id ? colors.BYellow : 'transparent',
+                        }}
                         onPress={() => handleAzkarVibrationChange(option.id)}
                       >
-                        <Text style={[
-                          styles.dropdownText,
-                          tempAzkarVibration === option.id && styles.activeDropdownText
-                        ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                        <Text style={{
+                          color: tempAzkarVibration === option.id ? colors.DGreen : colors.BYellow,
+                          fontSize: 16,
+                          fontFamily: "Cairo_400Regular",
+                          textAlign: 'center',
+                          flex: 1,
+                          fontWeight: tempAzkarVibration === option.id ? 'bold' : 'normal',
+                        }}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -1412,30 +1565,69 @@ export default function SettingsScreen({ navigation }) {
             <Modal
               visible={isIntensityDropdownVisible}
               transparent={true}
-              animationType="slide"
+              animationType="fade"
               onRequestClose={() => setIntensityDropdownVisible(false)}
             >
               <TouchableOpacity
-                style={styles.modalOverlay}
+                style={{
+                  flex: 1,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 activeOpacity={1}
                 onPress={() => setIntensityDropdownVisible(false)}
               >
-                <View style={styles.dropdown}>
-                  <View style={styles.bottomSheetHandle} />
-                  <ScrollView>
+                <View style={{
+                  width: '85%',
+                  maxHeight: '70%',
+                  backgroundColor: colors.DGreen,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: colors.BYellow,
+                  overflow: 'hidden',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4.65,
+                  elevation: 8,
+                }}>
+                  <View style={{
+                    backgroundColor: colors.BGreen,
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.BYellow + '33',
+                  }}>
+                    <Text style={{
+                      color: colors.BYellow,
+                      fontSize: 18,
+                      fontFamily: "Cairo_400Regular",
+                      textAlign: 'center',
+                    }}>{t('settings.vibrationIntensity')}</Text>
+                  </View>
+                  <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                     {intensityOptions.map((option) => (
                       <TouchableOpacity
                         key={option.id}
-                        style={[
-                          styles.dropdownItem,
-                          tempVibrationIntensity === option.id && styles.activeDropdownItem
-                        ]}
+                        style={{
+                          padding: 16,
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.BYellow + '20',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          backgroundColor: tempVibrationIntensity === option.id ? colors.BYellow : 'transparent',
+                        }}
                         onPress={() => handleIntensityChange(option.id)}
                       >
-                        <Text style={[
-                          styles.dropdownText,
-                          tempVibrationIntensity === option.id && styles.activeDropdownText
-                        ]}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
+                        <Text style={{
+                          color: tempVibrationIntensity === option.id ? colors.DGreen : colors.BYellow,
+                          fontSize: 16,
+                          fontFamily: "Cairo_400Regular",
+                          textAlign: 'center',
+                          flex: 1,
+                          fontWeight: tempVibrationIntensity === option.id ? 'bold' : 'normal',
+                        }}>{currentLang === 'ar' ? option.labelAr : option.labelEn}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -1447,30 +1639,69 @@ export default function SettingsScreen({ navigation }) {
           <Modal
             visible={isDropdownVisible}
             transparent={true}
-            animationType="slide"
+            animationType="fade"
             onRequestClose={() => setDropdownVisible(false)}
           >
             <TouchableOpacity
-              style={styles.modalOverlay}
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
               activeOpacity={1}
               onPress={() => setDropdownVisible(false)}
             >
-              <View style={styles.dropdown}>
-                <View style={styles.bottomSheetHandle} />
-                <ScrollView>
+              <View style={{
+                width: '85%',
+                maxHeight: '70%',
+                backgroundColor: colors.DGreen,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.BYellow,
+                overflow: 'hidden',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4.65,
+                elevation: 8,
+              }}>
+                <View style={{
+                  backgroundColor: colors.BGreen,
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.BYellow + '33',
+                }}>
+                  <Text style={{
+                    color: colors.BYellow,
+                    fontSize: 18,
+                    fontFamily: "Cairo_400Regular",
+                    textAlign: 'center',
+                  }}>{t('settings.initialScreen')}</Text>
+                </View>
+                <ScrollView showsVerticalScrollIndicator={false} style={Platform.OS === 'web' ? { maxHeight: '60vh' } : {}}>
                   {screens.map((screen) => (
                     <TouchableOpacity
                       key={screen.id}
-                      style={[
-                        styles.dropdownItem,
-                        tempScreen === screen.id && styles.activeDropdownItem
-                      ]}
+                      style={{
+                        padding: 16,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.BYellow + '20',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: tempScreen === screen.id ? colors.BYellow : 'transparent',
+                      }}
                       onPress={() => handleScreenChange(screen.id)}
                     >
-                      <Text style={[
-                        styles.dropdownText,
-                        tempScreen === screen.id && styles.activeDropdownText
-                      ]}>{currentLang === 'ar' ? screen.labelAr : screen.labelEn}</Text>
+                      <Text style={{
+                        color: tempScreen === screen.id ? colors.DGreen : colors.BYellow,
+                        fontSize: 16,
+                        fontFamily: "Cairo_400Regular",
+                        textAlign: 'center',
+                        flex: 1,
+                        fontWeight: tempScreen === screen.id ? 'bold' : 'normal',
+                      }}>{currentLang === 'ar' ? screen.labelAr : screen.labelEn}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
