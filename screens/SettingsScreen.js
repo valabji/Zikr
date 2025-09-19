@@ -23,7 +23,7 @@ export default function SettingsScreen({ navigation }) {
   const [initialScreen, setInitialScreen] = useState('Fav');
   const [isFirstTime, setIsFirstTime] = useState(true);
   const [tempScreen, setTempScreen] = useState('Fav');
-  const [tempVolume, setTempVolume] = useState(0.35);
+  const [tempVolume, setTempVolume] = useState(0.9);
   const [tempTheme, setTempTheme] = useState(theme);
   const [tempFontSize, setTempFontSize] = useState(18);
   const [fontSize, setFontSize] = useState(18);
@@ -47,7 +47,7 @@ export default function SettingsScreen({ navigation }) {
   // Initial values for change detection
   const [initialLang, setInitialLang] = useState('ar');
   const [lastSavedScreen, setLastSavedScreen] = useState('Fav');
-  const [lastSavedVolume, setLastSavedVolume] = useState(0.35);
+  const [lastSavedVolume, setLastSavedVolume] = useState(0.9);
   const [lastSavedFontSize, setLastSavedFontSize] = useState(18);
   const [lastSavedViewMode, setLastSavedViewMode] = useState('swiper');
   const [lastSavedTasbihVibration, setLastSavedTasbihVibration] = useState(false);
@@ -450,13 +450,9 @@ export default function SettingsScreen({ navigation }) {
     tutorialPanel: {
       position: 'absolute',
       bottom: 100,
-      left: 0,
-      right: 0,
-      backgroundColor: colors.DGreen + 'DD',
-      borderTopWidth: 2,
-      borderTopColor: colors.BYellow,
-      borderTopLeftRadius: 15,
-      borderTopRightRadius: 15,
+      left: 5,
+      right: 5,
+      backgroundColor: colors.DGreen,
       shadowColor: colors.shadowColor,
       shadowOffset: { width: 0, height: -5 },
       shadowOpacity: 0.3,
@@ -467,7 +463,7 @@ export default function SettingsScreen({ navigation }) {
     },
     tutorialContent: {
       flex: 1,
-      backgroundColor: colors.DGreen+'50',
+      backgroundColor: colors.DGreen,
       borderRadius: 15,
       borderWidth: 2,
       borderColor: colors.BYellow,
@@ -480,9 +476,9 @@ export default function SettingsScreen({ navigation }) {
     },
     tutorialHeader: {
       padding: 20,
-      backgroundColor: colors.MGreen + '50',
+      backgroundColor: colors.MGreen,
       borderBottomWidth: 1,
-      borderBottomColor: colors.BYellow + '50',
+      borderBottomColor: colors.BYellow,
     },
     tutorialTitle: {
       ...textStyles.body,
@@ -524,9 +520,9 @@ export default function SettingsScreen({ navigation }) {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: 20,
-      backgroundColor: colors.MGreen + '50',
+      backgroundColor: colors.MGreen,
       borderTopWidth: 1,
-      borderTopColor: colors.BYellow + '50',
+      borderTopColor: colors.BYellow,
     },
     tutorialButtonNav: {
       paddingVertical: 10,
@@ -678,30 +674,38 @@ export default function SettingsScreen({ navigation }) {
   }, []);
 
   // Handle back button press in header
-  const handleBackPress = () => {
-    console.log('Back button pressed');
+  const handleBackPress = async () => {
+    if (isFirstTime) {
+      await AsyncStorage.setItem('@firstTimeSettings', 'visited');
+      setIsFirstTime(false);
+      // Re-enable back navigation
+      navigation.setOptions({
+        headerLeft: undefined,
+        gestureEnabled: true
+      });
+    }
     if (hasUnsavedChanges() && !isAlertVisible) {
       setIsAlertVisible(true);
       Alert.alert(
         t('common.unsavedChanges'),
         t('common.unsavedChangesMessage'),
         [
-          { 
-            text: t('common.cancel'), 
-            style: 'cancel', 
-            onPress: () => setIsAlertVisible(false) 
+          {
+            text: t('common.cancel'),
+            style: 'cancel',
+            onPress: () => setIsAlertVisible(false)
           },
-          { 
-            text: t('common.discard'), 
-            style: 'destructive', 
+          {
+            text: t('common.discard'),
+            style: 'destructive',
             onPress: () => {
               setIsAlertVisible(false);
               navigation.goBack();
             }
           },
-          { 
-            text: t('common.save'), 
-            style: 'default', 
+          {
+            text: t('common.save'),
+            style: 'default',
             onPress: async () => {
               try {
                 await handleSave();
@@ -837,7 +841,7 @@ export default function SettingsScreen({ navigation }) {
 
   const handleDefault = async () => {
     playClick();
-    setTempVolume(0.35);
+    setTempVolume(0.9);
     setTempTheme('originalGreen');
     setTempFontSize(18);
     setTempScreen('Fav');
@@ -853,8 +857,8 @@ export default function SettingsScreen({ navigation }) {
     // If auto save is enabled, apply all default settings immediately
     if (autoSave) {
       // Apply volume
-      setClickVolume(0.35);
-      setLastSavedVolume(0.35);
+      setClickVolume(0.9);
+      setLastSavedVolume(0.9);
 
       // Apply font size
       await AsyncStorage.setItem('@fontSize', '18');
@@ -1021,7 +1025,7 @@ export default function SettingsScreen({ navigation }) {
     if (isTutorialVisible && scrollViewRef.current && settingScrollPositions[settingKey] !== undefined) {
       const yPosition = settingScrollPositions[settingKey];
       console.log(`Scrolling to setting: ${settingKey} at position: ${yPosition}`);
-      
+
       scrollViewRef.current.scrollTo({
         y: yPosition,
         animated: true,
@@ -1040,7 +1044,7 @@ export default function SettingsScreen({ navigation }) {
 
       const currentStepKey = tutorialSteps[currentTutorialStep]?.key;
       console.log(`Starting tutorial animation for step ${currentTutorialStep} (${currentStepKey})`);
-      
+
       setIsAnimating(true);
       setHighlightVisible(true); // Show highlight
 
@@ -1055,7 +1059,7 @@ export default function SettingsScreen({ navigation }) {
           setIsAnimating(false);
           setHighlightVisible(false);
         }
-      }, 3000);
+      }, 500);
 
     } catch (error) {
       console.error('Error in startTutorialAnimation:', error);
@@ -1066,11 +1070,11 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const nextTutorialStep = () => {
-    if ( isTutorialVisible && currentTutorialStep < tutorialSteps.length - 1) {
+    if (isTutorialVisible && currentTutorialStep < tutorialSteps.length - 1) {
       const nextStep = currentTutorialStep + 1;
       console.log(`Advancing to tutorial step ${nextStep}`);
       setCurrentTutorialStep(nextStep);
-      
+
       // Scroll to the next setting
       const nextStepKey = tutorialSteps[nextStep]?.key;
       if (nextStepKey) {
@@ -1087,7 +1091,7 @@ export default function SettingsScreen({ navigation }) {
       const prevStep = currentTutorialStep - 1;
       console.log(`Going back to tutorial step ${prevStep}`);
       setCurrentTutorialStep(prevStep);
-      
+
       // Scroll to the previous setting
       const prevStepKey = tutorialSteps[prevStep]?.key;
       if (prevStepKey) {
@@ -1100,7 +1104,7 @@ export default function SettingsScreen({ navigation }) {
     playClick();
     setTutorialVisible(true);
     setCurrentTutorialStep(0);
-    
+
     setTimeout(() => startTutorialAnimation(), 300);
   };
 
@@ -1113,16 +1117,16 @@ export default function SettingsScreen({ navigation }) {
     // highlightOpacity.value = 0;
     // highlightScale.value = 1;
     tutorialProgress.value = 0;
-    
+
     // Scroll to top when tutorial finishes
     if (scrollViewRef.current) {
       try {
         if (Platform.OS === 'web') {
           // For web, try multiple approaches
-          const scrollElement = scrollViewRef.current.getScrollableNode 
+          const scrollElement = scrollViewRef.current.getScrollableNode
             ? scrollViewRef.current.getScrollableNode()
             : scrollViewRef.current;
-          
+
           if (scrollElement && scrollElement.scrollTo) {
             scrollElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
           } else if (scrollElement && scrollElement.scrollTop !== undefined) {
@@ -1143,9 +1147,9 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <View style={styles.wrapper} testID="settings-screen">
-      <CustomHeader 
-        title={t("navigation.settings")} 
-        navigation={navigation} 
+      <CustomHeader
+        title={t("navigation.settings")}
+        navigation={navigation}
         Right={isFirstTime && !autoSave ? () => (<View style={{ flex: 1 }} />) : false}
         onBackPress={handleBackPress}
       />
@@ -1641,7 +1645,7 @@ export default function SettingsScreen({ navigation }) {
               </Text>
             </View>
           </View>
-            {isTutorialVisible && (<View style={{ height: 340 }} />)}
+          {isTutorialVisible && (<View style={{ height: 340 }} />)}
         </ScrollView>
 
         {/* Floating Save Button - only show when auto save is disabled */}
