@@ -4,7 +4,7 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.11",
+    version: "1.1.12",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
@@ -31,7 +31,7 @@ export default {
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 14,
+      versionCode: 15,
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
