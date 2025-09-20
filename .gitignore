@@ -2,6 +2,7 @@ node_modules
 .expo
 .DS_Store
 .env
+.VSCodeCounter/
 dist/
 google-services.json
 GoogleService-Info.plist
