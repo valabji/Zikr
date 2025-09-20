@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Platform, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
@@ -43,6 +43,7 @@ export default function SettingsScreen({ navigation }) {
   const [tasbihVibration, setTasbihVibration] = useState(false);
   const [azkarVibration, setAzkarVibration] = useState(VIBRATION_TYPES.OFF);
   const [vibrationIntensity, setVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
+  const [vibrationSupported, setVibrationSupported] = useState(false);
 
   // Initial values for change detection
   const [initialLang, setInitialLang] = useState('ar');
@@ -98,20 +99,20 @@ export default function SettingsScreen({ navigation }) {
     { id: VIBRATION_INTENSITY.HEAVY, labelEn: 'Heavy', labelAr: 'قوي' },
   ];
 
-  const tutorialSteps = [
+  const tutorialSteps = useMemo(() => [
     { key: 'language', title: t('settings.language'), description: t('settings.tutorial.language') },
     { key: 'autoSave', title: t('settings.autoSave'), description: t('settings.tutorial.autoSave') },
     { key: 'theme', title: t('settings.theme'), description: t('settings.tutorial.theme') },
     { key: 'initialScreen', title: t('settings.initialScreen'), description: t('settings.tutorial.initialScreen') },
     { key: 'viewMode', title: t('settings.viewMode'), description: t('settings.tutorial.viewMode') },
-    ...(Platform.OS !== 'web' ? [
+    ...(vibrationSupported && Platform.OS !== 'web' ? [
       { key: 'vibrationTasbih', title: t('settings.vibrationTasbih'), description: t('settings.tutorial.vibrationTasbih') },
       { key: 'vibrationAzkar', title: t('settings.vibrationAzkar'), description: t('settings.tutorial.vibrationAzkar') },
       { key: 'vibrationIntensity', title: t('settings.vibrationIntensity'), description: t('settings.tutorial.vibrationIntensity') }
     ] : []),
     { key: 'clickVolume', title: t('settings.clickVolume'), description: t('settings.tutorial.clickVolume') },
     { key: 'fontSize', title: t('settings.fontSize'), description: t('settings.tutorial.fontSize') },
-  ];
+  ], [vibrationSupported]);
 
   // Scroll positions for each setting (approximate Y positions)
   const settingScrollPositions = {
@@ -627,6 +628,10 @@ export default function SettingsScreen({ navigation }) {
         setVibrationIntensity(currentIntensity);
         setTempVibrationIntensity(currentIntensity);
         setLastSavedVibrationIntensity(currentIntensity);
+
+        // Check if vibration is supported
+        const supported = await vibrationManager.isVibrationSupported();
+        setVibrationSupported(supported);
 
         // If no screen is set, set default to 'Fav' and save it
         if (!screen) {
@@ -1409,7 +1414,7 @@ export default function SettingsScreen({ navigation }) {
           </Modal>
 
           {/* Tasbih Vibration Dropdown Modal - Mobile Only */}
-          {Platform.OS !== 'web' && (
+          {vibrationSupported && Platform.OS !== 'web' && (
             <Modal
               visible={isTasbihVibrationDropdownVisible}
               transparent={true}
@@ -1485,7 +1490,7 @@ export default function SettingsScreen({ navigation }) {
           )}
 
           {/* Azkar Vibration Dropdown Modal - Mobile Only */}
-          {Platform.OS !== 'web' && (
+          {vibrationSupported && Platform.OS !== 'web' && (
             <Modal
               visible={isAzkarVibrationDropdownVisible}
               transparent={true}
@@ -1561,7 +1566,7 @@ export default function SettingsScreen({ navigation }) {
           )}
 
           {/* Vibration Intensity Dropdown Modal - Mobile Only */}
-          {Platform.OS !== 'web' && (
+          {vibrationSupported && Platform.OS !== 'web' && (
             <Modal
               visible={isIntensityDropdownVisible}
               transparent={true}
@@ -1753,7 +1758,7 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           {/* Vibration Settings - Mobile Only */}
-          {Platform.OS !== 'web' && (
+          {vibrationSupported && Platform.OS !== 'web' && (
             <>
               <View style={styles.setting}>
                 <View
