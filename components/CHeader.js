@@ -10,7 +10,7 @@ import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
 import { Hbg } from './Hbg';
 const width = Dimensions.get("window").width
 
-export default function CustomHeader({ title, isHome, Left, Right, navigation, testID }) {
+export default function CustomHeader({ title, isHome, Left, Right, navigation, testID, onBackPress=null }) {
   const colors = useColors();
 
   return (
@@ -59,7 +59,7 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <TouchableOpacity
                 testID="back-button"
-                onPress={() => navigation.goBack()}
+                onPress={() => onBackPress ? onBackPress() : navigation.goBack()}
                 style={{ flexDirection: "row" }}
               >
                 <Feather

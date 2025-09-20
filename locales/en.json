@@ -52,6 +52,11 @@
     "current": "English"
   },
   "settings": {
+    "selectScreen": "Select Screen",
+    "selectViewMode": "Select View Mode",
+    "selectVibration": "Select Vibration",
+    "selectIntensity": "Select Intensity",
+    "preview": "Preview",
     "initialScreen": "Initial Screen",
     "language": "Language",
     "autoSave": "Auto Save",
@@ -73,12 +78,33 @@
     "vibrationMedium": "Medium",
     "vibrationHeavy": "Heavy",
     "default": "Default",
-    "save": "Save"
+    "save": "Save",
+    "tutorial": {
+      "title": "Settings Tutorial",
+      "language": "Choose your preferred language for the app interface: English or Arabic.",
+      "autoSave": "Enable auto-save to automatically apply changes as you make them. If disabled, use the save button to apply changes.",
+      "theme": "Select a color theme for the app's appearance.",
+      "initialScreen": "Choose which screen to show when the app starts.",
+      "viewMode": "Select how azkar are displayed: page by page or continuous scroll.",
+      "vibrationTasbih": "Enable vibration feedback when using the tasbih counter (mobile only).",
+      "vibrationAzkar": "Choose when to vibrate during azkar recitation (mobile only).",
+      "vibrationIntensity": "Set the strength of vibration feedback (mobile only).",
+      "clickVolume": "Adjust the volume of click sounds.",
+      "fontSize": "Change the font size for azkar text.",
+      "help": "Help"
+    }
   },
   "common": {
+    "unsavedChanges": "Unsaved Changes",
+    "unsavedChangesMessage": "You have unsaved changes. What would you like to do?",
+    "cancel": "Cancel",
+    "save": "Save",
+    "discard": "Discard",
     "ok": "OK",
     "cancel": "Cancel",
     "reset": "Reset",
+    "save": "Save",
+    "discard": "Discard",
     "error": "Error",
     "success": "Success",
     "loading": "Loading...",

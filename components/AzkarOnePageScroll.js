@@ -51,7 +51,17 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
               writingDirection: isRTL() ? "rtl" : "ltr"
             }
           ]}>{z.zekr}</Text>
-
+          <Text style={[
+            textStyles.bodySmall,
+            {
+              color: colors.BYellow,
+              marginTop: 6,
+              fontSize: zikrFontSize,
+              fontFamily: 'Hafs',
+              textAlign: getRTLTextAlign('left'),
+              writingDirection: isRTL() ? "rtl" : "ltr"
+            }
+          ]}>{z.quran}</Text>
           <View style={{
             borderTopWidth: 1,
             marginTop: 20,
