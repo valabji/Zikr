@@ -20,9 +20,9 @@ export default function SettingsScreen({ navigation }) {
   const { theme, setTheme, themes } = useTheme();
   const { volume, setClickVolume, playClick } = useAudio();
   const [currentLang, setCurrentLang] = useState('ar');
-  const [initialScreen, setInitialScreen] = useState('Fav');
+  const [initialScreen, setInitialScreen] = useState('Grid');
   const [isFirstTime, setIsFirstTime] = useState(true);
-  const [tempScreen, setTempScreen] = useState('Fav');
+  const [tempScreen, setTempScreen] = useState('Grid');
   const [tempVolume, setTempVolume] = useState(0.9);
   const [tempTheme, setTempTheme] = useState(theme);
   const [tempFontSize, setTempFontSize] = useState(18);
@@ -47,7 +47,7 @@ export default function SettingsScreen({ navigation }) {
 
   // Initial values for change detection
   const [initialLang, setInitialLang] = useState('ar');
-  const [lastSavedScreen, setLastSavedScreen] = useState('Fav');
+  const [lastSavedScreen, setLastSavedScreen] = useState('Grid');
   const [lastSavedVolume, setLastSavedVolume] = useState(0.9);
   const [lastSavedFontSize, setLastSavedFontSize] = useState(18);
   const [lastSavedViewMode, setLastSavedViewMode] = useState('swiper');
@@ -70,6 +70,7 @@ export default function SettingsScreen({ navigation }) {
   const tutorialProgress = useSharedValue(0);
 
   const screens = [
+    { id: 'Grid', labelEn: 'Main Menu', labelAr: 'القائمة الرئيسية', route: 'HomeGrid' },
     { id: 'All', labelEn: 'All Azkar', labelAr: 'كل الاذكار', route: 'Home' },
     { id: 'Fav', labelEn: 'Favorites', labelAr: 'الاذكار المفضلة', route: 'Fav' },
     { id: 'Tasbih', labelEn: 'Tasbih Counter', labelAr: 'المسبحة', route: 'Screen3' },
@@ -633,12 +634,12 @@ export default function SettingsScreen({ navigation }) {
         const supported = await vibrationManager.isVibrationSupported();
         setVibrationSupported(supported);
 
-        // If no screen is set, set default to 'Fav' and save it
+        // If no screen is set, set default to 'Grid' and save it
         if (!screen) {
-          await AsyncStorage.setItem('@initialScreen', 'Fav');
-          setInitialScreen('Fav');
-          setTempScreen('Fav');
-          setLastSavedScreen('Fav');
+          await AsyncStorage.setItem('@initialScreen', 'Grid');
+          setInitialScreen('Grid');
+          setTempScreen('Grid');
+          setLastSavedScreen('Grid');
         } else {
           setInitialScreen(screen);
           setTempScreen(screen);
@@ -849,7 +850,7 @@ export default function SettingsScreen({ navigation }) {
     setTempVolume(0.9);
     setTempTheme('originalGreen');
     setTempFontSize(18);
-    setTempScreen('Fav');
+    setTempScreen('Grid');
     setTempViewMode('swiper');
     setTempTasbihVibration(false);
     setTempAzkarVibration(VIBRATION_TYPES.OFF);
@@ -871,9 +872,9 @@ export default function SettingsScreen({ navigation }) {
       setLastSavedFontSize(18);
 
       // Apply initial screen
-      await AsyncStorage.setItem('@initialScreen', 'Fav');
-      setInitialScreen('Fav');
-      setLastSavedScreen('Fav');
+      await AsyncStorage.setItem('@initialScreen', 'Grid');
+      setInitialScreen('Grid');
+      setLastSavedScreen('Grid');
 
       // Apply view mode
       await AsyncStorage.setItem('@viewMode', 'swiper');

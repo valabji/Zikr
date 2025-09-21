@@ -21,8 +21,10 @@
   "navigation": {
     "main": "الرئيسية",
     "home": "الصفحة الرئيسية",
+    "mainMenu": "القائمة الرئيسية",
     "favorites": "الاذكار المفضلة",
     "allAzkar": "كل الاذكار",
+    "gridView": "العرض الشبكي",
     "settings": "الإعدادات",
     "contribute": "المساهمة",
     "helpImprove": "ساعد في التحسين",

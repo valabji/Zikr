@@ -5,6 +5,7 @@ import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
+import HomeGridScreen from '../screens/HomeGridScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ContributeScreen from '../screens/ContributeScreen';
 import PrayerTimesScreen from '../screens/PrayerTimesScreen';
@@ -38,7 +39,7 @@ export function DNav() {
 
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      initialRouteName="HomeGrid"
       screenOptions={{
         drawerPosition: isRTL() ? "right" : "left",
         drawerType: "slide",
@@ -51,6 +52,7 @@ export function DNav() {
             const routeMap = {
               'All': 'Home',
               'Fav': 'Home',
+              'Grid': 'HomeGrid',
               'Tasbih': 'Screen3',
               'Settings': 'Settings',
               'PrayerTimes': 'PrayerTimes',
@@ -85,6 +87,36 @@ export function DNav() {
                   height={148}
                 />
               </View>
+              
+               <TouchableOpacity
+                 testID="grid-screen"
+                 onPress={() => {
+                   navigation.navigate("HomeGrid")
+                 }}
+                 style={{
+                   // width: "100%",
+                   height: 64,
+                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                   marginTop: 30,
+                   backgroundColor: colors.DGreen,
+                   flexDirection: "row",
+                 }}>
+                 {isRTL() ? (
+                   <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                 ) : (
+                   <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                 )}
+                 <Text style={[
+                   textStyles.navigation,
+                   {
+                     color: colors.BYellow,
+                     marginTop: 7,
+                     textAlign: getRTLTextAlign('left'),
+                   }
+                 ]}>{t('navigation.mainMenu')}</Text>
+                 <View style={{ flex: 1 }} />
+                 <Feather name="grid" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+               </TouchableOpacity>
               <TouchableOpacity
                 testID="screen3"
                 onPress={() => {
@@ -94,7 +126,7 @@ export function DNav() {
                   // width: "100%",
                   height: 64,
                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 30,
+                  marginTop: 5,
                   backgroundColor: colors.DGreen,
                   flexDirection: "row",
                 }}>
@@ -143,35 +175,35 @@ export function DNav() {
                 <View style={{ flex: 1 }} />
                 <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
-              <TouchableOpacity
-                testID="main-screen"
-                onPress={() => {
-                  navigation.navigate("Home", { showFavorites: false })
-                }}
-                style={{
-                  // width: "100%",
-                  height: 64,
-                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 5,
-                  backgroundColor: colors.DGreen,
-                  flexDirection: "row",
-                }}>
-                {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                )}
-                <Text style={[
-                  textStyles.navigation,
-                  {
-                    color: colors.BYellow,
-                    marginTop: 7,
-                    textAlign: getRTLTextAlign('left'),
-                  }
-                ]}>{t('navigation.allAzkar')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
-              </TouchableOpacity>
+               <TouchableOpacity
+                 testID="main-screen"
+                 onPress={() => {
+                   navigation.navigate("Home", { showFavorites: false })
+                 }}
+                 style={{
+                   // width: "100%",
+                   height: 64,
+                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                   marginTop: 5,
+                   backgroundColor: colors.DGreen,
+                   flexDirection: "row",
+                 }}>
+                 {isRTL() ? (
+                   <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                 ) : (
+                   <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                 )}
+                 <Text style={[
+                   textStyles.navigation,
+                   {
+                     color: colors.BYellow,
+                     marginTop: 7,
+                     textAlign: getRTLTextAlign('left'),
+                   }
+                 ]}>{t('navigation.allAzkar')}</Text>
+                 <View style={{ flex: 1 }} />
+                 <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+               </TouchableOpacity>
               <TouchableOpacity
                 testID="prayer-times-screen"
                 onPress={() => {
@@ -359,6 +391,7 @@ export function DNav() {
     >
       <Drawer.Screen name="Screen3" component={Screen3} />
       <Drawer.Screen name="Home" component={MainScreen} />
+      <Drawer.Screen name="HomeGrid" component={HomeGridScreen} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />

@@ -21,8 +21,10 @@
   "navigation": {
     "main": "Main",
     "home": "Home",
+    "mainMenu": "Main Menu",
     "favorites": "Favorites",
     "allAzkar": "All Azkar",
+    "gridView": "Grid View",
     "shareApp": "Share App",
     "settings": "Settings",
     "contribute": "Contribute",
