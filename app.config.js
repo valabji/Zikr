@@ -97,7 +97,6 @@ export default {
     },
     plugins: [
       "expo-audio",
-      "@react-native-firebase/app",
       [
         "expo-build-properties",
         {
