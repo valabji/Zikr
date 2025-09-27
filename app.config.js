@@ -97,6 +97,9 @@ export default {
     },
     plugins: [
       "expo-audio",
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser",
       [
         "expo-build-properties",
         {
