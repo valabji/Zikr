@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -52,6 +52,21 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const [isCalculationMethodModalVisible, setCalculationMethodModalVisible] = useState(false);
     const [isMadhabModalVisible, setMadhabModalVisible] = useState(false);
 
+    // Initial values for change detection
+    const [initialLocation, setInitialLocation] = useState(null);
+    const [initialCalculationMethod, setInitialCalculationMethod] = useState(PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD);
+    const [initialMadhab, setInitialMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
+    const [initialNotificationsEnabled, setInitialNotificationsEnabled] = useState(false);
+    const [initialNotificationTimes, setInitialNotificationTimes] = useState({
+        fajr: true,
+        dhuhr: true,
+        asr: true,
+        maghrib: true,
+        isha: true
+    });
+    const [initialValuesSet, setInitialValuesSet] = useState(false);
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
+
     // Load all settings
     const loadSettings = async () => {
         try {
@@ -84,7 +99,20 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         } catch (error) {
             console.error('Error loading settings:', error);
         }
+        setSettingsLoaded(true);
     };
+
+    // Set initial values for change detection only once after settings are loaded
+    useEffect(() => {
+        if (settingsLoaded && !initialValuesSet) {
+            setInitialLocation(currentLocation);
+            setInitialCalculationMethod(calculationMethod);
+            setInitialMadhab(madhab);
+            setInitialNotificationsEnabled(notificationsEnabled);
+            setInitialNotificationTimes({ ...notificationTimes });
+            setInitialValuesSet(true);
+        }
+    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, notificationTimes]);
 
     // Location search with debouncing
     const handleSearch = async (query) => {
@@ -263,6 +291,23 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         setMadhabModalVisible(false);
     };
 
+    // Check for unsaved changes
+    const hasUnsavedChanges = useCallback(() => {
+        // Location changes
+        if (selectedLocation) {
+            if (!initialLocation) return true;
+            if (selectedLocation.latitude !== initialLocation.latitude || selectedLocation.longitude !== initialLocation.longitude) return true;
+        }
+
+        // Prayer settings changes
+        if (calculationMethod !== initialCalculationMethod) return true;
+        if (madhab !== initialMadhab) return true;
+        if (notificationsEnabled !== initialNotificationsEnabled) return true;
+        if (JSON.stringify(notificationTimes) !== JSON.stringify(initialNotificationTimes)) return true;
+
+        return false;
+    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, notificationTimes, initialNotificationTimes]);
+
     useEffect(() => {
         loadSettings();
         
@@ -278,6 +323,29 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             }
         };
     }, []);
+
+    // Handle back navigation with unsaved changes warning
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+            if (hasUnsavedChanges()) {
+                e.preventDefault();
+                Alert.alert(
+                    t('common.unsavedChanges'),
+                    t('common.unsavedChangesMessage'),
+                    [
+                        { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
+                        { text: t('common.discard'), style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+                        { text: t('common.save'), style: 'default', onPress: async () => {
+                            await saveAllSettings();
+                            navigation.dispatch(e.data.action);
+                        } }
+                    ]
+                );
+            }
+        });
+
+        return unsubscribe;
+    }, [navigation, hasUnsavedChanges]);
 
     // Helper function to get prayer-specific icons
     const getPrayerIcon = (prayer) => {

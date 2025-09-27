@@ -60,6 +60,17 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
               writingDirection: isRTL() ? "rtl" : "ltr"
             }
           ]}>{z.zekr}</Text>
+          <Text style={[
+            textStyles.bodySmall,
+            {
+              color: colors.BYellow,
+              marginTop: 6,
+              fontSize: zikrFontSize,
+              fontFamily: 'Hafs',
+              textAlign: getRTLTextAlign('left'),
+              writingDirection: isRTL() ? "rtl" : "ltr"
+            }
+          ]}>{z.quran}</Text>
           <View style={{ borderTopWidth: 1, marginTop: 20, height: 1, width: "100%", borderColor: colors.BYellow, borderStyle: "solid" }} />
           {z.reference != "" &&
             <Text style={[

@@ -4,7 +4,7 @@ import { themes } from './themes';
 
 // Theme Context
 export const ThemeContext = createContext({
-  theme: 'originalGreen',
+  theme: 'goldOnDark',
   setTheme: () => {},
   themes: themes,
   isThemeLoaded: false,
@@ -15,7 +15,7 @@ export const useTheme = () => {
   if (!context) {
     // Fallback if not within ThemeProvider
     return {
-      theme: 'originalGreen',
+      theme: 'goldOnDark',
       setTheme: () => {},
       themes: themes,
       isThemeLoaded: true, // Assume loaded if no provider
@@ -41,7 +41,7 @@ export const useColors = () => {
   const { theme } = useTheme();
   
   return useMemo(() => {
-    const currentTheme = themes[theme] || themes.originalGreen;
+    const currentTheme = themes[theme] || themes.goldOnDark;
     
     return {
       // Font configuration from theme

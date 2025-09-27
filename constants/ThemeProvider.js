@@ -4,7 +4,7 @@ import { ThemeContext } from './Colors';
 import { themes } from './themes';
 
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState('originalGreen');
+  const [currentTheme, setCurrentTheme] = useState('goldOnDark');
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
   // Load theme from storage on app start

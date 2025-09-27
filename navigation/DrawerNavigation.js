@@ -16,11 +16,13 @@ import { Feather } from '@expo/vector-icons';
 import { MuslimIconSvg } from '../components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 import { LogoSvg } from '../components/LogoSvg';
+import { PRAYER_CONSTANTS } from "../constants/PrayerConstants";
 
 const Drawer = createDrawerNavigator();
 export function DNav() {
   const colors = useColors();
   const [initialScreen, setInitialScreen] = useState(null);
+  const [hasLocation, setHasLocation] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('@initialScreen').then(screen => {
@@ -64,7 +66,9 @@ export function DNav() {
             return () => clearTimeout(timer);
           }
         }, [initialScreen, navigation]);
-
+        AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION).then(loc => {
+          setHasLocation(!!loc);
+        });
         return (
           <View
             testID="drawer-container"
@@ -171,6 +175,12 @@ export function DNav() {
               <TouchableOpacity
                 testID="prayer-times-screen"
                 onPress={() => {
+                  if (!hasLocation) {
+                    // If location is not set, navigate to UnifiedPrayerSettings to set it
+                    navigation.toggleDrawer()
+                    navigation.navigate("UnifiedPrayerSettings");
+                    return;
+                  }
                   navigation.navigate("PrayerTimes")
                 }}
                 style={{
@@ -199,6 +209,12 @@ export function DNav() {
               <TouchableOpacity
                 testID="qibla-screen"
                 onPress={() => {
+                  if (!hasLocation) {
+                    // If location is not set, navigate to UnifiedPrayerSettings to set it
+                    navigation.toggleDrawer()
+                    navigation.navigate("UnifiedPrayerSettings");
+                    return;
+                  }
                   navigation.navigate("Qibla")
                 }}
                 style={{
@@ -256,9 +272,7 @@ export function DNav() {
               <TouchableOpacity
                 testID="contribute-screen"
                 onPress={() => {
-                  if (Platform.OS === 'web') {
-                    navigation.toggleDrawer()
-                  }
+                  navigation.toggleDrawer()
                   navigation.navigate("Contribute")
                 }}
                 style={{

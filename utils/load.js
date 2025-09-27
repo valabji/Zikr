@@ -16,6 +16,7 @@ export async function loadResourcesAndDataAsync() {
         await Font.loadAsync({
             ...Ionicons.font,
             'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
+            'Hafs': require('../assets/fonts/Hafs.otf'),
         });
         await loadFirebaseAnalytics();
     } catch (e) {

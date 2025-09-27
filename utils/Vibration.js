@@ -119,13 +119,28 @@ class VibrationManager {
     }
   }
 
+  // Check if vibration is supported
+  async isVibrationSupported() {
+    // Skip vibration on web
+    if (Platform.OS === 'web') {
+      return false;
+    }
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   // Perform the actual vibration
   performVibration(intensity = 'light') {
     // Skip vibration on web
     if (Platform.OS === 'web') {
       return;
     }
-    
+
     try {
       switch (intensity) {
         case VIBRATION_INTENSITY.LIGHT:

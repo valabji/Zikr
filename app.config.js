@@ -4,7 +4,7 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.7",
+    version: "1.1.12",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
@@ -15,7 +15,7 @@ export default {
     },
     updates: {
       fallbackToCacheTimeout: 0,
-      url: "https://u.expo.dev/93819d24-8936-4af0-a311-4c072ec22e92",
+      url: "https://u.expo.dev/" + process.env.EAS_PROJECT_ID
     },
     runtimeVersion: {
       policy: "appVersion"
@@ -35,7 +35,7 @@ export default {
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 10,
+      versionCode: 15,
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
