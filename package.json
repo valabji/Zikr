@@ -45,7 +45,7 @@
     "@react-navigation/web": "^1.0.0-alpha.9",
     "@reduxjs/toolkit": "^1.5.1",
     "adhan": "^4.4.3",
-    "expo": "53.0.22",
+    "expo": "^54.0.10",
     "expo-application": "^6.1.5",
     "expo-asset": "~11.1.7",
     "expo-audio": "~0.4.9",

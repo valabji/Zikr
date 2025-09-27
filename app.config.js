@@ -14,7 +14,11 @@ export default {
       backgroundColor: "#ffffff"
     },
     updates: {
-      fallbackToCacheTimeout: 0
+      fallbackToCacheTimeout: 0,
+      url: "https://u.expo.dev/" + process.env.EAS_PROJECT_ID
+    },
+    runtimeVersion: {
+      policy: "appVersion"
     },
     assetBundlePatterns: ["**/*"],
     ios: {
