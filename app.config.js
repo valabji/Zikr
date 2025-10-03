@@ -21,6 +21,10 @@ export default {
       bundleIdentifier: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST,
       supportsTablet: true,
+      buildNumber: "15",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/splash_noname.png",
+      },
       config: {
         googleMobileAdsAppId: process.env.ADMOB_APPID
       },
@@ -93,6 +97,9 @@ export default {
     },
     plugins: [
       "expo-audio",
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser",
       "@react-native-firebase/app",
       [
         "expo-build-properties",

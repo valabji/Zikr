@@ -81,6 +81,7 @@ export default function HomeScreen({ navigation, route }) {
       <TouchableOpacity
         testID="fav-toggle"
         onPress={() => {
+          setFv(!fv)
           var Azkar2 = []
           for (let i = 0; i < Azkar.length; i++) {
             if (i == index) {
@@ -97,7 +98,6 @@ export default function HomeScreen({ navigation, route }) {
           }
           // Azkar2[index].fav = !fv
           Azkar2 = JSON.parse(JSON.stringify(Azkar2))
-          setFv(!fv)
           global.zikr = JSON.stringify(Azkar2)
           mystore.dispatch({ type: 'change', "obj": { "Azkar": Azkar2 } })
           AsyncStorage.setItem("@zikr", JSON.stringify(Azkar2))
@@ -109,7 +109,7 @@ export default function HomeScreen({ navigation, route }) {
           justifyContent: "center",
           ...getDirectionalMixedSpacing({ marginRight: 5 })
         }} >
-        <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} testID="fav-indicator" />
+        <Ionicons name={fv ? "heart" : "heart-outline"} color={colors.BYellow} size={32} testID="fav-indicator" />
       </TouchableOpacity>
     </TouchableOpacity>
   }
