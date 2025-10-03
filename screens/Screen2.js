@@ -96,9 +96,9 @@ export default function Screen2({ route, navigation }) {
             console.warn(err)
           }} /> */}
         {viewMode === 'swiper' ? (
-          <AzkarSwiper azkarList={azkarList} zikrFontSize={zikrFontSize} />
+          <AzkarSwiper key={`swiper-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         ) : (
-          <AzkarOnePageScroll azkarList={azkarList} zikrFontSize={zikrFontSize} />
+          <AzkarOnePageScroll key={`scroll-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         )}
       </View>
     </View>

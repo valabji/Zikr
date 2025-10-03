@@ -599,6 +599,10 @@ export default function SettingsScreen({ navigation }) {
         // Load font size
         const defaultFontSize = 18;
         const currentFontSize = storedFontSize ? parseInt(storedFontSize) : defaultFontSize;
+        // Save default font size if not set
+        if (!storedFontSize) {
+          await AsyncStorage.setItem('@fontSize', defaultFontSize.toString());
+        }
         setFontSize(currentFontSize);
         setTempFontSize(currentFontSize);
         setLastSavedFontSize(currentFontSize);
@@ -606,12 +610,20 @@ export default function SettingsScreen({ navigation }) {
         // Load view mode
         const defaultViewMode = 'swiper';
         const currentViewMode = storedViewMode || defaultViewMode;
+        // Save default view mode if not set
+        if (!storedViewMode) {
+          await AsyncStorage.setItem('@viewMode', defaultViewMode);
+        }
         setViewMode(currentViewMode);
         setTempViewMode(currentViewMode);
         setLastSavedViewMode(currentViewMode);
 
         // Load auto save setting (default to true)
         const currentAutoSave = storedAutoSave !== null ? storedAutoSave === 'true' : true;
+        // Save default auto save setting if not set
+        if (storedAutoSave === null) {
+          await AsyncStorage.setItem('@autoSave', 'true');
+        }
         setAutoSave(currentAutoSave);
 
         // Load vibration settings
@@ -782,8 +794,8 @@ export default function SettingsScreen({ navigation }) {
     }
   };
 
-  const handleAutoSave = async () => {
-    if (!autoSave) return;
+  const handleAutoSave = async (forceeSave = false) => {
+    if (!autoSave && !forceeSave) return;
 
     // Save volume if changed
     if (tempVolume !== volume) {
@@ -910,7 +922,7 @@ export default function SettingsScreen({ navigation }) {
     }
 
     // Always save all settings when manually saving
-    await handleAutoSave();
+    await handleAutoSave(true);
 
     // If language was changed, restart the app
     if (languageChanged) {
