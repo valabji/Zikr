@@ -8,6 +8,21 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
 }));
 
+jest.mock('react-native-reanimated', () => ({
+  // Mock the specific exports used in SettingsScreen
+  useSharedValue: jest.fn(() => ({ value: 0 })),
+  useAnimatedStyle: jest.fn(() => ({})),
+  withTiming: jest.fn((value) => value),
+  withSequence: jest.fn((...animations) => animations),
+  withDelay: jest.fn((delay, animation) => animation),
+  runOnJS: jest.fn((fn) => fn),
+  Animated: {
+    View: 'Animated.View', // Mock as string or component if needed
+    Text: 'Animated.Text',
+    // Add other Animated components if used
+  },
+  // Add other exports if your code uses them
+}));
 // Mock the Colors module
 jest.mock('../../constants/Colors', () => ({
   useColors: () => ({
