@@ -4,9 +4,12 @@ node_modules
 .env
 dist/
 google-services.json
+google-services.json.backup
 GoogleService-Info.plist
+GoogleService-Info.plist.backup
 coverage/
 android/
+android_backup/
 ios/
 
 # Ignore Yarn's cache & build state

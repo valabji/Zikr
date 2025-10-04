@@ -29,7 +29,9 @@ export default {
         googleMobileAdsAppId: process.env.ADMOB_APPID
       },
       infoPlist: {
-        CFBundleAllowMixedLocalizations: true
+        CFBundleAllowMixedLocalizations: true,
+        NSUserNotificationsUsageDescription: "Zikr needs notification permission to remind you of prayer times. You can customize which prayers to be notified about in the app settings.",
+        UIBackgroundModes: ["audio"]  // Required for playing adhan audio in notifications
       }
     },
     android: {
@@ -59,6 +61,12 @@ export default {
 
         // Device permissions - useful for user feedback and background tasks
         "android.permission.VIBRATE",
+
+        // Notification permissions - needed for adhan notifications
+        "android.permission.POST_NOTIFICATIONS",              // Required for Android 13+
+        "android.permission.SCHEDULE_EXACT_ALARM",            // Critical for precise prayer time notifications
+        "android.permission.USE_EXACT_ALARM",                 // Required for Android 14+
+        "android.permission.RECEIVE_BOOT_COMPLETED",          // Reschedule notifications after device reboot
       ],
       blockedPermissions: [
         // Audio permissions - not needed (app only plays simple sounds)
