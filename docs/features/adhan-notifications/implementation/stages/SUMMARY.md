@@ -90,7 +90,6 @@ Quick reference for remaining stages:
 - **400+ lines** of code per major stage
 - **Troubleshooting** sections for common issues
 - **Acceptance criteria** before moving to next stage
-- **Git commit** templates
 - **Rollback** procedures
 
 ### 🎯 Practical
@@ -303,7 +302,6 @@ Everything is prepared and ready for implementation. Each stage file contains:
 ✅ Testing procedures  
 ✅ Troubleshooting  
 ✅ Acceptance criteria  
-✅ Git commit templates  
 
 **No ambiguity. No guesswork. Just execute.**
 

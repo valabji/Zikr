@@ -40,10 +40,6 @@ cp -r android android_backup
 # Backup Firebase config files
 cp google-services.json google-services.json.backup
 cp GoogleService-Info.plist GoogleService-Info.plist.backup
-
-# Commit current state to git
-git add .
-git commit -m "Backup before adhan notifications stage 1"
 ```
 
 **Why this matters**: `expo prebuild --clean` can delete custom Firebase configuration files. Always backup first.
@@ -381,6 +377,9 @@ Run these to verify Stage 1 completion:
 # Verify dependencies installed
 grep "expo-notifications" package.json
 grep "expo-intent-launcher" package.json
+```
+
+---
 
 # Verify Android permissions
 grep "SCHEDULE_EXACT_ALARM" android/app/src/main/AndroidManifest.xml
@@ -418,26 +417,6 @@ git checkout package.json app.config.js
 
 # Reinstall dependencies
 npm install
-```
-
----
-
-## 📤 Git Commit
-
-Once Stage 1 is complete and verified:
-
-```bash
-git add .
-git commit -m "feat: stage 1 - add notifications dependencies and permissions
-
-- Install expo-notifications@~0.28.19
-- Install expo-intent-launcher
-- Add Android exact alarm permissions (CRITICAL for timing)
-- Add iOS notification permission descriptions
-- Run expo prebuild with Firebase backup
-- Verify all builds successful
-
-Stage 1 of 10 complete"
 ```
 
 ---

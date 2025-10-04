@@ -757,29 +757,6 @@ grep "expo-intent-launcher" package.json
 
 ---
 
-## 📤 Git Commit
-
-Once Stage 3 is complete and verified:
-
-```bash
-git add utils/NotificationService.js
-git commit -m "feat: stage 3 - create notification service core
-
-- Implement requestPermissions() for iOS/Android
-- Add checkExactAlarmPermission() for Android 12+
-- Add openExactAlarmSettings() to guide users
-- Implement scheduleExactNotification() with exact alarms
-- Add battery optimization checking and settings
-- Implement cancel operations
-- Test exact alarm functionality on physical device
-
-CRITICAL: Exact alarms work with <2 second precision
-
-Stage 3 of 10 complete"
-```
-
----
-
 ## ➡️ Next Stage
 
 **Stage 4**: Audio System Integration

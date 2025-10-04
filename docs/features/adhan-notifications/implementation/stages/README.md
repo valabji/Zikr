@@ -22,7 +22,6 @@ Each stage file includes:
 - **Testing Instructions** - How to verify
 - **Acceptance Criteria** - When to move to next stage
 - **Troubleshooting** - Common issues and solutions
-- **Git Commit** - How to commit changes
 
 ---
 

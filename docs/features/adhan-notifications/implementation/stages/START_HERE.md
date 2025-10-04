@@ -82,11 +82,7 @@ cd Zikr
 # Open: docs/features/adhan-notifications/implementation/stages/STAGE_01_DEPENDENCIES.md
 # Follow instructions step-by-step
 
-# 3. After completing each stage, commit:
-git add .
-git commit -m "feat: stage N complete - [description]"
-
-# 4. Proceed to next stage
+# 3. Proceed to next stage
 # Repeat until all 10 stages complete
 ```
 

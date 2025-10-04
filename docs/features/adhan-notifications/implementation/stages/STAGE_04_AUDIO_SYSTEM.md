@@ -743,30 +743,6 @@ ls -l assets/sound/adhan_full.mp3
 
 ---
 
-## 📤 Git Commit
-
-Once Stage 4 is complete and verified:
-
-```bash
-git add utils/Sounds.js
-git add utils/NotificationService.js
-git add App.js
-git commit -m "feat: stage 4 - integrate audio system with notifications
-
-- Update Sounds.js with two separate audio players
-- Implement playShortAlert() and playFullAdhan() methods
-- Add stopFullAdhan() for user control
-- Integrate notification listeners in NotificationService
-- Initialize audio system in App.js
-- Test short alert auto-play on notification
-- Test full adhan playback on notification tap
-- Verify audio works in silent mode
-
-Stage 4 of 10 complete"
-```
-
----
-
 ## ➡️ Next Stage
 
 **Stage 5**: Settings Screen UI

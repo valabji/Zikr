@@ -505,25 +505,6 @@ adhan_full.mp3          1.8 MB
 
 ---
 
-## 📤 Git Commit
-
-Once Stage 2 is complete and verified:
-
-```bash
-git add assets/sound/adhan_short_alert.mp3
-git add assets/sound/adhan_full.mp3
-git commit -m "feat: stage 2 - add adhan audio assets
-
-- Add short alert sound (3-5 sec, optimized to <100KB)
-- Add full adhan audio (2-3 min, optimized to <2MB)
-- Compress to mobile-friendly sizes
-- Verify playback quality
-
-Stage 2 of 10 complete"
-```
-
----
-
 ## ➡️ Next Stage
 
 **Stage 3**: Notification Service Creation
