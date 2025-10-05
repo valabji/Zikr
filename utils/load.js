@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { mystore } from '../redux/store';
 import loadFirebaseAnalytics from './firebase/load';
+import Sounds from './Sounds';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -19,6 +20,14 @@ export async function loadResourcesAndDataAsync() {
             'Hafs': require('../assets/fonts/Hafs.otf'),
         });
         await loadFirebaseAnalytics();
+        
+        // Initialize audio system
+        try {
+            await Sounds.initialize();
+            console.log('Audio system initialized');
+        } catch (error) {
+            console.error('Failed to initialize audio:', error);
+        }
     } catch (e) {
         console.warn(e);
     } finally {

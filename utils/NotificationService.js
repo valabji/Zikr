@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Sounds from './Sounds';
 
 /**
  * NotificationService - Handles all notification operations for adhan reminders
@@ -26,6 +27,37 @@ class NotificationService {
         shouldPlaySound: false,  // We'll play custom audio separately
         shouldSetBadge: true,
       }),
+    });
+
+    // Setup notification listeners
+    this.setupNotificationListener();
+  }
+
+  /**
+   * Setup notification listener for user interactions
+   * Plays appropriate audio when notification is received or tapped
+   */
+  setupNotificationListener() {
+    // When notification is received (app in foreground)
+    Notifications.addNotificationReceivedListener(async (notification) => {
+      console.log('📩 Notification received:', notification.request.identifier);
+      
+      // Play short alert automatically
+      const { soundType } = notification.request.content.data;
+      if (soundType) {
+        await Sounds.playNotificationSound(soundType, false);
+      }
+    });
+
+    // When user taps notification (app in background)
+    Notifications.addNotificationResponseReceivedListener(async (response) => {
+      console.log('👆 Notification tapped:', response.notification.request.identifier);
+      
+      // Play full adhan when tapped
+      const { soundType } = response.notification.request.content.data;
+      if (soundType) {
+        await Sounds.playNotificationSound(soundType, true);
+      }
     });
   }
 

@@ -92,6 +92,20 @@
       "clickVolume": "Adjust the volume of click sounds.",
       "fontSize": "Change the font size for azkar text.",
       "help": "Help"
+    },
+    "notifications": {
+      "title": "🔔 Prayer Notifications",
+      "enabled": "Enable Notifications",
+      "enabledDescription": "Receive prayer time reminders",
+      "audioMode": "Audio Mode",
+      "selectPrayers": "Select Prayers",
+      "exactAlarmRequired": "Exact Alarms Required",
+      "exactAlarmMessage": "Enable exact alarms for precise timing",
+      "batteryOptimization": "Battery Optimization",
+      "batteryMessage": "Disable for reliable notifications",
+      "permissionRequired": "Permission Required",
+      "permissionMessage": "Please enable notification permissions in your device settings.",
+      "openSettings": "Open Settings"
     }
   },
   "common": {
