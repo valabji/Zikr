@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../redux/store';
 import loadFirebaseAnalytics from './firebase/load';
 import Sounds from './Sounds';
+import PrayerCountdownService from './PrayerCountdownService';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -27,6 +28,14 @@ export async function loadResourcesAndDataAsync() {
             console.log('Audio system initialized');
         } catch (error) {
             console.error('Failed to initialize audio:', error);
+        }
+
+        // Initialize prayer countdown service
+        try {
+            await PrayerCountdownService.initialize();
+            console.log('Prayer countdown service initialized');
+        } catch (error) {
+            console.error('Failed to initialize prayer countdown service:', error);
         }
     } catch (e) {
         console.warn(e);

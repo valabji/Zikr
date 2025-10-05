@@ -24,6 +24,7 @@ import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 import { searchLocations, getLocationFromIP, getBrowserLocation } from '../utils/PrayerUtils';
 import { Restart } from '../utils/restart';
 import NotificationService from '../utils/NotificationService';
+import PrayerCountdownService from '../utils/PrayerCountdownService';
 
 export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const colors = useColors();
@@ -50,6 +51,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         isha: true
     });
     const [hasExactAlarm, setHasExactAlarm] = useState(true);
+    const [showPersistentCountdown, setShowPersistentCountdown] = useState(false);
 
     // UI states
     const [isCalculationMethodModalVisible, setCalculationMethodModalVisible] = useState(false);
@@ -69,6 +71,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         maghrib: true,
         isha: true
     });
+    const [initialShowPersistentCountdown, setInitialShowPersistentCountdown] = useState(false);
     const [initialValuesSet, setInitialValuesSet] = useState(false);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
@@ -91,6 +94,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             const savedNotifications = await AsyncStorage.getItem('@notifications_enabled');
             const savedAudioMode = await AsyncStorage.getItem('@audio_mode');
             const savedNotificationTimes = await AsyncStorage.getItem('@enabled_prayers');
+            const savedPersistentCountdown = await AsyncStorage.getItem('@persistent_countdown');
 
             if (savedMethod) {
                 setCalculationMethod(savedMethod);
@@ -106,6 +110,9 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             }
             if (savedNotificationTimes) {
                 setNotificationTimes(JSON.parse(savedNotificationTimes));
+            }
+            if (savedPersistentCountdown !== null) {
+                setShowPersistentCountdown(savedPersistentCountdown === 'true');
             }
 
             // Check exact alarm permission on Android
@@ -128,9 +135,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             setInitialNotificationsEnabled(notificationsEnabled);
             setInitialAudioMode(audioMode);
             setInitialNotificationTimes({ ...notificationTimes });
+            setInitialShowPersistentCountdown(showPersistentCountdown);
             setInitialValuesSet(true);
         }
-    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, audioMode, notificationTimes]);
+    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, audioMode, notificationTimes, showPersistentCountdown]);
 
     // Location search with debouncing
     const handleSearch = async (query) => {
@@ -272,6 +280,15 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             await AsyncStorage.setItem('@notifications_enabled', notificationsEnabled.toString());
             await AsyncStorage.setItem('@audio_mode', audioMode);
             await AsyncStorage.setItem('@enabled_prayers', JSON.stringify(notificationTimes));
+            await AsyncStorage.setItem('@persistent_countdown', showPersistentCountdown.toString());
+
+            // Restart countdown service with new settings
+            if (showPersistentCountdown) {
+                await PrayerCountdownService.stop();
+                await PrayerCountdownService.start();
+            } else {
+                await PrayerCountdownService.stop();
+            }
 
             setTimeout(() => {
                 Restart();
@@ -375,9 +392,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         if (notificationsEnabled !== initialNotificationsEnabled) return true;
         if (audioMode !== initialAudioMode) return true;
         if (JSON.stringify(notificationTimes) !== JSON.stringify(initialNotificationTimes)) return true;
+        if (showPersistentCountdown !== initialShowPersistentCountdown) return true;
 
         return false;
-    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, audioMode, initialAudioMode, notificationTimes, initialNotificationTimes]);
+    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, audioMode, initialAudioMode, notificationTimes, initialNotificationTimes, showPersistentCountdown, initialShowPersistentCountdown]);
 
     useEffect(() => {
         loadSettings();
@@ -1062,6 +1080,45 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 />
                                             </View>
                                         ))}
+                                    </View>
+
+                                    {/* Persistent Countdown Notification Toggle */}
+                                    <View style={{
+                                        backgroundColor: colors.BGreen,
+                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                        marginTop: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between'
+                                    }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                fontFamily: "Cairo_400Regular",
+                                                fontWeight: 'bold',
+                                                marginBottom: 4,
+                                            }}>
+                                                {t('prayerTimes.persistentNotification') || 'Show Countdown Notification'}
+                                            </Text>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+                                                fontFamily: "Cairo_400Regular",
+                                                opacity: 0.7,
+                                            }}>
+                                                {t('prayerTimes.persistentNotificationDesc') || 'Keep countdown in notification tray'}
+                                            </Text>
+                                        </View>
+                                        <CustomToggle
+                                            value={showPersistentCountdown}
+                                            onValueChange={setShowPersistentCountdown}
+                                            activeColor={colors.BYellow}
+                                            inactiveColor={colors.pastPrayer}
+                                            icon="bell"
+                                            size={24}
+                                        />
                                     </View>
                                 </>
                             )}

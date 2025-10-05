@@ -168,7 +168,9 @@
     "nextPrayer": "Next Prayer",
     "in": "in",
     "todaysPrayers": "Today's Prayers",
-    "settings": "Prayer Settings"
+    "settings": "Prayer Settings",
+    "persistentNotification": "Show Countdown Notification",
+    "persistentNotificationDesc": "Keep countdown in notification tray"
   },
   "qibla": {
     "loading": "Finding Qibla direction...",

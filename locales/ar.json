@@ -165,7 +165,9 @@
     "nextPrayer": "الصلاة التالية",
     "in": "خلال",
     "todaysPrayers": "صلوات اليوم",
-    "settings": "إعدادات الصلاة"
+    "settings": "إعدادات الصلاة",
+    "persistentNotification": "إظهار إشعار العد التنازلي",
+    "persistentNotificationDesc": "الاحتفاظ بالعد التنازلي في قائمة الإشعارات"
   },
   "qibla": {
     "loading": "جاري العثور على اتجاه القبلة...",

@@ -405,6 +405,68 @@ class NotificationService {
       console.log(`✅ Created notification channel: ${id}`);
     }
   }
+
+  /**
+   * Show or update persistent countdown notification
+   * This notification stays in the tray and shows next prayer countdown
+   * 
+   * @param {string} nextPrayerName - Name of next prayer (e.g., 'Fajr', 'Dhuhr')
+   * @param {string} nextPrayerTime - Formatted time string (e.g., '5:30 AM')
+   * @param {string} countdown - Time until prayer (e.g., '2h 15m')
+   * @param {string} title - Notification title
+   */
+  async showPersistentCountdown(nextPrayerName, nextPrayerTime, countdown, title = '🕌 Next Prayer') {
+    try {
+      // Create persistent notification channel if not exists (Android)
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('prayer-countdown', {
+          name: 'Prayer Countdown',
+          description: 'Shows countdown to next prayer',
+          importance: Notifications.AndroidImportance.LOW, // Low priority - won't make sound
+          sound: false,
+          vibrationPattern: null,
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          bypassDnd: false, // Don't bypass DND for countdown
+        });
+      }
+
+      // Cancel any existing countdown notification
+      await Notifications.dismissNotificationAsync('prayer-countdown-persistent');
+
+      // Show the persistent notification
+      await Notifications.presentNotificationAsync({
+        identifier: 'prayer-countdown-persistent',
+        content: {
+          title: title,
+          body: `${nextPrayerName} at ${nextPrayerTime}\n${countdown} remaining`,
+          sound: false,
+          priority: Platform.OS === 'android' ? 'low' : 'default',
+          sticky: true, // Android: Make notification persistent
+          data: {
+            type: 'countdown',
+            prayer: nextPrayerName,
+          },
+        },
+        trigger: null, // Show immediately
+      });
+
+      console.log(`📊 Updated persistent countdown: ${nextPrayerName} in ${countdown}`);
+    } catch (error) {
+      console.error('Error showing persistent countdown:', error);
+    }
+  }
+
+  /**
+   * Hide the persistent countdown notification
+   */
+  async hidePersistentCountdown() {
+    try {
+      await Notifications.dismissNotificationAsync('prayer-countdown-persistent');
+      console.log('🚫 Hidden persistent countdown notification');
+    } catch (error) {
+      console.error('Error hiding persistent countdown:', error);
+    }
+  }
 }
 
 // Export singleton instance
