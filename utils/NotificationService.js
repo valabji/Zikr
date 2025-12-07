@@ -20,10 +20,20 @@ import Sounds from './Sounds';
  */
 class NotificationService {
   constructor() {
+    // Note: Actual initialization happens in initialize() method
+    // which should be called explicitly after construction
+  }
+
+  /**
+   * Initialize the notification service
+   * MUST be called before using any other methods
+   */
+  async initialize() {
     // Set notification handler (how notifications appear)
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
+        shouldShowBanner: true,  // Shows banner notification
+        shouldShowList: true,    // Shows in notification list
         shouldPlaySound: false,  // We'll play custom audio separately
         shouldSetBadge: true,
       }),
@@ -31,6 +41,35 @@ class NotificationService {
 
     // Setup notification listeners
     this.setupNotificationListener();
+    
+    // Initialize notification channels on Android
+    await this.initializeChannels();
+    
+    console.log('✅ NotificationService initialized');
+  }
+
+  /**
+   * Initialize notification channels (Android only)
+   * Must be called before scheduling any notifications on Android 8.0+
+   */
+  async initializeChannels() {
+    if (Platform.OS === 'android') {
+      // Create main prayer reminders channel
+      await this.createNotificationChannel(
+        'prayer_reminders',
+        'Prayer Reminders',
+        'Notifications for prayer times'
+      );
+      
+      // Create countdown channel
+      await this.createNotificationChannel(
+        'prayer-countdown',
+        'Prayer Countdown',
+        'Shows countdown to next prayer'
+      );
+      
+      console.log('✅ All notification channels initialized');
+    }
   }
 
   /**
@@ -134,12 +173,19 @@ class NotificationService {
     try {
       // Android 12+ (API 31+) requires explicit permission
       if (Platform.Version >= 31) {
-        const hasPermission = await Notifications.checkPermissionsAsync();
+        // ⚠️ Note: expo-notifications doesn't provide a direct API to check
+        // SCHEDULE_EXACT_ALARM permission. This checks notification permission only.
+        // Users may need to manually grant exact alarm permission in system settings.
+        const hasPermission = await Notifications.getPermissionsAsync();
         
-        // Check if we can schedule exact alarms
-        // Note: Exact alarm permission is separate from notification permission
-        // We'll verify by attempting to get scheduling info
-        const canScheduleExact = hasPermission.status === 'granted';
+        // We can only check if notifications are granted
+        // The actual SCHEDULE_EXACT_ALARM permission must be checked/granted
+        // through system settings (opened via openExactAlarmSettings method)
+        const canScheduleExact = hasPermission.granted;
+        
+        if (!canScheduleExact) {
+          console.warn('Notification permission not granted');
+        }
         
         return canScheduleExact;
       }
@@ -167,7 +213,7 @@ class NotificationService {
       // Android 12+ (API 31+): Open exact alarm settings
       if (Platform.Version >= 31) {
         await IntentLauncher.startActivityAsync(
-          IntentLauncher.ActivityAction.REQUEST_SCHEDULE_EXACT_ALARM,
+          'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
           {
             data: 'package:com.valabji.zikr',
           }
@@ -298,27 +344,26 @@ class NotificationService {
       const content = {
         title,
         body,
-        sound: false, // We'll play custom audio separately
+        sound: null, // We'll play custom audio separately
         data: {
           notificationId: id,
           soundType: sound, // 'short' or 'full'
           scheduledTime: triggerDate.getTime(),
         },
-        priority: 'high',
+        priority: Platform.OS === 'android' 
+          ? Notifications.AndroidNotificationPriority.HIGH
+          : undefined,
         categoryIdentifier: 'prayer_reminder',
       };
 
       // Prepare trigger with exact timing
       const trigger = {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: triggerDate,
-        repeats: false,
-        // CRITICAL: For Android, this ensures exact timing
-        channelId: 'prayer_reminders', // Must match channel created later
       };
 
       // Schedule notification
       const notificationId = await Notifications.scheduleNotificationAsync({
-        identifier: id,
         content,
         trigger,
       });
@@ -335,22 +380,14 @@ class NotificationService {
   /**
    * Cancel a specific notification
    * 
-   * @param {string} id - Notification ID to cancel
+   * @param {string} identifier - Notification identifier to cancel
    */
-  async cancelNotification(id) {
+  async cancelNotification(identifier) {
     try {
-      // Get all scheduled notifications
-      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-      
-      // Find notification with matching identifier
-      const notification = scheduled.find(n => n.identifier === id);
-      
-      if (notification) {
-        await Notifications.cancelScheduledNotificationAsync(id);
-        console.log(`❌ Cancelled notification: ${id}`);
-      }
+      await Notifications.cancelScheduledNotificationAsync(identifier);
+      console.log(`❌ Cancelled notification: ${identifier}`);
     } catch (error) {
-      console.error(`Error cancelling notification "${id}":`, error);
+      console.error(`Error cancelling notification "${identifier}":`, error);
     }
   }
 
@@ -396,7 +433,7 @@ class NotificationService {
         name,
         description,
         importance: Notifications.AndroidImportance.MAX, // Highest priority
-        sound: false, // We'll play custom audio
+        sound: null, // We'll play custom audio
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF0000',
         lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -423,7 +460,7 @@ class NotificationService {
           name: 'Prayer Countdown',
           description: 'Shows countdown to next prayer',
           importance: Notifications.AndroidImportance.LOW, // Low priority - won't make sound
-          sound: false,
+          sound: null,
           vibrationPattern: null,
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
           bypassDnd: false, // Don't bypass DND for countdown
@@ -434,13 +471,14 @@ class NotificationService {
       await Notifications.dismissNotificationAsync('prayer-countdown-persistent');
 
       // Show the persistent notification
-      await Notifications.presentNotificationAsync({
-        identifier: 'prayer-countdown-persistent',
+      await Notifications.scheduleNotificationAsync({
         content: {
           title: title,
           body: `${nextPrayerName} at ${nextPrayerTime}\n${countdown} remaining`,
-          sound: false,
-          priority: Platform.OS === 'android' ? 'low' : 'default',
+          sound: null,
+          priority: Platform.OS === 'android' 
+            ? Notifications.AndroidNotificationPriority.LOW
+            : undefined,
           sticky: true, // Android: Make notification persistent
           data: {
             type: 'countdown',
@@ -470,4 +508,7 @@ class NotificationService {
 }
 
 // Export singleton instance
-export default new NotificationService();
+const notificationService = new NotificationService();
+
+// Export the instance and make sure users call initialize()
+export default notificationService;
