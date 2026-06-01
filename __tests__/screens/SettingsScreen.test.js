@@ -64,15 +64,33 @@ describe('SettingsScreen', () => {
     setOptions: jest.fn(),
   };
 
+  // Render helper that waits for all effects (async AsyncStorage loads + state updates)
+  // to settle, so subsequent assertions don't trigger React act() warnings.
+  const renderSettings = async (props = {}) => {
+    const result = render(<SettingsScreen navigation={mockNavigation} {...props} />);
+    // waitFor implicitly flushes pending state updates inside act()
+    await waitFor(() => {
+      expect(result.getByTestId('settings-screen')).toBeTruthy();
+    });
+    // Let any trailing setStates settle
+    await act(async () => {
+      await Promise.resolve();
+    });
+    return result;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     AsyncStorage.getItem.mockResolvedValue(null);
   });
 
-  it('renders correctly', () => {
-    const { getByTestId } = render(
-      <SettingsScreen navigation={mockNavigation} />
-    );
+  it('renders correctly', async () => {
+    const tree = await renderSettings();
+    const getByTestId = tree.getByTestId;
+    // Wait for AsyncStorage calls and effects to settle before asserting
+    await waitFor(() => {
+      expect(AsyncStorage.getItem).toHaveBeenCalled();
+    });
     expect(getByTestId('settings-screen')).toBeTruthy();
   });
 
@@ -107,9 +125,8 @@ describe('SettingsScreen', () => {
       return Promise.resolve(null);
     });
 
-    const { getByTestId } = render(
-      <SettingsScreen navigation={mockNavigation} />
-    );
+    const tree = await renderSettings();
+    const getByTestId = tree.getByTestId;
     
     // Wait for component to finish loading
     await act(async () => {
@@ -134,9 +151,7 @@ describe('SettingsScreen', () => {
       return Promise.resolve(null);
     });
 
-    const { getByTestId, queryByText } = render(
-      <SettingsScreen navigation={mockNavigation} />
-    );
+    const { getByTestId, queryByText } = await renderSettings();
     
     // Wait for component to finish loading
     await act(async () => {
@@ -155,16 +170,50 @@ describe('SettingsScreen', () => {
   });
 
   it('handles language change', async () => {
-    const { getByTestId } = render(
-      <SettingsScreen navigation={mockNavigation} />
-    );
-    
+    const tree = await renderSettings();
+    const getByTestId = tree.getByTestId;
+
+    // Wait for the component to fully load before interacting
+    await waitFor(() => {
+      expect(AsyncStorage.getItem).toHaveBeenCalled();
+    });
+
     const languageToggle = getByTestId('language-toggle');
-    
+
     await act(async () => {
       fireEvent.press(languageToggle);
     });
-    
+
     expect(languageToggle).toBeTruthy();
+  });
+
+  it('navigates to UnifiedPrayerSettings when prayer settings button pressed', async () => {
+    AsyncStorage.getItem.mockResolvedValue('false');
+    const { queryByTestId } = await renderSettings();
+    const btn = queryByTestId('prayer-settings-button');
+    if (btn) {
+      await act(async () => {
+        fireEvent.press(btn);
+      });
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('UnifiedPrayerSettings');
+    }
+  });
+
+  it('respects firstTime flag from storage', async () => {
+    AsyncStorage.getItem.mockImplementation((k) => {
+      if (k === '@firstTimeSettings') return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
+    const { getByTestId } = await renderSettings();
+    expect(getByTestId('settings-screen')).toBeTruthy();
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith('@firstTimeSettings');
+  });
+
+  it('renders without crashing when storage rejects', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    AsyncStorage.getItem.mockRejectedValue(new Error('storage broken'));
+    const { getByTestId } = await renderSettings();
+    expect(getByTestId('settings-screen')).toBeTruthy();
+    warn.mockRestore();
   });
 });

@@ -233,6 +233,13 @@ jest.mock('react-native', () => {
     FlatList: createMockComponent('FlatList'),
     TextInput: createMockComponent('TextInput'),
     TouchableHighlight: createMockComponent('TouchableHighlight'),
+    TouchableWithoutFeedback: createMockComponent('TouchableWithoutFeedback'),
+    Pressable: createMockComponent('Pressable'),
+    KeyboardAvoidingView: createMockComponent('KeyboardAvoidingView'),
+    ActivityIndicator: createMockComponent('ActivityIndicator'),
+    Switch: createMockComponent('Switch'),
+    StatusBar: createMockComponent('StatusBar'),
+    SectionList: createMockComponent('SectionList'),
     I18nManager: {
       isRTL: false,
       forceRTL: jest.fn(),
@@ -257,8 +264,35 @@ jest.mock('react-native', () => {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     },
+    DevSettings: {
+      reload: jest.fn(),
+      addMenuItem: jest.fn(),
+    },
+    Animated: {
+      Value: jest.fn(function (val) {
+        this._value = val;
+        this.setValue = jest.fn((v) => { this._value = v; });
+        this.interpolate = jest.fn(() => ({ _value: val }));
+        return this;
+      }),
+      timing: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      spring: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      parallel: jest.fn((animations) => ({
+        start: jest.fn((cb) => {
+          animations.forEach((a) => a && a.start && a.start());
+          if (cb) cb();
+        }),
+      })),
+      sequence: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      loop: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
+      View: createMockComponent('Animated.View'),
+      Text: createMockComponent('Animated.Text'),
+      Image: createMockComponent('Animated.Image'),
+      ScrollView: createMockComponent('Animated.ScrollView'),
+      createAnimatedComponent: (C) => C,
+    },
   };
-  
+
   return ReactNative;
 });
 
