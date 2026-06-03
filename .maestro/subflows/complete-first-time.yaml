@@ -1,0 +1,22 @@
+appId: com.valabji.zikr
+name: "Subflow: complete first-time setup"
+# Mark @firstTimeSettings as visited so subsequent navigation works.
+# First-time blocks the back button and only `auto-save off → save` exits
+# (since auto-save defaults on but only `!autoSave` shows the save button).
+---
+- extendedWaitUntil:
+    visible:
+      id: "settings-screen"
+    timeout: 30000
+- tapOn:
+    id: "auto-save-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "save-settings"
+    timeout: 5000
+- tapOn:
+    id: "save-settings"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000

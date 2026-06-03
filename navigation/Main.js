@@ -21,7 +21,7 @@ export const AppContainer = () => {
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            paddingTop: Platform.OS === 'ios' ? Constants.statusBarHeight : 0,
+            paddingTop: Constants.statusBarHeight,
             backgroundColor: colors.DGreen,
         },
     });

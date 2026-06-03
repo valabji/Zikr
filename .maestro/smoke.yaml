@@ -1,0 +1,9 @@
+appId: com.valabji.zikr
+name: Smoke — app launches and shows first-time settings
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "settings-screen"
+    timeout: 30000

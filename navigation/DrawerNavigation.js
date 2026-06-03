@@ -19,56 +19,56 @@ import { LogoSvg } from '../components/LogoSvg';
 import { PRAYER_CONSTANTS } from "../constants/PrayerConstants";
 
 const Drawer = createDrawerNavigator();
+
+function useInitialDrawerRoute() {
+  const [resolved, setResolved] = useState(undefined);
+  useEffect(() => {
+    AsyncStorage.getItem('@firstTimeSettings').then(ft => {
+      if (ft === null) {
+        setResolved({ route: 'Settings' });
+        return;
+      }
+      AsyncStorage.getItem('@initialScreen').then(screen => {
+        const map = {
+          All: { route: 'Home', params: { showFavorites: false } },
+          Fav: { route: 'Home', params: { showFavorites: true } },
+          Tasbih: { route: 'Screen3' },
+          PrayerTimes: { route: 'PrayerTimes' },
+          Qibla: { route: 'Qibla' },
+        };
+        setResolved(map[screen] || map.Fav);
+      });
+    });
+  }, []);
+  return resolved;
+}
+
 export function DNav() {
   const colors = useColors();
-  const [initialScreen, setInitialScreen] = useState(null);
   const [hasLocation, setHasLocation] = useState(false);
+  const initial = useInitialDrawerRoute();
 
   useEffect(() => {
-    AsyncStorage.getItem('@initialScreen').then(screen => {
-      AsyncStorage.getItem('@firstTimeSettings').then(ft => {
-        if (ft === null) {
-          setInitialScreen('Settings');
-        } else {
-          setInitialScreen(screen);
-        }
-      })
+    AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION).then(loc => {
+      setHasLocation(!!loc);
     });
   }, []);
 
+  if (initial === undefined) {
+    return null;
+  }
+
+  const homeInitialParams = initial.route === 'Home' ? initial.params : undefined;
+
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      initialRouteName={initial.route}
       screenOptions={{
         drawerPosition: isRTL() ? "right" : "left",
         drawerType: "slide",
         headerShown: false,
       }}
       drawerContent={({ navigation }) => {
-        // Handle initial screen navigation
-        useEffect(() => {
-          if (initialScreen) {
-            const routeMap = {
-              'All': 'Home',
-              'Fav': 'Home',
-              'Tasbih': 'Screen3',
-              'Settings': 'Settings',
-              'PrayerTimes': 'PrayerTimes',
-              'Qibla': 'Qibla',
-            };
-            const routeName = routeMap[initialScreen] || 'Home';
-            const routeParams = initialScreen === 'Fav' ? { showFavorites: true } : { showFavorites: false };
-
-            const timer = setTimeout(() => {
-              setInitialScreen(null);
-              navigation.navigate(routeName, routeParams);
-            }, 100);
-            return () => clearTimeout(timer);
-          }
-        }, [initialScreen, navigation]);
-        AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION).then(loc => {
-          setHasLocation(!!loc);
-        });
         return (
           <View
             testID="drawer-container"
@@ -358,7 +358,7 @@ export function DNav() {
       }}
     >
       <Drawer.Screen name="Screen3" component={Screen3} />
-      <Drawer.Screen name="Home" component={MainScreen} />
+      <Drawer.Screen name="Home" component={MainScreen} initialParams={homeInitialParams} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />

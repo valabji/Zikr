@@ -1,0 +1,20 @@
+appId: com.valabji.zikr
+name: Settings reachable from drawer after first-time setup
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+# Drawer item testID and screen-root testID are both "settings-screen".
+# The drawer item is tap-able first; tapping navigates back to Settings.
+- tapOn:
+    id: "settings-screen"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    id: "language-toggle"

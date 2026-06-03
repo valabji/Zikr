@@ -1,0 +1,24 @@
+appId: com.valabji.zikr
+name: Drawer opens from home and shows all menu items
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- assertVisible:
+    id: "screen3"
+- assertVisible:
+    id: "main-screen"
+- assertVisible:
+    id: "fav-screen"
+- assertVisible:
+    id: "prayer-times-screen"
+- assertVisible:
+    id: "qibla-screen"
+- assertVisible:
+    id: "contribute-screen"

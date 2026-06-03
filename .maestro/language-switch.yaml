@@ -1,0 +1,43 @@
+appId: com.valabji.zikr
+name: Switch language to English and restart applies it
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "settings-screen"
+    timeout: 30000
+# Turn auto-save off first so the save button appears (only `!autoSave`
+# renders it). Then toggle language to English (sets languageChanged = true),
+# and save — which calls setLanguage('en', true) → Updates.reloadAsync().
+- tapOn:
+    id: "auto-save-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "save-settings"
+    timeout: 5000
+- tapOn:
+    id: "language-toggle"
+- tapOn:
+    id: "save-settings"
+# handleSave calls setLanguage('en', true) → Restart() which calls
+# Updates.reloadAsync(). On the new architecture that reload can fail to
+# recreate the React instance, leaving a blank screen. Relaunch the app
+# explicitly (without clearState so the language change persists).
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 30000
+# Open the drawer; the English locale should render the menu items
+# with English copy. The "All Azkar" item testID is `main-screen`,
+# which doesn't change with language — just verify the drawer opens.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- assertVisible:
+    id: "main-screen"

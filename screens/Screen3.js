@@ -30,7 +30,7 @@ export default function Screen2({ route, navigation }) {
   const player = useAudio();
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="tasbih-screen">
       <BackgroundSvg2 color={colors.BYellow} />
       <Modal
         animationType="slide"
@@ -122,6 +122,7 @@ export default function Screen2({ route, navigation }) {
             console.warn(err)
           }} /> */}
         <TouchableOpacity
+          testID="tasbih-counter-button"
           onPressIn={() => {
             setI(i + 1)
             player.playClick();
@@ -132,6 +133,7 @@ export default function Screen2({ route, navigation }) {
           <View style={{ width: 256, height: 256, alignSelf: "center", justifyContent: "center", alignItems: "center" }}>
             <StarSvgFilled width={256} height={256} />
             <Text
+              testID="tasbih-counter-value"
               style={[
                 textStyles.base,
                 {

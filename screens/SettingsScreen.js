@@ -910,6 +910,8 @@ export default function SettingsScreen({ navigation }) {
   const handleSave = async () => {
     playClick();
 
+    const wasFirstTime = isFirstTime;
+
     // If it's first time, mark settings as visited
     if (isFirstTime) {
       await AsyncStorage.setItem('@firstTimeSettings', 'visited');
@@ -930,11 +932,25 @@ export default function SettingsScreen({ navigation }) {
       return; // Don't continue with other saves since we're restarting
     }
 
+    const routeMap = {
+      All: { route: 'Home', params: { showFavorites: false } },
+      Fav: { route: 'Home', params: { showFavorites: true } },
+      Tasbih: { route: 'Screen3' },
+      PrayerTimes: { route: 'PrayerTimes' },
+      Qibla: { route: 'Qibla' },
+    };
+
+    if (wasFirstTime) {
+      const target = routeMap[tempScreen] || routeMap.Fav;
+      navigation.navigate(target.route, target.params);
+      return;
+    }
+
     // Navigate appropriately
     if (tempScreen !== initialScreen) {
-      const selectedScreen = screens.find(s => s.id === tempScreen);
-      if (selectedScreen) {
-        navigation.navigate(selectedScreen.route);
+      const target = routeMap[tempScreen];
+      if (target) {
+        navigation.navigate(target.route, target.params);
       }
     } else {
       navigation.goBack();
@@ -1212,6 +1228,7 @@ export default function SettingsScreen({ navigation }) {
                 ]}>English</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                testID="language-toggle-ar"
                 style={[
                   styles.langButton,
                   currentLang === 'ar' && styles.activeLangButton
@@ -1240,6 +1257,7 @@ export default function SettingsScreen({ navigation }) {
                 <Text style={styles.autoSaveDescription}>{t('settings.autoSaveDescription')}</Text>
               </View>
               <TouchableOpacity
+                testID="auto-save-toggle"
                 style={[
                   styles.toggleButton,
                   autoSave ? styles.toggleButtonActive : styles.toggleButtonInactive
@@ -1264,6 +1282,7 @@ export default function SettingsScreen({ navigation }) {
             />
             <Text style={styles.settingTitle}>{t('settings.theme')}</Text>
             <TouchableOpacity
+              testID="theme-dropdown-trigger"
               style={styles.dropdownTrigger}
               onPress={() => {
                 playClick();
@@ -1899,6 +1918,7 @@ export default function SettingsScreen({ navigation }) {
         {/* Floating Save Button - only show when auto save is disabled */}
         {!autoSave && (
           <TouchableOpacity
+            testID="save-settings"
             onPress={handleSave}
             style={{
               position: Platform.OS === 'web' ? 'fixed' : 'absolute',

@@ -1,0 +1,20 @@
+appId: com.valabji.zikr
+name: Contribute screen reachable from drawer
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen"
+    timeout: 5000
+- tapOn:
+    id: "contribute-screen"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen-root"
+    timeout: 10000
+- assertVisible:
+    id: "copy-email"

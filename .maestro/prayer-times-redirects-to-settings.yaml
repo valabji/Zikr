@@ -1,0 +1,18 @@
+appId: com.valabji.zikr
+name: Prayer Times redirects to UnifiedPrayerSettings when location is not set
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "prayer-times-screen"
+    timeout: 5000
+- tapOn:
+    id: "prayer-times-screen"
+- extendedWaitUntil:
+    visible:
+      id: "unified-prayer-settings-screen"
+    timeout: 10000

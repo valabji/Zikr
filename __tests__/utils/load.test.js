@@ -52,12 +52,17 @@ describe('loadResourcesAndDataAsync', () => {
     expect(Font.loadAsync).toHaveBeenCalled();
   });
 
-  it('initializes firebase, sounds, and prayer countdown', async () => {
+  it('initializes firebase and prayer countdown', async () => {
     AsyncStorage.getItem.mockResolvedValue(null);
     await loadResourcesAndDataAsync();
     expect(loadFirebaseAnalytics).toHaveBeenCalled();
-    expect(Sounds.initialize).toHaveBeenCalled();
     expect(PrayerCountdownService.initialize).toHaveBeenCalled();
+  });
+
+  it('does not eagerly initialize Sounds at boot (lazy on first use)', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    await loadResourcesAndDataAsync();
+    expect(Sounds.initialize).not.toHaveBeenCalled();
   });
 
   it('initializes language as part of the finally block', async () => {
@@ -88,15 +93,6 @@ describe('loadResourcesAndDataAsync', () => {
   it('returns true on success', async () => {
     AsyncStorage.getItem.mockResolvedValueOnce(null);
     await expect(loadResourcesAndDataAsync()).resolves.toBe(true);
-  });
-
-  it('does not let Sounds.initialize failure abort startup', async () => {
-    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    Sounds.initialize.mockRejectedValueOnce(new Error('audio init failed'));
-    AsyncStorage.getItem.mockResolvedValueOnce(null);
-    await expect(loadResourcesAndDataAsync()).resolves.toBe(true);
-    expect(errSpy).toHaveBeenCalled();
-    errSpy.mockRestore();
   });
 
   it('does not let PrayerCountdownService.initialize failure abort startup', async () => {

@@ -58,7 +58,7 @@ export default function ContributeScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="contribute-screen-root">
       <CHeader navigation={navigation} title={t('navigation.contribute')} />
 
       <ScrollView

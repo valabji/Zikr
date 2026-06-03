@@ -519,10 +519,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     );
 
     return (
-        <View style={{ 
-            flex: 1, 
+        <View testID="unified-prayer-settings-screen" style={{
+            flex: 1,
             backgroundColor: colors.BGreen,
-            ...(Platform.OS === 'web' && { 
+            ...(Platform.OS === 'web' && {
                 height: '100vh',
                 display: 'flex',
                 flexDirection: 'column'

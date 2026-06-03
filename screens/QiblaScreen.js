@@ -181,7 +181,7 @@ export default function QiblaScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+      <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="qibla-loading">
         <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
         <View style={{
           flex: 1,
@@ -205,7 +205,7 @@ export default function QiblaScreen({ navigation }) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="qibla-content">
       <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
       <ScrollView
         style={{ flex: 1 }}

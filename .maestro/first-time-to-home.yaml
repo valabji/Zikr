@@ -1,0 +1,8 @@
+appId: com.valabji.zikr
+name: First-time setup completes and lands on home (favorites)
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- assertVisible:
+    id: "home-screen"
