@@ -92,7 +92,35 @@ jobs:
           script: |
             adb wait-for-device
             adb install -r android/app/build/outputs/apk/release/app-release.apk
-            maestro test .maestro/smoke.yaml
+            # Run every top-level flow under .maestro/. The subflows/ directory
+            # holds reusable fragments (e.g. complete-first-time.yaml) invoked
+            # via `runFlow:`, so we glob *.yaml at the top level instead of
+            # passing the directory.
+            # Maestro has no native retry flag, so each flow gets up to 2
+            # retries (3 total attempts) to absorb emulator-level flakes (slow
+            # boots, ANRs).
+            overall=0
+            max_attempts=3
+            for flow in .maestro/*.yaml; do
+              passed=0
+              for attempt in $(seq 1 $max_attempts); do
+                echo "::group::maestro $flow (attempt $attempt/$max_attempts)"
+                if maestro test "$flow"; then
+                  echo "::endgroup::"
+                  passed=1
+                  break
+                fi
+                echo "::endgroup::"
+                if [ "$attempt" -lt "$max_attempts" ]; then
+                  echo "::warning::$flow failed on attempt $attempt — retrying"
+                fi
+              done
+              if [ "$passed" -ne 1 ]; then
+                echo "::error::$flow failed after $max_attempts attempts"
+                overall=1
+              fi
+            done
+            exit $overall
 
       - name: Upload Maestro artifacts on failure
         if: failure()
