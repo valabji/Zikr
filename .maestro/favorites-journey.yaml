@@ -1,0 +1,128 @@
+appId: com.valabji.zikr
+name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contribute
+# Covers: first-time-to-home, favorites-default-shows-seeded, menu-button-on-favorites,
+# search-from-favorites, screen2-from-favorites, screen2-back-to-favorites,
+# drawer-opens, drawer-open-close, fav-toggle-then-untoggle,
+# drawer-favorites-to-contribute, contribute-screen, contribute-back-to-home,
+# contribute-from-favorites-back.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+# first-time-to-home + favorites-default-shows-seeded + menu-button-on-favorites
+- assertVisible:
+    id: "home-screen"
+- assertVisible:
+    id: "zikr-item"
+- assertNotVisible:
+    id: "empty-favorites"
+- assertVisible:
+    id: "menu-button"
+- assertVisible:
+    id: "search-toggle"
+- assertNotVisible:
+    id: "back-button"
+# search-from-favorites — open the search header from the Favorites view and close it.
+- tapOn:
+    id: "search-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 5000
+- assertVisible:
+    id: "close-search"
+- tapOn:
+    id: "close-search"
+- extendedWaitUntil:
+    visible:
+      id: "search-toggle"
+    timeout: 5000
+# screen2-from-favorites + screen2-back-to-favorites — tap a fav zikr, then back.
+- tapOn:
+    id: "zikr-item"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "screen2-container"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+- assertVisible:
+    id: "search-toggle"
+# drawer-opens — all six destinations are present in the drawer.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- assertVisible:
+    id: "screen3"
+- assertVisible:
+    id: "main-screen"
+- assertVisible:
+    id: "fav-screen"
+- assertVisible:
+    id: "prayer-times-screen"
+- assertVisible:
+    id: "qibla-screen"
+- assertVisible:
+    id: "contribute-screen"
+# drawer-open-close — system back closes the drawer and returns to home.
+- back
+- extendedWaitUntil:
+    visible:
+      id: "menu-button"
+    timeout: 5000
+- assertVisible:
+    id: "home-screen"
+# fav-toggle-then-untoggle — tap fav twice on whatever sits at index 0.
+- assertVisible:
+    id: "fav-toggle"
+- tapOn:
+    id: "fav-toggle"
+    index: 0
+- tapOn:
+    id: "fav-toggle"
+    index: 0
+# Re-enter Favorites via the drawer — list should still be populated (multiple seeded items).
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "fav-screen"
+    timeout: 5000
+- tapOn:
+    id: "fav-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# drawer-favorites-to-contribute + contribute-screen — drawer → contribute → see body.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen"
+    timeout: 5000
+- tapOn:
+    id: "contribute-screen"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen-root"
+    timeout: 10000
+- assertVisible:
+    id: "copy-email"
+# contribute-back-to-home + contribute-from-favorites-back — back returns to favorites.
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
+- assertVisible:
+    id: "menu-button"

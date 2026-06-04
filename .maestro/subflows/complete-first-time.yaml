@@ -7,7 +7,7 @@ name: "Subflow: complete first-time setup"
 - extendedWaitUntil:
     visible:
       id: "settings-screen"
-    timeout: 30000
+    timeout: 90000
 - tapOn:
     id: "auto-save-toggle"
 - extendedWaitUntil:

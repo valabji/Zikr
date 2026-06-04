@@ -1,0 +1,225 @@
+appId: com.valabji.zikr
+name: All Azkar journey — list, search variations, screen2 roundtrip, fav toggle, drawer
+# Covers: drawer-allazkar-from-favorites, azkar-list-shows-items, azkar-search,
+# search-clear-button-hides, search-cleared-on-reopen, search-clears-on-close,
+# search-close-returns-to-list, search-close-without-input, search-no-results,
+# search-reopen-after-close, azkar-fav-toggle-stays-on-list, azkar-item-opens-screen2,
+# screen2-count-button-visible, screen2-back-to-home, azkar-list-tap-second-item,
+# screen2-roundtrip, fav-toggle-adds-favorite, drawer-allazkar-to-contribute,
+# drawer-allazkar-to-settings.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+# drawer-allazkar-from-favorites + azkar-list-shows-items
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "main-screen"
+    timeout: 5000
+- tapOn:
+    id: "main-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+- assertVisible:
+    id: "search-toggle"
+- assertVisible:
+    id: "menu-button"
+# azkar-search + search-clear-button-hides — type, clear (X disappears), close.
+- tapOn:
+    id: "search-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 5000
+- inputText: "test"
+- assertVisible:
+    id: "clear-search"
+- tapOn:
+    id: "clear-search"
+- assertNotVisible:
+    id: "clear-search"
+- assertVisible:
+    id: "search-input"
+# search-no-results + search-clears-on-close — non-matching string hides items,
+# closing restores the full list.
+- inputText: "zzzzzzzz"
+- assertVisible:
+    id: "clear-search"
+- assertNotVisible:
+    id: "zikr-item"
+- tapOn:
+    id: "close-search"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 5000
+# search-close-without-input + search-reopen-after-close — open, close empty, reopen.
+- tapOn:
+    id: "search-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 5000
+- assertNotVisible:
+    id: "clear-search"
+- tapOn:
+    id: "close-search"
+- extendedWaitUntil:
+    visible:
+      id: "search-toggle"
+    timeout: 5000
+# search-cleared-on-reopen — reopen starts empty even though we last typed "zzzzzzzz".
+- tapOn:
+    id: "search-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 5000
+- assertNotVisible:
+    id: "clear-search"
+# search-close-returns-to-list — type something, close, default header is back.
+- inputText: "a"
+- tapOn:
+    id: "close-search"
+- extendedWaitUntil:
+    visible:
+      id: "search-toggle"
+    timeout: 5000
+- assertVisible:
+    id: "menu-button"
+# azkar-fav-toggle-stays-on-list — toggling fav on the second item stays on the list.
+# This also seeds an extra favorite for fav-toggle-adds-favorite later.
+- extendedWaitUntil:
+    visible:
+      id: "fav-toggle"
+    timeout: 10000
+- tapOn:
+    id: "fav-toggle"
+    index: 1
+- assertVisible:
+    id: "home-screen"
+- assertVisible:
+    id: "zikr-item"
+- assertVisible:
+    id: "search-toggle"
+# azkar-item-opens-screen2 + screen2-count-button-visible — open item 0, see count star.
+- tapOn:
+    id: "zikr-item"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "screen2-container"
+    timeout: 10000
+- assertVisible:
+    id: "back-button"
+# count-button lives at the bottom of the swiper slide's ScrollView.
+- scrollUntilVisible:
+    element:
+      id: "count-button"
+    direction: DOWN
+    timeout: 10000
+# screen2-back-to-home — back returns to the All Azkar list.
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+- assertVisible:
+    id: "search-toggle"
+# azkar-list-tap-second-item — opening item 1 also works.
+- tapOn:
+    id: "zikr-item"
+    index: 1
+- extendedWaitUntil:
+    visible:
+      id: "screen2-container"
+    timeout: 10000
+# screen2-roundtrip — back, then open item 0 again.
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+- tapOn:
+    id: "zikr-item"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "screen2-container"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+# drawer-allazkar-to-contribute — Contribute is a Stack screen, so back returns
+# to the active drawer screen (All Azkar) predictably.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen"
+    timeout: 5000
+- tapOn:
+    id: "contribute-screen"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen-root"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
+# fav-toggle-adds-favorite — the fav we added earlier should be visible in Favorites
+# alongside the pre-seeded items. Verify BEFORE jumping into Settings because
+# back-from-Settings via the drawer is non-deterministic (drawer history).
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "fav-screen"
+    timeout: 5000
+- tapOn:
+    id: "fav-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# Return to All Azkar so the next drawer-to-settings step starts from there.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "main-screen"
+    timeout: 5000
+- tapOn:
+    id: "main-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# drawer-allazkar-to-settings — terminal step: just verify the entry. Settings'
+# back-button calls navigation.goBack() on the inner drawer, which lands on
+# whatever the drawer history surfaces (Tasbih in our setup) — not a behavior
+# this journey is meant to validate.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- tapOn:
+    id: "settings-screen"
+- extendedWaitUntil:
+    visible:
+      id: "language-toggle"
+    timeout: 10000

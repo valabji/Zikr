@@ -1,0 +1,94 @@
+appId: com.valabji.zikr
+name: Prayer Times and Qibla redirect to UnifiedPrayerSettings from any drawer entry
+# Covers: prayer-times-redirects-to-settings, prayer-times-back-to-home,
+# qibla-redirects-to-settings, unified-prayer-settings-back-from-drawer-entry,
+# drawer-prayer-times-from-allazkar, drawer-qibla-from-allazkar.
+# Without @prayer_location set, the drawer's custom content routes both Prayer Times
+# and Qibla to UnifiedPrayerSettings.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+# prayer-times-redirects-to-settings + prayer-times-back-to-home (from Favorites).
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "prayer-times-screen"
+    timeout: 5000
+- tapOn:
+    id: "prayer-times-screen"
+- extendedWaitUntil:
+    visible:
+      id: "unified-prayer-settings-screen"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
+# qibla-redirects-to-settings + unified-prayer-settings-back-from-drawer-entry.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "qibla-screen"
+    timeout: 5000
+- tapOn:
+    id: "qibla-screen"
+- extendedWaitUntil:
+    visible:
+      id: "unified-prayer-settings-screen"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
+# Switch to All Azkar to exercise the from-allazkar variants.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "main-screen"
+    timeout: 5000
+- tapOn:
+    id: "main-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# drawer-prayer-times-from-allazkar
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "prayer-times-screen"
+    timeout: 5000
+- tapOn:
+    id: "prayer-times-screen"
+- extendedWaitUntil:
+    visible:
+      id: "unified-prayer-settings-screen"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# drawer-qibla-from-allazkar
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "qibla-screen"
+    timeout: 5000
+- tapOn:
+    id: "qibla-screen"
+- extendedWaitUntil:
+    visible:
+      id: "unified-prayer-settings-screen"
+    timeout: 10000

@@ -1,5 +1,8 @@
 appId: com.valabji.zikr
-name: Smoke — app launches and shows first-time settings
+name: Smoke — first-time settings screen, language toggles, and theme dropdown
+# Covers: smoke, settings-language-toggle-buttons (visibility),
+# theme-dropdown-opens, theme-dropdown-back-closes.
+# Stops before completing first-time setup so this stays fast for CI.
 ---
 - launchApp:
     clearState: true
@@ -7,3 +10,24 @@ name: Smoke — app launches and shows first-time settings
     visible:
       id: "settings-screen"
     timeout: 30000
+# settings-language-toggle-buttons — both sides of the toggle exist.
+- assertVisible:
+    id: "language-toggle"
+- assertVisible:
+    id: "language-toggle-ar"
+# theme-dropdown-opens — trigger is below the fold on smaller form factors.
+- scrollUntilVisible:
+    element:
+      id: "theme-dropdown-trigger"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "theme-dropdown-trigger"
+- waitForAnimationToEnd:
+    timeout: 3000
+# theme-dropdown-back-closes — system back dismisses the modal, settings remain.
+- back
+- assertVisible:
+    id: "theme-dropdown-trigger"
+- assertVisible:
+    id: "language-toggle"
