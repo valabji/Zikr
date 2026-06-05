@@ -8,6 +8,8 @@
     "eas:secret": "yarn eas env:create --scope project --visibility=secret ",
     "eas-build-pre-install": "./pre-install",
     "build:android": "yarn version && yarn eas build --profile production --platform android",
+    "build:android:local": "yarn eas build --profile production --platform android --local",
+    "lint:android": "expo prebuild --clean --platform android && cd android && ./gradlew lintVitalRelease",
     "build:ios": "yarn eas build --profile production --platform ios",
     "predeploy": "npx expo export -p web --output-dir dist",
     "prebuild": "expo prebuild --clean",
@@ -96,6 +98,6 @@
   },
   "private": true,
   "name": "zikr",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "packageManager": "yarn@3.6.4"
 }

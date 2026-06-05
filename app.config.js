@@ -4,7 +4,7 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.13",
+    version: "1.1.14",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
@@ -37,7 +37,7 @@ export default {
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 16,
+      versionCode: 17,
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
@@ -131,8 +131,8 @@ export default {
         }]
     ],
     locales: {
-      "ar": "./locales/ar.json",
-      "en": "./locales/en.json"
+      "ar": "./locales/native/ar.json",
+      "en": "./locales/native/en.json"
     }
   },
 };
