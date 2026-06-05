@@ -24,6 +24,16 @@ jest.mock('../../utils/PrayerCountdownService', () => ({
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
+jest.mock('../../utils/NotificationService', () => ({
+  __esModule: true,
+  default: { initialize: jest.fn(() => Promise.resolve()) },
+}));
+
+jest.mock('../../utils/PrayerNotificationScheduler', () => ({
+  __esModule: true,
+  default: { initialize: jest.fn(() => Promise.resolve()) },
+}));
+
 jest.mock('../../locales/i18n', () => ({
   initializeLanguage: jest.fn(() => Promise.resolve()),
 }));

@@ -9,6 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../redux/store';
 import loadFirebaseAnalytics from './firebase/load';
 import PrayerCountdownService from './PrayerCountdownService';
+import NotificationService from './NotificationService';
+import PrayerNotificationScheduler from './PrayerNotificationScheduler';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -20,6 +22,14 @@ export async function loadResourcesAndDataAsync() {
             'Hafs': require('../assets/fonts/Hafs.otf'),
         });
         await loadFirebaseAnalytics();
+
+        // Initialize notification service (sets handler, listeners, Android channels).
+        // Sounds is lazily initialized on first playback via Sounds.playNotificationSound.
+        try {
+            await NotificationService.initialize();
+        } catch (error) {
+            console.error('Failed to initialize NotificationService:', error);
+        }
 
         // Initialize prayer countdown service
         try {
@@ -40,6 +50,15 @@ export async function loadResourcesAndDataAsync() {
                 "Azkar": zikrData != undefined ? JSON.parse(zikrData) : Azkar
             }
         });
+
+        // Schedule prayer notifications after language is initialized
+        // so notification bodies are translated into the user's language
+        try {
+            await PrayerNotificationScheduler.initialize();
+        } catch (error) {
+            console.error('Failed to initialize prayer notification scheduler:', error);
+        }
+
         // Don't hide splash screen here - let App.js handle it after theme loads
         return true;
     }

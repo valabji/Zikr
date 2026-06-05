@@ -25,6 +25,8 @@ import { searchLocations, getLocationFromIP, getBrowserLocation } from '../utils
 import { Restart } from '../utils/restart';
 import NotificationService from '../utils/NotificationService';
 import PrayerCountdownService from '../utils/PrayerCountdownService';
+import PrayerNotificationScheduler from '../utils/PrayerNotificationScheduler';
+import Sounds from '../utils/Sounds';
 
 export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const colors = useColors();
@@ -290,6 +292,20 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 await PrayerCountdownService.stop();
             }
 
+            // Reschedule adhan notifications with new settings.
+            // The boot path also re-runs the scheduler, but we refresh here
+            // so the schedule is correct even if the user doesn't restart.
+            await PrayerNotificationScheduler.refresh();
+
+            // Unload native audio resources before the bundle reloads.
+            // Without this, expo-av's playback status callbacks can fire
+            // during teardown → "Player is accessed on the wrong thread".
+            try {
+                await Sounds.cleanup();
+            } catch (e) {
+                console.warn('Sounds cleanup before restart failed:', e);
+            }
+
             setTimeout(() => {
                 Restart();
             }, 100);
@@ -376,6 +392,57 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     // Handle opening battery settings
     const handleOpenBatterySettings = async () => {
         await NotificationService.openBatterySettings();
+    };
+
+    // Dev-only: fire a test adhan notification 60 seconds from now using the
+    // currently-selected audio mode. Useful for verifying the full pipeline
+    // (permission → schedule → fire → audio playback → tap) on a real device
+    // without waiting for an actual prayer time.
+    const handleTestNotification = async () => {
+        try {
+            // Make sure permissions are granted first
+            const perm = await NotificationService.requestPermissions();
+            if (!perm.granted) {
+                Alert.alert(
+                    'Test notification',
+                    'Notification permission is not granted. Enable it and try again.',
+                );
+                return;
+            }
+            if (perm.needsExactAlarm && Platform.OS === 'android') {
+                Alert.alert(
+                    'Exact alarm needed',
+                    'Grant the exact-alarm permission so the test notification fires on time.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Open settings', onPress: () => NotificationService.openExactAlarmSettings() },
+                    ],
+                );
+                return;
+            }
+
+            const trigger = new Date(Date.now() + 60_000);
+            const id = `prayer-test-${Date.now()}`;
+            const result = await NotificationService.scheduleExactNotification(
+                id,
+                '🕌 Test adhan',
+                `Scheduled to fire at ${trigger.toLocaleTimeString()}`,
+                trigger,
+                audioMode,
+            );
+
+            if (result) {
+                Alert.alert(
+                    'Test scheduled',
+                    `A test notification (audio mode: ${audioMode}) will fire in 60 seconds. Background the app or wait — if foreground and audio mode is "short", you should hear the short alert. Tap it to play the full adhan.`,
+                );
+            } else {
+                Alert.alert('Test failed', 'Could not schedule the test notification. Check the console for details.');
+            }
+        } catch (error) {
+            console.error('Test notification error:', error);
+            Alert.alert('Test failed', error?.message || 'Unknown error');
+        }
     };
 
     // Check for unsaved changes
@@ -1039,6 +1106,45 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         </View>
                                         <AntDesign name="right" size={20} color={colors.BYellow} />
                                     </TouchableOpacity>
+
+                                    {/* Dev-only: fire a test adhan in 60 seconds */}
+                                    {__DEV__ && (
+                                        <TouchableOpacity
+                                            onPress={handleTestNotification}
+                                            style={{
+                                                backgroundColor: colors.BGreen,
+                                                borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                                padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                                marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                borderWidth: 1,
+                                                borderColor: colors.BYellow,
+                                                borderStyle: 'dashed',
+                                            }}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                    fontWeight: 'bold',
+                                                    marginBottom: 4,
+                                                }}>
+                                                    🧪 Test notification (DEV)
+                                                </Text>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+                                                    fontFamily: "Cairo_400Regular",
+                                                }}>
+                                                    Fire a test adhan in 60 seconds
+                                                </Text>
+                                            </View>
+                                            <Feather name="play-circle" size={22} color={colors.BYellow} />
+                                        </TouchableOpacity>
+                                    )}
 
                                     {/* Individual Prayer Notifications */}
                                     <View style={{

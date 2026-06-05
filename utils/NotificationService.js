@@ -362,8 +362,9 @@ class NotificationService {
         date: triggerDate,
       };
 
-      // Schedule notification
+      // Schedule notification (use deterministic identifier so cancelNotification(id) works)
       const notificationId = await Notifications.scheduleNotificationAsync({
+        identifier: id,
         content,
         trigger,
       });

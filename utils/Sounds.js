@@ -224,6 +224,16 @@ class Sounds {
    */
   async cleanup() {
     try {
+      // Detach playback status listener BEFORE unloading so a late callback
+      // can't bridge into a JS thread that's being torn down (e.g. during
+      // a DevSettings.reload). Prevents the "Player is accessed on the
+      // wrong thread" error from expo-av.
+      if (this.fullAdhanSound) {
+        try {
+          this.fullAdhanSound.setOnPlaybackStatusUpdate(null);
+        } catch {}
+      }
+
       if (this.shortAlertSound) {
         await this.shortAlertSound.unloadAsync();
         this.shortAlertSound = null;
@@ -235,6 +245,7 @@ class Sounds {
       }
 
       this.isInitialized = false;
+      this.isPlayingFullAdhan = false;
       console.log('🧹 Audio system cleaned up');
 
     } catch (error) {
