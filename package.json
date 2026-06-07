@@ -22,6 +22,7 @@
     "test:coverage": "jest --coverage",
     "test:update": "jest --updateSnapshot",
     "test:ci": "jest --ci",
+    "ci:act": "act push -W .github/workflows/ci.yaml --container-architecture linux/amd64 -P ubuntu-latest=catthehacker/ubuntu:act-latest",
     "version": "node versioning.js",
     "version:auto": "node versioning.js --auto",
     "version:patch": "node versioning.js --patch",

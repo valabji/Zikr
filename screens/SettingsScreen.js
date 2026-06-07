@@ -80,6 +80,7 @@ export default function SettingsScreen({ navigation }) {
   const viewModes = [
     { id: 'swiper', labelEn: 'Swiper (Page by Page)', labelAr: 'التمرير (صفحة بصفحة)' },
     { id: 'onePageScroll', labelEn: 'One Page Scroll', labelAr: 'التمرير المستمر' },
+    { id: 'onePageScrollCompact', labelEn: 'One Page Scroll Compact', labelAr: 'التمرير المستمر المضغوط' },
   ];
 
   const vibrationOptions = [

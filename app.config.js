@@ -64,8 +64,9 @@ export default {
 
         // Notification permissions - needed for adhan notifications
         "android.permission.POST_NOTIFICATIONS",              // Required for Android 13+
-        "android.permission.SCHEDULE_EXACT_ALARM",            // Critical for precise prayer time notifications
-        "android.permission.USE_EXACT_ALARM",                 // Required for Android 14+
+        // SCHEDULE_EXACT_ALARM requires user grant in system settings on Android 12+; app routes there via expo-intent-launcher.
+        // USE_EXACT_ALARM is intentionally NOT requested — Play Store restricts it to calendar/alarm-clock apps.
+        "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.RECEIVE_BOOT_COMPLETED",          // Reschedule notifications after device reboot
       ],
       blockedPermissions: [

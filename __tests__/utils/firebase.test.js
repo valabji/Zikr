@@ -96,16 +96,14 @@ describe('firebase/load.loadFirebaseAnalytics', () => {
     );
   });
 
-  // NOTE: on web, load.js reads `process.env.EXPO_PUBLIC_FIREBASE_CONFIG` which
-  // babel-preset-expo inlines at compile time. In the test environment that value is
-  // `undefined`, so we can't directly call loadFirebaseAnalytics with Platform.OS='web'.
-  // Instead, we verify the code path by stubbing setReactNativeAsyncStorage and proving
-  // it is invoked when the function is called on web (before the JSON.parse failure).
-  it('on web, invokes setReactNativeAsyncStorage before failing on missing env config', async () => {
+  // load.js reads `process.env.EXPO_PUBLIC_FIREBASE_CONFIG`, which babel-preset-expo
+  // inlines at compile time. Whether it inlines as `undefined` or a real JSON string
+  // depends on the env the test runner was launched with (e.g. act loads .env), so we
+  // can't predict whether the function resolves or rejects — just that setReactNativeAsyncStorage
+  // runs first on web.
+  it('on web, invokes setReactNativeAsyncStorage', async () => {
     global.Platform.OS = 'web';
-    // The function will throw because EXPO_PUBLIC_FIREBASE_CONFIG is inlined as undefined
-    // in test builds, but setReactNativeAsyncStorage runs first.
-    await expect(loadFirebaseAnalytics()).rejects.toThrow();
+    await loadFirebaseAnalytics().catch(() => {});
     expect(firebase.setReactNativeAsyncStorage).toHaveBeenCalled();
   });
 });

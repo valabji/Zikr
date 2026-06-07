@@ -9,6 +9,7 @@ import { Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar.js';
 import AzkarSwiper from '../components/AzkarSwiper';
 import AzkarOnePageScroll from '../components/AzkarOnePageScroll';
+import AzkarOnePageScrollCompact from '../components/AzkarOnePageScrollCompact';
 import { useAudio } from '../utils/Sounds.js';
 import { BackgroundSvg1 } from '../components/BackgroundSvg1';
 import { getFontSize } from '../utils/FontSize';
@@ -97,6 +98,8 @@ export default function Screen2({ route, navigation }) {
           }} /> */}
         {viewMode === 'swiper' ? (
           <AzkarSwiper key={`swiper-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
+        ) : viewMode === 'onePageScrollCompact' ? (
+          <AzkarOnePageScrollCompact key={`scroll-compact-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         ) : (
           <AzkarOnePageScroll key={`scroll-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         )}
