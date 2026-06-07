@@ -132,8 +132,24 @@ jest.mock('expo-av', () => ({
         },
       })),
     },
+    setAudioModeAsync: jest.fn(() => Promise.resolve()),
   },
 }));
+
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
+}), { virtual: true });
+
+jest.mock('expo-file-system/legacy', () => ({
+  documentDirectory: '/mock/document/',
+  cacheDirectory: '/mock/cache/',
+  getInfoAsync: jest.fn(() => Promise.resolve({ exists: false })),
+  makeDirectoryAsync: jest.fn(() => Promise.resolve()),
+  downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
+  deleteAsync: jest.fn(() => Promise.resolve()),
+  readDirectoryAsync: jest.fn(() => Promise.resolve([])),
+}), { virtual: true });
 
 // Mock Sound functionality and utils
 jest.mock('./utils/Sounds', () => ({

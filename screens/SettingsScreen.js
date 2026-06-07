@@ -75,6 +75,7 @@ export default function SettingsScreen({ navigation }) {
     { id: 'Tasbih', labelEn: 'Tasbih Counter', labelAr: 'المسبحة', route: 'Screen3' },
     { id: 'PrayerTimes', labelEn: 'Prayer Times', labelAr: 'مواقيت الصلاة', route: 'PrayerTimesScreen' },
     { id: 'Qibla', labelEn: 'Qibla Direction', labelAr: 'اتجاه القبلة', route: 'QiblaScreen' },
+    { id: 'Quran', labelEn: 'Holy Quran', labelAr: 'القرآن الكريم', route: 'Quran' },
   ];
 
   const viewModes = [
@@ -939,6 +940,7 @@ export default function SettingsScreen({ navigation }) {
       Tasbih: { route: 'Screen3' },
       PrayerTimes: { route: 'PrayerTimes' },
       Qibla: { route: 'Qibla' },
+      Quran: { route: 'Quran' },
     };
 
     if (wasFirstTime) {

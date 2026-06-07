@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import ContributeScreen from '../screens/ContributeScreen';
 import PrayerTimesScreen from '../screens/PrayerTimesScreen';
 import QiblaScreen from '../screens/QiblaScreen';
+import QuranScreen from '../screens/QuranScreen';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
@@ -35,6 +36,7 @@ function useInitialDrawerRoute() {
           Tasbih: { route: 'Screen3' },
           PrayerTimes: { route: 'PrayerTimes' },
           Qibla: { route: 'Qibla' },
+          Quran: { route: 'Quran' },
         };
         setResolved(map[screen] || map.Fav);
       });
@@ -171,6 +173,34 @@ export function DNav() {
                 ]}>{t('navigation.allAzkar')}</Text>
                 <View style={{ flex: 1 }} />
                 <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="quran-screen"
+                onPress={() => {
+                  navigation.navigate("Quran")
+                }}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.quran')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="book-open" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
                 testID="prayer-times-screen"
@@ -359,6 +389,7 @@ export function DNav() {
     >
       <Drawer.Screen name="Screen3" component={Screen3} />
       <Drawer.Screen name="Home" component={MainScreen} initialParams={homeInitialParams} />
+      <Drawer.Screen name="Quran" component={QuranScreen} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />

@@ -29,7 +29,8 @@
     "helpImprove": "Help Improve",
     "logout": "Logout",
     "prayerTimes": "Prayer Times",
-    "qibla": "Qibla Direction"
+    "qibla": "Qibla Direction",
+    "quran": "Holy Quran"
   },
   "search": {
     "placeholder": "Search..."
@@ -296,5 +297,42 @@
       "Qatar": "Qatar",
       "Singapore": "Singapore"
     }
+  },
+  "quran": {
+    "title": "Holy Quran",
+    "page": "Page {current} of {total}",
+    "pageNumber": "Page {n}",
+    "surah": "Surah",
+    "juz": "Juz",
+    "bookmark": "Bookmark",
+    "bookmarked": "Bookmarked",
+    "removeBookmark": "Remove bookmark",
+    "lastRead": "Last read",
+    "goToPage": "Go to page",
+    "surahs": "Surahs",
+    "juzs": "Juz",
+    "bookmarks": "Bookmarks",
+    "noBookmarks": "No bookmarks yet. Tap the bookmark icon on any page to save it.",
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "ayahCount": "{count} verses",
+    "loading": "Loading…",
+    "settingsTitle": "Quran Settings",
+    "showTranslation": "Show Translation",
+    "showTranslationDesc": "Display English translation (Pickthall) under each verse.",
+    "fontSize": "Font Size",
+    "reciter": "Reciter",
+    "highFidelity": "High-Fidelity Mushaf",
+    "highFidelityDesc": "Download the official King Fahd Complex per-page fonts for pixel-exact 1405 H Mushaf layout (~95 MB).",
+    "highFidelityInstalled": "Installed",
+    "download": "Download",
+    "remove": "Remove",
+    "translation": "Translation",
+    "tafsir": "Tafsir",
+    "wordByWord": "Word-by-word",
+    "tafsirEmpty": "No tafsir available.",
+    "wbwEmpty": "No word-by-word data available.",
+    "search": "Search",
+    "play": "Play"
   }
 }

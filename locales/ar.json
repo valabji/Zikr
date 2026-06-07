@@ -29,7 +29,8 @@
     "shareApp": "مشاركة التطبيق",
     "logout": "تسجيل الخروج",
     "prayerTimes": "مواقيت الصلاة",
-    "qibla": "اتجاه القبلة"
+    "qibla": "اتجاه القبلة",
+    "quran": "القرآن الكريم"
   },
   "search": {
     "placeholder": "بحث..."
@@ -293,5 +294,42 @@
       "Qatar": "قطر",
       "Singapore": "سنغافورة"
     }
+  },
+  "quran": {
+    "title": "القرآن الكريم",
+    "page": "الصفحة {current} من {total}",
+    "pageNumber": "الصفحة {n}",
+    "surah": "السورة",
+    "juz": "الجزء",
+    "bookmark": "علّم",
+    "bookmarked": "مُعلَّم",
+    "removeBookmark": "إزالة العلامة",
+    "lastRead": "آخر قراءة",
+    "goToPage": "الذهاب إلى صفحة",
+    "surahs": "السور",
+    "juzs": "الأجزاء",
+    "bookmarks": "العلامات",
+    "noBookmarks": "لا توجد علامات بعد. اضغط على أيقونة الإشارة في أي صفحة لحفظها.",
+    "meccan": "مكية",
+    "medinan": "مدنية",
+    "ayahCount": "{count} آية",
+    "loading": "جاري التحميل…",
+    "settingsTitle": "إعدادات القرآن",
+    "showTranslation": "إظهار الترجمة",
+    "showTranslationDesc": "عرض الترجمة الإنجليزية (Pickthall) تحت كل آية.",
+    "fontSize": "حجم الخط",
+    "reciter": "القارئ",
+    "highFidelity": "مصحف عالي الدقة",
+    "highFidelityDesc": "تنزيل خطوط مجمع الملك فهد لكل صفحة لعرض مطابق تماماً لمصحف 1405 هـ (نحو 95 ميجابايت).",
+    "highFidelityInstalled": "مثبت",
+    "download": "تنزيل",
+    "remove": "إزالة",
+    "translation": "الترجمة",
+    "tafsir": "التفسير",
+    "wordByWord": "كلمة بكلمة",
+    "tafsirEmpty": "لا يتوفر تفسير.",
+    "wbwEmpty": "لا تتوفر بيانات كلمة بكلمة.",
+    "search": "بحث",
+    "play": "تشغيل"
   }
 }

@@ -11,6 +11,7 @@ import loadFirebaseAnalytics from './firebase/load';
 import PrayerCountdownService from './PrayerCountdownService';
 import NotificationService from './NotificationService';
 import PrayerNotificationScheduler from './PrayerNotificationScheduler';
+import QcfDownloader from './QcfDownloader';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -20,6 +21,7 @@ export async function loadResourcesAndDataAsync() {
             ...Ionicons.font,
             'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
             'Hafs': require('../assets/fonts/Hafs.otf'),
+            'UthmanicHafs': require('../assets/quran/fonts/UthmanicHafs1Ver18.ttf'),
         });
         await loadFirebaseAnalytics();
 
@@ -38,12 +40,17 @@ export async function loadResourcesAndDataAsync() {
         } catch (error) {
             console.error('Failed to initialize prayer countdown service:', error);
         }
+
     } catch (e) {
         console.warn(e);
     } finally {
         await initializeLanguage(); // Initialize translations first
         const zikrData = await AsyncStorage.getItem("@zikr");
         global.zikr = zikrData;
+
+        QcfDownloader.checkInstalled().catch((error) => {
+            console.warn('QCF downloader check failed:', error);
+        });
         mystore.dispatch({
             type: 'change',
             obj: {
