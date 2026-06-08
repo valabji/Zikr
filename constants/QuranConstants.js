@@ -48,10 +48,17 @@ export const QURAN_CONSTANTS = {
     ayahInteractionMode: 'menu',
     audioPlaybackScope: 'ayah',
     viewMode: 'paged',
+    customLineSize: false,
   },
 };
 
-export const FONT_SCALE_RANGE = { min: 0.75, max: 2.0, step: 0.05, default: 1.0 };
+export const FONT_SCALE_RANGE = { min: 0.75, max: 3.0, step: 0.05, default: 1.0 };
+
+// Base font size (px) used when customLineSize is on. The font-size slider
+// multiplies this instead of the auto-fitted Mushaf line size, and lines are
+// allowed to wrap, so the reader can show larger text than the printed
+// Mushaf width otherwise permits.
+export const CUSTOM_LINE_BASE_FONT_SIZE = 24;
 
 export const VIEW_MODES = {
   PAGED: 'paged',

@@ -17,6 +17,7 @@ const ayahKey = (s, a) => `${s}:${a}`;
 
 function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, onAyahPress, onAyahLongPress }) {
   const fontScale = settings.fontScale || 1;
+  const customLineSize = !!settings.customLineSize;
   const { width: windowWidth } = useWindowDimensions();
   const mushafFontSize = mushafFontSizeForWidth(windowWidth);
   const mushafLineHeight = mushafLineHeightFor(mushafFontSize);
@@ -25,9 +26,43 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, onAya
   const fontFamily = qcfActive ? qcfFontFamilyForPage(qcfVersion, page.page) : FONT_FAMILY;
   const pageLines = getLayout(edition.layoutFile)[page.page - 1];
 
+  // In customLineSize mode we want one continuous text block per run of
+  // consecutive text lines, so words flow across line boundaries instead of
+  // each Mushaf line wrapping on its own. Non-text items (surah headers,
+  // bismillah) break the flow.
+  // Exception: in Al-Fatiha the Basmala is verse 1:1 (a regular text line,
+  // not a 'bismillah' separator). Keep it as its own block so it doesn't
+  // dissolve into the rest of the surah.
+  const items = React.useMemo(() => {
+    if (!customLineSize) return pageLines.lines;
+    const out = [];
+    let run = null;
+    const flush = () => { if (run) { out.push(run); run = null; } };
+    for (const line of pageLines.lines) {
+      if (line.type === 'text') {
+        const isFatihaBasmala = line.words.some((w) => w.vk === '1:1');
+        if (isFatihaBasmala) {
+          flush();
+          out.push(line);
+          continue;
+        }
+        if (!run) {
+          run = { type: 'text', words: line.words.slice() };
+        } else {
+          for (const w of line.words) run.words.push(w);
+        }
+      } else {
+        flush();
+        out.push(line);
+      }
+    }
+    flush();
+    return out;
+  }, [pageLines, customLineSize]);
+
   return (
     <>
-      {pageLines.lines.map((line, i) => {
+      {items.map((line, i) => {
         if (line.type === 'surah_header') {
           return <SurahCartouche key={`l${i}`} surahId={line.surahId} colors={colors} fontScale={fontScale} />;
         }
@@ -47,6 +82,7 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, onAya
             playingAyahKey={playingAyahKey}
             onAyahPress={onAyahPress}
             onAyahLongPress={onAyahLongPress}
+            customLineSize={customLineSize}
           />
         );
       })}

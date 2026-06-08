@@ -240,6 +240,29 @@ export default function QuranSettingsModal({ visible, onClose }) {
                 </View>
               );
             })()}
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 12,
+              paddingTop: 12,
+              borderTopWidth: 1,
+              borderTopColor: colors.accent + '22',
+            }}>
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
+                  {t('quran.customLineSize')}
+                </Text>
+                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
+                  {t('quran.customLineSizeDesc')}
+                </Text>
+              </View>
+              <Switch
+                value={!!settings.customLineSize}
+                onValueChange={(v) => update({ customLineSize: v })}
+                trackColor={{ true: colors.accent, false: colors.accent + '44' }}
+                thumbColor={settings.customLineSize ? colors.accent : '#f4f3f4'}
+              />
+            </View>
           </Row>
 
           <Row label={t('quran.ayahInteraction')} colors={colors}>

@@ -328,6 +328,8 @@
     "showTranslation": "Show Translation",
     "showTranslationDesc": "Display English translation (Pickthall) under each verse.",
     "fontSize": "Font Size",
+    "customLineSize": "Custom line size",
+    "customLineSizeDesc": "Ignore Mushaf line-fit and let lines wrap, so the slider can scale text larger than the printed page width allows.",
     "reciter": "Reciter",
     "ayahInteraction": "Ayah Tap Behavior",
     "ayahInteractionDesc": "What happens when you tap an ayah on the page.",

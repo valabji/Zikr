@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
-import { QURAN_CONSTANTS } from '../constants/QuranConstants';
+import { QURAN_CONSTANTS, CUSTOM_LINE_BASE_FONT_SIZE } from '../constants/QuranConstants';
 import { toArabicDigits } from '../utils/mushafLayout';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
@@ -31,7 +31,7 @@ export function BismillahLine({ colors, fontScale }) {
 export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
   mushafFontSize, mushafLineHeight, playingAyahKey,
-  onAyahPress, onAyahLongPress,
+  onAyahPress, onAyahLongPress, customLineSize,
 }) {
   // Group consecutive words by verse_key so each ayah is one pressable Text segment.
   const groups = [];
@@ -47,16 +47,25 @@ export function MushafLine({
   // KFGQPC convention: every line on every page uses the same font size.
   // Short lines are centered; line-fit justification belongs to the per-page
   // QCF font glyphs (HD download path), not to runtime font scaling.
+  // In customLineSize mode we abandon the Mushaf width-fit and let lines wrap
+  // so the user can crank the font slider past what one printed line allows.
+  const fontSize = customLineSize
+    ? CUSTOM_LINE_BASE_FONT_SIZE * fontScale
+    : mushafFontSize * fontScale;
+  const lineHeight = customLineSize
+    ? Math.round(fontSize * 1.5)
+    : mushafLineHeight * fontScale;
+
   return (
     <View style={{ paddingHorizontal: 8, marginVertical: 1 }}>
       <Text
         allowFontScaling={false}
-        numberOfLines={1}
-        ellipsizeMode="clip"
+        numberOfLines={customLineSize ? undefined : 1}
+        ellipsizeMode={customLineSize ? undefined : 'clip'}
         style={{
           fontFamily,
-          fontSize: mushafFontSize * fontScale,
-          lineHeight: mushafLineHeight * fontScale,
+          fontSize,
+          lineHeight,
           color: colors.text,
           textAlign: 'center',
           writingDirection: 'rtl',
