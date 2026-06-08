@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
@@ -34,6 +35,7 @@ const HD_PROMPT_DISMISSED_KEY = (v) => `@quran_hd_prompt_dismissed_${v}`;
 
 export default function QuranScreen({ navigation }) {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const listRef = React.useRef(null);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [bookmarks, setBookmarks] = React.useState([]);
@@ -247,6 +249,7 @@ export default function QuranScreen({ navigation }) {
         )}
       />
       {ready ? (
+        <View style={{ flex: 1, paddingBottom: insets.bottom }}>
         <FlatList
           ref={listRef}
           key={isContinuous ? 'cont' : 'paged'}
@@ -291,6 +294,7 @@ export default function QuranScreen({ navigation }) {
             );
           }}
         />
+        </View>
       ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.accent} />

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textStyles } from '../constants/Fonts';
 import { isRTL, t } from '../locales/i18n';
 import { toArabicDigits } from '../utils/mushafLayout';
@@ -32,6 +33,7 @@ function Chip({ active, label, onPress, colors, icon }) {
 }
 
 export default function QuranMiniPlayer({ colors, audio, onClose }) {
+  const insets = useSafeAreaInsets();
   const [expanded, setExpanded] = React.useState(false);
   const [settings, setSettings] = React.useState(null);
 
@@ -114,7 +116,7 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
 
       <View style={{
         flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 12, paddingVertical: 10,
+        paddingHorizontal: 12, paddingTop: 10, paddingBottom: 10 + insets.bottom,
       }}>
         <Text style={[textStyles.subtitle, { color: colors.BYellow, flex: 1, fontSize: 14 }]} numberOfLines={1}>
           {label}

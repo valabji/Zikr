@@ -121,6 +121,21 @@ jest.mock('react-native-gesture-handler', () => ({
   ScrollView: 'ScrollView',
 }));
 
+// Mock Safe Area Context (no native module in tests)
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const inset = { top: 0, right: 0, bottom: 0, left: 0 };
+  const frame = { x: 0, y: 0, width: 0, height: 0 };
+  return {
+    SafeAreaProvider: ({ children }) => children,
+    SafeAreaConsumer: ({ children }) => children(inset),
+    SafeAreaView: ({ children, ...props }) => React.createElement('View', props, children),
+    useSafeAreaInsets: () => inset,
+    useSafeAreaFrame: () => frame,
+    initialWindowMetrics: { insets: inset, frame },
+  };
+});
+
 // Mock Audio and Sound
 jest.mock('expo-av', () => ({
   Audio: {
