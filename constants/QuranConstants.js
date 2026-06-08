@@ -47,6 +47,7 @@ export const QURAN_CONSTANTS = {
     mushafEdition: DEFAULT_MUSHAF_EDITION,
     ayahInteractionMode: 'menu',
     audioPlaybackScope: 'ayah',
+    loopEnabled: false,
     viewMode: 'paged',
     customLineSize: false,
   },

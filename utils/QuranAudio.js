@@ -19,6 +19,7 @@ class QuranAudioService {
     this.isPlaying = false;
     this.reciterId = DEFAULT_RECITER_ID;
     this.playbackScope = 'ayah';
+    this.loopEnabled = false;
     this.audioModeReady = false;
     this.listeners = new Set();
     this.unsubSettings = null;
@@ -45,6 +46,7 @@ class QuranAudioService {
       const s = await loadQuranSettings();
       this.reciterId = s.reciterId || DEFAULT_RECITER_ID;
       this.playbackScope = s.audioPlaybackScope || 'ayah';
+      this.loopEnabled = s.loopEnabled === true;
       this.unsubSettings = subscribeQuranSettings((next) => {
         const newReciter = next.reciterId || DEFAULT_RECITER_ID;
         if (newReciter !== this.reciterId) {
@@ -55,6 +57,7 @@ class QuranAudioService {
           }
         }
         this.playbackScope = next.audioPlaybackScope || 'ayah';
+        this.loopEnabled = next.loopEnabled === true;
       });
     }
   }
@@ -119,28 +122,43 @@ class QuranAudioService {
     }
   }
 
+  _scopeStart(current, scope) {
+    if (scope === 'page') return flatVerses.find((v) => v.page === current.page) || current;
+    if (scope === 'surah') return flatVerses.find((v) => v.surah === current.surah) || current;
+    return current;
+  }
+
   async _advance() {
     if (!this.activeAyah) return;
     const key = `${this.activeAyah.surah}:${this.activeAyah.ayah}`;
     const idx = verseIndex[key];
-    const nextIdx = idx + 1;
-    if (nextIdx >= flatVerses.length) {
-      await this.stop();
-      return;
-    }
     const current = flatVerses[idx];
-    const next = flatVerses[nextIdx];
     const scope = this.playbackScope || 'ayah';
+    const loop = !!this.loopEnabled;
+
     if (scope === 'ayah') {
-      await this.stop();
+      if (loop) {
+        await this.playAyah(current.surah, current.ayah);
+      } else {
+        await this.stop();
+      }
       return;
     }
-    if (scope === 'page' && next.page !== current.page) {
-      await this.stop();
-      return;
-    }
-    if (scope === 'surah' && next.surah !== current.surah) {
-      await this.stop();
+
+    const nextIdx = idx + 1;
+    const atEnd = nextIdx >= flatVerses.length;
+    const next = atEnd ? null : flatVerses[nextIdx];
+    const boundary = atEnd
+      || (scope === 'page' && next.page !== current.page)
+      || (scope === 'surah' && next.surah !== current.surah);
+
+    if (boundary) {
+      if (loop) {
+        const restart = this._scopeStart(current, scope);
+        await this.playAyah(restart.surah, restart.ayah);
+      } else {
+        await this.stop();
+      }
       return;
     }
     await this.playAyah(next.surah, next.ayah);
