@@ -12,6 +12,7 @@ jest.mock('expo-notifications', () => ({
   cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
   cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
   getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
+  getPresentedNotificationsAsync: jest.fn().mockResolvedValue([]),
   dismissNotificationAsync: jest.fn().mockResolvedValue(undefined),
   AndroidNotificationPriority: { HIGH: 'high', LOW: 'low' },
   AndroidImportance: { MAX: 5, LOW: 2 },
@@ -58,6 +59,7 @@ describe('NotificationService', () => {
     Notifications.cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     Notifications.cancelAllScheduledNotificationsAsync.mockResolvedValue(undefined);
     Notifications.getAllScheduledNotificationsAsync.mockResolvedValue([]);
+    Notifications.getPresentedNotificationsAsync.mockResolvedValue([]);
     Notifications.dismissNotificationAsync.mockResolvedValue(undefined);
     IntentLauncher.startActivityAsync.mockResolvedValue(undefined);
     Sounds.playNotificationSound.mockResolvedValue(undefined);
@@ -91,11 +93,16 @@ describe('NotificationService', () => {
       expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
     });
 
-    it('creates both prayer channels on Android', async () => {
+    it('creates both prayer channels on Android with correct importance', async () => {
       setPlatform('android', 33);
       await service.initialize();
-      const channelIds = Notifications.setNotificationChannelAsync.mock.calls.map((c) => c[0]);
-      expect(channelIds).toEqual(expect.arrayContaining(['prayer_reminders', 'prayer-countdown']));
+      const calls = Notifications.setNotificationChannelAsync.mock.calls;
+      const alarms = calls.find(([id]) => id === 'prayer_reminders');
+      const countdown = calls.find(([id]) => id === 'prayer-countdown');
+      expect(alarms).toBeDefined();
+      expect(countdown).toBeDefined();
+      expect(alarms[1].importance).toBe(Notifications.AndroidImportance.MAX);
+      expect(countdown[1].importance).toBe(Notifications.AndroidImportance.LOW);
     });
   });
 
@@ -449,27 +456,26 @@ describe('NotificationService', () => {
   });
 
   describe('showPersistentCountdown / hidePersistentCountdown', () => {
-    it('creates the low-importance channel on Android and schedules a sticky notification', async () => {
+    it('schedules a sticky notification with a stable identifier and the countdown channel on Android', async () => {
       setPlatform('android', 33);
       await service.showPersistentCountdown('Fajr', '5:30 AM', '2h 15m');
-      const channelCall = Notifications.setNotificationChannelAsync.mock.calls.find(
-        ([id]) => id === 'prayer-countdown'
-      );
-      expect(channelCall).toBeDefined();
-      expect(channelCall[1].importance).toBe(Notifications.AndroidImportance.LOW);
 
       const scheduleArg = Notifications.scheduleNotificationAsync.mock.calls.at(-1)[0];
+      expect(scheduleArg.identifier).toBe('prayer-countdown-persistent');
       expect(scheduleArg.trigger).toBeNull();
       expect(scheduleArg.content.sticky).toBe(true);
+      expect(scheduleArg.content.channelId).toBe('prayer-countdown');
       expect(scheduleArg.content.body).toContain('Fajr at 5:30 AM');
       expect(scheduleArg.content.body).toContain('2h 15m');
     });
 
-    it('does not create the channel on iOS but still schedules', async () => {
+    it('does not set channelId on iOS but still schedules with stable id', async () => {
       setPlatform('ios', 15);
       await service.showPersistentCountdown('Fajr', '5:30 AM', '2h 15m');
       expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled();
+      const scheduleArg = Notifications.scheduleNotificationAsync.mock.calls.at(-1)[0];
+      expect(scheduleArg.identifier).toBe('prayer-countdown-persistent');
+      expect(scheduleArg.content.channelId).toBeUndefined();
     });
 
     it('logs but does not throw when scheduling fails', async () => {

@@ -8,6 +8,7 @@ import { ThemeProvider } from './constants/ThemeProvider';
 import { useTheme } from './constants/Colors';
 import RTLStyleLoader from './components/RTLStyleLoader';
 import PrayerNotificationScheduler from './utils/PrayerNotificationScheduler';
+import NotificationService from './utils/NotificationService';
 
 // Inner component that has access to theme context
 function AppContent() {
@@ -31,6 +32,9 @@ function AppContent() {
       if (state === 'active') {
         PrayerNotificationScheduler.refresh().catch((e) =>
           console.error('Scheduler foreground refresh failed:', e)
+        );
+        NotificationService.consolidatePrayerAlarms().catch((e) =>
+          console.error('Alarm consolidation failed:', e)
         );
       }
     });

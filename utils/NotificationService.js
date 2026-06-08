@@ -51,25 +51,36 @@ class NotificationService {
   /**
    * Initialize notification channels (Android only)
    * Must be called before scheduling any notifications on Android 8.0+
+   *
+   * Two channels — Android already exposes these as separate toggles to the
+   * user, and we keep exactly one displayed notification per channel
+   * (the next-prayer countdown and the most recent alarm).
    */
   async initializeChannels() {
-    if (Platform.OS === 'android') {
-      // Create main prayer reminders channel
-      await this.createNotificationChannel(
-        'prayer_reminders',
-        'Prayer Reminders',
-        'Notifications for prayer times'
-      );
-      
-      // Create countdown channel
-      await this.createNotificationChannel(
-        'prayer-countdown',
-        'Prayer Countdown',
-        'Shows countdown to next prayer'
-      );
-      
-      console.log('✅ All notification channels initialized');
-    }
+    if (Platform.OS !== 'android') return;
+
+    await Notifications.setNotificationChannelAsync('prayer_reminders', {
+      name: 'Prayer Alarms',
+      description: 'Plays when a prayer time arrives',
+      importance: Notifications.AndroidImportance.MAX,
+      sound: null,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF0000',
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      bypassDnd: true,
+    });
+
+    await Notifications.setNotificationChannelAsync('prayer-countdown', {
+      name: 'Next Prayer',
+      description: 'Persistent countdown to the next prayer',
+      importance: Notifications.AndroidImportance.LOW,
+      sound: null,
+      vibrationPattern: null,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      bypassDnd: false,
+    });
+
+    console.log('✅ Notification channels initialized');
   }
 
   /**
@@ -79,25 +90,54 @@ class NotificationService {
   setupNotificationListener() {
     // When notification is received (app in foreground)
     Notifications.addNotificationReceivedListener(async (notification) => {
-      console.log('📩 Notification received:', notification.request.identifier);
-      
-      // Play short alert automatically
-      const { soundType } = notification.request.content.data;
+      const currentId = notification.request.identifier;
+      console.log('📩 Notification received:', currentId);
+
+      const { soundType } = notification.request.content.data || {};
       if (soundType) {
         await Sounds.playNotificationSound(soundType, false);
+        // Replace any prior alarm in the tray with this one.
+        await this._dismissOtherAlarms(currentId);
       }
     });
 
     // When user taps notification (app in background)
     Notifications.addNotificationResponseReceivedListener(async (response) => {
       console.log('👆 Notification tapped:', response.notification.request.identifier);
-      
+
       // Play full adhan when tapped
       const { soundType } = response.notification.request.content.data;
       if (soundType) {
         await Sounds.playNotificationSound(soundType, true);
       }
     });
+  }
+
+  /**
+   * Dismiss any displayed prayer alarms except `keepId` and the persistent
+   * countdown. Used to enforce a single alarm in the tray.
+   */
+  async _dismissOtherAlarms(keepId) {
+    try {
+      const presented = (await Notifications.getPresentedNotificationsAsync?.()) || [];
+      await Promise.all(
+        presented
+          .map((n) => n?.request?.identifier)
+          .filter((id) => id && id.startsWith('prayer-') && id !== keepId && id !== 'prayer-countdown-persistent')
+          .map((id) => Notifications.dismissNotificationAsync(id))
+      );
+    } catch (error) {
+      console.error('Error dismissing other prayer alarms:', error);
+    }
+  }
+
+  /**
+   * Clear stale prayer alarms from the tray, keeping the persistent
+   * countdown. Call on app foreground so alarms that fired while the
+   * app was killed don't pile up.
+   */
+  async consolidatePrayerAlarms() {
+    await this._dismissOtherAlarms(null);
   }
 
   /**
@@ -350,10 +390,11 @@ class NotificationService {
           soundType: sound, // 'short' or 'full'
           scheduledTime: triggerDate.getTime(),
         },
-        priority: Platform.OS === 'android' 
+        priority: Platform.OS === 'android'
           ? Notifications.AndroidNotificationPriority.HIGH
           : undefined,
         categoryIdentifier: 'prayer_reminder',
+        ...(Platform.OS === 'android' && { channelId: 'prayer_reminders' }),
       };
 
       // Prepare trigger with exact timing
@@ -455,32 +496,19 @@ class NotificationService {
    */
   async showPersistentCountdown(nextPrayerName, nextPrayerTime, countdown, title = '🕌 Next Prayer') {
     try {
-      // Create persistent notification channel if not exists (Android)
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('prayer-countdown', {
-          name: 'Prayer Countdown',
-          description: 'Shows countdown to next prayer',
-          importance: Notifications.AndroidImportance.LOW, // Low priority - won't make sound
-          sound: null,
-          vibrationPattern: null,
-          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-          bypassDnd: false, // Don't bypass DND for countdown
-        });
-      }
-
-      // Cancel any existing countdown notification
-      await Notifications.dismissNotificationAsync('prayer-countdown-persistent');
-
-      // Show the persistent notification
+      // Stable identifier — re-scheduling with the same id replaces the
+      // existing notification in the tray instead of stacking a new one.
       await Notifications.scheduleNotificationAsync({
+        identifier: 'prayer-countdown-persistent',
         content: {
           title: title,
           body: `${nextPrayerName} at ${nextPrayerTime}\n${countdown} remaining`,
           sound: null,
-          priority: Platform.OS === 'android' 
+          priority: Platform.OS === 'android'
             ? Notifications.AndroidNotificationPriority.LOW
             : undefined,
-          sticky: true, // Android: Make notification persistent
+          sticky: true,
+          ...(Platform.OS === 'android' && { channelId: 'prayer-countdown' }),
           data: {
             type: 'countdown',
             prayer: nextPrayerName,
