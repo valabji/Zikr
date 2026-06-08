@@ -18,6 +18,7 @@ class QuranAudioService {
     this.activeAyah = null;
     this.isPlaying = false;
     this.reciterId = DEFAULT_RECITER_ID;
+    this.playbackScope = 'ayah';
     this.audioModeReady = false;
     this.listeners = new Set();
     this.unsubSettings = null;
@@ -43,16 +44,17 @@ class QuranAudioService {
     if (!this.unsubSettings) {
       const s = await loadQuranSettings();
       this.reciterId = s.reciterId || DEFAULT_RECITER_ID;
+      this.playbackScope = s.audioPlaybackScope || 'ayah';
       this.unsubSettings = subscribeQuranSettings((next) => {
         const newReciter = next.reciterId || DEFAULT_RECITER_ID;
         if (newReciter !== this.reciterId) {
           this.reciterId = newReciter;
-          // If currently playing, restart current ayah with new reciter
           if (this.activeAyah) {
             const { surah, ayah } = this.activeAyah;
             this.playAyah(surah, ayah);
           }
         }
+        this.playbackScope = next.audioPlaybackScope || 'ayah';
       });
     }
   }
@@ -126,7 +128,21 @@ class QuranAudioService {
       await this.stop();
       return;
     }
+    const current = flatVerses[idx];
     const next = flatVerses[nextIdx];
+    const scope = this.playbackScope || 'ayah';
+    if (scope === 'ayah') {
+      await this.stop();
+      return;
+    }
+    if (scope === 'page' && next.page !== current.page) {
+      await this.stop();
+      return;
+    }
+    if (scope === 'surah' && next.surah !== current.surah) {
+      await this.stop();
+      return;
+    }
     await this.playAyah(next.surah, next.ayah);
   }
 

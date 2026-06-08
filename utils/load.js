@@ -22,6 +22,8 @@ export async function loadResourcesAndDataAsync() {
             'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
             'Hafs': require('../assets/fonts/Hafs.otf'),
             'UthmanicHafs': require('../assets/quran/fonts/UthmanicHafs1Ver18.ttf'),
+            'KFGQPC_SurahNames': require('../assets/quran/fonts/sura_names.ttf'),
+            'KFGQPC_Bismillah': require('../assets/quran/fonts/bismillah.ttf'),
         });
         await loadFirebaseAnalytics();
 

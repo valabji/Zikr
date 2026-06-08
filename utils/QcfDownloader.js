@@ -3,63 +3,94 @@ import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOTAL = 604;
-const REMOTE_BASE = 'https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v1/ttf';
-const LOCAL_DIR = FileSystem.documentDirectory + 'quran/fonts/v1/';
-const INSTALLED_KEY = '@quran_qcf_installed';
 
-function fileName(page) { return `p${page}.ttf`; }
-function localUri(page) { return LOCAL_DIR + fileName(page); }
-function remoteUrl(page) { return `${REMOTE_BASE}/p${page}.ttf`; }
-function fontFamily(page) { return `QCF_P${String(page).padStart(3, '0')}`; }
+const VERSIONS = {
+  v1: {
+    remoteBase: 'https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v1/ttf',
+    localDir: FileSystem.documentDirectory + 'quran/fonts/v1/',
+    fontFamilyPrefix: 'QCF_P',
+    installedKey: '@quran_qcf_v1_installed',
+  },
+  v2: {
+    remoteBase: 'https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v2/ttf',
+    localDir: FileSystem.documentDirectory + 'quran/fonts/v2/',
+    fontFamilyPrefix: 'QCFv2_P',
+    installedKey: '@quran_qcf_v2_installed',
+  },
+};
+
+function fontFamily(version, page) {
+  return `${VERSIONS[version].fontFamilyPrefix}${String(page).padStart(3, '0')}`;
+}
+
+function localUri(version, page) {
+  return `${VERSIONS[version].localDir}p${page}.ttf`;
+}
+
+function remoteUrl(version, page) {
+  return `${VERSIONS[version].remoteBase}/p${page}.ttf`;
+}
+
+function blankVersionState() {
+  return { installed: false, downloading: false, progress: 0, error: null };
+}
 
 class QcfDownloaderService {
   constructor() {
-    this.state = { installed: false, downloading: false, progress: 0, error: null };
+    this.state = { v1: blankVersionState(), v2: blankVersionState() };
     this.listeners = new Set();
-    this.cancelled = false;
-    this.registeredFonts = false;
+    this.cancelled = { v1: false, v2: false };
+    this.registered = { v1: false, v2: false };
   }
 
   async checkInstalled() {
-    try {
-      const flag = await AsyncStorage.getItem(INSTALLED_KEY);
-      if (flag === '1') {
-        this.state.installed = true;
-        this._emit();
-        await this._registerFonts();
-      }
-    } catch {}
-    return this.state.installed;
+    for (const v of Object.keys(VERSIONS)) {
+      try {
+        const flag = await AsyncStorage.getItem(VERSIONS[v].installedKey);
+        if (flag === '1') {
+          this.state[v].installed = true;
+          await this._registerFonts(v);
+        }
+      } catch {}
+    }
+    this._emit();
   }
 
   subscribe(fn) {
     this.listeners.add(fn);
-    fn(this.state);
+    fn(this._snapshot());
     return () => this.listeners.delete(fn);
   }
 
+  _snapshot() {
+    return {
+      v1: { ...this.state.v1 },
+      v2: { ...this.state.v2 },
+    };
+  }
+
   _emit() {
-    const snap = { ...this.state };
+    const snap = this._snapshot();
     this.listeners.forEach((fn) => { try { fn(snap); } catch {} });
   }
 
-  async _ensureDir() {
+  async _ensureDir(version) {
     try {
-      const info = await FileSystem.getInfoAsync(LOCAL_DIR);
+      const info = await FileSystem.getInfoAsync(VERSIONS[version].localDir);
       if (!info.exists) {
-        await FileSystem.makeDirectoryAsync(LOCAL_DIR, { intermediates: true });
+        await FileSystem.makeDirectoryAsync(VERSIONS[version].localDir, { intermediates: true });
       }
     } catch {}
   }
 
-  async start() {
-    if (this.state.downloading || this.state.installed) return;
-    this.cancelled = false;
-    this.state.downloading = true;
-    this.state.progress = 0;
-    this.state.error = null;
+  async start(version) {
+    const v = VERSIONS[version];
+    if (!v) return;
+    if (this.state[version].downloading || this.state[version].installed) return;
+    this.cancelled[version] = false;
+    this.state[version] = { installed: false, downloading: true, progress: 0, error: null };
     this._emit();
-    await this._ensureDir();
+    await this._ensureDir(version);
 
     try {
       let done = 0;
@@ -68,20 +99,20 @@ class QcfDownloaderService {
       for (let p = 1; p <= TOTAL; p++) queue.push(p);
 
       const worker = async () => {
-        while (queue.length && !this.cancelled) {
+        while (queue.length && !this.cancelled[version]) {
           const page = queue.shift();
-          const dest = localUri(page);
+          const dest = localUri(version, page);
           try {
             const info = await FileSystem.getInfoAsync(dest);
             if (!info.exists || info.size < 1000) {
-              await FileSystem.downloadAsync(remoteUrl(page), dest);
+              await FileSystem.downloadAsync(remoteUrl(version, page), dest);
             }
           } catch (e) {
-            console.warn(`QcfDownloader: page ${page} failed`, e);
+            console.warn(`QcfDownloader[${version}]: page ${page} failed`, e);
             throw e;
           }
           done++;
-          this.state.progress = done / TOTAL;
+          this.state[version].progress = done / TOTAL;
           if (done % 10 === 0) this._emit();
         }
       };
@@ -89,57 +120,62 @@ class QcfDownloaderService {
       const workers = Array.from({ length: CONCURRENCY }, () => worker());
       await Promise.all(workers);
 
-      if (this.cancelled) {
-        this.state.downloading = false;
-        this.state.progress = 0;
+      if (this.cancelled[version]) {
+        this.state[version] = { ...blankVersionState() };
         this._emit();
         return;
       }
 
-      await AsyncStorage.setItem(INSTALLED_KEY, '1');
-      this.state.installed = true;
-      this.state.downloading = false;
-      this.state.progress = 1;
+      await AsyncStorage.setItem(v.installedKey, '1');
+      this.state[version] = { installed: true, downloading: false, progress: 1, error: null };
       this._emit();
-      await this._registerFonts();
+      await this._registerFonts(version);
     } catch (e) {
-      this.state.downloading = false;
-      this.state.error = String(e && e.message ? e.message : e);
+      this.state[version] = {
+        installed: false, downloading: false, progress: 0,
+        error: String(e && e.message ? e.message : e),
+      };
       this._emit();
       throw e;
     }
   }
 
-  cancel() {
-    if (this.state.downloading) this.cancelled = true;
-  }
-
-  async uninstall() {
-    try {
-      await FileSystem.deleteAsync(LOCAL_DIR, { idempotent: true });
-    } catch {}
-    await AsyncStorage.removeItem(INSTALLED_KEY);
-    this.state = { installed: false, downloading: false, progress: 0, error: null };
-    this.registeredFonts = false;
-    this._emit();
-  }
-
-  async _registerFonts() {
-    if (this.registeredFonts) return;
-    try {
-      const fontMap = {};
-      for (let p = 1; p <= TOTAL; p++) {
-        fontMap[fontFamily(p)] = localUri(p);
-      }
-      await Font.loadAsync(fontMap);
-      this.registeredFonts = true;
-    } catch (e) {
-      console.warn('QcfDownloader: font registration failed', e);
+  cancel(version) {
+    if (this.state[version] && this.state[version].downloading) {
+      this.cancelled[version] = true;
     }
   }
 
-  fontFamilyForPage(page) {
-    return fontFamily(page);
+  async uninstall(version) {
+    const v = VERSIONS[version];
+    if (!v) return;
+    try { await FileSystem.deleteAsync(v.localDir, { idempotent: true }); } catch {}
+    await AsyncStorage.removeItem(v.installedKey);
+    this.state[version] = blankVersionState();
+    this.registered[version] = false;
+    this._emit();
+  }
+
+  async _registerFonts(version) {
+    if (this.registered[version]) return;
+    try {
+      const fontMap = {};
+      for (let p = 1; p <= TOTAL; p++) {
+        fontMap[fontFamily(version, p)] = localUri(version, p);
+      }
+      await Font.loadAsync(fontMap);
+      this.registered[version] = true;
+    } catch (e) {
+      console.warn(`QcfDownloader[${version}]: font registration failed`, e);
+    }
+  }
+
+  fontFamilyForPage(version, page) {
+    return fontFamily(version, page);
+  }
+
+  isInstalled(version) {
+    return !!(this.state[version] && this.state[version].installed);
   }
 }
 

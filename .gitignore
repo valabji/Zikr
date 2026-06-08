@@ -19,6 +19,7 @@ ios/
 .yarn/install-state.gz
 
 # Ignore temporary files
+__pycache__/
 .pnp.*
 .pnp
 .pnp.js
@@ -36,3 +37,5 @@ ios/
 # Do NOT ignore the Yarn configuration files
 !.yarnrc.yml
 !.yarn
+
+

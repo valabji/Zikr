@@ -3,10 +3,13 @@
 assets/quran/data/*.json. Run once; commit output.
 
 Produces:
-  pages.json              - per-page Uthmani text (Phase 1A)
+  pages.json              - per-page Uthmani text (ayah-level)
+  pages_lines_v1.json     - per-page, per-line word layout matching the
+                            KFGQPC 1405 H Mushaf (Madinah 1st print)
+  pages_lines_v2.json     - per-page, per-line word layout for the
+                            KFGQPC 1421/1441 H Mushaf (revised Madinah)
   surahs.json             - 114 surah index
   juz.json                - 30 juz index
-  pages_code_v1.json      - per-page QCF v1 glyph codes (Phase 1B)
   translation_en.json     - {"1:1": "text", ...} Pickthall (Phase 2)
   search_index.json       - normalized inverted word index (Phase 2)
   tafsir_ar.json          - {"1:1": "text", ...} Muyassar (Phase 4)
@@ -212,6 +215,119 @@ def build_words():
     return out
 
 
+# ---- pages_lines.json --------------------------------------------------
+# Per-page, per-line word groupings matching the King Fahd Complex 1405
+# Mushaf layout: each page has up to 15 lines; lines are surah headers,
+# bismillah banners, or text lines of words.
+
+def _assemble_lines(by_line, surah_first_seen):
+    """Given line-grouped words and per-surah first-line info, insert
+    decorative surah-header and bismillah lines and return the page's
+    line list."""
+    surah_header_at = {}
+    bismillah_at = set()
+    for s, ln in surah_first_seen.items():
+        if s == 1 or s == 9:
+            # Al-Fatiha: bismillah IS verse 1:1; At-Tawbah: no bismillah
+            if ln - 1 >= 1:
+                surah_header_at[ln - 1] = s
+        else:
+            if ln - 1 >= 1:
+                bismillah_at.add(ln - 1)
+            if ln - 2 >= 1:
+                surah_header_at[ln - 2] = s
+
+    max_line = max(
+        max(by_line.keys()) if by_line else 0,
+        max(surah_header_at.keys()) if surah_header_at else 0,
+        *bismillah_at if bismillah_at else [0],
+    )
+
+    lines = []
+    for n in range(1, max_line + 1):
+        if n in surah_header_at:
+            lines.append({"n": n, "type": "surah_header", "surahId": surah_header_at[n]})
+        elif n in bismillah_at:
+            lines.append({"n": n, "type": "bismillah"})
+        elif n in by_line:
+            lines.append({"n": n, "type": "text", "words": by_line[n]})
+    return lines
+
+
+def fetch_words_of_v1_page(page):
+    """Return raw words on v1 page N, each tagged with both v1 and v2 page+line."""
+    url = (f"{API}/verses/by_page/{page}?words=true&per_page=50"
+           f"&word_fields=line_v1,line_v2,v1_page,v2_page,"
+           f"text_uthmani,code_v1,code_v2,char_type_name")
+    data = fetch_json(url)
+    out = []
+    for v in data["verses"]:
+        vk = v["verse_key"]
+        for pos, w in enumerate(v.get("words", [])):
+            out.append({
+                "vk": vk,
+                "pos": pos,
+                "ar": w.get("text_uthmani") or w.get("text"),
+                "type": w["char_type_name"],
+                "v1_page": w["v1_page"], "v1_line": w["line_v1"],
+                "v2_page": w["v2_page"], "v2_line": w["line_v2"],
+                "code_v1": w.get("code_v1"),
+                "code_v2": w.get("code_v2"),
+            })
+    return out
+
+
+def build_pages_lines():
+    print("Fetching v1-paginated word stream (parallel x16)...", file=sys.stderr)
+    all_words = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as ex:
+        futures = {ex.submit(fetch_words_of_v1_page, p): p for p in range(1, 605)}
+        done = 0
+        for fut in concurrent.futures.as_completed(futures):
+            all_words.extend(fut.result())
+            done += 1
+            if done % 100 == 0:
+                print(f"  pages {done}/604", file=sys.stderr)
+    print(f"  total words: {len(all_words)}", file=sys.stderr)
+
+    # Group by (vk, pos) to dedupe — a word may appear via multiple by_page
+    # fetches if the API includes border words in both. Keep one copy each.
+    seen = {}
+    for w in all_words:
+        key = (w["vk"], w["pos"])
+        if key not in seen:
+            seen[key] = w
+    unique = list(seen.values())
+    print(f"  unique words: {len(unique)}", file=sys.stderr)
+
+    def assemble_layout(page_key, line_key, code_key):
+        by_page_line = {}      # {page_num: {line_num: [entries]}}
+        surah_first = {}       # {page_num: {surah_id: first_line_num}}
+        for w in unique:
+            pg = w[page_key]
+            ln = w[line_key]
+            entry = {
+                "ar": w["ar"], "code": w[code_key],
+                "type": w["type"], "vk": w["vk"],
+            }
+            by_page_line.setdefault(pg, {}).setdefault(ln, []).append(entry)
+            s, a = (int(x) for x in w["vk"].split(":"))
+            if a == 1:
+                page_surah = surah_first.setdefault(pg, {})
+                if s not in page_surah:
+                    page_surah[s] = ln
+
+        out = [None] * 604
+        for pg in range(1, 605):
+            lines = _assemble_lines(by_page_line.get(pg, {}), surah_first.get(pg, {}))
+            out[pg - 1] = {"page": pg, "lines": lines}
+        return out
+
+    v1_pages = assemble_layout("v1_page", "v1_line", "code_v1")
+    v2_pages = assemble_layout("v2_page", "v2_line", "code_v2")
+    return v1_pages, v2_pages
+
+
 # ---- search_index.json -------------------------------------------------
 
 TASHKEEL = re.compile(r"[ً-ٰٟۖ-ۭٓ-ٕ]")
@@ -276,9 +392,6 @@ def main():
     write("surahs.json", surahs, compact=False)
     write("juz.json", juz, compact=False)
 
-    pages_v1 = build_pages_v1()
-    write("pages_code_v1.json", pages_v1)
-
     translation = build_translation(pages)
     write("translation_en.json", translation)
 
@@ -287,6 +400,10 @@ def main():
 
     words = build_words()
     write("words.json", words)
+
+    v1_lines, v2_lines = build_pages_lines()
+    write("pages_lines_v1.json", v1_lines)
+    write("pages_lines_v2.json", v2_lines)
 
     index = build_search_index(pages)
     write("search_index.json", index)

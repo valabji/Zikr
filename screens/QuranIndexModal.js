@@ -65,7 +65,7 @@ function Row({ left, right, sub, onPress, onRemove, colors }) {
   );
 }
 
-export default function QuranIndexModal({ visible, onClose, currentPage, bookmarks, onSelectPage, onRemoveBookmark }) {
+export default function QuranIndexModal({ visible, onClose, currentPage, bookmarks, onSelectPage, onRemoveBookmark, onOpenSearch, onOpenSettings }) {
   const colors = useColors();
   const [tab, setTab] = React.useState('surahs');
   const lang = isRTL() ? 'ar' : 'en';
@@ -133,7 +133,16 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
           <Text style={[textStyles.header, { color: colors.text, flex: 1, textAlign: 'center', marginHorizontal: 8 }]} numberOfLines={1}>
             {t('quran.title')}
           </Text>
-          <View style={{ width: 42 }} />
+          {onOpenSearch ? (
+            <TouchableOpacity onPress={onOpenSearch} style={{ padding: 8 }} testID="quran-index-search">
+              <Feather name="search" size={22} color={colors.text} />
+            </TouchableOpacity>
+          ) : null}
+          {onOpenSettings ? (
+            <TouchableOpacity onPress={onOpenSettings} style={{ padding: 8 }} testID="quran-index-settings">
+              <Feather name="settings" size={20} color={colors.text} />
+            </TouchableOpacity>
+          ) : null}
         </View>
         <View style={{ flexDirection: 'row' }}>
           {TABS.map((key) => (
