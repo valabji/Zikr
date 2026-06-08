@@ -22,6 +22,7 @@ import NotificationService from '../NotificationService';
 import * as PrayerUtils from '../PrayerUtils';
 import service from '../PrayerCountdownService';
 import { PRAYER_CONSTANTS } from '../../constants/PrayerConstants';
+import { setLanguage } from '../../locales/i18n';
 import moment from 'moment-timezone';
 
 const LOCATION = {
@@ -176,19 +177,22 @@ describe('PrayerCountdownService', () => {
       spy.mockRestore();
     });
 
-    it('calls showPersistentCountdown with formatted name + time + remaining', async () => {
+    it('calls showPersistentCountdown with a single-language body and the prayer key', async () => {
       const t = moment().add(1, 'hour');
       PrayerUtils.calculatePrayerTimes.mockReturnValue({ fajr: t });
       PrayerUtils.getCurrentAndNextPrayer.mockReturnValue({ next: { name: 'fajr', time: t } });
       PrayerUtils.getTimeUntilNextPrayer.mockReturnValue('1h 0m');
 
       await service.updateCountdown(LOCATION, 'MuslimWorldLeague', 'Shafi');
-      expect(NotificationService.showPersistentCountdown).toHaveBeenCalledWith(
-        'Fajr',
-        expect.any(String),
-        '1h 0m',
-        'Next Prayer'
-      );
+      expect(NotificationService.showPersistentCountdown).toHaveBeenCalledTimes(1);
+      const [title, body, prayerKey] = NotificationService.showPersistentCountdown.mock.calls[0];
+      expect(title).toMatch(/🕌/);
+      expect(typeof body).toBe('string');
+      expect(body.length).toBeGreaterThan(0);
+      // Guarantee: no English h/m/s tokens leaked through (would indicate language mixing)
+      expect(body).not.toMatch(/\dh /);
+      expect(body).not.toMatch(/\dm$/);
+      expect(prayerKey).toBe('fajr');
     });
 
     it('recalculates for tomorrow when there is no time remaining today', async () => {
@@ -205,12 +209,51 @@ describe('PrayerCountdownService', () => {
         .mockReturnValueOnce('8h 0m'); // tomorrow
 
       await service.updateCountdown(LOCATION, 'MuslimWorldLeague', 'Shafi');
-      expect(NotificationService.showPersistentCountdown).toHaveBeenCalledWith(
-        'Fajr',
-        expect.any(String),
-        '8h 0m',
-        'Next Prayer'
-      );
+      const [title, body, prayerKey] = NotificationService.showPersistentCountdown.mock.calls.at(-1);
+      expect(title).toMatch(/🕌/);
+      expect(typeof body).toBe('string');
+      expect(body.length).toBeGreaterThan(0);
+      expect(prayerKey).toBe('fajr');
+    });
+
+    describe('language consistency', () => {
+      const ARABIC_LETTERS = /[؀-ۿ]/;
+      const ENGLISH_LETTERS = /[A-Za-z]/;
+
+      const setupNextPrayer = () => {
+        const t = moment().add(1, 'hour');
+        PrayerUtils.calculatePrayerTimes.mockReturnValue({ fajr: t });
+        PrayerUtils.getCurrentAndNextPrayer.mockReturnValue({ next: { name: 'fajr', time: t } });
+        PrayerUtils.getTimeUntilNextPrayer.mockReturnValue('1h 0m');
+      };
+
+      it('builds an entirely-Arabic body when language is Arabic', async () => {
+        await setLanguage('ar', false);
+        setupNextPrayer();
+        await service.updateCountdown(LOCATION, 'MuslimWorldLeague', 'Shafi');
+        const [title, body] = NotificationService.showPersistentCountdown.mock.calls.at(-1);
+        // Body must contain Arabic and no Latin letters (other than digits/punctuation).
+        expect(body).toMatch(ARABIC_LETTERS);
+        expect(body).not.toMatch(ENGLISH_LETTERS);
+        expect(title).toMatch(ARABIC_LETTERS);
+        expect(title.replace(/🕌\s*/, '')).not.toMatch(ENGLISH_LETTERS);
+      });
+
+      it('builds an entirely-English body when language is English', async () => {
+        await setLanguage('en', false);
+        setupNextPrayer();
+        await service.updateCountdown(LOCATION, 'MuslimWorldLeague', 'Shafi');
+        const [title, body] = NotificationService.showPersistentCountdown.mock.calls.at(-1);
+        expect(body).toMatch(ENGLISH_LETTERS);
+        expect(body).not.toMatch(ARABIC_LETTERS);
+        expect(title).toMatch(ENGLISH_LETTERS);
+        expect(title).not.toMatch(ARABIC_LETTERS);
+      });
+
+      afterAll(async () => {
+        // Reset to default language so other suites are not affected
+        await setLanguage('ar', false);
+      });
     });
 
     it('logs errors thrown inside updateCountdown without bubbling', async () => {
@@ -222,22 +265,6 @@ describe('PrayerCountdownService', () => {
         service.updateCountdown(LOCATION, 'MuslimWorldLeague', 'Shafi')
       ).resolves.toBeUndefined();
       spy.mockRestore();
-    });
-  });
-
-  describe('getPrayerName()', () => {
-    it.each([
-      ['fajr', 'Fajr'],
-      ['dhuhr', 'Dhuhr'],
-      ['asr', 'Asr'],
-      ['maghrib', 'Maghrib'],
-      ['isha', 'Isha'],
-    ])('maps %s -> %s', (key, name) => {
-      expect(service.getPrayerName(key)).toBe(name);
-    });
-
-    it('returns the raw key when it is unknown', () => {
-      expect(service.getPrayerName('unknown-prayer')).toBe('unknown-prayer');
     });
   });
 

@@ -487,22 +487,23 @@ class NotificationService {
 
   /**
    * Show or update persistent countdown notification
-   * This notification stays in the tray and shows next prayer countdown
-   * 
-   * @param {string} nextPrayerName - Name of next prayer (e.g., 'Fajr', 'Dhuhr')
-   * @param {string} nextPrayerTime - Formatted time string (e.g., '5:30 AM')
-   * @param {string} countdown - Time until prayer (e.g., '2h 15m')
-   * @param {string} title - Notification title
+   * This notification stays in the tray and shows next prayer countdown.
+   * Caller is responsible for localizing the title and body so the
+   * notification stays in a single language.
+   *
+   * @param {string} title - Notification title (already localized)
+   * @param {string} body - Notification body (already localized, may contain newlines)
+   * @param {string} [prayer] - Prayer key for the data payload (optional)
    */
-  async showPersistentCountdown(nextPrayerName, nextPrayerTime, countdown, title = '🕌 Next Prayer') {
+  async showPersistentCountdown(title, body, prayer) {
     try {
       // Stable identifier — re-scheduling with the same id replaces the
       // existing notification in the tray instead of stacking a new one.
       await Notifications.scheduleNotificationAsync({
         identifier: 'prayer-countdown-persistent',
         content: {
-          title: title,
-          body: `${nextPrayerName} at ${nextPrayerTime}\n${countdown} remaining`,
+          title,
+          body,
           sound: null,
           priority: Platform.OS === 'android'
             ? Notifications.AndroidNotificationPriority.LOW
@@ -511,13 +512,13 @@ class NotificationService {
           ...(Platform.OS === 'android' && { channelId: 'prayer-countdown' }),
           data: {
             type: 'countdown',
-            prayer: nextPrayerName,
+            ...(prayer && { prayer }),
           },
         },
         trigger: null, // Show immediately
       });
 
-      console.log(`📊 Updated persistent countdown: ${nextPrayerName} in ${countdown}`);
+      console.log(`📊 Updated persistent countdown: ${prayer || ''}`);
     } catch (error) {
       console.error('Error showing persistent countdown:', error);
     }

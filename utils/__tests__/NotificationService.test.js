@@ -458,20 +458,21 @@ describe('NotificationService', () => {
   describe('showPersistentCountdown / hidePersistentCountdown', () => {
     it('schedules a sticky notification with a stable identifier and the countdown channel on Android', async () => {
       setPlatform('android', 33);
-      await service.showPersistentCountdown('Fajr', '5:30 AM', '2h 15m');
+      await service.showPersistentCountdown('🕌 Next Prayer', 'Fajr at 5:30 AM\n2h 15m remaining', 'fajr');
 
       const scheduleArg = Notifications.scheduleNotificationAsync.mock.calls.at(-1)[0];
       expect(scheduleArg.identifier).toBe('prayer-countdown-persistent');
       expect(scheduleArg.trigger).toBeNull();
       expect(scheduleArg.content.sticky).toBe(true);
       expect(scheduleArg.content.channelId).toBe('prayer-countdown');
-      expect(scheduleArg.content.body).toContain('Fajr at 5:30 AM');
-      expect(scheduleArg.content.body).toContain('2h 15m');
+      expect(scheduleArg.content.title).toBe('🕌 Next Prayer');
+      expect(scheduleArg.content.body).toBe('Fajr at 5:30 AM\n2h 15m remaining');
+      expect(scheduleArg.content.data.prayer).toBe('fajr');
     });
 
     it('does not set channelId on iOS but still schedules with stable id', async () => {
       setPlatform('ios', 15);
-      await service.showPersistentCountdown('Fajr', '5:30 AM', '2h 15m');
+      await service.showPersistentCountdown('🕌 Next Prayer', 'body');
       expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
       const scheduleArg = Notifications.scheduleNotificationAsync.mock.calls.at(-1)[0];
       expect(scheduleArg.identifier).toBe('prayer-countdown-persistent');
@@ -481,7 +482,7 @@ describe('NotificationService', () => {
     it('logs but does not throw when scheduling fails', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       Notifications.scheduleNotificationAsync.mockRejectedValue(new Error('no'));
-      await expect(service.showPersistentCountdown('Fajr', '5:30 AM', '2h 15m'))
+      await expect(service.showPersistentCountdown('title', 'body'))
         .resolves.toBeUndefined();
       spy.mockRestore();
     });

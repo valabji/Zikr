@@ -7,6 +7,7 @@ import {
   formatPrayerTime,
 } from './PrayerUtils';
 import NotificationService from './NotificationService';
+import { t } from '../locales/i18n';
 import moment from 'moment-timezone';
 
 /**
@@ -152,45 +153,55 @@ class PrayerCountdownService {
           if (tomorrowNext && tomorrowNext.time) {
             const tomorrowRemaining = getTimeUntilNextPrayer(tomorrowNext.time);
             if (tomorrowRemaining) {
-              const formattedTime = formatPrayerTime(tomorrowNext.time);
-              await NotificationService.showPersistentCountdown(
-                this.getPrayerName(tomorrowNext.name),
-                formattedTime,
-                tomorrowRemaining,
-                'Next Prayer'
-              );
+              await this._showCountdown(tomorrowNext, tomorrowRemaining);
             }
           }
         }
         return;
       }
 
-      // Update notification
-      const formattedTime = formatPrayerTime(next.time);
-      await NotificationService.showPersistentCountdown(
-        this.getPrayerName(next.name),
-        formattedTime,
-        timeRemaining,
-        'Next Prayer'
-      );
+      await this._showCountdown(next, timeRemaining);
 
     } catch (error) {
       console.error('Error updating countdown:', error);
     }
   }
 
-  /**
-   * Get prayer name (without translation as we're in background)
-   */
-  getPrayerName(prayerKey) {
-    const names = {
-      fajr: 'Fajr',
-      dhuhr: 'Dhuhr',
-      asr: 'Asr',
-      maghrib: 'Maghrib',
-      isha: 'Isha',
-    };
-    return names[prayerKey] || prayerKey;
+  async _showCountdown(prayer, remaining) {
+    const title = `🕌 ${t('prayerTimes.nextPrayer')}`;
+    const body = `${this._buildPrayerLine(prayer)}\n${this._buildRemainingLine(remaining)}`;
+    await NotificationService.showPersistentCountdown(title, body, prayer.name);
+  }
+
+  _buildPrayerLine(prayer) {
+    const name = t(`prayerTimes.${prayer.name}`) || prayer.name;
+    const time = this._localizeTime(formatPrayerTime(prayer.time));
+    return t('prayerTimes.notificationBody', { prayer: name, time });
+  }
+
+  _buildRemainingLine(remaining) {
+    const localized = this._localizeCountdown(remaining);
+    return t('prayerTimes.notificationRemaining', { countdown: localized });
+  }
+
+  // Replace English AM/PM tokens with the locale-appropriate ones so the
+  // notification stays in a single language regardless of moment's current locale.
+  _localizeTime(timeStr) {
+    if (!timeStr) return '';
+    return timeStr
+      .replace(/AM/g, t('prayerTimes.am'))
+      .replace(/PM/g, t('prayerTimes.pm'))
+      .replace(/ص/g, t('prayerTimes.am'))
+      .replace(/م(?!\S)/g, t('prayerTimes.pm'));
+  }
+
+  // Replace the English h/m/s tokens that getTimeUntilNextPrayer emits.
+  _localizeCountdown(countdownStr) {
+    if (!countdownStr) return '';
+    return countdownStr
+      .replace(/h/g, t('prayerTimes.countdownHour'))
+      .replace(/m/g, t('prayerTimes.countdownMinute'))
+      .replace(/s/g, t('prayerTimes.countdownSecond'));
   }
 
   /**

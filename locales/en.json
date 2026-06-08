@@ -172,7 +172,14 @@
     "todaysPrayers": "Today's Prayers",
     "settings": "Prayer Settings",
     "persistentNotification": "Show Countdown Notification",
-    "persistentNotificationDesc": "Keep countdown in notification tray"
+    "persistentNotificationDesc": "Keep countdown in notification tray",
+    "notificationBody": "{prayer} at {time}",
+    "notificationRemaining": "{countdown} remaining",
+    "am": "AM",
+    "pm": "PM",
+    "countdownHour": "h",
+    "countdownMinute": "m",
+    "countdownSecond": "s"
   },
   "qibla": {
     "loading": "Finding Qibla direction...",

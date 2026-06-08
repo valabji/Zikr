@@ -15,6 +15,11 @@ import QcfDownloader from './QcfDownloader';
 
 
 export async function loadResourcesAndDataAsync() {
+    // Language must be set before any service that reads t() or moment.locale,
+    // otherwise notifications can be built with default-language text while the
+    // user has chosen the other language.
+    await initializeLanguage();
+
     try {
         SplashScreen.preventAutoHideAsync();
         await Font.loadAsync({
@@ -46,7 +51,6 @@ export async function loadResourcesAndDataAsync() {
     } catch (e) {
         console.warn(e);
     } finally {
-        await initializeLanguage(); // Initialize translations first
         const zikrData = await AsyncStorage.getItem("@zikr");
         global.zikr = zikrData;
 
