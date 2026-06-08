@@ -138,7 +138,7 @@ export function PageView(props) {
   return (
     <View style={{ width: SCREEN_WIDTH, flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: 8, paddingBottom: 24 }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingTop: 8, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
         <PageContent {...props} />
