@@ -31,6 +31,7 @@ export default {
       infoPlist: {
         CFBundleAllowMixedLocalizations: true,
         NSUserNotificationsUsageDescription: "Zikr needs notification permission to remind you of prayer times. You can customize which prayers to be notified about in the app settings.",
+        NSMicrophoneUsageDescription: "Used to follow your Quran recitation.",
         UIBackgroundModes: ["audio"]  // Required for playing adhan audio in notifications
       }
     },
@@ -68,10 +69,10 @@ export default {
         // USE_EXACT_ALARM is intentionally NOT requested — Play Store restricts it to calendar/alarm-clock apps.
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.RECEIVE_BOOT_COMPLETED",          // Reschedule notifications after device reboot
+        "android.permission.RECORD_AUDIO",
       ],
       blockedPermissions: [
         // Audio permissions - not needed (app only plays simple sounds)
-        "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
 
         // Storage permissions - not needed (app uses internal storage only)

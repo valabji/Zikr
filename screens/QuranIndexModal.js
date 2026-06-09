@@ -6,10 +6,11 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import surahsData from '../assets/quran/data/surahs.json';
 import juzData from '../assets/quran/data/juz.json';
+import { getStats, subscribeProgress } from '../utils/ReadingProgress';
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
-const TABS = ['surahs', 'juzs', 'bookmarks'];
+const TABS = ['surahs', 'juzs', 'bookmarks', 'progress'];
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
@@ -69,6 +70,12 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
   const colors = useColors();
   const [tab, setTab] = React.useState('surahs');
   const lang = isRTL() ? 'ar' : 'en';
+  const [progressStats, setProgressStats] = React.useState({ todayCount: 0, streak: 0, totalUnique: 0, completionPct: 0 });
+
+  React.useEffect(() => {
+    getStats().then(setProgressStats).catch(() => {});
+    return subscribeProgress(setProgressStats);
+  }, []);
 
   const fmtNum = (n) => (lang === 'ar' ? toArabicDigits(n) : n);
   const pageLabel = (n) => t('quran.pageNumber', { n: fmtNum(n) });
@@ -189,6 +196,65 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
               renderItem={renderBookmark}
             />
           )
+        )}
+        {tab === 'progress' && (
+          <View style={{ flex: 1, padding: 20 }}>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              padding: 18,
+              marginBottom: 14,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+              <Feather name="zap" size={28} color={colors.accent} style={{ marginEnd: 16 }} />
+              <View>
+                <Text style={[textStyles.header, { color: colors.accent, fontSize: 28 }]}>
+                  {progressStats.streak}
+                </Text>
+                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13 }]}>
+                  {t('quran.streakDays')}
+                </Text>
+              </View>
+            </View>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              padding: 18,
+              marginBottom: 14,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <Text style={[textStyles.subtitle, { color: colors.text }]}>{t('quran.todayPages')}</Text>
+              <Text style={[textStyles.subtitle, { color: colors.accent, fontSize: 18 }]}>
+                {fmtNum(progressStats.todayCount)}
+              </Text>
+            </View>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              padding: 18,
+            }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                <Text style={[textStyles.subtitle, { color: colors.text }]}>{t('quran.completion')}</Text>
+                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13 }]}>
+                  {fmtNum(progressStats.totalUnique)} / {fmtNum(604)} ({fmtNum(progressStats.completionPct)}%)
+                </Text>
+              </View>
+              <View style={{ height: 8, backgroundColor: colors.accent + '33', borderRadius: 4, overflow: 'hidden' }}>
+                <View style={{
+                  height: '100%',
+                  width: `${progressStats.completionPct}%`,
+                  backgroundColor: colors.accent,
+                  borderRadius: 4,
+                }} />
+              </View>
+              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8 }]}>
+                {t('quran.totalRead')}: {fmtNum(progressStats.totalUnique)}
+              </Text>
+            </View>
+          </View>
         )}
       </SafeAreaView>
     </Modal>

@@ -367,6 +367,16 @@
     "play": "تشغيل",
     "loop": "تكرار",
     "expandPlayer": "خيارات إضافية للمشغل",
-    "collapsePlayer": "إخفاء خيارات المشغل"
+    "collapsePlayer": "إخفاء خيارات المشغل",
+    "progress": "التقدم",
+    "streakDays": "أيام متتالية",
+    "todayPages": "صفحات اليوم",
+    "totalRead": "صفحات مقروءة",
+    "completion": "الإتمام",
+    "pageInfo": "معلومات الصفحة",
+    "pageInfoClose": "إغلاق",
+    "voiceFollow": "متابعة صوتية",
+    "voiceFollowActive": "يستمع…",
+    "voiceMicDenied": "تم رفض إذن الميكروفون"
   }
 }

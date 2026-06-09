@@ -15,7 +15,7 @@ import { BismillahLine, MushafLine } from './MushafLine';
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const ayahKey = (s, a) => `${s}:${a}`;
 
-function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, onAyahPress, onAyahLongPress }) {
+function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, onAyahPress, onAyahLongPress }) {
   const fontScale = settings.fontScale || 1;
   const customLineSize = !!settings.customLineSize;
   const { width: windowWidth } = useWindowDimensions();
@@ -80,6 +80,7 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, onAya
             mushafFontSize={mushafFontSize}
             mushafLineHeight={mushafLineHeight}
             playingAyahKey={playingAyahKey}
+            playingWordIdx={playingWordIdx}
             onAyahPress={onAyahPress}
             onAyahLongPress={onAyahLongPress}
             customLineSize={customLineSize}

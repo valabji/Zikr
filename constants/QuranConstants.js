@@ -34,6 +34,7 @@ export const QURAN_CONSTANTS = {
     LAST_PAGE: '@quran_last_page',
     BOOKMARKS: '@quran_bookmarks',
     SETTINGS: '@quran_settings',
+    READING_PROGRESS: '@quran_reading_progress',
   },
 
   FONT_FAMILY: 'UthmanicHafs',

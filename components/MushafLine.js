@@ -30,7 +30,7 @@ export function BismillahLine({ colors, fontScale }) {
 
 export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
-  mushafFontSize, mushafLineHeight, playingAyahKey,
+  mushafFontSize, mushafLineHeight, playingAyahKey, playingWordIdx,
   onAyahPress, onAyahLongPress, customLineSize,
 }) {
   // Group consecutive words by verse_key so each ayah is one pressable Text segment.
@@ -76,6 +76,7 @@ export function MushafLine({
           const [s, a] = g.vk.split(':').map(Number);
           const ayahMeta = { surah: s, ayah: a };
 
+          let speakableIdx = -1;
           const segChildren = g.words.map((w, wi) => {
             if (w.type === 'end' && !qcfActive) {
               return (
@@ -87,8 +88,17 @@ export function MushafLine({
                 </Text>
               );
             }
+            if (w.type !== 'end') speakableIdx += 1;
             const txt = qcfActive ? (w.code || w.ar) : w.ar;
-            return (wi === 0 ? '' : ' ') + txt;
+            const isWordHighlighted = isPlaying && w.type !== 'end' && playingWordIdx === speakableIdx;
+            return (
+              <Text
+                key={wi}
+                style={isWordHighlighted ? { backgroundColor: colors.accent + '55' } : null}
+              >
+                {wi === 0 ? '' : ' '}{txt}
+              </Text>
+            );
           });
 
           return (

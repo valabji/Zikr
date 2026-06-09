@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import pagesData from '../assets/quran/data/pages.json';
+import wordsData from '../assets/quran/data/words.json';
 
 const flatVerses = [];
 const verseIndex = {};
@@ -17,6 +18,7 @@ class QuranAudioService {
     this.sound = null;
     this.activeAyah = null;
     this.isPlaying = false;
+    this.playingWordIdx = null;
     this.reciterId = DEFAULT_RECITER_ID;
     this.playbackScope = 'ayah';
     this.loopEnabled = false;
@@ -64,12 +66,12 @@ class QuranAudioService {
 
   subscribe(fn) {
     this.listeners.add(fn);
-    fn({ activeAyah: this.activeAyah, isPlaying: this.isPlaying });
+    fn({ activeAyah: this.activeAyah, isPlaying: this.isPlaying, playingWordIdx: this.playingWordIdx });
     return () => this.listeners.delete(fn);
   }
 
   _emit() {
-    const state = { activeAyah: this.activeAyah, isPlaying: this.isPlaying };
+    const state = { activeAyah: this.activeAyah, isPlaying: this.isPlaying, playingWordIdx: this.playingWordIdx };
     this.listeners.forEach((fn) => { try { fn(state); } catch {} });
   }
 
@@ -81,6 +83,7 @@ class QuranAudioService {
       } catch {}
       this.sound = null;
     }
+    this.playingWordIdx = null;
   }
 
   async playAyah(surah, ayah) {
@@ -106,14 +109,30 @@ class QuranAudioService {
           }
           return;
         }
-        const next = status.isPlaying || status.isBuffering;
-        if (next !== this.isPlaying) {
-          this.isPlaying = next;
-          this._emit();
-        }
         if (status.didJustFinish) {
           this._advance();
+          return;
         }
+        const next = status.isPlaying || status.isBuffering;
+        let changed = next !== this.isPlaying;
+        if (changed) this.isPlaying = next;
+
+        if (this.activeAyah && status.isPlaying) {
+          const key = `${this.activeAyah.surah}:${this.activeAyah.ayah}`;
+          const words = wordsData[key] || [];
+          const speakable = words.filter((w) => w.type !== 'end');
+          const wordCount = speakable.length || 1;
+          const wordIdx = Math.min(
+            wordCount - 1,
+            Math.floor((status.positionMillis / (status.durationMillis || 1)) * wordCount)
+          );
+          if (wordIdx !== this.playingWordIdx) {
+            this.playingWordIdx = wordIdx;
+            changed = true;
+          }
+        }
+
+        if (changed) this._emit();
       });
     } catch (e) {
       console.warn('QuranAudio: playAyah failed', e);
@@ -206,6 +225,7 @@ class QuranAudioService {
     await this._unload();
     this.activeAyah = null;
     this.isPlaying = false;
+    this.playingWordIdx = null;
     this._emit();
   }
 }

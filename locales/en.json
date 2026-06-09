@@ -39,7 +39,7 @@
     "resetConfirmation": "Do you want to reset the counter?",
     "resetCounters": "Reset Counters",
     "yes": "Yes",
-    "no": "No", 
+    "no": "No",
     "page": "Page {current} of {total}"
   },
   "zikr": {
@@ -117,10 +117,7 @@
     "save": "Save",
     "discard": "Discard",
     "ok": "OK",
-    "cancel": "Cancel",
     "reset": "Reset",
-    "save": "Save",
-    "discard": "Discard",
     "error": "Error",
     "success": "Success",
     "loading": "Loading...",
@@ -139,7 +136,7 @@
     "contactUs": "Contact Us",
     "referenceChecking": "Reference Checking",
     "translation": "Translation",
-    "suggestions": "Suggestions", 
+    "suggestions": "Suggestions",
     "bugReports": "Bug Reports",
     "reportReference": "Report Reference Issue",
     "helpTranslation": "Help with Translation",
@@ -370,6 +367,16 @@
     "play": "Play",
     "loop": "Loop",
     "expandPlayer": "More player options",
-    "collapsePlayer": "Hide player options"
+    "collapsePlayer": "Hide player options",
+    "progress": "Progress",
+    "streakDays": "day streak",
+    "todayPages": "Pages today",
+    "totalRead": "Pages read",
+    "completion": "Completion",
+    "pageInfo": "Page Info",
+    "pageInfoClose": "Close",
+    "voiceFollow": "Voice follow",
+    "voiceFollowActive": "Listening…",
+    "voiceMicDenied": "Microphone permission denied"
   }
 }
