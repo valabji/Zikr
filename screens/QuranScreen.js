@@ -28,6 +28,7 @@ import QuranAyahActionSheet from './QuranAyahActionSheet';
 import QuranSettingsModal from './QuranSettingsModal';
 import QuranHdPromptModal from './QuranHdPromptModal';
 import QuranPageInfoSheet from './QuranPageInfoSheet';
+import QuranHeaderMenu from './QuranHeaderMenu';
 
 const { TOTAL_PAGES, STORAGE_KEYS, DEFAULT_SETTINGS } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
@@ -49,6 +50,7 @@ export default function QuranScreen({ navigation }) {
   const [actionAyah, setActionAyah] = React.useState(null);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [pageInfoOpen, setPageInfoOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const [hdPromptVersion, setHdPromptVersion] = React.useState(null);
   const [settings, setSettings] = React.useState(DEFAULT_SETTINGS);
   const [audioState, setAudioState] = React.useState({ activeAyah: null, isPlaying: false, playingWordIdx: null });
@@ -261,23 +263,9 @@ export default function QuranScreen({ navigation }) {
         isHome={true}
         navigation={navigation}
         Left={() => (
-          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: 12 }}>
-            <TouchableOpacity onPress={handleVoiceToggle} testID="quran-voice-toggle" hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }} style={{ paddingHorizontal: 10 }}>
-              <Feather name={voiceState.active ? 'mic-off' : 'mic'} size={22} color={voiceState.active ? colors.accent : colors.BYellow} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setPageInfoOpen(true)} testID="quran-page-info-open" hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }} style={{ paddingHorizontal: 10 }}>
-              <Feather name="list" size={22} color={colors.BYellow} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleBookmark} testID="quran-bookmark-toggle" hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }} style={{ paddingHorizontal: 10 }}>
-              <Feather
-                name="bookmark"
-                size={22}
-                color={isBookmarked ? colors.accent : colors.BYellow}
-                style={{ opacity: isBookmarked ? 1 : 0.85 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setIndexOpen(true)} testID="quran-index-open" hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }} style={{ paddingHorizontal: 10 }}>
-              <Feather name="book-open" size={22} color={colors.BYellow} />
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 18 }}>
+            <TouchableOpacity onPress={() => setMenuOpen(true)} testID="quran-header-menu" hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <Feather name="more-vertical" size={24} color={colors.BYellow} />
             </TouchableOpacity>
           </View>
         )}
@@ -383,6 +371,18 @@ export default function QuranScreen({ navigation }) {
         currentPage={currentPage}
         onSelectAyah={({ page }) => { if (page) jumpToPage(page); setPageInfoOpen(false); }}
         colors={colors}
+      />
+      <QuranHeaderMenu
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        voiceActive={voiceState.active}
+        isBookmarked={isBookmarked}
+        onVoiceToggle={handleVoiceToggle}
+        onPageInfo={() => setPageInfoOpen(true)}
+        onBookmark={toggleBookmark}
+        onIndex={() => setIndexOpen(true)}
+        onSearch={() => setSearchOpen(true)}
+        onSettings={() => setSettingsOpen(true)}
       />
     </View>
   );

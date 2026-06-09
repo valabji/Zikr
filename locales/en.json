@@ -377,6 +377,7 @@
     "pageInfoClose": "Close",
     "voiceFollow": "Voice follow",
     "voiceFollowActive": "Listening…",
-    "voiceMicDenied": "Microphone permission denied"
+    "voiceMicDenied": "Microphone permission denied",
+    "index": "Index"
   }
 }
