@@ -61,7 +61,7 @@ export function MushafLine({
       <Text
         allowFontScaling={false}
         numberOfLines={customLineSize ? undefined : 1}
-        ellipsizeMode={customLineSize ? undefined : 'clip'}
+        ellipsizeMode="tail"
         style={{
           fontFamily,
           fontSize,

@@ -58,7 +58,7 @@ export function mushafFontSizeForWidth(width) {
 }
 
 export function mushafLineHeightFor(fontSize) {
-  return Math.round(fontSize * 1.25) + 2;
+  return Math.round(fontSize * 1.55) + 2;
 }
 
 // Module-load defaults used by LINE_PX (continuous-scroll height estimate).
