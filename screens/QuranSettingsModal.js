@@ -6,10 +6,11 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
-import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE } from '../constants/QuranConstants';
+import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QcfDownloader from '../utils/QcfDownloader';
 import QuranReciterPicker from '../components/QuranReciterPicker';
+import TafsirDropdown from '../components/TafsirDropdown';
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
@@ -212,6 +213,16 @@ export default function QuranSettingsModal({ visible, onClose }) {
                 thumbColor={settings.showTranslation ? colors.accent : '#f4f3f4'}
               />
             </View>
+          </Row>
+
+          <Row label={t('quran.tafsirSelection')} colors={colors}>
+            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 10 }]}>
+              {t('quran.tafsirSelectionDesc')}
+            </Text>
+            <TafsirDropdown
+              tafsirId={settings.tafsirId || DEFAULT_TAFSIR_ID}
+              onChange={(id) => update({ tafsirId: id })}
+            />
           </Row>
 
           <Row label={t('quran.fontSize')} colors={colors}>

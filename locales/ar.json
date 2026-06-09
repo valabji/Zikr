@@ -378,6 +378,8 @@
     "voiceFollow": "متابعة صوتية",
     "voiceFollowActive": "يستمع…",
     "voiceMicDenied": "تم رفض إذن الميكروفون",
-    "index": "الفهرس"
+    "index": "الفهرس",
+    "tafsirSelection": "التفسير",
+    "tafsirSelectionDesc": "التفسير المعروض في تبويب التفسير عند عرض الآية."
   }
 }

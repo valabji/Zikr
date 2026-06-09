@@ -378,6 +378,8 @@
     "voiceFollow": "Voice follow",
     "voiceFollowActive": "Listening…",
     "voiceMicDenied": "Microphone permission denied",
-    "index": "Index"
+    "index": "Index",
+    "tafsirSelection": "Tafsir",
+    "tafsirSelectionDesc": "Commentary shown in the Tafsir tab when viewing an ayah."
   }
 }

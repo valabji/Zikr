@@ -347,6 +347,7 @@ export default function QuranScreen({ navigation }) {
       <QuranAyahDetailSheet
         ayah={detailAyah}
         onClose={() => setDetailAyah(null)}
+        tafsirId={settings.tafsirId}
       />
       <QuranAyahActionSheet
         ayah={actionAyah}
@@ -371,6 +372,7 @@ export default function QuranScreen({ navigation }) {
         currentPage={currentPage}
         onSelectAyah={({ page }) => { if (page) jumpToPage(page); setPageInfoOpen(false); }}
         colors={colors}
+        tafsirId={settings.tafsirId}
       />
       <QuranHeaderMenu
         visible={menuOpen}
