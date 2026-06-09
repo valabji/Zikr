@@ -5,10 +5,11 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
-import { RECITERS } from '../constants/QuranReciters';
+import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QcfDownloader from '../utils/QcfDownloader';
+import QuranReciterPicker from '../components/QuranReciterPicker';
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
@@ -286,17 +287,11 @@ export default function QuranSettingsModal({ visible, onClose }) {
           </Row>
 
           <Row label={t('quran.reciter')} colors={colors}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {RECITERS.map((r) => (
-                <Choice
-                  key={r.id}
-                  colors={colors}
-                  label={lang === 'ar' ? r.nameAr : r.nameEn}
-                  active={(settings.reciterId || RECITERS[0].id) === r.id}
-                  onPress={() => update({ reciterId: r.id })}
-                />
-              ))}
-            </View>
+            <QuranReciterPicker
+              colors={colors}
+              reciterId={settings.reciterId || DEFAULT_RECITER_ID}
+              onChange={(id) => update({ reciterId: id })}
+            />
           </Row>
 
           <Row label={t('quran.audioScope')} colors={colors}>

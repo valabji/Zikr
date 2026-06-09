@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textStyles } from '../constants/Fonts';
@@ -7,9 +7,10 @@ import { isRTL, t } from '../locales/i18n';
 import { toArabicDigits } from '../utils/mushafLayout';
 import QuranAudio from '../utils/QuranAudio';
 import surahsData from '../assets/quran/data/surahs.json';
-import { RECITERS, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
+import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { AUDIO_PLAYBACK_SCOPES } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
+import QuranReciterPicker from './QuranReciterPicker';
 
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
 
@@ -66,24 +67,19 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
           <Text style={[textStyles.subtitle, { color: colors.BYellow + 'cc', fontSize: 11, marginBottom: 4 }]}>
             {t('quran.reciter')}
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 4 }}
-            style={{ marginBottom: 8 }}
-          >
-            {RECITERS.map((r) => (
-              <Chip
-                key={r.id}
-                colors={colors}
-                label={lang === 'ar' ? r.nameAr : r.nameEn}
-                active={r.id === reciterId}
-                onPress={() => update({ reciterId: r.id })}
-              />
-            ))}
-          </ScrollView>
+          <View style={{ marginBottom: 8 }}>
+            <QuranReciterPicker
+              colors={colors}
+              reciterId={reciterId}
+              onChange={(id) => update({ reciterId: id })}
+              compact
+            />
+          </View>
 
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+          <Text style={[textStyles.subtitle, { color: colors.BYellow + 'cc', fontSize: 11, marginBottom: 4 }]}>
+            {t('quran.audioScope')}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', rowGap: 6, marginBottom: 8 }}>
             <Chip
               colors={colors}
               label={t('quran.audioScopeAyah')}

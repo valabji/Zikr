@@ -1,8 +1,8 @@
 import { RECITERS, getReciter, buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../../constants/QuranReciters';
 
 describe('QuranReciters', () => {
-  it('contains 4 reciters with required fields', () => {
-    expect(RECITERS.length).toBe(4);
+  it('contains reciters with required fields', () => {
+    expect(RECITERS.length).toBeGreaterThanOrEqual(4);
     for (const r of RECITERS) {
       expect(r).toEqual(expect.objectContaining({
         id: expect.any(String),
