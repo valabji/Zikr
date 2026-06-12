@@ -5,6 +5,7 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS } from '../constants/QuranConstants';
+import { arForHafs } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 
@@ -128,7 +129,7 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
             writingDirection: 'rtl',
           }}
         >
-          {item.text}
+          {arForHafs(item.text)}
         </Text>
       </TouchableOpacity>
     );

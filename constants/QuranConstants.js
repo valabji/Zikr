@@ -19,7 +19,7 @@ export const MUSHAF_EDITIONS = [
   },
 ];
 
-export const DEFAULT_MUSHAF_EDITION = 'v1';
+export const DEFAULT_MUSHAF_EDITION = 'v2';
 
 export function getMushafEdition(id) {
   return MUSHAF_EDITIONS.find((m) => m.id === id) || MUSHAF_EDITIONS[0];

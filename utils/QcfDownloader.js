@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,12 +11,14 @@ const VERSIONS = {
     localDir: FileSystem.documentDirectory + 'quran/fonts/v1/',
     fontFamilyPrefix: 'QCF_P',
     installedKey: '@quran_qcf_v1_installed',
+    optOutKey: '@quran_qcf_v1_auto_opt_out',
   },
   v2: {
     remoteBase: 'https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v2/ttf',
     localDir: FileSystem.documentDirectory + 'quran/fonts/v2/',
     fontFamilyPrefix: 'QCFv2_P',
     installedKey: '@quran_qcf_v2_installed',
+    optOutKey: '@quran_qcf_v2_auto_opt_out',
   },
 };
 
@@ -48,8 +51,9 @@ class QcfDownloaderService {
       try {
         const flag = await AsyncStorage.getItem(VERSIONS[v].installedKey);
         if (flag === '1') {
-          this.state[v].installed = true;
+          // Register first: installed must never be visible while fonts are still loading.
           await this._registerFonts(v);
+          this.state[v].installed = true;
         }
       } catch {}
     }
@@ -83,10 +87,24 @@ class QcfDownloaderService {
     } catch {}
   }
 
+  // Boot-time auto-install: starts (or resumes) the download unless the user
+  // explicitly uninstalled this version from settings. Native only.
+  async autoInstall(version) {
+    const v = VERSIONS[version];
+    if (!v || Platform.OS === 'web') return;
+    if (this.state[version].downloading || this.state[version].installed) return;
+    try {
+      const optedOut = await AsyncStorage.getItem(v.optOutKey);
+      if (optedOut === '1') return;
+    } catch {}
+    await this.start(version);
+  }
+
   async start(version) {
     const v = VERSIONS[version];
     if (!v) return;
     if (this.state[version].downloading || this.state[version].installed) return;
+    AsyncStorage.removeItem(v.optOutKey).catch(() => {});
     this.cancelled[version] = false;
     this.state[version] = { installed: false, downloading: true, progress: 0, error: null };
     this._emit();
@@ -127,9 +145,10 @@ class QcfDownloaderService {
       }
 
       await AsyncStorage.setItem(v.installedKey, '1');
+      // Register before announcing installed so pages never measure with a fallback font.
+      await this._registerFonts(version);
       this.state[version] = { installed: true, downloading: false, progress: 1, error: null };
       this._emit();
-      await this._registerFonts(version);
     } catch (e) {
       this.state[version] = {
         installed: false, downloading: false, progress: 0,
@@ -151,6 +170,7 @@ class QcfDownloaderService {
     if (!v) return;
     try { await FileSystem.deleteAsync(v.localDir, { idempotent: true }); } catch {}
     await AsyncStorage.removeItem(v.installedKey);
+    AsyncStorage.setItem(v.optOutKey, '1').catch(() => {});
     this.state[version] = blankVersionState();
     this.registered[version] = false;
     this._emit();

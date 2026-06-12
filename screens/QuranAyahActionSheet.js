@@ -5,6 +5,7 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS } from '../constants/QuranConstants';
+import { arForHafs } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 
@@ -54,7 +55,7 @@ export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onDetails 
   if (!ayah) return null;
   const key = `${ayah.surah}:${ayah.ayah}`;
   const surah = surahsData[ayah.surah - 1];
-  const arabicText = verseTextByKey[key] || '';
+  const arabicText = arForHafs(verseTextByKey[key] || '');
 
   return (
     <Modal visible={!!ayah} animationType="slide" transparent onRequestClose={onClose}>

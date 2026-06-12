@@ -7,6 +7,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
 import { setQuranSettings } from '../utils/QuranSettings';
+import { arForHafs } from '../utils/mushafLayout';
 import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '../utils/tafsirLoader';
 import TafsirDropdown from '../components/TafsirDropdown';
 import pagesData from '../assets/quran/data/pages.json';
@@ -62,7 +63,7 @@ function AyahRow({ ayah, tab, tafsirText, tafsirLoading, tafsirDirection, onPres
         style={{ fontFamily: FONT_FAMILY, fontSize: 18, lineHeight: 36, color: colors.text, textAlign: 'right', writingDirection: 'rtl', marginBottom: 6 }}
         allowFontScaling={false}
       >
-        {ayah.text}
+        {arForHafs(ayah.text)}
       </Text>
       {tab === 'translation' && (
         <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, lineHeight: 20, textAlign: 'left', writingDirection: 'ltr' }]}>

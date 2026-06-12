@@ -12,6 +12,8 @@ android/
 android_backup/
 ios/
 
+local_plans/
+
 # Ignore Yarn's cache & build state
 .yarn/cache
 .yarn/unplugged

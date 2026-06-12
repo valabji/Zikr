@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { QURAN_CONSTANTS, CUSTOM_LINE_BASE_FONT_SIZE } from '../constants/QuranConstants';
-import { toArabicDigits } from '../utils/mushafLayout';
+import { toArabicDigits, arForHafs } from '../utils/mushafLayout';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 
@@ -30,9 +30,13 @@ export function BismillahLine({ colors, fontScale }) {
 
 export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
-  mushafFontSize, mushafLineHeight, playingAyahKey, playingWordIdx,
+  mushafFontSize, mushafLineHeight, mushafSpaceExtra, playingAyahKey, playingWordIdx,
   onAyahPress, onAyahLongPress, customLineSize,
 }) {
+  // Justification: letterSpacing on the lone space char widens only the
+  // inter-word gaps, leaving word glyphs and Arabic joining untouched.
+  const spaceExtra = (!customLineSize && mushafSpaceExtra > 0) ? mushafSpaceExtra : 0;
+  const sep = spaceExtra > 0 ? <Text style={{ letterSpacing: spaceExtra }}> </Text> : ' ';
   // Group consecutive words by verse_key so each ayah is one pressable Text segment.
   const groups = [];
   for (const w of line.words) {
@@ -84,19 +88,19 @@ export function MushafLine({
                   key={wi}
                   style={{ fontFamily: FONT_FAMILY, color: colors.accent }}
                 >
-                  {' '}﴿{toArabicDigits(a)}﴾
+                  {sep}{toArabicDigits(a)}
                 </Text>
               );
             }
             if (w.type !== 'end') speakableIdx += 1;
-            const txt = qcfActive ? (w.code || w.ar) : w.ar;
+            const txt = qcfActive ? (w.code || arForHafs(w.ar)) : arForHafs(w.ar);
             const isWordHighlighted = isPlaying && w.type !== 'end' && playingWordIdx === speakableIdx;
             return (
               <Text
                 key={wi}
                 style={isWordHighlighted ? { backgroundColor: colors.accent + '55' } : null}
               >
-                {wi === 0 ? '' : ' '}{txt}
+                {wi === 0 ? '' : sep}{txt}
               </Text>
             );
           });
@@ -108,7 +112,7 @@ export function MushafLine({
               onLongPress={() => onAyahLongPress(ayahMeta)}
               style={isPlaying ? { backgroundColor: colors.accent + '33' } : null}
             >
-              {gi > 0 ? ' ' : ''}{segChildren}
+              {gi > 0 ? sep : ''}{segChildren}
             </Text>
           );
         })}

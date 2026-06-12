@@ -54,9 +54,11 @@ export async function loadResourcesAndDataAsync() {
         const zikrData = await AsyncStorage.getItem("@zikr");
         global.zikr = zikrData;
 
-        QcfDownloader.checkInstalled().catch((error) => {
-            console.warn('QCF downloader check failed:', error);
-        });
+        QcfDownloader.checkInstalled()
+            .then(() => QcfDownloader.autoInstall('v2'))
+            .catch((error) => {
+                console.warn('QCF downloader check failed:', error);
+            });
         mystore.dispatch({
             type: 'change',
             obj: {

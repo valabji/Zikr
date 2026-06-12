@@ -218,7 +218,7 @@ export default function QuranScreen({ navigation }) {
   }, [voiceState.active, audioState.activeAyah, currentPage]);
 
   const isContinuous = settings.viewMode === 'continuous';
-  const fontScale = settings.fontScale || 1;
+  const fontScale = settings.customLineSize ? (settings.fontScale || 1) : 1;
   const activeLayoutFile = getMushafEdition(settings.mushafEdition).layoutFile;
 
   const getItemLayout = React.useCallback((_, index) => {

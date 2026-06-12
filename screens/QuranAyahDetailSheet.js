@@ -8,6 +8,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
 import { setQuranSettings } from '../utils/QuranSettings';
+import { arForHafs } from '../utils/mushafLayout';
 import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '../utils/tafsirLoader';
 import TafsirDropdown from '../components/TafsirDropdown';
 import pagesData from '../assets/quran/data/pages.json';
@@ -78,7 +79,7 @@ export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId }) {
 
   if (!ayah) return null;
   const surah = surahsData[ayah.surah - 1];
-  const arabicText = verseTextByKey[key];
+  const arabicText = arForHafs(verseTextByKey[key]);
   const translation = translationEn[key];
   const words = wordsData[key] || [];
   const activeTafsirConfig = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);
@@ -171,7 +172,7 @@ export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId }) {
                   <View style={{ flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                     {words.map((w, i) => (
                       <View key={i} style={{ margin: 6, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, backgroundColor: colors.surface, minWidth: 80, alignItems: 'center' }}>
-                        <Text style={{ fontFamily: FONT_FAMILY, fontSize: 22, color: colors.text }} allowFontScaling={false}>{w.ar}</Text>
+                        <Text style={{ fontFamily: FONT_FAMILY, fontSize: 22, color: colors.text }} allowFontScaling={false}>{arForHafs(w.ar)}</Text>
                         <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 4 }]}>{w.en}</Text>
                       </View>
                     ))}
