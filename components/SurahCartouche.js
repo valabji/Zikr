@@ -31,7 +31,7 @@ export default function SurahCartouche({ surahId, colors, fontScale }) {
   const ayahCountStr = toArabicDigits(surah.ayahCount);
   const placeAr = surah.type === 'meccan' ? 'مكية' : 'مدنية';
 
-  const containerWidth = SCREEN_WIDTH - (8 + 18) * 2;
+  const [containerWidth, setContainerWidth] = React.useState(SCREEN_WIDTH - 36);
   const borderHeight = containerWidth / SURA_BORDER_ASPECT;
 
   // All coordinates in SVG viewBox space (W=16320, H=2000, x in [0,16320], y in [-500,1500]).
@@ -47,82 +47,86 @@ export default function SurahCartouche({ surahId, colors, fontScale }) {
   const medallionFontSize = Math.max(7, Math.min(borderHeight * 0.28, 11));
 
   return (
-    <View style={{ marginVertical: 8, marginHorizontal: 18, alignItems: 'center' }}>
-      <View style={{ width: containerWidth, height: borderHeight }}>
-        <Svg
-          width={containerWidth}
-          height={borderHeight}
-          viewBox={`0 ${SURA_BORDER_VIEWBOX_MIN_Y} ${SURA_BORDER_VIEWBOX_W} ${SURA_BORDER_VIEWBOX_H}`}
+    <View
+      style={{ marginVertical: 8, marginHorizontal: 18 }}
+      onLayout={(e) => {
+        const w = e.nativeEvent.layout.width;
+        if (w > 0) setContainerWidth(w);
+      }}
+    >
+      <Svg
+        width={containerWidth}
+        height={borderHeight}
+        viewBox={`0 ${SURA_BORDER_VIEWBOX_MIN_Y} ${SURA_BORDER_VIEWBOX_W} ${SURA_BORDER_VIEWBOX_H}`}
+      >
+        <Path fill={colors.accent} d={SURA_BORDER_PATH_D} />
+        <SvgText
+          x={midX}
+          y={nameTextY}
+          fill={colors.text}
+          fontFamily="KFGQPC_SurahNames"
+          fontSize={nameFontSize}
+          textAnchor="middle"
         >
-          <Path fill={colors.accent} d={SURA_BORDER_PATH_D} />
-          <SvgText
-            x={midX}
-            y={nameTextY}
-            fill={colors.text}
-            fontFamily="KFGQPC_SurahNames"
-            fontSize={nameFontSize}
-            textAnchor="middle"
-          >
-            {surahNameGlyph(surahId)}
-          </SvgText>
-        </Svg>
-        {/* Mecca/Medina label - RN Text overlay so the UthmanicHafs font applies. */}
-        <View
-          pointerEvents="none"
+          {surahNameGlyph(surahId)}
+        </SvgText>
+      </Svg>
+      {/* Mecca/Medina label - RN Text overlay so the UthmanicHafs font applies. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0, bottom: 0,
+          left: rightMedPx - medallionBoxWidth / 2,
+          width: medallionBoxWidth,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          allowFontScaling={false}
+          numberOfLines={1}
+          adjustsFontSizeToFit
           style={{
-            position: 'absolute',
-            top: 0, bottom: 0,
-            left: rightMedPx - medallionBoxWidth / 2,
-            width: medallionBoxWidth,
-            justifyContent: 'center',
-            alignItems: 'center',
+            fontFamily: FONT_FAMILY,
+            fontSize: medallionFontSize,
+            color: colors.text,
+            textAlign: 'center',
+            writingDirection: 'rtl',
+            includeFontPadding: false,
           }}
         >
-          <Text
-            allowFontScaling={false}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: medallionFontSize,
-              color: colors.text,
-              textAlign: 'center',
-              writingDirection: 'rtl',
-              includeFontPadding: false,
-            }}
-          >
-            {placeAr}
-          </Text>
-        </View>
-        {/* Ayah count label — body font, not UthmanicHafs, so digits aren't
-            rendered as ornamental ayah-end markers. */}
-        <View
-          pointerEvents="none"
+          {placeAr}
+        </Text>
+      </View>
+      {/* Ayah count label — body font, not UthmanicHafs, so digits aren't
+          rendered as ornamental ayah-end markers. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0, bottom: 0,
+          left: leftMedPx - medallionBoxWidth / 2,
+          width: medallionBoxWidth,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          allowFontScaling={false}
+          numberOfLines={1}
+          adjustsFontSizeToFit
           style={{
-            position: 'absolute',
-            top: 0, bottom: 0,
-            left: leftMedPx - medallionBoxWidth / 2,
-            width: medallionBoxWidth,
-            justifyContent: 'center',
-            alignItems: 'center',
+            fontFamily: 'Cairo_400Regular',
+            fontSize: medallionFontSize,
+            color: colors.text,
+            textAlign: 'center',
+            writingDirection: 'rtl',
+            includeFontPadding: false,
           }}
         >
-          <Text
-            allowFontScaling={false}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            style={{
-              fontFamily: 'Cairo_400Regular',
-              fontSize: medallionFontSize,
-              color: colors.text,
-              textAlign: 'center',
-              writingDirection: 'rtl',
-              includeFontPadding: false,
-            }}
-          >
-            {ayahCountStr}
-          </Text>
-        </View>
+          {ayahCountStr}
+        </Text>
       </View>
     </View>
   );
