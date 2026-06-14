@@ -2,8 +2,26 @@ import * as React from 'react';
 import { View, Text } from 'react-native';
 import { QURAN_CONSTANTS, CUSTOM_LINE_BASE_FONT_SIZE } from '../constants/QuranConstants';
 import { toArabicDigits, arForHafs } from '../utils/mushafLayout';
+import wordsData from '../assets/quran/data/words.json';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
+
+// playingWordIdx counts speakable words across the whole ayah; when an ayah
+// spans multiple lines its words are split across MushafLine instances, so a
+// per-line counter alone restarts at 0 each line. Anchor to the ayah by
+// finding where this line's slice begins inside the full ayah word list.
+function ayahWordBase(vk, lineSpeakable) {
+  const full = wordsData[vk];
+  if (!full || !full.length || !lineSpeakable.length) return 0;
+  for (let i = 0; i <= full.length - lineSpeakable.length; i += 1) {
+    let match = true;
+    for (let j = 0; j < lineSpeakable.length; j += 1) {
+      if (full[i + j].ar !== lineSpeakable[j].ar) { match = false; break; }
+    }
+    if (match) return i;
+  }
+  return 0;
+}
 
 // KFGQPC Bismillah font: single ornate calligraphic ligature at U+FDFD.
 const BISMILLAH_GLYPH = '﷽';
@@ -80,7 +98,9 @@ export function MushafLine({
           const [s, a] = g.vk.split(':').map(Number);
           const ayahMeta = { surah: s, ayah: a };
 
-          let speakableIdx = -1;
+          let speakableIdx = isPlaying
+            ? ayahWordBase(g.vk, g.words.filter((w) => w.type !== 'end')) - 1
+            : -1;
           const segChildren = g.words.map((w, wi) => {
             if (w.type === 'end' && !qcfActive) {
               return (
