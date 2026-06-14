@@ -48,7 +48,7 @@ function ActionRow({ icon, label, onPress, colors, primary }) {
   );
 }
 
-export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onDetails }) {
+export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onFollow, onDetails }) {
   const colors = useColors();
   const lang = isRTL() ? 'ar' : 'en';
 
@@ -117,6 +117,12 @@ export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onDetails 
               label={t('quran.actionPlay')}
               onPress={() => { onPlay(ayah); onClose(); }}
               primary
+            />
+            <ActionRow
+              colors={colors}
+              icon="mic"
+              label={t('quran.actionFollow')}
+              onPress={() => { onFollow(ayah); onClose(); }}
             />
             <ActionRow
               colors={colors}

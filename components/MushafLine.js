@@ -5,6 +5,7 @@ import { toArabicDigits, arForHafs } from '../utils/mushafLayout';
 import wordsData from '../assets/quran/data/words.json';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
+const MISTAKE_HIGHLIGHT = '#E53935';
 
 // playingWordIdx counts speakable words across the whole ayah; when an ayah
 // spans multiple lines its words are split across MushafLine instances, so a
@@ -49,7 +50,7 @@ export function BismillahLine({ colors, fontScale }) {
 export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
   mushafFontSize, mushafLineHeight, mushafSpaceExtra, playingAyahKey, playingWordIdx,
-  onAyahPress, onAyahLongPress, customLineSize,
+  playingWordMistake, onAyahPress, onAyahLongPress, customLineSize,
 }) {
   // Justification: letterSpacing on the lone space char widens only the
   // inter-word gaps, leaving word glyphs and Arabic joining untouched.
@@ -115,10 +116,13 @@ export function MushafLine({
             if (w.type !== 'end') speakableIdx += 1;
             const txt = qcfActive ? (w.code || arForHafs(w.ar)) : arForHafs(w.ar);
             const isWordHighlighted = isPlaying && w.type !== 'end' && playingWordIdx === speakableIdx;
+            const highlightColor = (isWordHighlighted && playingWordMistake)
+              ? MISTAKE_HIGHLIGHT + '66'
+              : colors.accent + '55';
             return (
               <Text
                 key={wi}
-                style={isWordHighlighted ? { backgroundColor: colors.accent + '55' } : null}
+                style={isWordHighlighted ? { backgroundColor: highlightColor } : null}
               >
                 {wi === 0 ? '' : sep}{txt}
               </Text>

@@ -4,6 +4,16 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t } from '../locales/i18n';
+import { VOICE_FOLLOW_DEBUG } from '../utils/quranDebug';
+import { runMicTest } from '../utils/MicTest';
+
+const MIC_TEST_LABELS = {
+  idle: 'Test mic (3s)',
+  recording: 'Recording… speak now',
+  playing: 'Playing back…',
+  denied: 'Mic permission denied',
+  error: 'Mic test failed',
+};
 
 function MenuRow({ icon, label, onPress, colors, active }) {
   return (
@@ -27,6 +37,8 @@ function MenuRow({ icon, label, onPress, colors, active }) {
 
 export default function QuranHeaderMenu({ visible, onClose, voiceActive, isBookmarked, onVoiceToggle, onPageInfo, onBookmark, onIndex, onSearch, onSettings }) {
   const colors = useColors();
+  const [micTestState, setMicTestState] = React.useState('idle');
+  const micBusy = micTestState === 'recording' || micTestState === 'playing';
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <Pressable
@@ -79,6 +91,15 @@ export default function QuranHeaderMenu({ visible, onClose, voiceActive, isBookm
               label={t('quran.settingsTitle')}
               onPress={() => { onSettings(); onClose(); }}
             />
+            {VOICE_FOLLOW_DEBUG && (
+              <MenuRow
+                colors={colors}
+                icon="radio"
+                label={MIC_TEST_LABELS[micTestState] || MIC_TEST_LABELS.idle}
+                active={micBusy}
+                onPress={() => { if (!micBusy) runMicTest(setMicTestState); }}
+              />
+            )}
             <TouchableOpacity
               onPress={onClose}
               style={{ paddingVertical: 14, alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.accent + '22', marginTop: 4 }}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  ActivityIndicator,
+  ActivityIndicator, Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
@@ -21,6 +21,7 @@ import QuranVoiceFollower from '../utils/QuranVoiceFollower';
 import QcfDownloader from '../utils/QcfDownloader';
 import { PageView, PageViewContinuous } from '../components/MushafPage';
 import QuranMiniPlayer from '../components/QuranMiniPlayer';
+import QuranVoiceFollowBar from '../components/QuranVoiceFollowBar';
 import QuranIndexModal from './QuranIndexModal';
 import QuranSearchModal from './QuranSearchModal';
 import QuranAyahDetailSheet from './QuranAyahDetailSheet';
@@ -33,6 +34,13 @@ import QuranHeaderMenu from './QuranHeaderMenu';
 const { TOTAL_PAGES, STORAGE_KEYS, DEFAULT_SETTINGS } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
 const ayahKey = (s, a) => `${s}:${a}`;
+const ayahToPage = (() => {
+  const m = {};
+  pagesData.forEach((pg) => {
+    pg.ayahs.forEach((a) => { m[ayahKey(a.surah, a.ayah)] = pg.page; });
+  });
+  return m;
+})();
 
 const HD_SIZE_LABEL = { v1: '~95 MB', v2: '~208 MB' };
 const HD_PROMPT_DISMISSED_KEY = (v) => `@quran_hd_prompt_dismissed_${v}`;
@@ -54,7 +62,7 @@ export default function QuranScreen({ navigation }) {
   const [hdPromptVersion, setHdPromptVersion] = React.useState(null);
   const [settings, setSettings] = React.useState(DEFAULT_SETTINGS);
   const [audioState, setAudioState] = React.useState({ activeAyah: null, isPlaying: false, playingWordIdx: null });
-  const [voiceState, setVoiceState] = React.useState({ active: false, activeAyah: null, playingWordIdx: null });
+  const [voiceState, setVoiceState] = React.useState({ active: false, activeAyah: null, playingWordIdx: null, mistake: false, pendingPrompt: null });
   const [qcfState, setQcfState] = React.useState({ v1: { installed: false }, v2: { installed: false } });
 
   React.useEffect(() => {
@@ -97,6 +105,26 @@ export default function QuranScreen({ navigation }) {
       QuranVoiceFollower.stop();
     };
   }, []);
+
+  const promptShownRef = React.useRef(null);
+  React.useEffect(() => {
+    const p = voiceState.pendingPrompt;
+    if (!p) { promptShownRef.current = null; return; }
+    if (promptShownRef.current === p) return;
+    promptShownRef.current = p;
+    const surah = surahById[p.toSurah];
+    const name = surah ? (isRTL() ? surah.nameAr : surah.nameEn) : '';
+    Alert.alert(
+      t('quran.voiceMismatchTitle'),
+      t('quran.voiceMismatchMessage', { to: `${name} ${p.toAyah}` }),
+      [
+        { text: t('quran.voiceMismatchLookAhead'), onPress: () => QuranVoiceFollower.resolvePrompt('lookahead') },
+        { text: t('quran.voiceMismatchMistake'), onPress: () => QuranVoiceFollower.resolvePrompt('mistake') },
+        { text: t('common.cancel'), style: 'cancel', onPress: () => QuranVoiceFollower.resolvePrompt('dismiss') },
+      ],
+      { cancelable: true, onDismiss: () => QuranVoiceFollower.resolvePrompt('dismiss') }
+    );
+  }, [voiceState.pendingPrompt]);
 
   // One-time HD-fonts nudge per QCF version that isn't installed.
   React.useEffect(() => {
@@ -255,6 +283,19 @@ export default function QuranScreen({ navigation }) {
   const effectiveWordIdx = voiceState.active
     ? voiceState.playingWordIdx
     : audioState.playingWordIdx;
+  const effectiveWordMistake = voiceState.active && voiceState.mistake;
+
+  React.useEffect(() => {
+    if (!ready || !effectiveAyahKey) return;
+    const page = ayahToPage[effectiveAyahKey];
+    if (!page || page === currentPageRef.current) return;
+    currentPageRef.current = page;
+    setCurrentPage(page);
+    persistLastPage(page);
+    try {
+      listRef.current?.scrollToIndex({ index: page - 1, animated: true });
+    } catch {}
+  }, [effectiveAyahKey, ready, persistLastPage]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="quran-screen">
@@ -311,6 +352,7 @@ export default function QuranScreen({ navigation }) {
                 qcfVersion={qcfReady ? edition.qcfVersion : null}
                 playingAyahKey={effectiveAyahKey}
                 playingWordIdx={effectiveWordIdx}
+                playingWordMistake={effectiveWordMistake}
                 onAyahPress={handleAyahPress}
                 onAyahLongPress={handleAyahLongPress}
               />
@@ -325,6 +367,7 @@ export default function QuranScreen({ navigation }) {
         </View>
       )}
       <QuranMiniPlayer colors={colors} audio={audioState} onClose={closeMiniPlayer} />
+      <QuranVoiceFollowBar colors={colors} voice={voiceState} />
       <QuranIndexModal
         visible={indexOpen}
         onClose={() => setIndexOpen(false)}
@@ -353,6 +396,7 @@ export default function QuranScreen({ navigation }) {
         ayah={actionAyah}
         onClose={() => setActionAyah(null)}
         onPlay={(a) => QuranAudio.playAyah(a.surah, a.ayah)}
+        onFollow={(a) => { QuranAudio.stop(); QuranVoiceFollower.start({ surah: a.surah, ayah: a.ayah }); }}
         onDetails={(a) => setDetailAyah({ surah: a.surah, ayah: a.ayah })}
       />
       <QuranSettingsModal

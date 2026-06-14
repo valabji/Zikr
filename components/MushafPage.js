@@ -20,7 +20,7 @@ import { BismillahLine, MushafLine } from './MushafLine';
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const ayahKey = (s, a) => `${s}:${a}`;
 
-function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, onAyahPress, onAyahLongPress }) {
+function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, playingWordMistake, onAyahPress, onAyahLongPress }) {
   const customLineSize = !!settings.customLineSize;
   const fontScale = customLineSize ? (settings.fontScale || 1) : 1;
   const { width: windowWidth } = useWindowDimensions();
@@ -270,6 +270,7 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
             mushafSpaceExtra={spaceExtras ? spaceExtras[i] : 0}
             playingAyahKey={playingAyahKey}
             playingWordIdx={playingWordIdx}
+            playingWordMistake={playingWordMistake}
             onAyahPress={onAyahPress}
             onAyahLongPress={onAyahLongPress}
             customLineSize={customLineSize}

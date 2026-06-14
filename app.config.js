@@ -32,6 +32,7 @@ export default {
         CFBundleAllowMixedLocalizations: true,
         NSUserNotificationsUsageDescription: "Zikr needs notification permission to remind you of prayer times. You can customize which prayers to be notified about in the app settings.",
         NSMicrophoneUsageDescription: "Used to follow your Quran recitation.",
+        NSSpeechRecognitionUsageDescription: "Used to follow along with your Quran recitation and highlight the words you read.",
         UIBackgroundModes: ["audio"]  // Required for playing adhan audio in notifications
       }
     },
@@ -107,6 +108,14 @@ export default {
     },
     plugins: [
       "./plugins/withNonModularHeaderFix",
+      [
+        "expo-speech-recognition",
+        {
+          microphonePermission: "Used to follow your Quran recitation.",
+          speechRecognitionPermission: "Used to follow along with your Quran recitation and highlight the words you read.",
+          androidSpeechServicePackages: ["com.google.android.googlequicksearchbox"]
+        }
+      ],
       "expo-audio",
       "expo-asset",
       "expo-font",
