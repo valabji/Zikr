@@ -11,6 +11,7 @@
     "build:android:local": "yarn eas build --profile production --platform android --local",
     "lint:android": "expo prebuild --clean --platform android && cd android && ./gradlew lintVitalRelease",
     "build:ios": "yarn eas build --profile production --platform ios",
+    "build:ios:local": "yarn eas build --profile production --platform ios --local",
     "predeploy": "npx expo export -p web --output-dir dist",
     "prebuild": "expo prebuild --clean",
     "deploy": "gh-pages -d dist --cname zikr.valabji.com",

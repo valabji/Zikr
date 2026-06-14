@@ -106,6 +106,7 @@ export default {
       }
     },
     plugins: [
+      "./plugins/withNonModularHeaderFix",
       "expo-audio",
       "expo-asset",
       "expo-font",
