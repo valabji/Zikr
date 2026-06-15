@@ -41,7 +41,32 @@
     "resetCounters": "Reset Counters",
     "yes": "Yes",
     "no": "No",
-    "page": "Page {current} of {total}"
+    "page": "Page {current} of {total}",
+    "target": "Target",
+    "noTarget": "No target",
+    "rounds": "Rounds",
+    "total": "Total",
+    "addCounter": "Add Counter",
+    "editCounter": "Edit Counter",
+    "delete": "Delete",
+    "deleteConfirmation": "Delete this counter?",
+    "rename": "Rename",
+    "name": "Name",
+    "namePlaceholder": "Counter name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "manage": "Manage",
+    "done": "Done",
+    "custom": "Custom",
+    "switchCounter": "Switch counter",
+    "presets": {
+      "counter": "Counter",
+      "subhanAllah": "Subhan Allah",
+      "alhamdulillah": "Alhamdulillah",
+      "laIlahaIllaAllah": "La ilaha illa Allah",
+      "allahuAkbar": "Allahu Akbar",
+      "astaghfirullah": "Astaghfirullah"
+    }
   },
   "zikr": {
     "reference": "Reference: {text}"

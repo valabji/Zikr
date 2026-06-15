@@ -95,6 +95,14 @@ class VibrationManager {
     }
   }
 
+  vibrateForTasbihComplete() {
+    if (!this.isInitialized) return;
+    if (this.tasbihEnabled) {
+      if (Platform.OS === 'web') return;
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (error) { console.warn('Vibration failed:', error); }
+    }
+  }
+
   // Vibrate for azkar count
   vibrateForAzkarCount() {
     if (!this.isInitialized) {

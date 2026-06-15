@@ -12,6 +12,7 @@ import PrayerCountdownService from './PrayerCountdownService';
 import NotificationService from './NotificationService';
 import PrayerNotificationScheduler from './PrayerNotificationScheduler';
 import QcfDownloader from './QcfDownloader';
+import { loadTasbih } from './TasbihStore';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -46,6 +47,12 @@ export async function loadResourcesAndDataAsync() {
             console.log('Prayer countdown service initialized');
         } catch (error) {
             console.error('Failed to initialize prayer countdown service:', error);
+        }
+
+        try {
+            await loadTasbih();
+        } catch (error) {
+            console.error('Failed to load tasbih counters:', error);
         }
 
     } catch (e) {

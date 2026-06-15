@@ -1,7 +1,6 @@
 import * as React from 'react';
 import CustomHeader from '../components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, I18nManager, Alert, BackHandler, Image, ImageBackground, Modal, TouchableHighlight } from 'react-native'
-import { StackActions } from '@react-navigation/native';
+import { Text, View, TouchableOpacity, Modal, TouchableHighlight } from 'react-native'
 import { useColors, useIsBrightTheme } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing } from '../locales/i18n';
@@ -10,24 +9,15 @@ import { useAudio } from '../utils/Sounds';
 import { BackgroundSvg2 } from '../components/BackgroundSvg2';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
-// import {
-//   AdMobBanner,
-//   AdMobInterstitial,
-//   PublisherBanner,
-//   AdMobRewarded,
-//   setTestDeviceIDAsync,
-// } from 'expo-ads-admob';
+import { useTasbih, getCounterDisplayName } from '../utils/TasbihStore';
+import TasbihCountersSheet from '../components/TasbihCountersSheet';
 
-// const Banner = "ca-app-pub-1740754568229700/6853520443"
-// const Interstatel = "ca-app-pub-1740754568229700/7975030420"
-
-const audioSource = require('../assets/sound/kikhires.mp3');
-
-export default function Screen2({ route, navigation }) {
+export default function Screen3({ route, navigation }) {
   const colors = useColors();
-  const [i, setI] = React.useState(0)
-  const [mv, setMv] = React.useState(false)
+  const { active, increment, resetActive } = useTasbih();
   const player = useAudio();
+  const [sheetVisible, setSheetVisible] = React.useState(false);
+  const [resetVisible, setResetVisible] = React.useState(false);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="tasbih-screen">
@@ -35,9 +25,9 @@ export default function Screen2({ route, navigation }) {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={mv}
+        visible={resetVisible}
         onRequestClose={() => {
-          setMv(false)
+          setResetVisible(false)
         }}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <View style={{
@@ -71,8 +61,8 @@ export default function Screen2({ route, navigation }) {
             <View style={{ flexDirection: "row-reverse", width: "100%", marginTop: 20, justifyContent: "space-around" }}>
               <TouchableHighlight
                 onPress={() => {
-                  setI(0)
-                  setMv(false)
+                  resetActive()
+                  setResetVisible(false)
                 }}
                 style={{ backgroundColor: colors.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
@@ -86,7 +76,7 @@ export default function Screen2({ route, navigation }) {
               </TouchableHighlight>
               <TouchableHighlight
                 onPress={() => {
-                  setMv(false)
+                  setResetVisible(false)
                 }}
                 style={{ backgroundColor: colors.BGreen, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
               >
@@ -107,26 +97,53 @@ export default function Screen2({ route, navigation }) {
       <CustomHeader title={t('app.tasbih')} isHome={true} navigation={navigation} Left={() => {
         return <TouchableOpacity
           onPress={() => {
-            setMv(true)
+            setResetVisible(true)
           }}
-          style={{ flex: 1, justifyContent: "center", alignItems: "flex-end",paddingHorizontal:20 }}>
+          style={{ flex: 1, justifyContent: "center", alignItems: "flex-end", paddingHorizontal: 20 }}>
           <Feather name="rotate-cw" color={colors.BYellow} size={32} />
         </TouchableOpacity>
       }} />
+
+      <TouchableOpacity
+        testID="tasbih-active-name"
+        onPress={() => setSheetVisible(true)}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+        }}
+      >
+        <Text style={[
+          textStyles.subtitle,
+          { color: colors.BYellow, ...getDirectionalMixedSpacing({ marginRight: 8 }) }
+        ]}>{getCounterDisplayName(active)}</Text>
+        <Feather name="chevron-down" color={colors.BYellow} size={20} />
+      </TouchableOpacity>
+
+      {active?.target > 0 && (
+        <View style={{ alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+          <Text style={[textStyles.base, { color: colors.BYellow, fontSize: 16 }]}>
+            {active.count + ' / ' + active.target}
+          </Text>
+          <Text style={[textStyles.base, { color: colors.BYellow, fontSize: 13, opacity: 0.8, marginTop: 2 }]}>
+            {t('counter.rounds') + ': ' + (active.rounds || 0)}
+          </Text>
+        </View>
+      )}
+
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {/* <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} /> */}
         <TouchableOpacity
           testID="tasbih-counter-button"
           onPressIn={() => {
-            setI(i + 1)
+            const res = increment();
             player.playClick();
-            vibrationManager.vibrateForTasbih();
+            if (res && res.completed) {
+              vibrationManager.vibrateForTasbihComplete();
+            } else {
+              vibrationManager.vibrateForTasbih();
+            }
           }}
           style={{ flex: 1, justifyContent: "center", width: "100%", alignItems: "center" }}
         >
@@ -143,18 +160,12 @@ export default function Screen2({ route, navigation }) {
                   fontWeight: 'bold',
                 }
               ]}
-            >{i}</Text>
+            >{active ? active.count : 0}</Text>
           </View>
         </TouchableOpacity>
-        {/* <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} /> */}
       </View>
 
+      <TasbihCountersSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
     </View>
   );
 }

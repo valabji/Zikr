@@ -10,6 +10,26 @@ const mockNavigation = {
   toggleDrawer: jest.fn()
 };
 
+// Mock the tasbih store with a deterministic active counter
+jest.mock('../../utils/TasbihStore', () => ({
+  useTasbih: () => ({
+    active: { id: 'a', count: 5, target: 33, rounds: 1, total: 100 },
+    increment: jest.fn(() => ({ completed: false })),
+    resetActive: jest.fn(),
+    setActiveId: jest.fn(),
+    addCounter: jest.fn(),
+    renameCounter: jest.fn(),
+    setTarget: jest.fn(),
+    deleteCounter: jest.fn(),
+    moveCounter: jest.fn(),
+    state: {
+      counters: [{ id: 'a', count: 5, target: 33, rounds: 1, total: 100, nameKey: 'counter.presets.subhanAllah' }],
+      activeId: 'a',
+    },
+  }),
+  getCounterDisplayName: () => 'counter.presets.subhanAllah',
+}));
+
 // Mock Sound utils
 jest.mock('../../utils/Sounds', () => ({
   useAudio: () => ({
@@ -63,27 +83,10 @@ describe('Screen3', () => {
     expect(root).toBeTruthy();
   });
 
-  it('handles counter press correctly', async () => {
-    const { root } = renderWithProvider(
+  it('shows the active counter value', () => {
+    const { getByTestId } = renderWithProvider(
       <Screen3 navigation={mockNavigation} />
     );
-    
-    // Just verify that the component rendered without errors
-    expect(root).toBeTruthy();
-    
-    // For now, just verify the component exists since we're having accessibility issues
-    // TODO: Fix accessibility querying to properly test counter functionality
-  });
-
-  it('handles multiple presses correctly', async () => {
-    const { root } = renderWithProvider(
-      <Screen3 navigation={mockNavigation} />
-    );
-    
-    // Just verify that the component rendered without errors
-    expect(root).toBeTruthy();
-    
-    // For now, just verify the component exists since we're having accessibility issues
-    // TODO: Fix accessibility querying to properly test counter functionality
+    expect(String(getByTestId('tasbih-counter-value').props.children)).toBe('5');
   });
 });

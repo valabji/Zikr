@@ -41,7 +41,32 @@
     "resetCounters": "إعادة تعيين العدادات",
     "yes": "نعم",
     "no": "لا",
-    "page": "صفحة {current} من {total}"
+    "page": "صفحة {current} من {total}",
+    "target": "الهدف",
+    "noTarget": "بدون هدف",
+    "rounds": "الجولات",
+    "total": "الإجمالي",
+    "addCounter": "إضافة عداد",
+    "editCounter": "تعديل العداد",
+    "delete": "حذف",
+    "deleteConfirmation": "حذف هذا العداد؟",
+    "rename": "إعادة تسمية",
+    "name": "الاسم",
+    "namePlaceholder": "اسم العداد",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "manage": "إدارة",
+    "done": "تم",
+    "custom": "مخصص",
+    "switchCounter": "تبديل العداد",
+    "presets": {
+      "counter": "عداد",
+      "subhanAllah": "سبحان الله",
+      "alhamdulillah": "الحمد لله",
+      "laIlahaIllaAllah": "لا إله إلا الله",
+      "allahuAkbar": "الله أكبر",
+      "astaghfirullah": "أستغفر الله"
+    }
   },
   "zikr": {
     "reference": "المرجع : {text}"
