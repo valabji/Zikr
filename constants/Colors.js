@@ -32,7 +32,7 @@ export const useIsBrightTheme = () => {
   const { theme } = useTheme();
   
   return useMemo(() => {
-    const brightThemes = ['goldOnWhite', 'paige'];
+    const brightThemes = ['goldOnWhite', 'paige', 'sky'];
     return brightThemes.includes(theme);
   }, [theme]);
 };
