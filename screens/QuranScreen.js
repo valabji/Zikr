@@ -266,6 +266,27 @@ export default function QuranScreen({ navigation }) {
     return currentPage - 1;
   }, [ready, currentPage]);
 
+  const offsetForIndex = React.useCallback((index) => {
+    if (isContinuous) {
+      const { offsets } = getLayoutOffsets(activeLayoutFile);
+      return offsets[index] * fontScale;
+    }
+    return SCREEN_WIDTH * index;
+  }, [isContinuous, activeLayoutFile, fontScale]);
+
+  const restoredRef = React.useRef(false);
+  React.useEffect(() => { restoredRef.current = false; }, [isContinuous]);
+
+  const handleListLayout = React.useCallback(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const idx = currentPageRef.current - 1;
+    if (idx <= 0) return;
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToOffset({ offset: offsetForIndex(idx), animated: false });
+    });
+  }, [offsetForIndex]);
+
   const headerSurah = (() => {
     const pg = pagesData[currentPage - 1];
     return pg ? surahById[pg.ayahs[0].surah] : null;
@@ -325,14 +346,9 @@ export default function QuranScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           initialScrollIndex={initialScrollIndex}
           getItemLayout={getItemLayout}
+          onLayout={handleListLayout}
           onScrollToIndexFailed={(info) => {
-            let offset;
-            if (isContinuous) {
-              const { offsets } = getLayoutOffsets(activeLayoutFile);
-              offset = offsets[info.index] * fontScale;
-            } else {
-              offset = SCREEN_WIDTH * info.index;
-            }
+            const offset = offsetForIndex(info.index);
             setTimeout(() => listRef.current?.scrollToOffset({ offset, animated: false }), 50);
           }}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
