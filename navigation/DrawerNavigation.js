@@ -88,15 +88,42 @@ export function DNav() {
                 />
               </View>
               <TouchableOpacity
+                testID="quran-screen"
+                onPress={() => {
+                  navigation.navigate("Quran")
+                }}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 30,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.quran')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="book-open" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
                 testID="screen3"
                 onPress={() => {
                   navigation.navigate("Screen3")
                 }}
                 style={{
-                  // width: "100%",
                   height: 64,
                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 30,
+                  marginTop: 5,
                   backgroundColor: colors.DGreen,
                   flexDirection: "row",
                 }}>
@@ -117,41 +144,11 @@ export function DNav() {
                 <Feather name="target" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
-                testID="fav-screen"
-                onPress={() => {
-                  navigation.navigate("Home", { showFavorites: true })
-                }}
-                style={{
-                  // width: "100%",
-                  height: 64,
-                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 5,
-                  backgroundColor: colors.DGreen,
-                  flexDirection: "row",
-                }}>
-                {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                )}
-                <Text style={[
-                  textStyles.navigation,
-                  {
-                    color: colors.BYellow,
-                    marginTop: 7,
-                    textAlign: getRTLTextAlign('left'),
-                  }
-                ]}>{t('navigation.favorites')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="heart" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
-              </TouchableOpacity>
-              <TouchableOpacity
                 testID="main-screen"
                 onPress={() => {
                   navigation.navigate("Home", { showFavorites: false })
                 }}
                 style={{
-                  // width: "100%",
                   height: 64,
                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                   marginTop: 5,
@@ -170,37 +167,9 @@ export function DNav() {
                     marginTop: 7,
                     textAlign: getRTLTextAlign('left'),
                   }
-                ]}>{t('navigation.allAzkar')}</Text>
+                ]}>{t('navigation.azkar')}</Text>
                 <View style={{ flex: 1 }} />
                 <Feather name="list" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="quran-screen"
-                onPress={() => {
-                  navigation.navigate("Quran")
-                }}
-                style={{
-                  height: 64,
-                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 5,
-                  backgroundColor: colors.DGreen,
-                  flexDirection: "row",
-                }}>
-                {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                )}
-                <Text style={[
-                  textStyles.navigation,
-                  {
-                    color: colors.BYellow,
-                    marginTop: 7,
-                    textAlign: getRTLTextAlign('left'),
-                  }
-                ]}>{t('navigation.quran')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="book-open" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
                 testID="prayer-times-screen"

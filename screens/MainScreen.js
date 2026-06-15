@@ -32,8 +32,13 @@ export default function HomeScreen({ navigation, route }) {
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
   const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'))
 
-  // Get showFavorites parameter from route params, default to false (show all)
-  const showFavorites = route?.params?.showFavorites || false
+  const [showFavorites, setShowFavorites] = React.useState(route?.params?.showFavorites || false)
+
+  React.useEffect(() => {
+    if (route?.params?.showFavorites !== undefined) {
+      setShowFavorites(route.params.showFavorites)
+    }
+  }, [route?.params?.showFavorites])
 
   // Listen for dimension changes
   React.useEffect(() => {
@@ -234,14 +239,24 @@ export default function HomeScreen({ navigation, route }) {
           isHome={true}
           navigation={navigation}
           Left={() => {
-            return <TouchableOpacity
-              testID="search-toggle"
-              onPress={() => {
-                setS(!s)
-              }}
-              style={{ flex: 1, justifyContent: "center", alignItems: "flex-end", paddingHorizontal: 20 }}>
-              <Feather name="search" color={colors.BYellow} size={32} />
-            </TouchableOpacity>
+            return <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingHorizontal: 12 }}>
+              <TouchableOpacity
+                testID="favorites-toggle"
+                onPress={() => {
+                  setShowFavorites(!showFavorites)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Ionicons name={showFavorites ? "heart" : "heart-outline"} color={colors.BYellow} size={32} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="search-toggle"
+                onPress={() => {
+                  setS(!s)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Feather name="search" color={colors.BYellow} size={32} />
+              </TouchableOpacity>
+            </View>
           }}
         />
       )}
