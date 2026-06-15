@@ -99,14 +99,15 @@ describe('SettingsScreen', () => {
     // which the dropdown uses via Object.entries(themes).map()
     const { themes } = require('../../constants/themes');
     
-    // Check that all 6 themes exist
-    expect(Object.keys(themes)).toHaveLength(6);
+    // Check that all 7 themes exist
+    expect(Object.keys(themes)).toHaveLength(7);
     expect(themes.originalGreen).toBeDefined();
     expect(themes.goldOnWhite).toBeDefined();
     expect(themes.goldOnDark).toBeDefined();
     expect(themes.paige).toBeDefined();
     expect(themes.chocolate).toBeDefined();
     expect(themes.lavender).toBeDefined();
+    expect(themes.ocean).toBeDefined();
     
     // Verify the themes have both English and Arabic names
     expect(themes.paige.name).toBe('Paige');

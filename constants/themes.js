@@ -157,5 +157,31 @@ export const themes = {
     warningBackground: '#6A1B9A',
     warningText: '#FFF9E6',
     warningAccent: '#FFB74D',
+  },
+  ocean: {
+    name: 'Ocean Blue',
+    nameAr: 'الأزرق المحيطي',
+    // Font configuration
+    fontFamily: FONT_FAMILY,
+    primary: '#0D3B66',
+    primaryMedium: '#103E6E',
+    primaryDark: '#072A4D',
+    accent: '#9FD3FF',
+    accentDark: '#5BA4D9',
+    background: '#0D3B66',
+    surface: '#103E6E',
+    text: '#9FD3FF',
+    textSecondary: '#5BA4D9',
+    // Prayer time colors
+    currentPrayer: '#4CAF50',
+    nextPrayer: '#FFB74D',
+    pastPrayer: '#6E8CA8',
+    // Notice and warning colors
+    noticeBackground: '#0F4C75',
+    noticeText: '#9FD3FF',
+    noticeAccent: '#42A5F5',
+    warningBackground: '#3D2E14',
+    warningText: '#9FD3FF',
+    warningAccent: '#FFB74D',
   }
 };
