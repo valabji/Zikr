@@ -18,6 +18,7 @@ export default function Screen3({ route, navigation }) {
   const player = useAudio();
   const [sheetVisible, setSheetVisible] = React.useState(false);
   const [resetVisible, setResetVisible] = React.useState(false);
+  const [resetRounds, setResetRounds] = React.useState(false);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="tasbih-screen">
@@ -43,7 +44,7 @@ export default function Screen3({ route, navigation }) {
             alignItems: "center",
             elevation: 2,
             width: 240,
-            height: 220,
+            paddingVertical: 24,
             borderRadius: 20,
           }}>
             <Feather name="info" size={64} color={colors.DYellow} />
@@ -58,10 +59,23 @@ export default function Screen3({ route, navigation }) {
             ]}
             >{t('counter.resetConfirmation')}</Text>
 
+            {active?.rounds > 0 ? (
+              <TouchableOpacity
+                onPress={() => setResetRounds((v) => !v)}
+                style={{ flexDirection: "row", alignItems: "center", marginTop: 16, paddingHorizontal: 15 }}
+              >
+                <Feather name={resetRounds ? "check-square" : "square"} size={20} color={colors.DYellow} />
+                <Text style={[
+                  textStyles.base,
+                  { color: colors.DGreen, ...getDirectionalMixedSpacing({ marginLeft: 8 }) }
+                ]}>{t('counter.alsoResetRounds')}</Text>
+              </TouchableOpacity>
+            ) : null}
+
             <View style={{ flexDirection: "row-reverse", width: "100%", marginTop: 20, justifyContent: "space-around" }}>
               <TouchableHighlight
                 onPress={() => {
-                  resetActive()
+                  resetActive(resetRounds)
                   setResetVisible(false)
                 }}
                 style={{ backgroundColor: colors.DYellow, width: 80, justifyContent: "center", alignItems: "center", height: 38, borderRadius: 12 }}
@@ -97,6 +111,7 @@ export default function Screen3({ route, navigation }) {
       <CustomHeader title={t('app.tasbih')} isHome={true} navigation={navigation} Left={() => {
         return <TouchableOpacity
           onPress={() => {
+            setResetRounds(false)
             setResetVisible(true)
           }}
           style={{ flex: 1, justifyContent: "center", alignItems: "flex-end", paddingHorizontal: 20 }}>

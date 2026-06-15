@@ -82,7 +82,7 @@ function CounterRow({ counter, isActive, manage, isFirst, isLast, colors, onSele
   };
 
   const targetLabel = counter.target > 0 ? t('counter.target') + ': ' + counter.target : t('counter.noTarget');
-  const statsLabel = t('counter.total') + ': ' + (counter.total || 0) + '  ·  ' + t('counter.rounds') + ': ' + (counter.rounds || 0);
+  const statsLabel = t('counter.total') + ': ' + (counter.total || 0) + '  ·  ' + t('counter.rounds') + ': ' + (counter.rounds || 0) + '  ·  ' + t('counter.totalRounds') + ': ' + (counter.totalRounds || 0);
 
   return (
     <View
@@ -238,7 +238,7 @@ export default function TasbihCountersSheet({ visible, onClose }) {
             <View
               testID="tasbih-counters-sheet"
               style={{
-                backgroundColor: colors.white,
+                backgroundColor: colors.surface,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
                 maxHeight: '85%',

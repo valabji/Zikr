@@ -23,6 +23,7 @@ function seedState() {
     count: 0,
     target: c.target || 0,
     rounds: 0,
+    totalRounds: 0,
     total: 0,
     createdAt: Date.now(),
   }));
@@ -37,6 +38,7 @@ function normalizeCounter(c) {
     count: typeof c.count === 'number' ? c.count : 0,
     target: typeof c.target === 'number' ? c.target : 0,
     rounds: typeof c.rounds === 'number' ? c.rounds : 0,
+    totalRounds: typeof c.totalRounds === 'number' ? c.totalRounds : (c.rounds || 0),
     total: typeof c.total === 'number' ? c.total : 0,
     createdAt: c.createdAt || Date.now(),
   };
@@ -131,7 +133,7 @@ export function increment() {
     const total = c.total + 1;
     if (c.target > 0 && c.count + 1 >= c.target) {
       result = { completed: true };
-      return { ...c, total, rounds: c.rounds + 1, count: 0 };
+      return { ...c, total, rounds: c.rounds + 1, totalRounds: c.totalRounds + 1, count: 0 };
     }
     return { ...c, total, count: c.count + 1 };
   });
@@ -139,10 +141,10 @@ export function increment() {
   return result;
 }
 
-export function resetActive() {
+export function resetActive(resetRounds = false) {
   const state = getState();
   const counters = state.counters.map((c) =>
-    c.id === state.activeId ? { ...c, count: 0 } : c
+    c.id === state.activeId ? { ...c, count: 0, rounds: resetRounds ? 0 : c.rounds } : c
   );
   commit({ ...state, counters });
 }
@@ -162,6 +164,7 @@ export function addCounter({ name, target } = {}) {
     count: 0,
     target: Number(target) || 0,
     rounds: 0,
+    totalRounds: 0,
     total: 0,
     createdAt: Date.now(),
   };

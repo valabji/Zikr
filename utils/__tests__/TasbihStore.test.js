@@ -35,6 +35,7 @@ describe('TasbihStore', () => {
       expect(typeof c.id).toBe('string');
       expect(c.count).toBe(0);
       expect(c.rounds).toBe(0);
+      expect(c.totalRounds).toBe(0);
       expect(c.total).toBe(0);
     });
     expect(state.counters[1].nameKey).toBe('counter.presets.subhanAllah');
@@ -56,10 +57,12 @@ describe('TasbihStore', () => {
     expect(state.activeId).toBe('y');
     expect(state.counters[0].count).toBe(0);
     expect(state.counters[0].rounds).toBe(0);
+    expect(state.counters[0].totalRounds).toBe(0);
     expect(state.counters[0].total).toBe(0);
     expect(typeof state.counters[0].target).toBe('number');
     expect(state.counters[1].count).toBe(4);
     expect(state.counters[1].rounds).toBe(2);
+    expect(state.counters[1].totalRounds).toBe(2);
     expect(state.counters[1].total).toBe(70);
   });
 
@@ -86,7 +89,29 @@ describe('TasbihStore', () => {
     const active = mod.getCachedTasbih().counters[0];
     expect(active.count).toBe(0);
     expect(active.rounds).toBe(1);
+    expect(active.totalRounds).toBe(1);
     expect(active.total).toBe(3);
+  });
+
+  it('resetActive zeroes count, keeps rounds by default and resets rounds when asked', async () => {
+    const stored = {
+      counters: [{ id: 'a', nameKey: 'counter.presets.subhanAllah', target: 3, count: 2, rounds: 5, totalRounds: 5, total: 17 }],
+      activeId: 'a',
+    };
+    AsyncStorage.getItem.mockResolvedValue(JSON.stringify(stored));
+    const mod = await loadAndReset();
+    await mod.loadTasbih();
+    mod.resetActive();
+    let active = mod.getCachedTasbih().counters[0];
+    expect(active.count).toBe(0);
+    expect(active.rounds).toBe(5);
+    expect(active.totalRounds).toBe(5);
+    expect(active.total).toBe(17);
+    mod.resetActive(true);
+    active = mod.getCachedTasbih().counters[0];
+    expect(active.rounds).toBe(0);
+    expect(active.totalRounds).toBe(5);
+    expect(active.total).toBe(17);
   });
 
   it('target 0 never rolls over', async () => {
