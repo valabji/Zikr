@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AppState } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
 import { loadResourcesAndDataAsync } from './utils/load';
@@ -73,8 +74,10 @@ function AppContent() {
 
 export default function App(props) {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

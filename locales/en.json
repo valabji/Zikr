@@ -31,7 +31,9 @@
     "logout": "Logout",
     "prayerTimes": "Prayer Times",
     "qibla": "Qibla Direction",
-    "quran": "Holy Quran"
+    "quran": "Holy Quran",
+    "books": "Islamic Library",
+    "radio": "Radio"
   },
   "search": {
     "placeholder": "Search..."
@@ -418,5 +420,38 @@
     "index": "Index",
     "tafsirSelection": "Tafsir",
     "tafsirSelectionDesc": "Commentary shown in the Tafsir tab when viewing an ayah."
+  },
+  "books": {
+    "title": "Islamic Library",
+    "entries": "Contents",
+    "bookmarks": "Bookmarks",
+    "search": "Search",
+    "settingsTitle": "Reading Settings",
+    "fontSize": "Font Size",
+    "showTranslation": "Show Translation",
+    "showTranslationDesc": "Display the English translation under the Arabic text.",
+    "noBookmarks": "No bookmarks yet. Tap the bookmark icon on any hadith to save it.",
+    "noResults": "No results found.",
+    "loading": "Loading…",
+    "hadithNumber": "Hadith {n}",
+    "entryCount": "{count} hadiths",
+    "download": "Download",
+    "downloading": "Downloading…",
+    "downloadRetry": "Failed — tap to retry",
+    "downloadAll": "Download all",
+    "downloadingAll": "Downloading… {done}/{total}",
+    "remove": "Remove download",
+    "removeConfirm": "Remove this downloaded book from your device?"
+  },
+  "radio": {
+    "title": "Radio",
+    "all": "All Stations",
+    "favorites": "Favorites",
+    "live": "Live",
+    "nowPlaying": "Now Playing",
+    "offline": "Offline",
+    "noStations": "No stations available.",
+    "search": "Search stations",
+    "loading": "Loading stations…"
   }
 }

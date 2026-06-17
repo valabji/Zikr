@@ -31,7 +31,9 @@
     "logout": "تسجيل الخروج",
     "prayerTimes": "مواقيت الصلاة",
     "qibla": "اتجاه القبلة",
-    "quran": "القرآن الكريم"
+    "quran": "القرآن الكريم",
+    "books": "المكتبة الإسلامية",
+    "radio": "الراديو"
   },
   "search": {
     "placeholder": "بحث..."
@@ -418,5 +420,38 @@
     "index": "الفهرس",
     "tafsirSelection": "التفسير",
     "tafsirSelectionDesc": "التفسير المعروض في تبويب التفسير عند عرض الآية."
+  },
+  "books": {
+    "title": "المكتبة الإسلامية",
+    "entries": "المحتويات",
+    "bookmarks": "المحفوظات",
+    "search": "بحث",
+    "settingsTitle": "إعدادات القراءة",
+    "fontSize": "حجم الخط",
+    "showTranslation": "إظهار الترجمة",
+    "showTranslationDesc": "عرض الترجمة الإنجليزية أسفل النص العربي.",
+    "noBookmarks": "لا توجد محفوظات بعد. اضغط على أيقونة الإشارة المرجعية في أي حديث لحفظه.",
+    "noResults": "لا توجد نتائج.",
+    "loading": "جارٍ التحميل…",
+    "hadithNumber": "حديث {n}",
+    "entryCount": "{count} حديثًا",
+    "download": "تنزيل",
+    "downloading": "جارٍ التنزيل…",
+    "downloadRetry": "فشل التنزيل — اضغط للإعادة",
+    "downloadAll": "تنزيل الكل",
+    "downloadingAll": "جارٍ التنزيل… {done}/{total}",
+    "remove": "حذف التنزيل",
+    "removeConfirm": "حذف هذا الكتاب المُنزَّل من جهازك؟"
+  },
+  "radio": {
+    "title": "الراديو",
+    "all": "جميع المحطات",
+    "favorites": "المفضلة",
+    "live": "مباشر",
+    "nowPlaying": "قيد التشغيل الآن",
+    "offline": "بدون اتصال",
+    "noStations": "لا توجد محطات متاحة.",
+    "search": "البحث عن المحطات",
+    "loading": "جاري تحميل المحطات…"
   }
 }

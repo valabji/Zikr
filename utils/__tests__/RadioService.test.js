@@ -1,0 +1,136 @@
+import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RadioService from '../RadioService';
+import QuranAudio from '../QuranAudio';
+import Sounds from '../Sounds';
+import { RADIO_CONSTANTS } from '../../constants/RadioConstants';
+
+const { STORAGE_KEYS } = RADIO_CONSTANTS;
+
+const mockState = { lastSound: null };
+const mockMakeSound = () => {
+  const sound = {
+    cb: null,
+    playAsync: jest.fn(() => Promise.resolve()),
+    pauseAsync: jest.fn(() => Promise.resolve()),
+    stopAsync: jest.fn(() => Promise.resolve()),
+    unloadAsync: jest.fn(() => Promise.resolve()),
+    getStatusAsync: jest.fn(() => Promise.resolve({ isLoaded: true, isPlaying: true })),
+    setOnPlaybackStatusUpdate: jest.fn((cb) => { sound.cb = cb; }),
+  };
+  mockState.lastSound = sound;
+  return sound;
+};
+
+jest.mock('expo-av', () => ({
+  Audio: {
+    Sound: {
+      createAsync: jest.fn(() => Promise.resolve({ sound: mockMakeSound() })),
+    },
+    setAudioModeAsync: jest.fn(() => Promise.resolve()),
+  },
+}));
+
+jest.mock('../QuranAudio', () => ({
+  __esModule: true,
+  default: { stop: jest.fn(() => Promise.resolve()) },
+}));
+
+jest.mock('../Sounds', () => ({
+  __esModule: true,
+  default: { stopFullAdhan: jest.fn(() => Promise.resolve()) },
+}));
+
+const station = { id: 3, name: 'Test Radio', streamUrl: 'https://stream.example/3' };
+
+describe('RadioService', () => {
+  let store;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockState.lastSound = null;
+    store = {};
+    AsyncStorage.setItem.mockImplementation((k, v) => { store[k] = v; return Promise.resolve(); });
+    RadioService.sound = null;
+    RadioService.activeStation = null;
+    RadioService.isPlaying = false;
+    RadioService.isBuffering = false;
+    RadioService.audioModeReady = false;
+    RadioService.listeners.clear();
+  });
+
+  it('subscribe immediately emits current state and returns an unsubscribe', () => {
+    const fn = jest.fn();
+    const unsub = RadioService.subscribe(fn);
+    expect(fn).toHaveBeenCalledWith({ activeStation: null, isPlaying: false, isBuffering: false });
+    expect(RadioService.listeners.size).toBe(1);
+    unsub();
+    expect(RadioService.listeners.size).toBe(0);
+  });
+
+  it('playStation sets the audio mode, stops Quran, plays, and persists last played', async () => {
+    await RadioService.playStation(station);
+    expect(Audio.setAudioModeAsync).toHaveBeenCalledWith(expect.objectContaining({
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+    }));
+    expect(QuranAudio.stop).toHaveBeenCalled();
+    expect(Sounds.stopFullAdhan).toHaveBeenCalled();
+    expect(Audio.Sound.createAsync).toHaveBeenCalledWith(
+      { uri: station.streamUrl },
+      { shouldPlay: true },
+    );
+    expect(RadioService.activeStation).toEqual(station);
+    expect(RadioService.isPlaying).toBe(true);
+    expect(JSON.parse(store[STORAGE_KEYS.LAST_PLAYED])).toEqual(station);
+  });
+
+  it('ignores a station with no stream url', async () => {
+    await RadioService.playStation({ id: 1, name: 'No URL' });
+    expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+    expect(RadioService.activeStation).toBeNull();
+  });
+
+  it('switching stations unloads the previous sound', async () => {
+    await RadioService.playStation(station);
+    const first = mockState.lastSound;
+    await RadioService.playStation({ id: 4, name: 'Second', streamUrl: 'https://stream.example/4' });
+    expect(first.setOnPlaybackStatusUpdate).toHaveBeenCalledWith(null);
+    expect(first.unloadAsync).toHaveBeenCalled();
+    expect(RadioService.activeStation.id).toBe(4);
+  });
+
+  it('playback status updates flow to subscribers', async () => {
+    await RadioService.playStation(station);
+    const fn = jest.fn();
+    RadioService.subscribe(fn);
+    fn.mockClear();
+    mockState.lastSound.cb({ isLoaded: true, isPlaying: false, isBuffering: true });
+    expect(RadioService.isBuffering).toBe(true);
+    expect(RadioService.isPlaying).toBe(false);
+    expect(fn).toHaveBeenCalledWith({ activeStation: station, isPlaying: false, isBuffering: true });
+  });
+
+  it('toggle pauses when playing and resumes when paused', async () => {
+    await RadioService.playStation(station);
+    const sound = mockState.lastSound;
+    sound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: true });
+    await RadioService.toggle();
+    expect(sound.pauseAsync).toHaveBeenCalled();
+    expect(RadioService.isPlaying).toBe(false);
+
+    sound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: false });
+    await RadioService.toggle();
+    expect(sound.playAsync).toHaveBeenCalled();
+    expect(RadioService.isPlaying).toBe(true);
+  });
+
+  it('stop unloads the sound and clears state', async () => {
+    await RadioService.playStation(station);
+    const sound = mockState.lastSound;
+    await RadioService.stop();
+    expect(sound.unloadAsync).toHaveBeenCalled();
+    expect(RadioService.sound).toBeNull();
+    expect(RadioService.activeStation).toBeNull();
+    expect(RadioService.isPlaying).toBe(false);
+  });
+});

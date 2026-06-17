@@ -90,6 +90,7 @@ class QuranAudioService {
     await this._ensureAudioMode();
     await this._ensureSettings();
     await this._unload();
+    try { require('./RadioService').default.stop(); } catch {}
     const uri = buildAyahAudioUrl(this.reciterId, surah, ayah);
     this.activeAyah = { surah, ayah };
     this.isPlaying = true;

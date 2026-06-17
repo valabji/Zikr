@@ -1,5 +1,6 @@
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { initializeLanguage, } from '../locales/i18n';
 
@@ -13,6 +14,7 @@ import NotificationService from './NotificationService';
 import PrayerNotificationScheduler from './PrayerNotificationScheduler';
 import QcfDownloader from './QcfDownloader';
 import { loadTasbih } from './TasbihStore';
+import RadioService from './RadioService';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -53,6 +55,14 @@ export async function loadResourcesAndDataAsync() {
             await loadTasbih();
         } catch (error) {
             console.error('Failed to load tasbih counters:', error);
+        }
+
+        if (Platform.OS !== 'web') {
+            try {
+                await RadioService.initialize();
+            } catch (error) {
+                console.error('Failed to initialize radio service:', error);
+            }
         }
 
     } catch (e) {

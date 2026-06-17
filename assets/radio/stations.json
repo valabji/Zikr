@@ -1,0 +1,18 @@
+[
+  { "id": 1, "nameAr": "إذاعة إبراهيم الأخضر", "nameEn": "Radio Ibrahim Al-Akdar", "streamUrl": "https://backup.qurango.net/radio/ibrahim_alakdar" },
+  { "id": 2, "nameAr": "إذاعة أبو بكر الشاطري", "nameEn": "Radio Shaik Abu Bakr Al Shatri", "streamUrl": "https://backup.qurango.net/radio/shaik_abu_bakr_al_shatri" },
+  { "id": 3, "nameAr": "إذاعة أحمد العجمي", "nameEn": "Radio Ahmad Al-Ajmy", "streamUrl": "https://backup.qurango.net/radio/ahmad_alajmy" },
+  { "id": 4, "nameAr": "إذاعة أحمد الحواشي", "nameEn": "Radio Ahmad Al-Hawashi", "streamUrl": "https://backup.qurango.net/radio/ahmad_alhawashi" },
+  { "id": 5, "nameAr": "إذاعة أحمد صابر", "nameEn": "Radio Ahmad Saber", "streamUrl": "https://backup.qurango.net/radio/ahmad_saber" },
+  { "id": 6, "nameAr": "إذاعة أحمد نعينع", "nameEn": "Radio Ahmad Nauina", "streamUrl": "https://backup.qurango.net/radio/ahmad_nauina" },
+  { "id": 7, "nameAr": "إذاعة أكرم العلاقمي", "nameEn": "Radio Akram Alalaqmi", "streamUrl": "https://backup.qurango.net/radio/akram_alalaqmi" },
+  { "id": 8, "nameAr": "إذاعة إدريس أبكر", "nameEn": "Radio Idrees Abkr", "streamUrl": "https://backup.qurango.net/radio/idrees_abkr" },
+  { "id": 9, "nameAr": "إذاعة الزين محمد أحمد", "nameEn": "Radio Alzain Mohammad Ahmad", "streamUrl": "https://backup.qurango.net/radio/alzain_mohammad_ahmad" },
+  { "id": 10, "nameAr": "إذاعة القارئ ياسين", "nameEn": "Radio Al-Qaria Yassen", "streamUrl": "https://backup.qurango.net/radio/alqaria_yassen" },
+  { "id": 11, "nameAr": "إذاعة العيون الكوشي", "nameEn": "Radio Aloyoon Al-Koshi", "streamUrl": "https://backup.qurango.net/radio/aloyoon_alkoshi" },
+  { "id": 12, "nameAr": "إذاعة توفيق الصايغ", "nameEn": "Radio Tawfeeq As-Sayegh", "streamUrl": "https://backup.qurango.net/radio/tawfeeq_assayegh" },
+  { "id": 13, "nameAr": "إذاعة جمال شاكر عبدالله", "nameEn": "Radio Jamal Shaker Abdullah", "streamUrl": "https://backup.qurango.net/radio/jamal_shaker_abdullah" },
+  { "id": 14, "nameAr": "إذاعة خالد القحطاني", "nameEn": "Radio Khaled Al-Qahtani", "streamUrl": "https://backup.qurango.net/radio/khaled_alqahtani" },
+  { "id": 15, "nameAr": "إذاعة خالد عبدالكافي", "nameEn": "Radio Khalid Abdulkafi", "streamUrl": "https://backup.qurango.net/radio/khalid_abdulkafi" },
+  { "id": 16, "nameAr": "إذاعة خليفة الطنيجي", "nameEn": "Radio Khalifa Altunaiji", "streamUrl": "https://backup.qurango.net/radio/khalifa_altunaiji" }
+]

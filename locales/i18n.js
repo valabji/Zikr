@@ -293,3 +293,15 @@ export const getRTLTextAlign = (defaultAlign = 'left') => {
   
   return defaultAlign;
 };
+
+export const getArabicContentAlign = () => {
+  if (Platform?.OS === 'web') return 'right';
+  return isRTL() ? 'left' : 'right';
+};
+
+export const arabicContentStyle = (overrides = {}) => ({
+  textAlign: getArabicContentAlign(),
+  writingDirection: 'rtl',
+  direction: 'rtl',
+  ...overrides,
+});

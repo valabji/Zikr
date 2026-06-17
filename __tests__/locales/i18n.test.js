@@ -310,6 +310,43 @@ describe('locales/i18n', () => {
     });
   });
 
+  describe('getArabicContentAlign', () => {
+    it('returns right on web regardless of app language', async () => {
+      const i18n = loadI18n();
+      global.Platform.OS = 'web';
+      await i18n.setLanguage('en', false);
+      expect(i18n.getArabicContentAlign()).toBe('right');
+      await i18n.setLanguage('ar', false);
+      expect(i18n.getArabicContentAlign()).toBe('right');
+    });
+
+    it('on native flips for I18nManager mirroring', async () => {
+      const i18n = loadI18n();
+      const { I18nManager } = require('react-native');
+      global.Platform.OS = 'ios';
+      I18nManager.isRTL = false;
+      await i18n.setLanguage('en', false);
+      expect(i18n.getArabicContentAlign()).toBe('right');
+      I18nManager.isRTL = true;
+      await i18n.setLanguage('ar', false);
+      expect(i18n.getArabicContentAlign()).toBe('left');
+    });
+  });
+
+  describe('arabicContentStyle', () => {
+    it('always sets rtl direction and writingDirection', async () => {
+      const i18n = loadI18n();
+      global.Platform.OS = 'ios';
+      await i18n.setLanguage('en', false);
+      expect(i18n.arabicContentStyle({ fontSize: 18 })).toEqual({
+        textAlign: 'right',
+        writingDirection: 'rtl',
+        direction: 'rtl',
+        fontSize: 18,
+      });
+    });
+  });
+
   describe('initializeLanguage', () => {
     it('uses saved language from AsyncStorage', async () => {
       AsyncStorage.getItem.mockResolvedValueOnce('en');

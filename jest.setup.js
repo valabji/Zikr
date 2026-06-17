@@ -130,6 +130,8 @@ jest.mock('react-native-safe-area-context', () => {
     SafeAreaProvider: ({ children }) => children,
     SafeAreaConsumer: ({ children }) => children(inset),
     SafeAreaView: ({ children, ...props }) => React.createElement('View', props, children),
+    SafeAreaInsetsContext: React.createContext(inset),
+    SafeAreaFrameContext: React.createContext(frame),
     useSafeAreaInsets: () => inset,
     useSafeAreaFrame: () => frame,
     initialWindowMetrics: { insets: inset, frame },
@@ -164,6 +166,9 @@ jest.mock('expo-file-system/legacy', () => ({
   downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
   deleteAsync: jest.fn(() => Promise.resolve()),
   readDirectoryAsync: jest.fn(() => Promise.resolve([])),
+  readAsStringAsync: jest.fn(() => Promise.resolve('{"entries":[]}')),
+  writeAsStringAsync: jest.fn(() => Promise.resolve()),
+  createDownloadResumable: jest.fn(() => ({ downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })) })),
 }), { virtual: true });
 
 // Mock Sound functionality and utils
@@ -238,7 +243,29 @@ jest.mock('react-native', () => {
     
     return React.createElement(name, { ...accessibilityProps, ref }, props.children);
   });
-  
+
+  const createMockList = (name) => React.forwardRef((props, ref) => {
+    const { data, renderItem, keyExtractor, ListEmptyComponent, ListHeaderComponent, ListFooterComponent, ...rest } = props;
+    React.useImperativeHandle(ref, () => ({
+      scrollToIndex: () => {}, scrollToOffset: () => {}, scrollToEnd: () => {}, scrollToItem: () => {},
+    }));
+    const slot = (C) => (!C ? null : React.isValidElement(C) ? C : React.createElement(C));
+    const items = Array.isArray(data) ? data : [];
+    const rows = items.length === 0
+      ? [slot(ListEmptyComponent)]
+      : items.map((item, index) => React.createElement(
+          React.Fragment,
+          { key: keyExtractor ? keyExtractor(item, index) : String(index) },
+          renderItem ? renderItem({ item, index }) : null,
+        ));
+    return React.createElement(name, {
+      accessible: true,
+      accessibilityLabel: props.accessibilityLabel || '',
+      accessibilityRole: props.accessibilityRole || 'none',
+      ...rest,
+    }, slot(ListHeaderComponent), rows, slot(ListFooterComponent));
+  });
+
   const ReactNative = {
     Platform: global.Platform,
     StyleSheet: {
@@ -261,7 +288,7 @@ jest.mock('react-native', () => {
     ScrollView: createMockComponent('ScrollView'),
     Image: createMockComponent('Image'),
     ImageBackground: createMockComponent('ImageBackground'),
-    FlatList: createMockComponent('FlatList'),
+    FlatList: createMockList('FlatList'),
     TextInput: createMockComponent('TextInput'),
     TouchableHighlight: createMockComponent('TouchableHighlight'),
     TouchableWithoutFeedback: createMockComponent('TouchableWithoutFeedback'),

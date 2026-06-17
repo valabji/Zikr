@@ -16,6 +16,7 @@
     "prebuild": "expo prebuild --clean",
     "deploy": "gh-pages -d dist --cname zikr.valabji.com",
     "ios": "expo run:ios",
+    "ios:device": "bash scripts/ios-device.sh",
     "web": "expo start --web",
     "eject": "expo eject",
     "test": "jest --coverage=false",

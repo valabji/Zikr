@@ -10,6 +10,7 @@ import { useColors, useIsBrightTheme } from '../constants/Colors';
 import Constants from 'expo-constants';
 import { createStackNavigator } from '@react-navigation/stack';
 import SettingsScreen from '../screens/SettingsScreen';
+import RadioMiniPlayer from '../components/RadioMiniPlayer';
 import LogEvent from '../utils/firebase/events';
 
 
@@ -50,6 +51,7 @@ export const AppContainer = () => {
                 <Stack.Screen name="Contribute" component={ContributeScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="UnifiedPrayerSettings" component={UnifiedPrayerSettingsScreen} options={{ title: "Prayer Settings", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
             </Stack.Navigator>
+            <RadioMiniPlayer />
         </NavigationContainer>
     </View>
 }

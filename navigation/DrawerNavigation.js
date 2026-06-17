@@ -10,6 +10,8 @@ import ContributeScreen from '../screens/ContributeScreen';
 import PrayerTimesScreen from '../screens/PrayerTimesScreen';
 import QiblaScreen from '../screens/QiblaScreen';
 import QuranScreen from '../screens/QuranScreen';
+import BooksScreen from '../screens/BooksScreen';
+import RadioScreen from '../screens/RadioScreen';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
@@ -37,6 +39,8 @@ function useInitialDrawerRoute() {
           PrayerTimes: { route: 'PrayerTimes' },
           Qibla: { route: 'Qibla' },
           Quran: { route: 'Quran' },
+          Books: { route: 'Books' },
+          Radio: { route: 'Radio' },
         };
         setResolved(map[screen] || map.Fav);
       });
@@ -114,6 +118,62 @@ export function DNav() {
                 ]}>{t('navigation.quran')}</Text>
                 <View style={{ flex: 1 }} />
                 <Feather name="book-open" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="books-screen"
+                onPress={() => {
+                  navigation.navigate("Books")
+                }}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.books')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="book" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="radio-screen"
+                onPress={() => {
+                  navigation.navigate("Radio")
+                }}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.radio')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="radio" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
                 testID="screen3"
@@ -359,6 +419,8 @@ export function DNav() {
       <Drawer.Screen name="Screen3" component={Screen3} />
       <Drawer.Screen name="Home" component={MainScreen} initialParams={homeInitialParams} />
       <Drawer.Screen name="Quran" component={QuranScreen} />
+      <Drawer.Screen name="Books" component={BooksScreen} />
+      <Drawer.Screen name="Radio" component={RadioScreen} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />

@@ -76,6 +76,8 @@ export default function SettingsScreen({ navigation }) {
     { id: 'PrayerTimes', labelEn: 'Prayer Times', labelAr: 'مواقيت الصلاة', route: 'PrayerTimesScreen' },
     { id: 'Qibla', labelEn: 'Qibla Direction', labelAr: 'اتجاه القبلة', route: 'QiblaScreen' },
     { id: 'Quran', labelEn: 'Holy Quran', labelAr: 'القرآن الكريم', route: 'Quran' },
+    { id: 'Books', labelEn: 'Islamic Library', labelAr: 'المكتبة الإسلامية', route: 'Books' },
+    { id: 'Radio', labelEn: 'Radio', labelAr: 'الراديو', route: 'Radio' },
   ];
 
   const viewModes = [
@@ -941,6 +943,8 @@ export default function SettingsScreen({ navigation }) {
       PrayerTimes: { route: 'PrayerTimes' },
       Qibla: { route: 'Qibla' },
       Quran: { route: 'Quran' },
+      Books: { route: 'Books' },
+      Radio: { route: 'Radio' },
     };
 
     if (wasFirstTime) {
