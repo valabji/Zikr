@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
@@ -20,6 +20,41 @@ import BooksSettingsModal from './BooksSettingsModal';
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
+const ENTRY_FRAME_HEIGHT = 32 /* padding */ + 44 /* header row */ + 16 /* card margins */;
+
+const estimateEntryHeight = (item, fontScale, showTranslation, containerWidth) => {
+  const hasAr = !!item.textAr;
+  const hasEn = !!item.textEn;
+  const showEn = hasEn && (showTranslation || !hasAr);
+  let height = ENTRY_FRAME_HEIGHT;
+  if (hasAr) {
+    const charsPerLine = Math.max(8, containerWidth / (20 * fontScale * 0.55));
+    const lines = Math.max(1, Math.ceil((item.textAr || '').length / charsPerLine));
+    height += lines * (38 * fontScale);
+  }
+  if (showEn) {
+    const enFontSize = (hasAr ? 15 : 18) * fontScale;
+    const charsPerLine = Math.max(8, containerWidth / (enFontSize * 0.5));
+    const lines = Math.max(1, Math.ceil((item.textEn || '').length / charsPerLine));
+    height += (hasAr ? 12 : 0) + lines * ((hasAr ? 24 : 30) * fontScale);
+  }
+  return height;
+};
+
+function EntryFlashCard({ active, baseColor, flashColor, style, children }) {
+  const anim = React.useRef(new Animated.Value(0)).current;
+  React.useEffect(() => {
+    if (!active) return;
+    anim.setValue(1);
+    Animated.timing(anim, { toValue: 0, duration: 900, delay: 350, useNativeDriver: false }).start();
+  }, [active, anim]);
+  return (
+    <Animated.View style={[style, { backgroundColor: anim.interpolate({ inputRange: [0, 1], outputRange: [baseColor, flashColor] }) }]}>
+      {children}
+    </Animated.View>
+  );
+}
+
 export default function BooksScreen({ navigation }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -37,7 +72,13 @@ export default function BooksScreen({ navigation }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [dlState, setDlState] = React.useState({});
+  const [highlightIndex, setHighlightIndex] = React.useState(null);
   const pendingOpenRef = React.useRef(null);
+  const highlightTimeoutRef = React.useRef(null);
+
+  React.useEffect(() => () => {
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+  }, []);
 
   React.useEffect(() => {
     loadBooksSettings().then(setSettings);
@@ -72,6 +113,7 @@ export default function BooksScreen({ navigation }) {
     setIndexOpen(false);
     setSearchOpen(false);
     setSettingsOpen(false);
+    setHighlightIndex(null);
   }, []);
 
   React.useEffect(() => {
@@ -99,7 +141,7 @@ export default function BooksScreen({ navigation }) {
     ]);
   }, [dlState, lang]);
 
-  const jumpToIndex = React.useCallback((index) => {
+  const jumpToIndex = React.useCallback((index, { highlight = false } = {}) => {
     setIndexOpen(false);
     setSearchOpen(false);
     currentIndexRef.current = index;
@@ -108,12 +150,17 @@ export default function BooksScreen({ navigation }) {
         listRef.current?.scrollToIndex({ index, animated: false });
       } catch {}
     });
+    if (highlight) {
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      setHighlightIndex(index);
+      highlightTimeoutRef.current = setTimeout(() => setHighlightIndex(null), 1500);
+    }
   }, []);
 
   const selectByNumber = React.useCallback((n) => {
     if (!book) return;
     const idx = book.entries.findIndex((e) => e.n === n);
-    if (idx >= 0) jumpToIndex(idx);
+    if (idx >= 0) jumpToIndex(idx, { highlight: true });
   }, [book, jumpToIndex]);
 
   const toggleBookmark = React.useCallback((index) => {
@@ -153,6 +200,23 @@ export default function BooksScreen({ navigation }) {
 
   const fontScale = settings?.fontScale ?? FONT_SCALE_RANGE.default;
   const showTranslation = !!settings?.showTranslation;
+
+  const entryLayouts = React.useMemo(() => {
+    if (!book) return [];
+    const containerWidth = Dimensions.get('window').width - 56;
+    let offset = 4;
+    return book.entries.map((entry, index) => {
+      const length = estimateEntryHeight(entry, fontScale, showTranslation, containerWidth);
+      const layout = { length, offset, index };
+      offset += length;
+      return layout;
+    });
+  }, [book, fontScale, showTranslation]);
+
+  const getItemLayout = React.useCallback(
+    (data, index) => entryLayouts[index] || { length: 0, offset: 0, index },
+    [entryLayouts]
+  );
 
   const renderCatalogAccessory = (item, st, ready) => {
     if (ready) {
@@ -255,14 +319,18 @@ export default function BooksScreen({ navigation }) {
     const hasEn = !!item.textEn;
     const showEn = hasEn && (showTranslation || !hasAr);
     return (
-      <View style={{
-        backgroundColor: colors.surface,
-        borderRadius: 12,
-        marginHorizontal: 12,
-        marginVertical: 8,
-        padding: 16,
-        direction: hasAr ? 'rtl' : 'ltr',
-      }}>
+      <EntryFlashCard
+        active={index === highlightIndex}
+        baseColor={colors.surface}
+        flashColor={colors.accent + '55'}
+        style={{
+          borderRadius: 12,
+          marginHorizontal: 12,
+          marginVertical: 8,
+          padding: 16,
+          direction: hasAr ? 'rtl' : 'ltr',
+        }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <View style={{
             minWidth: 34, height: 34, borderRadius: 17, paddingHorizontal: 8,
@@ -303,7 +371,7 @@ export default function BooksScreen({ navigation }) {
             {item.textEn}
           </Text>
         ) : null}
-      </View>
+      </EntryFlashCard>
     );
   };
 
@@ -353,6 +421,7 @@ export default function BooksScreen({ navigation }) {
           data={book.entries}
           keyExtractor={(item, index) => String(index)}
           renderItem={renderEntry}
+          getItemLayout={getItemLayout}
           initialNumToRender={6}
           maxToRenderPerBatch={6}
           windowSize={9}
@@ -362,7 +431,7 @@ export default function BooksScreen({ navigation }) {
               try {
                 listRef.current?.scrollToIndex({ index: info.index, animated: false });
               } catch {}
-            }, 120);
+            }, 50);
           }}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 20 }}
