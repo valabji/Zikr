@@ -1105,6 +1105,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bacons/apple-targets@npm:4.0.7":
+  version: 4.0.7
+  resolution: "@bacons/apple-targets@npm:4.0.7"
+  dependencies:
+    "@bacons/xcode": 1.0.0-alpha.32
+    "@react-native/normalize-colors": ^0.79.2
+    debug: ^4.3.4
+    glob: ^10.4.2
+  peerDependencies:
+    expo: ">=52"
+  checksum: 41d32ba7af60720cce258727701070203907921c87736b60d6ce9283713dbaae13165d6d6bc185a4972c707a337470be4dcdb221aab216a6ec916b7297098e1a
+  languageName: node
+  linkType: hard
+
+"@bacons/xcode@npm:1.0.0-alpha.32":
+  version: 1.0.0-alpha.32
+  resolution: "@bacons/xcode@npm:1.0.0-alpha.32"
+  dependencies:
+    "@expo/plist": ^0.0.18
+    debug: ^4.3.4
+    uuid: ^8.3.2
+  checksum: 1b848f9d6484a4021d14523dec2e8cc102d74daaf496aeadfa5f46c87af3862f07851518d71fdefdc18e4b067ed4e1c7ad108a0434fa54eea167285305e6bcdd
+  languageName: node
+  linkType: hard
+
 "@bcoe/v8-coverage@npm:^0.2.3":
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3"
@@ -1669,6 +1694,17 @@ __metadata:
     ora: ^3.4.0
     resolve-workspace-root: ^2.0.0
   checksum: b779fd56731ad68eebace80d2ac4239963213177ede0f925f95d4d5fb46f94b1a67e13d245e4acd46eb1aae23a07ceeec38701127ba75de395ef6419c8552fd7
+  languageName: node
+  linkType: hard
+
+"@expo/plist@npm:^0.0.18":
+  version: 0.0.18
+  resolution: "@expo/plist@npm:0.0.18"
+  dependencies:
+    "@xmldom/xmldom": ~0.7.0
+    base64-js: ^1.2.3
+    xmlbuilder: ^14.0.0
+  checksum: 42f5743fcd2a07b55a9f048d27cf0f273510ab35dde1f7030b22dc8c30ab2cfb65c6e68f8aa58fbcfa00177fdc7c9696d0004083c9a47c36fd4ac7fea27d6ccc
   languageName: node
   linkType: hard
 
@@ -3364,6 +3400,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native/normalize-colors@npm:^0.79.2":
+  version: 0.79.7
+  resolution: "@react-native/normalize-colors@npm:0.79.7"
+  checksum: 0c9420bbacb93965c50d872ab65edc17669a51ba7404ae845a6ee51356d0ef5c616c41782bb7b0af7b795f0a63e579ae28145450788fbcf053abf423038c2389
+  languageName: node
+  linkType: hard
+
 "@react-native/virtualized-lists@npm:0.81.4":
   version: 0.81.4
   resolution: "@react-native/virtualized-lists@npm:0.81.4"
@@ -3843,6 +3886,13 @@ __metadata:
   version: 0.8.11
   resolution: "@xmldom/xmldom@npm:0.8.11"
   checksum: 72020f3d5c74b54e25d19f2cd7b2d87484926cc7febdf02347dc3e06364186641d54e9e94baaaaba30e99528e6727adcd1baef6d0809e7460aee3a5be890b132
+  languageName: node
+  linkType: hard
+
+"@xmldom/xmldom@npm:~0.7.0":
+  version: 0.7.13
+  resolution: "@xmldom/xmldom@npm:0.7.13"
+  checksum: b4054078530e5fa8ede9677425deff0fce6d965f4c477ca73f8490d8a089e60b8498a15560425a1335f5ff99ecb851ed2c734b0a9a879299a5694302f212f37a
   languageName: node
   linkType: hard
 
@@ -4406,6 +4456,13 @@ __metadata:
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
   checksum: 9706c088a283058a8a99e0bf91b0a2f75497f185980d9ffa8b304de1d9e58ebda7c72c07ebf01dadedaac5b2907b2c6f566f660d62bd336c3468e960403b9d65
+  languageName: node
+  linkType: hard
+
+"base64-arraybuffer@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "base64-arraybuffer@npm:1.0.2"
+  checksum: 15e6400d2d028bf18be4ed97702b11418f8f8779fb8c743251c863b726638d52f69571d4cc1843224da7838abef0949c670bde46936663c45ad078e89fee5c62
   languageName: node
   linkType: hard
 
@@ -5041,6 +5098,15 @@ __metadata:
   dependencies:
     hyphenate-style-name: ^1.0.3
   checksum: 066318e918c04a5e5bce46b38fe81052ea6ac051bcc6d3c369a1d59ceb1546cb2b6086901ab5d22be084122ee3732169996a3dfb04d3406eaee205af77aec61b
+  languageName: node
+  linkType: hard
+
+"css-line-break@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "css-line-break@npm:2.1.0"
+  dependencies:
+    utrie: ^1.0.2
+  checksum: 37b1fe632b03be7a287cd394cef8b5285666343443125c510df9cfb6a4734a2c71e154ec8f7bbff72d7c339e1e5872989b1c52d86162aed27d6cc114725bb4d0
   languageName: node
   linkType: hard
 
@@ -5917,6 +5983,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-sharing@npm:~14.0.8":
+  version: 14.0.8
+  resolution: "expo-sharing@npm:14.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 8ac54d82328141dc67add5b9db3f16253b42e0e0aa2d39589fffd4d9cf15067e10262b0ab21837b184caae2799de81d74f8b2d129886c50e25550ef4fc6919f3
+  languageName: node
+  linkType: hard
+
 "expo-speech-recognition@npm:^56.0.1":
   version: 56.0.1
   resolution: "expo-speech-recognition@npm:56.0.1"
@@ -5925,6 +6000,15 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 25797a90b9a1fab323c3f3924bd152511caad16f89fdadd78557fe17066d9610ea330acfe34183af71610552422e461af8e524e2319e82f36404d92bd5aefdab
+  languageName: node
+  linkType: hard
+
+"expo-speech@npm:~14.0.8":
+  version: 14.0.8
+  resolution: "expo-speech@npm:14.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: b1fa82f6517ea4b031dd862939a30420502812c10baa4cbadfe5c443b3aa99be8d80ca7e5f747a11158b86ef25b1a3258ac80d4a79d6be2538e64d5fa2949365
   languageName: node
   linkType: hard
 
@@ -6696,6 +6780,16 @@ __metadata:
   version: 2.0.2
   resolution: "html-escaper@npm:2.0.2"
   checksum: d2df2da3ad40ca9ee3a39c5cc6475ef67c8f83c234475f24d8e9ce0dc80a2c82df8e1d6fa78ddd1e9022a586ea1bd247a615e80a5cd9273d90111ddda7d9e974
+  languageName: node
+  linkType: hard
+
+"html2canvas@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "html2canvas@npm:1.4.1"
+  dependencies:
+    css-line-break: ^2.1.0
+    text-segmentation: ^1.0.3
+  checksum: c134324af57f3262eecf982e436a4843fded3c6cf61954440ffd682527e4dd350e0c2fafd217c0b6f9a455fe345d0c67b4505689796ab160d4ca7c91c3766739
   languageName: node
   linkType: hard
 
@@ -8871,6 +8965,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"moment-hijri@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "moment-hijri@npm:3.0.0"
+  dependencies:
+    moment: ^2.30.1
+  checksum: 271812371694cc172d69c44a97848c85094684ab7a4c9b5b13b9d9ab0bf608398f8259d297c9c458c68c3072c34729ab74009d264d663eed710c7812eb764176
+  languageName: node
+  linkType: hard
+
 "moment-timezone@npm:^0.6.0":
   version: 0.6.0
   resolution: "moment-timezone@npm:0.6.0"
@@ -9731,6 +9834,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-android-widget@npm:0.20.3":
+  version: 0.20.3
+  resolution: "react-native-android-widget@npm:0.20.3"
+  peerDependencies:
+    expo: ">=54.0.0"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: f105c337ed2e9c98c0c624c32483ef14f5fd45a3264459fe47691e96f76e8eb06495fa3aa69b49168bacbffa80fd661d66082af2681fcff741e42b34f97c94f3
+  languageName: node
+  linkType: hard
+
 "react-native-drawer-layout@npm:^4.2.0":
   version: 4.2.0
   resolution: "react-native-drawer-layout@npm:4.2.0"
@@ -9809,6 +9926,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-shared-group-preferences@npm:1.1.24":
+  version: 1.1.24
+  resolution: "react-native-shared-group-preferences@npm:1.1.24"
+  peerDependencies:
+    react-native: ">=0.41.2"
+  checksum: df4b1fd820ad095b7c874bd701849c5cbed1dd6b01d1a5c1c4c288548a5aff54b1cacc5fc1afa5dd07b8183223197b71c9c1248130540dc229f6b3da3b99c2f8
+  languageName: node
+  linkType: hard
+
 "react-native-sound@npm:^0.11.0":
   version: 0.11.2
   resolution: "react-native-sound@npm:0.11.2"
@@ -9838,6 +9964,18 @@ __metadata:
   dependencies:
     prop-types: ^15.5.10
   checksum: 21e7a270dce6d249f718377a8aa2578c9a89b2b076710f6a60dc849ace5b47ade9e071345607947e738c0fdb06b17d9dad6ef99a8f76d7072b13bf3655026225
+  languageName: node
+  linkType: hard
+
+"react-native-view-shot@npm:4.0.3":
+  version: 4.0.3
+  resolution: "react-native-view-shot@npm:4.0.3"
+  dependencies:
+    html2canvas: ^1.4.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: d795849b5e2d1c75f66675aea073dae7d109b2b0a266d54f8c0ac8b30d4516dd83a5a7494fd2c44adf0e6e7286d3c29e9b025dbea3536332bf7165715f8a97de
   languageName: node
   linkType: hard
 
@@ -11029,6 +11167,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"text-segmentation@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "text-segmentation@npm:1.0.3"
+  dependencies:
+    utrie: ^1.0.2
+  checksum: 2e24632d59567c55ab49ac324815e2f7a8043e63e26b109636322ac3e30692cee8679a448fd5d0f0598a345f407afd0e34ba612e22524cf576d382d84058c013
+  languageName: node
+  linkType: hard
+
 "thenify-all@npm:^1.0.0":
   version: 1.6.0
   resolution: "thenify-all@npm:1.6.0"
@@ -11395,12 +11542,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"utrie@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "utrie@npm:1.0.2"
+  dependencies:
+    base64-arraybuffer: ^1.0.2
+  checksum: c96fbb7d4d8855a154327da0b18e39b7511cc70a7e4bcc3658e24f424bb884312d72b5ba777500b8858e34d365dc6b1a921dc5ca2f0d341182519c6b78e280a5
+  languageName: node
+  linkType: hard
+
 "uuid@npm:^7.0.3":
   version: 7.0.3
   resolution: "uuid@npm:7.0.3"
   bin:
     uuid: dist/bin/uuid
   checksum: f5b7b5cc28accac68d5c083fd51cca64896639ebd4cca88c6cfb363801aaa83aa439c86dfc8446ea250a7a98d17afd2ad9e88d9d4958c79a412eccb93bae29de
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
   languageName: node
   linkType: hard
 
@@ -11733,6 +11898,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xmlbuilder@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "xmlbuilder@npm:14.0.0"
+  checksum: 9e93d3c73957dbb21acde63afa5d241b19057bdbdca9d53534d8351e70f1d5c9db154e3ca19bd3e9ea84c082539ab6e7845591c8778a663e8b5d3470d5427a8b
+  languageName: node
+  linkType: hard
+
 "xmlbuilder@npm:^15.1.1":
   version: 15.1.1
   resolution: "xmlbuilder@npm:15.1.1"
@@ -11839,6 +12011,7 @@ __metadata:
   resolution: "zikr@workspace:."
   dependencies:
     "@babel/core": ^7.26.0
+    "@bacons/apple-targets": 4.0.7
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@expo-google-fonts/cairo": ^0.1.0
@@ -11875,6 +12048,8 @@ __metadata:
     expo-location: ~19.0.7
     expo-notifications: ^0.32.14
     expo-sensors: ~15.0.7
+    expo-sharing: ~14.0.8
+    expo-speech: ~14.0.8
     expo-speech-recognition: ^56.0.1
     expo-splash-screen: ~31.0.10
     expo-updates: ~29.0.11
@@ -11884,17 +12059,21 @@ __metadata:
     jest: ~29.7.0
     jest-expo: ~53.0.10
     moment: ^2.30.1
+    moment-hijri: ^3.0.0
     moment-timezone: ^0.6.0
     react: 19.1.0
     react-dom: 19.1.0
     react-native: 0.81.4
+    react-native-android-widget: 0.20.3
     react-native-gesture-handler: ~2.28.0
     react-native-reanimated: ~4.1.1
     react-native-safe-area-context: ~5.6.0
     react-native-screens: ~4.16.0
+    react-native-shared-group-preferences: 1.1.24
     react-native-sound: ^0.11.0
     react-native-svg: 15.12.1
     react-native-swiper: ^1.6.0
+    react-native-view-shot: 4.0.3
     react-native-web: ^0.21.0
     react-native-web-swiper: ^2.2.4
     react-native-worklets: 0.5.1

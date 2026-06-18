@@ -1,5 +1,9 @@
 // Single source of truth for all theme definitions
 import { FONT_FAMILY } from './Fonts';
+import { lighten, darken, mix } from '../utils/colorShift';
+import { THEME_VARIANT_KEYS } from '../utils/ThemeVariant';
+
+export { THEME_VARIANT_KEYS };
 
 export const themes = {
   originalGreen: {
@@ -210,4 +214,45 @@ export const themes = {
     warningText: '#A7C7E7',
     warningAccent: '#FFB74D',
   }
+};
+
+// Recipes describing how each prayer-time variant nudges a theme's base palette
+const VARIANT_RECIPES = {
+  fajr: { mixColor: '#A9C9E8', mixAmount: 0.14, accentLighten: 0.06 },
+  duha: { lightenAmount: 0.08, accentLighten: 0.04 },
+  asr: { mixColor: '#D98E4A', mixAmount: 0.14, accentDarken: 0.05 },
+  isha: { darkenAmount: 0.16, accentLighten: 0.08 },
+};
+
+const shiftSurface = (hex, recipe) => {
+  let result = hex;
+  if (recipe.mixColor) result = mix(result, recipe.mixColor, recipe.mixAmount);
+  if (recipe.lightenAmount) result = lighten(result, recipe.lightenAmount);
+  if (recipe.darkenAmount) result = darken(result, recipe.darkenAmount);
+  return result;
+};
+
+const shiftAccent = (hex, recipe) => {
+  let result = hex;
+  if (recipe.accentLighten) result = lighten(result, recipe.accentLighten);
+  if (recipe.accentDarken) result = darken(result, recipe.accentDarken);
+  return result;
+};
+
+// Applies a prayer-time variant recipe on top of a theme's base colors
+export const getThemeVariant = (themeKey, variantKey) => {
+  const base = themes[themeKey] || themes.goldOnDark;
+  const recipe = VARIANT_RECIPES[variantKey];
+  if (!recipe) return base;
+
+  return {
+    ...base,
+    background: shiftSurface(base.background, recipe),
+    surface: shiftSurface(base.surface, recipe),
+    primary: shiftSurface(base.primary, recipe),
+    primaryMedium: shiftSurface(base.primaryMedium, recipe),
+    primaryDark: shiftSurface(base.primaryDark, recipe),
+    accent: shiftAccent(base.accent, recipe),
+    accentDark: shiftAccent(base.accentDark, recipe),
+  };
 };

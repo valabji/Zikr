@@ -12,12 +12,13 @@ import { t, getDirectionalMixedSpacing, getRTLTextAlign, isRTL } from '../locale
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar';
+import { THEME_VARIANT_KEYS } from '../constants/themes';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS } from 'react-native-reanimated';
 
 export default function SettingsScreen({ navigation }) {
   const colors = useColors();
-  const { theme, setTheme, themes } = useTheme();
+  const { theme, setTheme, themes, variant, autoVariant, lockedVariant, setAutoVariantEnabled, lockVariant } = useTheme();
   const { volume, setClickVolume, playClick } = useAudio();
   const [currentLang, setCurrentLang] = useState('ar');
   const [initialScreen, setInitialScreen] = useState('Fav');
@@ -1301,6 +1302,79 @@ export default function SettingsScreen({ navigation }) {
               </Text>
               <AntDesign name={isThemeDropdownVisible ? "up" : "down"} size={20} color={colors.BYellow} />
             </TouchableOpacity>
+          </View>
+
+          {/* Prayer-time Theme Variants */}
+          <View style={styles.setting} testID="theme-variant-section">
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.settingTitle}>{t('settings.themeVariant')}</Text>
+              <TouchableOpacity
+                testID="theme-variant-auto-toggle"
+                onPress={() => {
+                  playClick();
+                  setAutoVariantEnabled(!autoVariant);
+                }}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 14,
+                  backgroundColor: autoVariant ? colors.BYellow : 'transparent',
+                  borderWidth: 1,
+                  borderColor: colors.BYellow,
+                }}
+              >
+                <Text style={{
+                  color: autoVariant ? colors.DGreen : colors.BYellow,
+                  fontFamily: 'Cairo_400Regular',
+                  fontWeight: autoVariant ? 'bold' : 'normal',
+                }}>
+                  {t(autoVariant ? 'settings.themeVariantAutoOn' : 'settings.themeVariantAutoOff')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: colors.textSecondary || colors.BYellow, fontFamily: 'Cairo_400Regular', fontSize: 13, marginTop: 4 }}>
+              {t('settings.themeVariantDescription')}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 12, gap: 8 }}>
+              {THEME_VARIANT_KEYS.map((variantKey) => {
+                const isActive = variant === variantKey;
+                const isLocked = !autoVariant && lockedVariant === variantKey;
+                return (
+                  <TouchableOpacity
+                    key={variantKey}
+                    testID={`theme-variant-${variantKey}`}
+                    onPress={() => {
+                      playClick();
+                      lockVariant(variantKey);
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderRadius: 14,
+                      borderWidth: 1,
+                      borderColor: colors.BYellow,
+                      backgroundColor: isActive ? colors.BYellow : 'transparent',
+                    }}
+                  >
+                    <Feather
+                      name={isLocked ? 'lock' : 'unlock'}
+                      size={14}
+                      color={isActive ? colors.DGreen : colors.BYellow}
+                      style={{ marginEnd: 6 }}
+                    />
+                    <Text style={{
+                      color: isActive ? colors.DGreen : colors.BYellow,
+                      fontFamily: 'Cairo_400Regular',
+                      fontWeight: isActive ? 'bold' : 'normal',
+                    }}>
+                      {t(`settings.themeVariants.${variantKey}`)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
 
           {/* Theme Dropdown Modal */}

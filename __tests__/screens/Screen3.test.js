@@ -22,6 +22,21 @@ jest.mock('../../utils/TasbihStore', () => ({
     setTarget: jest.fn(),
     deleteCounter: jest.fn(),
     moveCounter: jest.fn(),
+    setDailyGoal: jest.fn(),
+    stats: {
+      todayTotal: 5,
+      dailyGoal: 1000,
+      goalPct: 1,
+      last7Days: [
+        { date: '2026-06-12', count: 0 },
+        { date: '2026-06-13', count: 0 },
+        { date: '2026-06-14', count: 0 },
+        { date: '2026-06-15', count: 0 },
+        { date: '2026-06-16', count: 0 },
+        { date: '2026-06-17', count: 0 },
+        { date: '2026-06-18', count: 5 },
+      ],
+    },
     state: {
       counters: [{ id: 'a', count: 5, target: 33, rounds: 1, total: 100, nameKey: 'counter.presets.subhanAllah' }],
       activeId: 'a',
@@ -44,6 +59,7 @@ jest.mock('../../locales/i18n', () => ({
   t: (key) => key,
   getDirectionalMixedSpacing: jest.fn(() => ({})),
   getDirectionalSpacing: jest.fn(() => ({})),
+  isRTL: jest.fn(() => false),
 }));
 
 // Mock colors and themes
@@ -56,6 +72,11 @@ jest.mock('../../constants/Colors', () => ({
     white: '#FFFFFF',
     primary: '#000000',
     shadowColor: '#000000',
+    surface: '#FFFFFF',
+    overlayBackground: 'rgba(0, 0, 0, 0.7)',
+    accent: '#B8860B',
+    text: '#000000',
+    textSecondary: '#666666',
   }),
   useIsBrightTheme: () => false,
 }));

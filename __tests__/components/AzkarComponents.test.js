@@ -2,6 +2,8 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import AzkarSwiper from '../../components/AzkarSwiper';
 import AzkarOnePageScroll from '../../components/AzkarOnePageScroll';
+import AzkarOnePageScrollCompact from '../../components/AzkarOnePageScrollCompact';
+import * as Speech from 'expo-speech';
 
 // Mock required modules
 jest.mock('../../utils/Sounds.js', () => ({
@@ -46,13 +48,15 @@ const mockAzkarList = [
     zekr: 'Test Zikr 1',
     count: 3,
     reference: 'Test Reference 1',
-    description: 'Test Description 1'
+    description: 'Test Description 1',
+    category: 'Morning'
   },
   {
     zekr: 'Test Zikr 2',
     count: 1,
     reference: 'Test Reference 2',
-    description: 'Test Description 2'
+    description: 'Test Description 2',
+    category: 'Morning'
   }
 ];
 
@@ -89,5 +93,65 @@ describe('AzkarOnePageScroll', () => {
     fireEvent.press(countButtons[0]);
     // Since we mocked the audio module, we just check that it doesn't crash
     expect(countButtons[0]).toBeTruthy();
+  });
+});
+
+describe('Azkar audio recitation button', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('speaks the zikr text via expo-speech when pressed in AzkarOnePageScroll', () => {
+    const { getAllByTestId } = render(
+      <AzkarOnePageScroll azkarList={mockAzkarList} zikrFontSize={18} />
+    );
+
+    const audioButtons = getAllByTestId('azkar-audio-button');
+    expect(audioButtons).toHaveLength(2);
+
+    fireEvent.press(audioButtons[0]);
+    expect(Speech.speak).toHaveBeenCalledWith(
+      'Test Zikr 1',
+      expect.objectContaining({ language: 'ar' })
+    );
+  });
+
+  it('stops speech when the active button is pressed again', () => {
+    const { getAllByTestId } = render(
+      <AzkarOnePageScroll azkarList={mockAzkarList} zikrFontSize={18} />
+    );
+
+    const [firstButton] = getAllByTestId('azkar-audio-button');
+    fireEvent.press(firstButton);
+    fireEvent.press(firstButton);
+    expect(Speech.stop).toHaveBeenCalled();
+  });
+
+  it('renders the audio toggle button in AzkarOnePageScrollCompact', () => {
+    const { getAllByTestId } = render(
+      <AzkarOnePageScrollCompact azkarList={mockAzkarList} zikrFontSize={18} />
+    );
+
+    const audioButtons = getAllByTestId('azkar-audio-button');
+    expect(audioButtons).toHaveLength(2);
+    fireEvent.press(audioButtons[1]);
+    expect(Speech.speak).toHaveBeenCalledWith(
+      'Test Zikr 2',
+      expect.objectContaining({ language: 'ar' })
+    );
+  });
+
+  it('renders the audio toggle button in AzkarSwiper', () => {
+    const { getAllByTestId } = render(
+      <AzkarSwiper azkarList={mockAzkarList} zikrFontSize={18} />
+    );
+
+    const audioButtons = getAllByTestId('azkar-audio-button');
+    expect(audioButtons).toHaveLength(2);
+    fireEvent.press(audioButtons[0]);
+    expect(Speech.speak).toHaveBeenCalledWith(
+      'Test Zikr 1',
+      expect.objectContaining({ language: 'ar' })
+    );
   });
 });

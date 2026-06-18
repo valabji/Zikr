@@ -1,10 +1,34 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { TASBIH_CONSTANTS } from '../constants/TasbihConstants';
 import { t } from '../locales/i18n';
 
-const { STORAGE_KEY, DEFAULT_COUNTERS } = TASBIH_CONSTANTS;
+const { STORAGE_KEY, DEFAULT_COUNTERS, DEFAULT_DAILY_GOAL } = TASBIH_CONSTANTS;
+
+function todayKey() {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+export function computeTasbihStats(history, dailyGoal) {
+  const h = history || {};
+  const goal = dailyGoal > 0 ? dailyGoal : DEFAULT_DAILY_GOAL;
+  const today = todayKey();
+  const todayTotal = h[today] || 0;
+  const goalPct = goal > 0 ? Math.min(100, Math.round((todayTotal / goal) * 100)) : 0;
+  const dayMs = 86400000;
+  const todayMs = new Date(today).getTime();
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const ms = todayMs - i * dayMs;
+    const key = new Date(ms).toISOString().slice(0, 10);
+    last7Days.push({ date: key, count: h[key] || 0 });
+  }
+  return { todayTotal, dailyGoal: goal, goalPct, last7Days };
+}
 
 let cached = null;
 let persistTimer = null;
@@ -27,7 +51,7 @@ function seedState() {
     total: 0,
     createdAt: Date.now(),
   }));
-  return { counters, activeId: counters[0].id };
+  return { counters, activeId: counters[0].id, dailyGoal: DEFAULT_DAILY_GOAL, history: {} };
 }
 
 function normalizeCounter(c) {
@@ -48,7 +72,9 @@ function normalizeState(raw) {
   if (!raw || !Array.isArray(raw.counters) || raw.counters.length === 0) return seedState();
   const counters = raw.counters.map(normalizeCounter);
   const activeId = counters.some((c) => c.id === raw.activeId) ? raw.activeId : counters[0].id;
-  return { counters, activeId };
+  const dailyGoal = typeof raw.dailyGoal === 'number' && raw.dailyGoal > 0 ? raw.dailyGoal : DEFAULT_DAILY_GOAL;
+  const history = raw.history && typeof raw.history === 'object' ? raw.history : {};
+  return { counters, activeId, dailyGoal, history };
 }
 
 function emit() {
@@ -137,8 +163,16 @@ export function increment() {
     }
     return { ...c, total, count: c.count + 1 };
   });
-  commit({ ...state, counters });
+  const today = todayKey();
+  const history = { ...(state.history || {}) };
+  history[today] = (history[today] || 0) + 1;
+  commit({ ...state, counters, history });
   return result;
+}
+
+export function setDailyGoal(goal) {
+  const state = getState();
+  commit({ ...state, dailyGoal: Number(goal) > 0 ? Number(goal) : DEFAULT_DAILY_GOAL });
 }
 
 export function resetActive(resetRounds = false) {
@@ -216,9 +250,11 @@ export function useTasbih() {
     return () => { mounted = false; unsubscribe(); };
   }, []);
   const active = state.counters.find((c) => c.id === state.activeId);
+  const stats = useMemo(() => computeTasbihStats(state.history, state.dailyGoal), [state.history, state.dailyGoal]);
   return {
     state,
     active,
+    stats,
     increment,
     resetActive,
     setActiveId,
@@ -227,6 +263,7 @@ export function useTasbih() {
     setTarget,
     deleteCounter,
     moveCounter,
+    setDailyGoal,
   };
 }
 

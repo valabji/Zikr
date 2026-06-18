@@ -1,19 +1,25 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import Swiper from 'react-native-web-swiper';
+import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
+import { useAzkarAudio } from '../utils/AzkarAudio';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
+import { logAzkarCompletion } from '../utils/AzkarHistory';
+import ShareCardModal from './ShareCardModal';
 
 export default function AzkarSwiper({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
+  const azkarAudio = useAzkarAudio();
   const reverse = Platform.OS === 'web' && isRTL();
   const swp = React.useRef(null);
   const size = azkarList.length;
+  const [shareItem, setShareItem] = React.useState(null);
 
   const Item = ({ z, pn }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
@@ -31,6 +37,9 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
               setI(i + 1);
               if (i == z.count - 1) {
                 vibrationManager.vibrateForNextZikr();
+                if (pn === size) {
+                  logAzkarCompletion(z.category);
+                }
                 // react-native-web-swiper navigation
                 if (reverse) {
                   let next = size - pn - 1;
@@ -153,10 +162,25 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
         stackDepth={1}
       >
         {azkarList.map((i, index) => {
+          const audioKey = `${i.category}-${index + 1}`;
+          const isAudioActive = azkarAudio.activeKey === audioKey && azkarAudio.isPlaying;
           const slideContent = (
             <View style={{
               flex: 1, borderWidth: 1, borderColor: colors.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
             }}>
+              <TouchableOpacity
+                onPress={() => setShareItem(i)}
+                style={{ position: 'absolute', top: 8, [isRTL() ? 'left' : 'right']: 8, zIndex: 1, padding: 8 }}
+              >
+                <Feather name="share-2" size={20} color={colors.BYellow} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="azkar-audio-button"
+                onPress={() => azkarAudio.toggle(audioKey, i.zekr)}
+                style={{ position: 'absolute', top: 8, [isRTL() ? 'right' : 'left']: 8, zIndex: 1, padding: 8 }}
+              >
+                <Feather name={isAudioActive ? 'pause' : 'volume-2'} size={20} color={colors.BYellow} />
+              </TouchableOpacity>
               <Item z={i} pn={index + 1} />
             </View>
           );
@@ -173,6 +197,16 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
           );
         })}
       </Swiper>
+      <ShareCardModal
+        visible={!!shareItem}
+        content={shareItem ? {
+          arabic: shareItem.zekr,
+          quran: shareItem.quran,
+          reference: shareItem.reference,
+          description: shareItem.description,
+        } : null}
+        onClose={() => setShareItem(null)}
+      />
     </View>
   );
 }

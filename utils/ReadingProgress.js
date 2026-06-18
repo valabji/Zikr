@@ -50,7 +50,16 @@ function computeStats(data) {
     }
   }
 
-  return { todayCount, streak, totalUnique, completionPct };
+  const dayMs = 86400000;
+  const todayMs = new Date(today).getTime();
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const ms = todayMs - i * dayMs;
+    const key = new Date(ms).toISOString().slice(0, 10);
+    last7Days.push({ date: key, count: (data[key] || []).length });
+  }
+
+  return { todayCount, streak, totalUnique, completionPct, last7Days };
 }
 
 async function load() {

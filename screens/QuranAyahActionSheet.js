@@ -48,7 +48,7 @@ function ActionRow({ icon, label, onPress, colors, primary }) {
   );
 }
 
-export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onFollow, onDetails }) {
+export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onFollow, onDetails, onShare }) {
   const colors = useColors();
   const lang = isRTL() ? 'ar' : 'en';
 
@@ -129,6 +129,12 @@ export default function QuranAyahActionSheet({ ayah, onClose, onPlay, onFollow, 
               icon="info"
               label={t('quran.actionDetails')}
               onPress={() => { onDetails(ayah); onClose(); }}
+            />
+            <ActionRow
+              colors={colors}
+              icon="share-2"
+              label={t('quran.actionShare')}
+              onPress={() => { onShare(ayah); onClose(); }}
             />
             <TouchableOpacity
               onPress={onClose}

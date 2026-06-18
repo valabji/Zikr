@@ -11,12 +11,14 @@ import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
 import { useTasbih, getCounterDisplayName } from '../utils/TasbihStore';
 import TasbihCountersSheet from '../components/TasbihCountersSheet';
+import TasbihStatsSheet from '../components/TasbihStatsSheet';
 
 export default function Screen3({ route, navigation }) {
   const colors = useColors();
-  const { active, increment, resetActive } = useTasbih();
+  const { active, increment, resetActive, stats, setDailyGoal } = useTasbih();
   const player = useAudio();
   const [sheetVisible, setSheetVisible] = React.useState(false);
+  const [statsVisible, setStatsVisible] = React.useState(false);
   const [resetVisible, setResetVisible] = React.useState(false);
   const [resetRounds, setResetRounds] = React.useState(false);
 
@@ -108,16 +110,29 @@ export default function Screen3({ route, navigation }) {
         </View>
       </Modal>
 
-      <CustomHeader title={t('app.tasbih')} isHome={true} navigation={navigation} Left={() => {
-        return <TouchableOpacity
-          onPress={() => {
-            setResetRounds(false)
-            setResetVisible(true)
-          }}
-          style={{ flex: 1, justifyContent: "center", alignItems: "flex-end", paddingHorizontal: 20 }}>
-          <Feather name="rotate-cw" color={colors.BYellow} size={32} />
-        </TouchableOpacity>
-      }} />
+      <CustomHeader
+        title={t('app.tasbih')}
+        isHome={true}
+        navigation={navigation}
+        Left={() => {
+          return <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingHorizontal: 12 }}>
+            <TouchableOpacity
+              testID="tasbih-stats-button"
+              onPress={() => setStatsVisible(true)}
+              style={{ paddingHorizontal: 8 }}>
+              <Feather name="bar-chart-2" color={colors.BYellow} size={26} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setResetRounds(false)
+                setResetVisible(true)
+              }}
+              style={{ paddingHorizontal: 8 }}>
+              <Feather name="rotate-cw" color={colors.BYellow} size={26} />
+            </TouchableOpacity>
+          </View>
+        }}
+      />
 
       <TouchableOpacity
         testID="tasbih-active-name"
@@ -146,6 +161,18 @@ export default function Screen3({ route, navigation }) {
             {t('counter.rounds') + ': ' + (active.rounds || 0)}
           </Text>
         </View>
+      )}
+
+      {stats?.dailyGoal > 0 && (
+        <TouchableOpacity
+          testID="tasbih-goal-progress"
+          onPress={() => setStatsVisible(true)}
+          style={{ alignItems: "center", justifyContent: "center", marginBottom: 8 }}
+        >
+          <Text style={[textStyles.base, { color: colors.BYellow, fontSize: 13, opacity: 0.85 }]}>
+            {t('counter.todayProgress') + ': ' + stats.todayTotal + ' / ' + stats.dailyGoal}
+          </Text>
+        </TouchableOpacity>
       )}
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -181,6 +208,12 @@ export default function Screen3({ route, navigation }) {
       </View>
 
       <TasbihCountersSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
+      <TasbihStatsSheet
+        visible={statsVisible}
+        onClose={() => setStatsVisible(false)}
+        stats={stats}
+        onSetDailyGoal={setDailyGoal}
+      />
     </View>
   );
 }

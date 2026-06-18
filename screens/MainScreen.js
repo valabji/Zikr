@@ -13,6 +13,8 @@ import { MuslimIconSvg } from '../components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Hbg } from '../components/Hbg';
+import { useAzkarHistory } from '../utils/AzkarHistory';
+import DailyHadithCard from '../components/DailyHadithCard';
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -33,6 +35,7 @@ export default function HomeScreen({ navigation, route }) {
   const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'))
 
   const [showFavorites, setShowFavorites] = React.useState(route?.params?.showFavorites || false)
+  const { stats: azkarStats } = useAzkarHistory()
 
   React.useEffect(() => {
     if (route?.params?.showFavorites !== undefined) {
@@ -228,6 +231,27 @@ export default function HomeScreen({ navigation, route }) {
     );
   };
 
+  const StreakBadge = ({ icon, label, streak, doneToday }) => (
+    <View style={{
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.DGreen,
+      borderRadius: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      ...getDirectionalMixedSpacing({ marginRight: 8, marginLeft: 8 }),
+    }}>
+      <Feather name={icon} color={colors.BYellow} size={18} />
+      <View style={getDirectionalMixedSpacing({ marginLeft: 8 })}>
+        <Text style={[textStyles.body, { color: colors.BYellow, fontSize: 13 }]} numberOfLines={1}>{label}</Text>
+        <Text style={[textStyles.bodySmall, { color: colors.BYellow, opacity: 0.85, fontSize: 11 }]}>
+          {streak + ' ' + t('zikr.dayStreak')}
+        </Text>
+      </View>
+      {doneToday ? <Feather name="check-circle" color={colors.BYellow} size={16} style={getDirectionalMixedSpacing({ marginLeft: 6 })} /> : null}
+    </View>
+  )
+
   let p = ""
   return (
     <View style={{ flex: 1 }} testID="home-screen">
@@ -282,6 +306,17 @@ export default function HomeScreen({ navigation, route }) {
           onDidFailToReceiveAdWithError={err=>{
             console.warn(err)
           }} /> */}
+        {!s && !showFavorites && (azkarStats.morningStreak > 0 || azkarStats.eveningStreak > 0 || azkarStats.morningDoneToday || azkarStats.eveningDoneToday) ? (
+          <View testID="azkar-streak-banner" style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
+            <StreakBadge icon="sunrise" label={t('zikr.morningAzkar')} streak={azkarStats.morningStreak} doneToday={azkarStats.morningDoneToday} />
+            <StreakBadge icon="moon" label={t('zikr.eveningAzkar')} streak={azkarStats.eveningStreak} doneToday={azkarStats.eveningDoneToday} />
+          </View>
+        ) : null}
+        {!s && !showFavorites ? (
+          <View style={{ alignItems: 'center', width: '100%' }}>
+            <DailyHadithCard />
+          </View>
+        ) : null}
         <ScrollView
           style={{ flex: 1, width: "100%" }}
           contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}

@@ -158,6 +158,21 @@ jest.mock('expo-font', () => ({
   isLoaded: jest.fn(() => true),
 }), { virtual: true });
 
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}), { virtual: true });
+
+jest.mock('expo-speech', () => ({
+  speak: jest.fn(),
+  stop: jest.fn(),
+  isSpeakingAsync: jest.fn(() => Promise.resolve(false)),
+}), { virtual: true });
+
+jest.mock('react-native-view-shot', () => ({
+  captureRef: jest.fn(() => Promise.resolve('file:///mock/share-card.png')),
+}), { virtual: true });
+
 jest.mock('expo-file-system/legacy', () => ({
   documentDirectory: '/mock/document/',
   cacheDirectory: '/mock/cache/',
@@ -311,12 +326,18 @@ jest.mock('react-native', () => {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     },
+    useWindowDimensions: jest.fn(() => ({ width: 375, height: 667 })),
     AsyncStorage: {
       getItem: jest.fn().mockResolvedValue(null),
       setItem: jest.fn().mockResolvedValue(undefined),
     },
     Alert: {
       alert: jest.fn(),
+    },
+    Linking: {
+      openURL: jest.fn().mockResolvedValue(true),
+      canOpenURL: jest.fn().mockResolvedValue(true),
+      getInitialURL: jest.fn().mockResolvedValue(null),
     },
     BackHandler: {
       addEventListener: jest.fn(),
@@ -356,6 +377,28 @@ jest.mock('react-native', () => {
 
 // Mock react-native-community/slider
 jest.mock('@react-native-community/slider', () => 'Slider');
+
+jest.mock('react-native-android-widget', () => ({
+  registerWidgetTaskHandler: jest.fn(),
+  registerWidgetConfigurationScreen: jest.fn(),
+  requestWidgetUpdate: jest.fn(() => Promise.resolve()),
+  FlexWidget: 'FlexWidget',
+  TextWidget: 'TextWidget',
+  IconWidget: 'IconWidget',
+  ImageWidget: 'ImageWidget',
+  ListWidget: 'ListWidget',
+  OverlapWidget: 'OverlapWidget',
+  SvgWidget: 'SvgWidget',
+}));
+
+jest.mock('react-native-shared-group-preferences', () => ({
+  __esModule: true,
+  default: {
+    isAppInstalledAndroid: jest.fn(() => Promise.resolve()),
+    getItem: jest.fn(() => Promise.resolve(null)),
+    setItem: jest.fn(() => Promise.resolve()),
+  },
+}));
 
 // Mock problematic React Native components
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter');

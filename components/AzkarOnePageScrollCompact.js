@@ -1,21 +1,29 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
+import { useAzkarAudio } from '../utils/AzkarAudio';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
+import { logAzkarCompletion } from '../utils/AzkarHistory';
+import ShareCardModal from './ShareCardModal';
 
 export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
+  const azkarAudio = useAzkarAudio();
+  const [shareItem, setShareItem] = React.useState(null);
 
   const Item = ({ z, pn, totalCount }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
+    const audioKey = `${z.category}-${pn}`;
+    const isAudioActive = azkarAudio.activeKey === audioKey && azkarAudio.isPlaying;
 
     return (
       <View style={{
@@ -27,6 +35,19 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
         borderRadius: 10,
       }}>
         <TouchableOpacity
+          onPress={() => setShareItem(z)}
+          style={{ position: 'absolute', top: 8, [isRTL() ? 'left' : 'right']: 8, zIndex: 1, padding: 8 }}
+        >
+          <Feather name="share-2" size={18} color={colors.BYellow} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID="azkar-audio-button"
+          onPress={() => azkarAudio.toggle(audioKey, z.zekr)}
+          style={{ position: 'absolute', top: 8, [isRTL() ? 'right' : 'left']: 8, zIndex: 1, padding: 8 }}
+        >
+          <Feather name={isAudioActive ? 'pause' : 'volume-2'} size={18} color={colors.BYellow} />
+        </TouchableOpacity>
+        <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
             if (i < z.count) {
@@ -35,6 +56,9 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
               vibrationManager.vibrateForAzkarCount();
               if (i == z.count - 1) {
                 vibrationManager.vibrateForNextZikr();
+                if (pn === totalCount) {
+                  logAzkarCompletion(z.category);
+                }
               }
             }
           }}
@@ -107,22 +131,34 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1, width: '100%' }}
-      contentContainerStyle={{
-        paddingBottom: 80,
-        flexGrow: 1
-      }}
-      showsVerticalScrollIndicator={true}
-    >
-      {azkarList.map((item, index) => (
-        <Item
-          key={index}
-          z={item}
-          pn={index + 1}
-          totalCount={azkarList.length}
-        />
-      ))}
-    </ScrollView>
+    <>
+      <ScrollView
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{
+          paddingBottom: 80,
+          flexGrow: 1
+        }}
+        showsVerticalScrollIndicator={true}
+      >
+        {azkarList.map((item, index) => (
+          <Item
+            key={index}
+            z={item}
+            pn={index + 1}
+            totalCount={azkarList.length}
+          />
+        ))}
+      </ScrollView>
+      <ShareCardModal
+        visible={!!shareItem}
+        content={shareItem ? {
+          arabic: shareItem.zekr,
+          quran: shareItem.quran,
+          reference: shareItem.reference,
+          description: shareItem.description,
+        } : null}
+        onClose={() => setShareItem(null)}
+      />
+    </>
   );
 }

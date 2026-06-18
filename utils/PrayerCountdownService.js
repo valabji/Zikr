@@ -7,6 +7,7 @@ import {
   formatPrayerTime,
 } from './PrayerUtils';
 import NotificationService from './NotificationService';
+import { syncWidgetData } from './PrayerWidgetService';
 import { t } from '../locales/i18n';
 import moment from 'moment-timezone';
 
@@ -110,6 +111,8 @@ class PrayerCountdownService {
         console.error('Failed to calculate prayer times');
         return;
       }
+
+      syncWidgetData();
 
       // Get current and next prayer
       const { next } = getCurrentAndNextPrayer(

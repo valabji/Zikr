@@ -51,6 +51,7 @@ export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
   mushafFontSize, mushafLineHeight, mushafSpaceExtra, playingAyahKey, playingWordIdx,
   playingWordMistake, onAyahPress, onAyahLongPress, customLineSize,
+  wordTooltipEnabled, onWordPress,
 }) {
   // Justification: letterSpacing on the lone space char widens only the
   // inter-word gaps, leaving word glyphs and Arabic joining untouched.
@@ -99,9 +100,11 @@ export function MushafLine({
           const [s, a] = g.vk.split(':').map(Number);
           const ayahMeta = { surah: s, ayah: a };
 
-          let speakableIdx = isPlaying
+          const needsWordIndex = isPlaying || wordTooltipEnabled;
+          let speakableIdx = needsWordIndex
             ? ayahWordBase(g.vk, g.words.filter((w) => w.type !== 'end')) - 1
             : -1;
+          const ayahWords = wordTooltipEnabled ? wordsData[g.vk] : null;
           const segChildren = g.words.map((w, wi) => {
             if (w.type === 'end' && !qcfActive) {
               return (
@@ -119,9 +122,14 @@ export function MushafLine({
             const highlightColor = (isWordHighlighted && playingWordMistake)
               ? MISTAKE_HIGHLIGHT + '66'
               : colors.accent + '55';
+            const wordGloss = ayahWords && w.type !== 'end' ? ayahWords[speakableIdx] : null;
             return (
               <Text
                 key={wi}
+                testID={wordTooltipEnabled && w.type !== 'end' ? 'mushaf-word' : undefined}
+                onPress={wordTooltipEnabled && w.type !== 'end' ? (e) => {
+                  onWordPress({ ar: w.ar, en: wordGloss ? wordGloss.en : null }, e.nativeEvent.pageX, e.nativeEvent.pageY);
+                } : undefined}
                 style={isWordHighlighted ? { backgroundColor: highlightColor } : null}
               >
                 {wi === 0 ? '' : sep}{txt}

@@ -33,7 +33,82 @@
     "qibla": "اتجاه القبلة",
     "quran": "القرآن الكريم",
     "books": "المكتبة الإسلامية",
-    "radio": "الراديو"
+    "radio": "الراديو",
+    "islamicCalendar": "التقويم الهجري",
+    "wirdPlanner": "خطة الورد",
+    "hifzTracker": "متتبع الحفظ"
+  },
+  "dailyHadith": {
+    "title": "حديث اليوم"
+  },
+  "islamicCalendar": {
+    "title": "التقويم الهجري",
+    "today": "اليوم",
+    "todayIs": "اليوم هو {date}",
+    "upcomingEvents": "المناسبات القادمة",
+    "inDays": "خلال {count} يوم",
+    "inOneDay": "غدًا",
+    "fastingTracker": "متتبع الصيام",
+    "totalFasts": "إجمالي أيام الصيام المسجلة",
+    "ramadanProgress": "رمضان: تم صيام {fasted} من {total} يومًا",
+    "markFasting": "تحديد كيوم صيام",
+    "unmarkFasting": "إلغاء تحديد الصيام",
+    "fastingDay": "يوم صيام",
+    "selectedDate": "التاريخ المحدد",
+    "noEventToday": "لا توجد مناسبة في هذا اليوم",
+    "reminders": "تذكير السحور والإفطار",
+    "remindersDescription": "احصل على تنبيه عند وقت السحور والإفطار في الأيام التي تحددها كأيام صيام.",
+    "remindersNeedLocation": "حدد موقعك في إعدادات مواقيت الصلاة لتفعيل التذكيرات.",
+    "events": {
+      "islamicNewYear": "رأس السنة الهجرية",
+      "ashura": "يوم عاشوراء",
+      "mawlid": "المولد النبوي الشريف",
+      "ramadanStart": "بداية شهر رمضان",
+      "laylatAlQadr": "ليلة القدر (تقديري)",
+      "eidAlFitr": "عيد الفطر",
+      "arafahDay": "يوم عرفة",
+      "eidAlAdha": "عيد الأضحى"
+    },
+    "notifications": {
+      "suhoorTitle": "تذكير السحور",
+      "suhoorBody": "اقترب وقت انتهاء السحور، أتمم وجبتك قبل أذان الفجر.",
+      "iftarTitle": "حان وقت الإفطار",
+      "iftarBody": "حان الآن وقت الإفطار."
+    }
+  },
+  "wirdPlanner": {
+    "title": "خطة الورد",
+    "dailyTarget": "هدف القراءة اليومي",
+    "dailyTargetDescription": "حدد عدد صفحات القرآن التي تريد قراءتها كل يوم.",
+    "pagesPerDay": "{count} صفحة/يوم",
+    "setGoal": "تحديد الهدف",
+    "goalPlaceholder": "مثال: 20",
+    "noGoalSet": "حدد هدفًا يوميًا للصفحات لبدء تتبع وردك.",
+    "today": "اليوم",
+    "todayProgress": "تمت قراءة {read} من {target} صفحة",
+    "streak": "يوم متتالي",
+    "khatmahProgress": "تقدم الختمة",
+    "pagesOfTotal": "{progress} من {total} صفحة",
+    "khatmahCount": "عدد الختمات المكتملة",
+    "totalPagesRead": "إجمالي الصفحات المقروءة",
+    "resetKhatmah": "بدء ختمة جديدة",
+    "resetKhatmahConfirm": "سيؤدي هذا إلى إعادة تعيين تقدم ختمتك الحالية إلى الصفر. هل تريد المتابعة؟"
+  },
+  "hifz": {
+    "title": "متتبع الحفظ",
+    "progress": "تقدم الحفظ",
+    "surahsMemorized": "تم حفظ {count} من {total} سورة",
+    "ayahProgress": "{progress} من {total} آية",
+    "dueForReview": "{count} سورة بحاجة للمراجعة",
+    "review": "مراجعة",
+    "ayahCount": "{count} آية",
+    "noResults": "لا توجد سور مطابقة لهذا التصفية",
+    "filters": {
+      "all": "الكل",
+      "memorized": "محفوظة",
+      "inProgress": "قيد الحفظ",
+      "due": "بحاجة للمراجعة"
+    }
   },
   "search": {
     "placeholder": "بحث..."
@@ -63,6 +138,11 @@
     "done": "تم",
     "custom": "مخصص",
     "switchCounter": "تبديل العداد",
+    "stats": "الإحصائيات",
+    "dailyGoal": "الهدف اليومي",
+    "todayProgress": "اليوم",
+    "weeklyChart": "آخر 7 أيام",
+    "noGoal": "بدون هدف",
     "presets": {
       "counter": "عداد",
       "subhanAllah": "سبحان الله",
@@ -73,10 +153,17 @@
     }
   },
   "zikr": {
-    "reference": "المرجع : {text}"
+    "reference": "المرجع : {text}",
+    "morningAzkar": "أذكار الصباح",
+    "eveningAzkar": "أذكار المساء",
+    "dayStreak": "أيام متتالية",
+    "completedToday": "أُنجز اليوم"
   },
   "share": {
-    "message": "حمل تطبيق ذِكْر وانشره لغيرك لتعم الفائدة وتنال الثواب 📱✨\n\n🌟 المميزات:\n• أذكار وأدعية صحيحة 📖\n• مسبحة رقمية تفاعلية مع صوت مميز 📿\n• مواقيت الصلاة مع طرق حساب متعددة ⏰\n• تحديد اتجاه القبلة مع البوصلة 🧭\n• دعم كامل للعربية والإنجليزية 🌐\n• واجهة سهلة مع نظام المفضلة ⭐\n\n📱 التحميل:\nنسخة الويب: https://zikr.valabji.com\nتطبيق الاندرويد: https://play.google.com/store/apps/details?id=com.valabji.zikr\n\n🍎 للايفون - إصدار متجر التطبيقات قادم قريباً، لكن يمكنك الآن:\n١. افتح رابط نسخة الويب في متصفح Safari\n٢. اضغط على أيقونة المشاركة (مربع مع سهم)\n٣. مرر لأسفل واختر \"إضافة إلى الشاشة الرئيسية\"\n٤. اضغط \"إضافة\" - سيظهر التطبيق كأيقونة على الشاشة الرئيسية"
+    "message": "حمل تطبيق ذِكْر وانشره لغيرك لتعم الفائدة وتنال الثواب 📱✨\n\n🌟 المميزات:\n• أذكار وأدعية صحيحة 📖\n• مسبحة رقمية تفاعلية مع صوت مميز 📿\n• مواقيت الصلاة مع طرق حساب متعددة ⏰\n• تحديد اتجاه القبلة مع البوصلة 🧭\n• دعم كامل للعربية والإنجليزية 🌐\n• واجهة سهلة مع نظام المفضلة ⭐\n\n📱 التحميل:\nنسخة الويب: https://zikr.valabji.com\nتطبيق الاندرويد: https://play.google.com/store/apps/details?id=com.valabji.zikr\n\n🍎 للايفون - إصدار متجر التطبيقات قادم قريباً، لكن يمكنك الآن:\n١. افتح رابط نسخة الويب في متصفح Safari\n٢. اضغط على أيقونة المشاركة (مربع مع سهم)\n٣. مرر لأسفل واختر \"إضافة إلى الشاشة الرئيسية\"\n٤. اضغط \"إضافة\" - سيظهر التطبيق كأيقونة على الشاشة الرئيسية",
+    "preview": "معاينة المشاركة",
+    "shareImage": "مشاركة كصورة",
+    "cardBranding": "ذِكْر · zikr.valabji.com"
   },
   "language": {
     "switch": "English",
@@ -93,6 +180,16 @@
     "autoSave": "الحفظ التلقائي",
     "autoSaveDescription": "حفظ التغييرات تلقائياً عند إجرائها",
     "theme": "المظهر",
+    "themeVariant": "تنويعة الوقت",
+    "themeVariantDescription": "يتبدل كل مظهر بين أجواء الفجر والنهار والعصر والليل مع مواقيت الصلاة. اضغط على قفل أي تنويعة لتثبيتها.",
+    "themeVariantAutoOn": "تلقائي",
+    "themeVariantAutoOff": "مثبّت",
+    "themeVariants": {
+      "fajr": "الفجر",
+      "duha": "الضحى",
+      "asr": "العصر",
+      "isha": "العشاء"
+    },
     "clickVolume": "مستوى صوت النقر",
     "fontSize": "حجم خط الأذكار",
     "viewMode": "طريقة عرض الأذكار",
@@ -206,7 +303,13 @@
     "pm": "م",
     "countdownHour": "س",
     "countdownMinute": "د",
-    "countdownSecond": "ث"
+    "countdownSecond": "ث",
+    "streak": "تتابع الصلاة",
+    "streakDays": "تتابع {count} يوم",
+    "streakDaysZero": "سجّل صلاتك لبدء التتابع",
+    "prayersCompletedToday": "{count}/{total} صلوات اليوم",
+    "markAsPrayed": "وضع علامة كصُلّيت",
+    "prayed": "تمت الصلاة"
   },
   "qibla": {
     "loading": "جاري العثور على اتجاه القبلة...",
@@ -347,6 +450,7 @@
     "juzs": "الأجزاء",
     "bookmarks": "العلامات",
     "noBookmarks": "لا توجد علامات بعد. اضغط على أيقونة الإشارة في أي صفحة لحفظها.",
+    "bookmarkNotePlaceholder": "أضف ملاحظة...",
     "meccan": "مكية",
     "medinan": "مدنية",
     "ayahCount": "{count} آية",
@@ -365,6 +469,8 @@
     "customLineSize": "حجم خط مخصص للأسطر",
     "customLineSizeDesc": "تجاوز ضبط عرض المصحف للسطر واسمح بانتقال الكلمات إلى سطر جديد، حتى يتمكن المنزلق من تكبير النص إلى ما هو أكبر من عرض الصفحة المطبوعة.",
     "reciter": "القارئ",
+    "wordTooltip": "النقر على الكلمة",
+    "wordTooltipDesc": "اضغط على أي كلمة في الصفحة لرؤية معناها بالإنجليزية.",
     "ayahInteraction": "سلوك النقر على الآية",
     "ayahInteractionDesc": "ما الذي يحدث عند النقر على آية في الصفحة.",
     "ayahInteractionMenu": "عرض قائمة الإجراءات",
@@ -372,11 +478,13 @@
     "actionPlay": "تشغيل هذه الآية",
     "actionFollow": "المتابعة الصوتية من هنا",
     "actionDetails": "الترجمة، التفسير، كلمة بكلمة",
+    "actionShare": "مشاركة كصورة",
     "audioScope": "نطاق التشغيل التلقائي",
     "audioScopeDesc": "إلى أي مدى تستمر التلاوة بعد الآية التي ضغطت عليها.",
     "audioScopeAyah": "هذه الآية فقط",
     "audioScopePage": "حتى نهاية الصفحة",
     "audioScopeSurah": "حتى نهاية السورة",
+    "playbackSpeed": "سرعة التلاوة",
     "highFidelity": "مصحف عالي الدقة",
     "highFidelityDesc": "تنزيل خطوط مجمع الملك فهد لكل صفحة لعرض مطابق تماماً لتخطيط أسطر المصحف المطبوع.",
     "hd1405": "خطوط 1405 هـ الدقيقة",
@@ -402,6 +510,7 @@
     "progress": "التقدم",
     "streakDays": "أيام متتالية",
     "todayPages": "صفحات اليوم",
+    "weeklyChart": "آخر 7 أيام",
     "totalRead": "صفحات مقروءة",
     "completion": "الإتمام",
     "pageInfo": "معلومات الصفحة",
@@ -419,7 +528,9 @@
     "voiceMismatchMistake": "أخطأت في القراءة",
     "index": "الفهرس",
     "tafsirSelection": "التفسير",
-    "tafsirSelectionDesc": "التفسير المعروض في تبويب التفسير عند عرض الآية."
+    "tafsirSelectionDesc": "التفسير المعروض في تبويب التفسير عند عرض الآية.",
+    "searchByMeaning": "البحث في الترجمة حسب المعنى",
+    "noResults": "لا توجد نتائج"
   },
   "books": {
     "title": "المكتبة الإسلامية",

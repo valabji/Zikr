@@ -33,7 +33,82 @@
     "qibla": "Qibla Direction",
     "quran": "Holy Quran",
     "books": "Islamic Library",
-    "radio": "Radio"
+    "radio": "Radio",
+    "islamicCalendar": "Islamic Calendar",
+    "wirdPlanner": "Wird Planner",
+    "hifzTracker": "Hifz Tracker"
+  },
+  "dailyHadith": {
+    "title": "Hadith of the Day"
+  },
+  "islamicCalendar": {
+    "title": "Islamic Calendar",
+    "today": "Today",
+    "todayIs": "Today is {date}",
+    "upcomingEvents": "Upcoming Events",
+    "inDays": "in {count} days",
+    "inOneDay": "tomorrow",
+    "fastingTracker": "Fasting Tracker",
+    "totalFasts": "Total fasts logged",
+    "ramadanProgress": "Ramadan: {fasted} of {total} days fasted",
+    "markFasting": "Mark as a fasting day",
+    "unmarkFasting": "Remove fasting mark",
+    "fastingDay": "Fasting day",
+    "selectedDate": "Selected date",
+    "noEventToday": "No significant event on this day",
+    "reminders": "Suhoor & Iftar Reminders",
+    "remindersDescription": "Get notified at suhoor and iftar time on days you mark as fasting.",
+    "remindersNeedLocation": "Set your prayer location in Prayer Times settings to enable reminders.",
+    "events": {
+      "islamicNewYear": "Islamic New Year",
+      "ashura": "Day of Ashura",
+      "mawlid": "Mawlid an-Nabi",
+      "ramadanStart": "Start of Ramadan",
+      "laylatAlQadr": "Laylat al-Qadr (estimated)",
+      "eidAlFitr": "Eid al-Fitr",
+      "arafahDay": "Day of Arafah",
+      "eidAlAdha": "Eid al-Adha"
+    },
+    "notifications": {
+      "suhoorTitle": "Suhoor Reminder",
+      "suhoorBody": "Suhoor time is ending soon, finish your meal before Fajr.",
+      "iftarTitle": "Iftar Time",
+      "iftarBody": "It's time to break your fast."
+    }
+  },
+  "wirdPlanner": {
+    "title": "Wird Planner",
+    "dailyTarget": "Daily Reading Goal",
+    "dailyTargetDescription": "Set how many pages of the Quran you want to read each day.",
+    "pagesPerDay": "{count} pages/day",
+    "setGoal": "Set Goal",
+    "goalPlaceholder": "e.g. 20",
+    "noGoalSet": "Set a daily page goal to start tracking your wird.",
+    "today": "Today",
+    "todayProgress": "{read} of {target} pages read",
+    "streak": "day streak",
+    "khatmahProgress": "Khatmah Progress",
+    "pagesOfTotal": "{progress} of {total} pages",
+    "khatmahCount": "Completed Khatmahs",
+    "totalPagesRead": "Total Pages Read",
+    "resetKhatmah": "Start New Khatmah",
+    "resetKhatmahConfirm": "This will reset your current Khatmah progress to 0. Continue?"
+  },
+  "hifz": {
+    "title": "Hifz Tracker",
+    "progress": "Memorization Progress",
+    "surahsMemorized": "{count} of {total} surahs memorized",
+    "ayahProgress": "{progress} of {total} ayahs",
+    "dueForReview": "{count} surah(s) due for review",
+    "review": "Review",
+    "ayahCount": "{count} ayahs",
+    "noResults": "No surahs match this filter",
+    "filters": {
+      "all": "All",
+      "memorized": "Memorized",
+      "inProgress": "In Progress",
+      "due": "Due"
+    }
   },
   "search": {
     "placeholder": "Search..."
@@ -63,6 +138,11 @@
     "done": "Done",
     "custom": "Custom",
     "switchCounter": "Switch counter",
+    "stats": "Stats",
+    "dailyGoal": "Daily Goal",
+    "todayProgress": "Today",
+    "weeklyChart": "Last 7 days",
+    "noGoal": "No goal",
     "presets": {
       "counter": "Counter",
       "subhanAllah": "Subhan Allah",
@@ -73,10 +153,17 @@
     }
   },
   "zikr": {
-    "reference": "Reference: {text}"
+    "reference": "Reference: {text}",
+    "morningAzkar": "Morning Azkar",
+    "eveningAzkar": "Evening Azkar",
+    "dayStreak": "day streak",
+    "completedToday": "Completed today"
   },
   "share": {
-    "message": "Download Zikr App and share it with others to spread the benefit 📱✨\n\n🌟 Features:\n• Authentic daily prayers & supplications 📖\n• Interactive digital tasbih counter with audio feedback 📿\n• Prayer times with multiple calculation methods ⏰\n• Qibla direction with compass 🧭\n• Full Arabic & English support with RTL/LTR layout 🌐\n• User-friendly interface with favorites system ⭐\n\n📱 Download:\nWeb Version: https://zikr.valabji.com\nAndroid App: https://play.google.com/store/apps/details?id=com.valabji.zikr\n\n🍎 For iPhone - App Store version coming soon, but you can now:\n1. Open the web version link in Safari browser\n2. Tap the Share icon (square with arrow)\n3. Scroll down and select \"Add to Home Screen\"\n4. Tap \"Add\" - the app will appear as an icon on your home screen"
+    "message": "Download Zikr App and share it with others to spread the benefit 📱✨\n\n🌟 Features:\n• Authentic daily prayers & supplications 📖\n• Interactive digital tasbih counter with audio feedback 📿\n• Prayer times with multiple calculation methods ⏰\n• Qibla direction with compass 🧭\n• Full Arabic & English support with RTL/LTR layout 🌐\n• User-friendly interface with favorites system ⭐\n\n📱 Download:\nWeb Version: https://zikr.valabji.com\nAndroid App: https://play.google.com/store/apps/details?id=com.valabji.zikr\n\n🍎 For iPhone - App Store version coming soon, but you can now:\n1. Open the web version link in Safari browser\n2. Tap the Share icon (square with arrow)\n3. Scroll down and select \"Add to Home Screen\"\n4. Tap \"Add\" - the app will appear as an icon on your home screen",
+    "preview": "Share preview",
+    "shareImage": "Share as image",
+    "cardBranding": "Zikr · zikr.valabji.com"
   },
   "language": {
     "switch": "عربي",
@@ -93,6 +180,16 @@
     "autoSave": "Auto Save",
     "autoSaveDescription": "Automatically save changes when made",
     "theme": "Theme",
+    "themeVariant": "Time-of-Day Variant",
+    "themeVariantDescription": "Each theme shifts through dawn, day, dusk, and night moods as prayer times pass. Tap a variant's lock to pin it.",
+    "themeVariantAutoOn": "Auto",
+    "themeVariantAutoOff": "Locked",
+    "themeVariants": {
+      "fajr": "Fajr",
+      "duha": "Duha",
+      "asr": "Asr",
+      "isha": "Isha"
+    },
     "clickVolume": "Click Sound Volume",
     "fontSize": "Zikr Font Size",
     "viewMode": "Azkar View Mode",
@@ -206,7 +303,13 @@
     "pm": "PM",
     "countdownHour": "h",
     "countdownMinute": "m",
-    "countdownSecond": "s"
+    "countdownSecond": "s",
+    "streak": "Prayer Streak",
+    "streakDays": "{count} day streak",
+    "streakDaysZero": "Check in to start a streak",
+    "prayersCompletedToday": "{count}/{total} prayers today",
+    "markAsPrayed": "Mark as prayed",
+    "prayed": "Prayed"
   },
   "qibla": {
     "loading": "Finding Qibla direction...",
@@ -347,6 +450,7 @@
     "juzs": "Juz",
     "bookmarks": "Bookmarks",
     "noBookmarks": "No bookmarks yet. Tap the bookmark icon on any page to save it.",
+    "bookmarkNotePlaceholder": "Add a note...",
     "meccan": "Meccan",
     "medinan": "Medinan",
     "ayahCount": "{count} verses",
@@ -365,6 +469,8 @@
     "customLineSize": "Custom line size",
     "customLineSizeDesc": "Ignore Mushaf line-fit and let lines wrap, so the slider can scale text larger than the printed page width allows.",
     "reciter": "Reciter",
+    "wordTooltip": "Word-by-word Tap",
+    "wordTooltipDesc": "Tap any word on the page to see its English meaning.",
     "ayahInteraction": "Ayah Tap Behavior",
     "ayahInteractionDesc": "What happens when you tap an ayah on the page.",
     "ayahInteractionMenu": "Show action menu",
@@ -372,11 +478,13 @@
     "actionPlay": "Play this ayah",
     "actionFollow": "Voice follow from here",
     "actionDetails": "Translation, tafsir, word-by-word",
+    "actionShare": "Share as image",
     "audioScope": "Auto-Play Range",
     "audioScopeDesc": "How far recitation continues after the tapped ayah.",
     "audioScopeAyah": "Only this ayah",
     "audioScopePage": "Till end of page",
     "audioScopeSurah": "Till end of surah",
+    "playbackSpeed": "Playback Speed",
     "highFidelity": "High-Fidelity Mushaf",
     "highFidelityDesc": "Download the official King Fahd Complex per-page fonts for pixel-exact line layout matching the printed Mushaf.",
     "hd1405": "1405 H pixel-exact fonts",
@@ -402,6 +510,7 @@
     "progress": "Progress",
     "streakDays": "day streak",
     "todayPages": "Pages today",
+    "weeklyChart": "Last 7 days",
     "totalRead": "Pages read",
     "completion": "Completion",
     "pageInfo": "Page Info",
@@ -419,7 +528,9 @@
     "voiceMismatchMistake": "I misread",
     "index": "Index",
     "tafsirSelection": "Tafsir",
-    "tafsirSelectionDesc": "Commentary shown in the Tafsir tab when viewing an ayah."
+    "tafsirSelectionDesc": "Commentary shown in the Tafsir tab when viewing an ayah.",
+    "searchByMeaning": "Searching translations by meaning",
+    "noResults": "No results found"
   },
   "books": {
     "title": "Islamic Library",

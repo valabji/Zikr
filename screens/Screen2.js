@@ -11,6 +11,7 @@ import AzkarSwiper from '../components/AzkarSwiper';
 import AzkarOnePageScroll from '../components/AzkarOnePageScroll';
 import AzkarOnePageScrollCompact from '../components/AzkarOnePageScrollCompact';
 import { useAudio } from '../utils/Sounds.js';
+import azkarAudioService from '../utils/AzkarAudio';
 import { BackgroundSvg1 } from '../components/BackgroundSvg1';
 import { getFontSize } from '../utils/FontSize';
 import { useFocusEffect } from '@react-navigation/native';
@@ -48,6 +49,7 @@ export default function Screen2({ route, navigation }) {
         setViewMode(savedViewMode || 'swiper');
       };
       loadSettings();
+      return () => azkarAudioService.stop();
     }, [])
   );
 

@@ -48,7 +48,7 @@ function TabButton({ label, active, onPress, colors }) {
   );
 }
 
-export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId }) {
+export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId, onShare }) {
   const colors = useColors();
   const lang = isRTL() ? 'ar' : 'en';
   const [tab, setTab] = React.useState('translation');
@@ -111,6 +111,11 @@ export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId }) {
                   {lang === 'ar' ? toArabicDigits(ayah.ayah) : ayah.ayah}
                 </Text>
               </View>
+              {onShare ? (
+                <TouchableOpacity onPress={() => onShare(ayah)} style={{ padding: 6 }}>
+                  <Feather name="share-2" size={22} color={colors.accent} />
+                </TouchableOpacity>
+              ) : null}
               <TouchableOpacity onPress={() => QuranAudio.playAyah(ayah.surah, ayah.ayah)} style={{ padding: 6 }}>
                 <Feather name="play" size={24} color={colors.accent} />
               </TouchableOpacity>

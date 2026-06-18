@@ -1,6 +1,6 @@
 import { useMemo, useContext, createContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { themes } from './themes';
+import { themes, getThemeVariant } from './themes';
 
 // Theme Context
 export const ThemeContext = createContext({
@@ -8,6 +8,11 @@ export const ThemeContext = createContext({
   setTheme: () => {},
   themes: themes,
   isThemeLoaded: false,
+  variant: null,
+  autoVariant: true,
+  lockedVariant: null,
+  setAutoVariantEnabled: () => {},
+  lockVariant: () => {},
 });
 
 export const useTheme = () => {
@@ -19,6 +24,11 @@ export const useTheme = () => {
       setTheme: () => {},
       themes: themes,
       isThemeLoaded: true, // Assume loaded if no provider
+      variant: null,
+      autoVariant: true,
+      lockedVariant: null,
+      setAutoVariantEnabled: () => {},
+      lockVariant: () => {},
     };
   }
   return context;
@@ -38,11 +48,11 @@ export const useIsBrightTheme = () => {
 };
 
 export const useColors = () => {
-  const { theme } = useTheme();
-  
+  const { theme, variant } = useTheme();
+
   return useMemo(() => {
-    const currentTheme = themes[theme] || themes.goldOnDark;
-    
+    const currentTheme = getThemeVariant(theme, variant);
+
     return {
       // Font configuration from theme
       fontFamily: currentTheme.fontFamily,
@@ -96,7 +106,7 @@ export const useColors = () => {
       goldOnWhite: '#D1955E',
       goldOnDark: '#FFE29D',
     };
-  }, [theme]);
+  }, [theme, variant]);
 };
 
 // For backward compatibility, export the colors object as well

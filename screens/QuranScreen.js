@@ -11,9 +11,11 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
-import { SCREEN_WIDTH, getLayoutOffsets } from '../utils/mushafLayout';
+import { SCREEN_WIDTH, getLayoutOffsets, arForHafs } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
+import translationEn from '../assets/quran/data/translation_en.json';
+import ShareCardModal from '../components/ShareCardModal';
 import { loadQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import { trackPage } from '../utils/ReadingProgress';
 import QuranAudio from '../utils/QuranAudio';
@@ -30,9 +32,29 @@ import QuranSettingsModal from './QuranSettingsModal';
 import QuranHdPromptModal from './QuranHdPromptModal';
 import QuranPageInfoSheet from './QuranPageInfoSheet';
 import QuranHeaderMenu from './QuranHeaderMenu';
+import QuranWordTooltip from '../components/QuranWordTooltip';
 
 const { TOTAL_PAGES, STORAGE_KEYS, DEFAULT_SETTINGS } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+const verseTextByKey = {};
+for (const pg of pagesData) {
+  for (const a of pg.ayahs) {
+    verseTextByKey[`${a.surah}:${a.ayah}`] = a.text;
+  }
+}
+function buildAyahShareContent(a, lang) {
+  const key = `${a.surah}:${a.ayah}`;
+  const surah = surahsData[a.surah - 1];
+  const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+  const reference = lang === 'ar'
+    ? `${surah.nameAr} ${toArabicDigits(a.surah)}:${toArabicDigits(a.ayah)}`
+    : `${surah.nameEn} ${a.surah}:${a.ayah}`;
+  return {
+    arabic: arForHafs(verseTextByKey[key] || ''),
+    translation: translationEn[key],
+    reference,
+  };
+}
 const ayahKey = (s, a) => `${s}:${a}`;
 const ayahToPage = (() => {
   const m = {};
@@ -56,6 +78,8 @@ export default function QuranScreen({ navigation }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [detailAyah, setDetailAyah] = React.useState(null);
   const [actionAyah, setActionAyah] = React.useState(null);
+  const [wordTooltip, setWordTooltip] = React.useState(null);
+  const [shareAyah, setShareAyah] = React.useState(null);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [pageInfoOpen, setPageInfoOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -232,6 +256,10 @@ export default function QuranScreen({ navigation }) {
     setDetailAyah({ surah: ayah.surah, ayah: ayah.ayah });
   }, []);
 
+  const handleWordPress = React.useCallback((word, x, y) => {
+    setWordTooltip({ ar: word.ar, en: word.en, x, y });
+  }, []);
+
   const closeMiniPlayer = React.useCallback(() => {
     QuranAudio.stop();
   }, []);
@@ -371,6 +399,7 @@ export default function QuranScreen({ navigation }) {
                 playingWordMistake={effectiveWordMistake}
                 onAyahPress={handleAyahPress}
                 onAyahLongPress={handleAyahLongPress}
+                onWordPress={handleWordPress}
               />
             );
           }}
@@ -397,6 +426,11 @@ export default function QuranScreen({ navigation }) {
           setBookmarks(next);
           AsyncStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(next)).catch(() => {});
         }}
+        onUpdateBookmarkNote={(page, note) => {
+          const next = bookmarks.map((b) => (b.page === page ? { ...b, note } : b));
+          setBookmarks(next);
+          AsyncStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(next)).catch(() => {});
+        }}
       />
       <QuranSearchModal
         visible={searchOpen}
@@ -407,6 +441,7 @@ export default function QuranScreen({ navigation }) {
         ayah={detailAyah}
         onClose={() => setDetailAyah(null)}
         tafsirId={settings.tafsirId}
+        onShare={(a) => setShareAyah({ surah: a.surah, ayah: a.ayah })}
       />
       <QuranAyahActionSheet
         ayah={actionAyah}
@@ -414,10 +449,21 @@ export default function QuranScreen({ navigation }) {
         onPlay={(a) => QuranAudio.playAyah(a.surah, a.ayah)}
         onFollow={(a) => { QuranAudio.stop(); QuranVoiceFollower.start({ surah: a.surah, ayah: a.ayah }); }}
         onDetails={(a) => setDetailAyah({ surah: a.surah, ayah: a.ayah })}
+        onShare={(a) => setShareAyah({ surah: a.surah, ayah: a.ayah })}
+      />
+      <ShareCardModal
+        visible={!!shareAyah}
+        content={shareAyah ? buildAyahShareContent(shareAyah, isRTL() ? 'ar' : 'en') : null}
+        onClose={() => setShareAyah(null)}
       />
       <QuranSettingsModal
         visible={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+      />
+      <QuranWordTooltip
+        word={wordTooltip}
+        onClose={() => setWordTooltip(null)}
+        colors={colors}
       />
       <QuranHdPromptModal
         visible={!!hdPromptVersion}

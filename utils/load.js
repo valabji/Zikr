@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mystore } from '../redux/store';
 import loadFirebaseAnalytics from './firebase/load';
 import PrayerCountdownService from './PrayerCountdownService';
+import { syncWidgetData } from './PrayerWidgetService';
 import NotificationService from './NotificationService';
 import PrayerNotificationScheduler from './PrayerNotificationScheduler';
 import QcfDownloader from './QcfDownloader';
@@ -50,6 +51,10 @@ export async function loadResourcesAndDataAsync() {
         } catch (error) {
             console.error('Failed to initialize prayer countdown service:', error);
         }
+
+        // Push fresh prayer data to the home screen widget on every launch,
+        // independent of whether the persistent countdown notification is enabled.
+        syncWidgetData();
 
         try {
             await loadTasbih();

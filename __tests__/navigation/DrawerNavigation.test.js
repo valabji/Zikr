@@ -62,6 +62,9 @@ jest.mock('../../screens/MainScreen', () => 'MainScreen');
 jest.mock('../../screens/Screen3', () => 'Screen3');
 jest.mock('../../screens/SettingsScreen', () => 'SettingsScreen');
 jest.mock('../../screens/ContributeScreen', () => 'ContributeScreen');
+jest.mock('../../screens/IslamicCalendarScreen', () => 'IslamicCalendarScreen');
+jest.mock('../../screens/WirdPlannerScreen', () => 'WirdPlannerScreen');
+jest.mock('../../screens/HifzTrackerScreen', () => 'HifzTrackerScreen');
 
 describe('DrawerNavigation', () => {
   const renderWithProvider = (component) => {

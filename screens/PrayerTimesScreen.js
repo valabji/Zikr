@@ -25,6 +25,7 @@ import {
   getLocationFromIP,
   getBrowserLocation
 } from '../utils/PrayerUtils';
+import { usePrayerCheckIn, togglePrayerCheckIn, MANDATORY_PRAYERS } from '../utils/PrayerCheckIn';
 
 export default function PrayerTimesScreen({ navigation }) {
   const colors = useColors();
@@ -37,6 +38,7 @@ export default function PrayerTimesScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [calculationMethod, setCalculationMethod] = useState(PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD);
   const [madhab, setMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
+  const { stats: checkInStats } = usePrayerCheckIn();
 
   // Load saved settings
   const loadSettings = useCallback(async () => {
@@ -204,8 +206,11 @@ export default function PrayerTimesScreen({ navigation }) {
 
     // Use dark text for bright card backgrounds
     const textColor = (isCurrent || isNext)
-      ? colors.black 
+      ? colors.black
       : colors.BYellow;
+
+    const isMandatory = MANDATORY_PRAYERS.includes(prayerName);
+    const isPrayed = !!checkInStats.today[prayerName];
 
     return (
       <View
@@ -228,25 +233,43 @@ export default function PrayerTimesScreen({ navigation }) {
           {t(`prayerTimes.${prayerName}`)}
         </Text>
 
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{
-            color: textColor,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.PRAYER_TIME,
-            fontFamily: "Cairo_400Regular",
-          }}>
-            {formatArabicTime(time)}
-          </Text>
-
-          {isNext && timeUntilNext && (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ alignItems: 'flex-end' }}>
             <Text style={{
               color: textColor,
-              fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+              fontSize: PRAYER_CONSTANTS.FONT_SIZES.PRAYER_TIME,
               fontFamily: "Cairo_400Regular",
-              opacity: 0.8,
-              marginTop: 2
             }}>
-              {t('prayerTimes.in')} {formatArabicCountdown(timeUntilNext)}
+              {formatArabicTime(time)}
             </Text>
+
+            {isNext && timeUntilNext && (
+              <Text style={{
+                color: textColor,
+                fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+                fontFamily: "Cairo_400Regular",
+                opacity: 0.8,
+                marginTop: 2
+              }}>
+                {t('prayerTimes.in')} {formatArabicCountdown(timeUntilNext)}
+              </Text>
+            )}
+          </View>
+
+          {isMandatory && (
+            <TouchableOpacity
+              testID={`checkin-${prayerName}`}
+              accessibilityLabel={t('prayerTimes.markAsPrayed')}
+              onPress={() => togglePrayerCheckIn(prayerName)}
+              style={{ ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING }), padding: 4 }}
+            >
+              <Feather
+                name={isPrayed ? 'check-circle' : 'circle'}
+                size={24}
+                color={textColor}
+                style={{ opacity: isPrayed ? 1 : 0.5 }}
+              />
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -335,6 +358,43 @@ export default function PrayerTimesScreen({ navigation }) {
           >
             <Feather name="map-pin" size={20} color={colors.BYellow} />
           </TouchableOpacity>
+        </View>
+
+        {/* Prayer Streak */}
+        <View
+          testID="prayer-streak-banner"
+          style={{
+            backgroundColor: colors.DGreen,
+            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+            marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="zap" size={22} color={colors.nextPrayer} />
+            <View style={{ ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING }) }}>
+              <Text style={{
+                color: colors.BYellow,
+                ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+                fontFamily: "Cairo_400Regular",
+              }}>
+                {checkInStats.streak > 0
+                  ? t('prayerTimes.streakDays', { count: checkInStats.streak })
+                  : t('prayerTimes.streakDaysZero')}
+              </Text>
+            </View>
+          </View>
+          <Text style={{
+            color: colors.BYellow,
+            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+            fontFamily: "Cairo_400Regular",
+            opacity: 0.8
+          }}>
+            {t('prayerTimes.prayersCompletedToday', { count: checkInStats.todayCount, total: checkInStats.todayTotal })}
+          </Text>
         </View>
 
         {/* Next Prayer Countdown */}

@@ -12,6 +12,9 @@ import QiblaScreen from '../screens/QiblaScreen';
 import QuranScreen from '../screens/QuranScreen';
 import BooksScreen from '../screens/BooksScreen';
 import RadioScreen from '../screens/RadioScreen';
+import IslamicCalendarScreen from '../screens/IslamicCalendarScreen';
+import WirdPlannerScreen from '../screens/WirdPlannerScreen';
+import HifzTrackerScreen from '../screens/HifzTrackerScreen';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
@@ -41,6 +44,9 @@ function useInitialDrawerRoute() {
           Quran: { route: 'Quran' },
           Books: { route: 'Books' },
           Radio: { route: 'Radio' },
+          IslamicCalendar: { route: 'IslamicCalendar' },
+          WirdPlanner: { route: 'WirdPlanner' },
+          HifzTracker: { route: 'HifzTracker' },
         };
         setResolved(map[screen] || map.Fav);
       });
@@ -300,6 +306,84 @@ export function DNav() {
                 <Feather name="compass" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
+                testID="islamic-calendar-screen-link"
+                onPress={() => navigation.navigate("IslamicCalendar")}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.islamicCalendar')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="calendar" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="wird-planner-screen-link"
+                onPress={() => navigation.navigate("WirdPlanner")}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.wirdPlanner')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="book-open" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="hifz-tracker-screen-link"
+                onPress={() => navigation.navigate("HifzTracker")}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                    textAlign: getRTLTextAlign('left'),
+                  }
+                ]}>{t('navigation.hifzTracker')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="bookmark" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={() => {
                   Share.share({
                     message: t('share.message'),
@@ -423,6 +507,9 @@ export function DNav() {
       <Drawer.Screen name="Radio" component={RadioScreen} />
       <Drawer.Screen name="PrayerTimes" component={PrayerTimesScreen} />
       <Drawer.Screen name="Qibla" component={QiblaScreen} />
+      <Drawer.Screen name="IslamicCalendar" component={IslamicCalendarScreen} />
+      <Drawer.Screen name="WirdPlanner" component={WirdPlannerScreen} />
+      <Drawer.Screen name="HifzTracker" component={HifzTrackerScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator >
   );

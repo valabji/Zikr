@@ -8,17 +8,25 @@ import { QURAN_CONSTANTS } from '../constants/QuranConstants';
 import { arForHafs } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
+import { isArabicQuery, searchArabicIndex, getEnglishIndex, searchEnglishIndex } from '../utils/quranSearch';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
 let indexCache = null;
+let translationCache = null;
 let pageMapCache = null;
 async function getIndex() {
   if (!indexCache) {
     indexCache = require('../assets/quran/data/search_index.json');
   }
   return indexCache;
+}
+function getTranslation() {
+  if (!translationCache) {
+    translationCache = require('../assets/quran/data/translation_en.json');
+  }
+  return translationCache;
 }
 function getPageMap() {
   if (!pageMapCache) {
@@ -34,19 +42,6 @@ function getPageMap() {
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
-const TASHKEEL_RE = /[ً-ٰۖ-ۭ۟-ۥؐ-ؚ]/g;
-const TATWEEL_RE = /ـ/g;
-const NONLETTER_RE = /[^ء-يٱ-ە\s]/g;
-
-function normalize(text) {
-  let t = text.replace(TASHKEEL_RE, '').replace(TATWEEL_RE, '');
-  t = t.replace(/[ٱآأإ]/g, 'ا');
-  t = t.replace(/ى/g, 'ي');
-  t = t.replace(/ة/g, 'ه');
-  t = t.replace(NONLETTER_RE, ' ');
-  return t.replace(/\s+/g, ' ').trim();
-}
-
 export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
   const colors = useColors();
   const lang = isRTL() ? 'ar' : 'en';
@@ -54,6 +49,7 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
   const [results, setResults] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [indexReady, setIndexReady] = React.useState(false);
+  const [meaningMode, setMeaningMode] = React.useState(false);
 
   React.useEffect(() => {
     if (!visible) return;
@@ -67,34 +63,27 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
 
   React.useEffect(() => {
     if (!visible || !indexReady) return;
-    const q = normalize(query);
-    if (!q || q.length < 2) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
       setResults([]);
+      setMeaningMode(false);
       return;
     }
+    const byMeaning = !isArabicQuery(trimmed);
     const handle = setTimeout(() => {
-      const terms = q.split(' ').filter((w) => w.length >= 2);
-      if (!terms.length) {
-        setResults([]);
-        return;
-      }
-      const idx = indexCache;
-      let candidate = null;
-      for (const term of terms) {
-        const hits = new Set();
-        for (const word in idx) {
-          if (word.includes(term)) {
-            for (const k of idx[word]) hits.add(k);
-          }
-        }
-        candidate = candidate ? new Set([...candidate].filter((x) => hits.has(x))) : hits;
-        if (candidate.size === 0) break;
-      }
       const pm = getPageMap();
-      const list = [...(candidate || [])]
-        .slice(0, 200)
-        .map((k) => pm[k])
+      const keys = byMeaning
+        ? searchEnglishIndex(trimmed, getEnglishIndex(getTranslation()))
+        : searchArabicIndex(trimmed, indexCache);
+      const translations = byMeaning ? getTranslation() : null;
+      const list = keys
+        .map((k) => {
+          const base = pm[k];
+          if (!base) return null;
+          return byMeaning ? { ...base, translation: translations[k] } : base;
+        })
         .filter(Boolean);
+      setMeaningMode(byMeaning);
       setResults(list);
     }, 200);
     return () => clearTimeout(handle);
@@ -131,6 +120,11 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
         >
           {arForHafs(item.text)}
         </Text>
+        {item.translation ? (
+          <Text numberOfLines={2} style={[textStyles.base, { color: colors.textSecondary, fontSize: 14, marginTop: 6 }]}>
+            {item.translation}
+          </Text>
+        ) : null}
       </TouchableOpacity>
     );
   };
@@ -182,6 +176,11 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
             ) : null}
           </View>
         </View>
+        {meaningMode && query.trim().length >= 2 ? (
+          <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, paddingHorizontal: 16, paddingTop: 8 }]}>
+            {t('quran.searchByMeaning')}
+          </Text>
+        ) : null}
         {loading ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator color={colors.accent} />
@@ -194,9 +193,9 @@ export default function QuranSearchModal({ visible, onClose, onSelectAyah }) {
             renderItem={renderResult}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
-              query.length >= 2 ? (
+              query.trim().length >= 2 ? (
                 <View style={{ padding: 32, alignItems: 'center' }}>
-                  <Text style={[textStyles.base, { color: colors.textSecondary }]}>—</Text>
+                  <Text style={[textStyles.base, { color: colors.textSecondary }]}>{t('quran.noResults')}</Text>
                 </View>
               ) : null
             }

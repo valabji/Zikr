@@ -6,7 +6,7 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
-import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
+import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID, PLAYBACK_RATES } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QcfDownloader from '../utils/QcfDownloader';
 import QuranReciterPicker from '../components/QuranReciterPicker';
@@ -215,6 +215,20 @@ export default function QuranSettingsModal({ visible, onClose }) {
             </View>
           </Row>
 
+          <Row label={t('quran.wordTooltip')} colors={colors}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, flex: 1 }]}>
+                {t('quran.wordTooltipDesc')}
+              </Text>
+              <Switch
+                value={!!settings.showWBW}
+                onValueChange={(v) => update({ showWBW: v })}
+                trackColor={{ true: colors.accent, false: colors.accent + '44' }}
+                thumbColor={settings.showWBW ? colors.accent : '#f4f3f4'}
+              />
+            </View>
+          </Row>
+
           <Row label={t('quran.tafsirSelection')} colors={colors}>
             <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 10 }]}>
               {t('quran.tafsirSelectionDesc')}
@@ -328,6 +342,20 @@ export default function QuranSettingsModal({ visible, onClose }) {
                 active={(settings.audioPlaybackScope || 'ayah') === AUDIO_PLAYBACK_SCOPES.SURAH}
                 onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.SURAH })}
               />
+            </View>
+          </Row>
+
+          <Row label={t('quran.playbackSpeed')} colors={colors}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {PLAYBACK_RATES.map((rate) => (
+                <Choice
+                  key={rate}
+                  colors={colors}
+                  label={`${rate}x`}
+                  active={(settings.playbackRate || 1.0) === rate}
+                  onPress={() => update({ playbackRate: rate })}
+                />
+              ))}
             </View>
           </Row>
 

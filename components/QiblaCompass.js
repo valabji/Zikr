@@ -206,6 +206,29 @@ const QiblaCompass = ({
               ],
             }}
           >
+            {/* Tolerance Arc - marks the +/-10deg window counted as "close" around the Qibla direction */}
+            {compassEnabled && Array.from({ length: 21 }, (_, i) => i - 10).map((deg) => (
+              <View
+                key={`tolerance-${deg}`}
+                testID={deg === 0 ? 'qibla-tolerance-arc' : undefined}
+                style={{
+                  position: 'absolute',
+                  width: 3,
+                  height: deg === 0 ? 14 : 9,
+                  backgroundColor: deg === 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(34, 197, 94, 0.3)',
+                  borderRadius: 1.5,
+                  transform: [
+                    { rotate: `${deg}deg` },
+                    { translateY: -95 }
+                  ],
+                  left: '50%',
+                  top: '50%',
+                  marginLeft: -1.5,
+                  marginTop: deg === 0 ? -7 : -4.5
+                }}
+              />
+            ))}
+
             {/* Qibla Arrow */}
             <View style={{
               width: 0,

@@ -34,6 +34,10 @@ jest.mock('../../utils/PrayerNotificationScheduler', () => ({
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
+jest.mock('../../utils/PrayerWidgetService', () => ({
+  syncWidgetData: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock('../../locales/i18n', () => ({
   initializeLanguage: jest.fn(() => Promise.resolve()),
 }));
@@ -46,6 +50,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import loadFirebaseAnalytics from '../../utils/firebase/load';
 import Sounds from '../../utils/Sounds';
 import PrayerCountdownService from '../../utils/PrayerCountdownService';
+import { syncWidgetData } from '../../utils/PrayerWidgetService';
 import { initializeLanguage } from '../../locales/i18n';
 import { mystore } from '../../redux/store';
 import { loadResourcesAndDataAsync } from '../../utils/load';
@@ -67,6 +72,12 @@ describe('loadResourcesAndDataAsync', () => {
     await loadResourcesAndDataAsync();
     expect(loadFirebaseAnalytics).toHaveBeenCalled();
     expect(PrayerCountdownService.initialize).toHaveBeenCalled();
+  });
+
+  it('syncs widget data on boot', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    await loadResourcesAndDataAsync();
+    expect(syncWidgetData).toHaveBeenCalled();
   });
 
   it('does not eagerly initialize Sounds at boot (lazy on first use)', async () => {

@@ -22,6 +22,7 @@ class QuranAudioService {
     this.reciterId = DEFAULT_RECITER_ID;
     this.playbackScope = 'ayah';
     this.loopEnabled = false;
+    this.playbackRate = 1.0;
     this.audioModeReady = false;
     this.listeners = new Set();
     this.unsubSettings = null;
@@ -49,6 +50,7 @@ class QuranAudioService {
       this.reciterId = s.reciterId || DEFAULT_RECITER_ID;
       this.playbackScope = s.audioPlaybackScope || 'ayah';
       this.loopEnabled = s.loopEnabled === true;
+      this.playbackRate = typeof s.playbackRate === 'number' ? s.playbackRate : 1.0;
       this.unsubSettings = subscribeQuranSettings((next) => {
         const newReciter = next.reciterId || DEFAULT_RECITER_ID;
         if (newReciter !== this.reciterId) {
@@ -60,6 +62,13 @@ class QuranAudioService {
         }
         this.playbackScope = next.audioPlaybackScope || 'ayah';
         this.loopEnabled = next.loopEnabled === true;
+        const newRate = typeof next.playbackRate === 'number' ? next.playbackRate : 1.0;
+        if (newRate !== this.playbackRate) {
+          this.playbackRate = newRate;
+          if (this.sound) {
+            this.sound.setRateAsync(this.playbackRate, true).catch(() => {});
+          }
+        }
       });
     }
   }
@@ -98,7 +107,7 @@ class QuranAudioService {
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: true }
+        { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true }
       );
       this.sound = sound;
       sound.setOnPlaybackStatusUpdate((status) => {
@@ -219,6 +228,13 @@ class QuranAudioService {
       this._emit();
     } catch (e) {
       console.warn('QuranAudio: toggle failed', e);
+    }
+  }
+
+  async setPlaybackRate(rate) {
+    this.playbackRate = rate;
+    if (this.sound) {
+      try { await this.sound.setRateAsync(rate, true); } catch (e) { console.warn('QuranAudio: setRateAsync failed', e); }
     }
   }
 

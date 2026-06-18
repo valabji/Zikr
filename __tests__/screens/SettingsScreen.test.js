@@ -24,6 +24,8 @@ jest.mock('react-native-reanimated', () => ({
   // Add other exports if your code uses them
 }));
 // Mock the Colors module
+const mockSetAutoVariantEnabled = jest.fn();
+const mockLockVariant = jest.fn();
 jest.mock('../../constants/Colors', () => ({
   useColors: () => ({
     BGreen: '#003C34',
@@ -37,6 +39,11 @@ jest.mock('../../constants/Colors', () => ({
     theme: 'originalGreen',
     setTheme: jest.fn(),
     themes: require('../../constants/themes').themes,
+    variant: 'duha',
+    autoVariant: true,
+    lockedVariant: null,
+    setAutoVariantEnabled: mockSetAutoVariantEnabled,
+    lockVariant: mockLockVariant,
   }),
 }));
 
@@ -217,5 +224,32 @@ describe('SettingsScreen', () => {
     const { getByTestId } = await renderSettings();
     expect(getByTestId('settings-screen')).toBeTruthy();
     warn.mockRestore();
+  });
+
+  describe('prayer-time theme variants', () => {
+    it('renders a lock toggle for each variant and the auto-mode switch', async () => {
+      const { getByTestId } = await renderSettings();
+      expect(getByTestId('theme-variant-auto-toggle')).toBeTruthy();
+      expect(getByTestId('theme-variant-fajr')).toBeTruthy();
+      expect(getByTestId('theme-variant-duha')).toBeTruthy();
+      expect(getByTestId('theme-variant-asr')).toBeTruthy();
+      expect(getByTestId('theme-variant-isha')).toBeTruthy();
+    });
+
+    it('toggles auto mode when the auto/locked pill is pressed', async () => {
+      const { getByTestId } = await renderSettings();
+      await act(async () => {
+        fireEvent.press(getByTestId('theme-variant-auto-toggle'));
+      });
+      expect(mockSetAutoVariantEnabled).toHaveBeenCalledWith(false);
+    });
+
+    it('locks a variant when its row is pressed', async () => {
+      const { getByTestId } = await renderSettings();
+      await act(async () => {
+        fireEvent.press(getByTestId('theme-variant-asr'));
+      });
+      expect(mockLockVariant).toHaveBeenCalledWith('asr');
+    });
   });
 });

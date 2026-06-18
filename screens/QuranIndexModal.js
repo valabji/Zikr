@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, View, Text, FlatList, TouchableOpacity, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { Modal, View, Text, FlatList, TouchableOpacity, SafeAreaView, Platform, StatusBar, TextInput } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
@@ -13,6 +13,8 @@ const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight 
 const TABS = ['surahs', 'juzs', 'bookmarks', 'progress'];
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+const WEEKDAY_EN = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAY_AR = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 
 function TabButton({ label, active, onPress, colors }) {
   return (
@@ -66,11 +68,73 @@ function Row({ left, right, sub, onPress, onRemove, colors }) {
   );
 }
 
-export default function QuranIndexModal({ visible, onClose, currentPage, bookmarks, onSelectPage, onRemoveBookmark, onOpenSearch, onOpenSettings }) {
+function BookmarkRow({ item, colors, lang, fmtNum, pageLabel, onPress, onRemove, editing, noteDraft, onStartEdit, onChangeDraft, onSaveNote }) {
+  const surah = surahsData[item.surah - 1];
+  return (
+    <View style={{
+      paddingVertical: 14,
+      paddingHorizontal: 18,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.accent + '22',
+    }}>
+      <TouchableOpacity onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{
+          width: 36, height: 36, borderRadius: 18,
+          backgroundColor: colors.accent + '22',
+          justifyContent: 'center', alignItems: 'center',
+        }}>
+          <Text style={[textStyles.base, { color: colors.accent, fontSize: 14 }]}>{fmtNum(item.page)}</Text>
+        </View>
+        <View style={{ flex: 1, marginHorizontal: 14 }}>
+          <Text style={[textStyles.subtitle, { color: colors.text }]} numberOfLines={1}>
+            {lang === 'ar' ? surah.nameAr : surah.nameEn}
+          </Text>
+          <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 2 }]} numberOfLines={1}>
+            {pageLabel(item.page)}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={onStartEdit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ marginEnd: 14 }}>
+          <Feather name="edit-2" size={18} color={colors.textSecondary} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onRemove} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Feather name="x" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </TouchableOpacity>
+      {editing ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+          <TextInput
+            value={noteDraft}
+            onChangeText={onChangeDraft}
+            placeholder={t('quran.bookmarkNotePlaceholder')}
+            placeholderTextColor={colors.textSecondary}
+            style={[textStyles.base, {
+              flex: 1, color: colors.text, fontSize: 13,
+              borderWidth: 1, borderColor: colors.accent + '44', borderRadius: 8,
+              paddingHorizontal: 10, paddingVertical: 6,
+            }]}
+            autoFocus
+            onSubmitEditing={onSaveNote}
+          />
+          <TouchableOpacity onPress={onSaveNote} style={{ marginStart: 10 }}>
+            <Feather name="check" size={20} color={colors.accent} />
+          </TouchableOpacity>
+        </View>
+      ) : item.note ? (
+        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8, fontStyle: 'italic' }]} numberOfLines={2}>
+          {item.note}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+export default function QuranIndexModal({ visible, onClose, currentPage, bookmarks, onSelectPage, onRemoveBookmark, onUpdateBookmarkNote, onOpenSearch, onOpenSettings }) {
   const colors = useColors();
   const [tab, setTab] = React.useState('surahs');
+  const [editingNotePage, setEditingNotePage] = React.useState(null);
+  const [noteDraft, setNoteDraft] = React.useState('');
   const lang = isRTL() ? 'ar' : 'en';
-  const [progressStats, setProgressStats] = React.useState({ todayCount: 0, streak: 0, totalUnique: 0, completionPct: 0 });
+  const [progressStats, setProgressStats] = React.useState({ todayCount: 0, streak: 0, totalUnique: 0, completionPct: 0, last7Days: [] });
 
   React.useEffect(() => {
     getStats().then(setProgressStats).catch(() => {});
@@ -104,19 +168,25 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
     />
   );
 
-  const renderBookmark = ({ item }) => {
-    const surah = surahsData[item.surah - 1];
-    return (
-      <Row
-        colors={colors}
-        left={fmtNum(item.page)}
-        right={lang === 'ar' ? surah.nameAr : surah.nameEn}
-        sub={pageLabel(item.page)}
-        onPress={() => onSelectPage(item.page)}
-        onRemove={() => onRemoveBookmark(item.page)}
-      />
-    );
-  };
+  const renderBookmark = ({ item }) => (
+    <BookmarkRow
+      item={item}
+      colors={colors}
+      lang={lang}
+      fmtNum={fmtNum}
+      pageLabel={pageLabel}
+      onPress={() => onSelectPage(item.page)}
+      onRemove={() => onRemoveBookmark(item.page)}
+      editing={editingNotePage === item.page}
+      noteDraft={noteDraft}
+      onStartEdit={() => { setEditingNotePage(item.page); setNoteDraft(item.note || ''); }}
+      onChangeDraft={setNoteDraft}
+      onSaveNote={() => {
+        onUpdateBookmarkNote && onUpdateBookmarkNote(item.page, noteDraft.trim());
+        setEditingNotePage(null);
+      }}
+    />
+  );
 
   const sortedBookmarks = React.useMemo(
     () => [...bookmarks].sort((a, b) => a.page - b.page),
@@ -230,6 +300,40 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
               <Text style={[textStyles.subtitle, { color: colors.accent, fontSize: 18 }]}>
                 {fmtNum(progressStats.todayCount)}
               </Text>
+            </View>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              padding: 18,
+              marginBottom: 14,
+            }}>
+              <Text style={[textStyles.subtitle, { color: colors.text, marginBottom: 12 }]}>
+                {t('quran.weeklyChart')}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 90 }}>
+                {progressStats.last7Days.map((d) => {
+                  const maxCount = Math.max(1, ...progressStats.last7Days.map((x) => x.count));
+                  const barHeight = Math.max(4, Math.round((d.count / maxCount) * 64));
+                  const weekday = new Date(d.date + 'T00:00:00').getDay();
+                  const weekdayLabel = lang === 'ar' ? WEEKDAY_AR[weekday] : WEEKDAY_EN[weekday];
+                  return (
+                    <View key={d.date} style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={[textStyles.base, { color: colors.accent, fontSize: 11, marginBottom: 4 }]}>
+                        {d.count > 0 ? fmtNum(d.count) : ''}
+                      </Text>
+                      <View style={{
+                        width: 14,
+                        height: barHeight,
+                        borderRadius: 4,
+                        backgroundColor: colors.accent + (d.count > 0 ? 'ff' : '33'),
+                      }} />
+                      <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 10, marginTop: 6 }]}>
+                        {weekdayLabel}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
             <View style={{
               backgroundColor: colors.surface,

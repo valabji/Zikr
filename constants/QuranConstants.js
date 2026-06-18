@@ -49,6 +49,7 @@ export const QURAN_CONSTANTS = {
     ayahInteractionMode: 'menu',
     audioPlaybackScope: 'ayah',
     loopEnabled: false,
+    playbackRate: 1.0,
     viewMode: 'paged',
     customLineSize: false,
     tafsirId: 'muyassar_ar',
@@ -56,6 +57,8 @@ export const QURAN_CONSTANTS = {
 };
 
 export const FONT_SCALE_RANGE = { min: 0.75, max: 3.0, step: 0.05, default: 1.0 };
+
+export const PLAYBACK_RATES = [0.75, 1.0, 1.25, 1.5];
 
 // Base font size (px) used when customLineSize is on. The font-size slider
 // multiplies this instead of the auto-fitted Mushaf line size, and lines are

@@ -8,7 +8,7 @@ import { toArabicDigits } from '../utils/mushafLayout';
 import QuranAudio from '../utils/QuranAudio';
 import surahsData from '../assets/quran/data/surahs.json';
 import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
-import { AUDIO_PLAYBACK_SCOPES } from '../constants/QuranConstants';
+import { AUDIO_PLAYBACK_SCOPES, PLAYBACK_RATES } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QuranReciterPicker from './QuranReciterPicker';
 
@@ -54,6 +54,7 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
   const scope = settings?.audioPlaybackScope || 'ayah';
   const reciterId = settings?.reciterId || DEFAULT_RECITER_ID;
   const loopOn = !!settings?.loopEnabled;
+  const rate = settings?.playbackRate || 1.0;
   const update = (partial) => setQuranSettings(partial);
 
   return (
@@ -106,6 +107,21 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
               active={loopOn}
               onPress={() => update({ loopEnabled: !loopOn })}
             />
+          </View>
+
+          <Text style={[textStyles.subtitle, { color: colors.BYellow + 'cc', fontSize: 11, marginBottom: 4 }]}>
+            {t('quran.playbackSpeed')}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', rowGap: 6, marginBottom: 4 }}>
+            {PLAYBACK_RATES.map((r) => (
+              <Chip
+                key={r}
+                colors={colors}
+                label={`${r}x`}
+                active={rate === r}
+                onPress={() => update({ playbackRate: r })}
+              />
+            ))}
           </View>
         </View>
       ) : null}

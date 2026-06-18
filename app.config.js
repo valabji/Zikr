@@ -34,6 +34,9 @@ export default {
         NSMicrophoneUsageDescription: "Used to follow your Quran recitation.",
         NSSpeechRecognitionUsageDescription: "Used to follow along with your Quran recitation and highlight the words you read.",
         UIBackgroundModes: ["audio"]  // Required for playing adhan audio in notifications
+      },
+      entitlements: {
+        "com.apple.security.application-groups": ["group.com.valabji.zikr.widget"]
       }
     },
     android: {
@@ -140,7 +143,24 @@ export default {
           },
           "resizeMode": "contain",
           "imageWidth": 200
-        }]
+        }],
+      [
+        "react-native-android-widget",
+        {
+          widgets: [
+            {
+              name: "PrayerTimes",
+              label: "Zikr Prayer Times",
+              description: "Shows the current and next prayer time.",
+              minWidth: "180dp",
+              minHeight: "100dp",
+              resizeMode: "horizontal|vertical",
+              updatePeriodMillis: 1800000
+            }
+          ]
+        }
+      ],
+      "@bacons/apple-targets"
     ],
     locales: {
       "ar": "./locales/native/ar.json",
