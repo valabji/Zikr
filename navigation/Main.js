@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import linkingOptions from './useLinking';
 import Screen2 from '../screens/Screen2';
 import ContributeScreen from '../screens/ContributeScreen';
+import AboutScreen from '../screens/AboutScreen';
+import CreditsScreen from '../screens/CreditsScreen';
 import UnifiedPrayerSettingsScreen from '../screens/UnifiedPrayerSettingsScreen';
 import { DNav } from './DrawerNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
@@ -49,6 +51,8 @@ export const AppContainer = () => {
                 <Stack.Screen name="Home" component={DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Contribute" component={ContributeScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="About" component={AboutScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="Credits" component={CreditsScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="UnifiedPrayerSettings" component={UnifiedPrayerSettingsScreen} options={{ title: "Prayer Settings", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
             </Stack.Navigator>
             <RadioMiniPlayer />

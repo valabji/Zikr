@@ -441,6 +441,34 @@ export function DNav() {
                 <Feather name="help-circle" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
+                testID="about-screen"
+                onPress={() => {
+                  navigation.toggleDrawer()
+                  navigation.navigate("About")
+                }}
+                style={{
+                  height: 64,
+                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
+                  marginTop: 5,
+                  backgroundColor: colors.DGreen,
+                  flexDirection: "row",
+                }}>
+                {isRTL() ? (
+                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                ) : (
+                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                )}
+                <Text style={[
+                  textStyles.navigation,
+                  {
+                    color: colors.BYellow,
+                    marginTop: 7,
+                  }
+                ]}>{t('navigation.about')}</Text>
+                <View style={{ flex: 1 }} />
+                <Feather name="info" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={async () => {
                   const currentLang = await AsyncStorage.getItem('@language') || 'ar';
                   const newLang = currentLang === 'ar' ? 'en' : 'ar';

@@ -6,11 +6,16 @@ import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 const STORAGE_KEY = PRAYER_CONSTANTS.STORAGE_KEYS.CHECKIN;
 export const MANDATORY_PRAYERS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
-function todayKey() {
+function dateKeyForOffset(offsetDays) {
   const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function todayKey() {
+  return dateKeyForOffset(0);
 }
 
 function dayComplete(day) {
@@ -43,6 +48,25 @@ export function computePrayerCheckInStats(state) {
     completedToday: todayCount === MANDATORY_PRAYERS.length,
     today,
   };
+}
+
+export function getCheckInHistory(state, numDays = 7) {
+  const days = (state && state.days) || {};
+  const history = [];
+  for (let offsetDays = 0; offsetDays < numDays; offsetDays++) {
+    const dateKey = dateKeyForOffset(offsetDays);
+    const day = days[dateKey] || {};
+    const count = MANDATORY_PRAYERS.filter((p) => !!day[p]).length;
+    history.push({
+      dateKey,
+      offsetDays,
+      day,
+      count,
+      total: MANDATORY_PRAYERS.length,
+      complete: count === MANDATORY_PRAYERS.length,
+    });
+  }
+  return history;
 }
 
 let cached = null;

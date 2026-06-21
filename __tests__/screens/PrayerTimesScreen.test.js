@@ -17,7 +17,7 @@ jest.mock('expo-location', () => ({
 }));
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PrayerTimesScreen from '../../screens/PrayerTimesScreen';
 import { PRAYER_CONSTANTS } from '../../constants/PrayerConstants';
@@ -57,6 +57,23 @@ describe('PrayerTimesScreen', () => {
     await waitFor(() => {
       expect(navigation.navigate).toHaveBeenCalledWith('UnifiedPrayerSettings');
     });
+  });
+
+  it('opens the prayer history sheet from the one-line trigger', async () => {
+    AsyncStorage.getItem.mockImplementation((key) => {
+      if (key === PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION) return Promise.resolve(LOC);
+      if (key === PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD)
+        return Promise.resolve('MuslimWorldLeague');
+      if (key === PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB) return Promise.resolve('Shafi');
+      return Promise.resolve(null);
+    });
+    const navigation = buildNav();
+    const { getByTestId, queryByTestId } = render(<PrayerTimesScreen navigation={navigation} />);
+    await waitFor(() => expect(getByTestId('prayer-history-trigger')).toBeTruthy());
+
+    expect(queryByTestId('prayer-history-sheet')).toBeNull();
+    fireEvent.press(getByTestId('prayer-history-trigger'));
+    await waitFor(() => expect(getByTestId('prayer-history-sheet')).toBeTruthy());
   });
 
   it('does not crash on storage error', async () => {

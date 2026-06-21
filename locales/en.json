@@ -36,7 +36,8 @@
     "radio": "Radio",
     "islamicCalendar": "Islamic Calendar",
     "wirdPlanner": "Wird Planner",
-    "hifzTracker": "Hifz Tracker"
+    "hifzTracker": "Hifz Tracker",
+    "about": "About"
   },
   "dailyHadith": {
     "title": "Hadith of the Day"
@@ -309,7 +310,10 @@
     "streakDaysZero": "Check in to start a streak",
     "prayersCompletedToday": "{count}/{total} prayers today",
     "markAsPrayed": "Mark as prayed",
-    "prayed": "Prayed"
+    "prayed": "Prayed",
+    "history": "Last 7 Days",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "qibla": {
     "loading": "Finding Qibla direction...",
@@ -564,5 +568,54 @@
     "noStations": "No stations available.",
     "search": "Search stations",
     "loading": "Loading stations…"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {version}",
+    "description": "Zikr is a free Islamic companion grounded in the Quran and the authentic Sunnah upon the understanding of the righteous predecessors (the Salaf). It brings together authentic azkar and a digital tasbih, the Holy Quran with recitations and tafsir, accurate prayer times and Qibla direction, an Islamic library and Quran radio, the Hijri calendar, and tools to track your prayers, wird and memorization in both Arabic and English.",
+    "developer": "About the Developer",
+    "developerName": "Abdalrahman Valabji",
+    "developerRole": "Software Developer",
+    "developerLink": "valabji.com",
+    "links": "Links",
+    "website": "Website",
+    "github": "Source Code",
+    "playStore": "Google Play",
+    "shareApp": "Share App",
+    "creditsLink": "Credits, Licenses & Acknowledgements",
+    "creditsLinkDesc": "Data sources, open-source libraries and thank-yous",
+    "rights": "© 2020–{year} Abdalrahman Valabji · MIT License",
+    "madeWith": "Made with care for the Ummah",
+    "error": "Error",
+    "linkError": "Could not open the link. Please try again later."
+  },
+  "credits": {
+    "title": "Credits & Licenses",
+    "intro": "Zikr stands on the work of many people and projects. We are grateful to every source, library and contributor that made this app possible.",
+    "dataSources": "Content & Data Sources",
+    "licenses": "Open-Source Licenses",
+    "thanks": "Thank You",
+    "thanksBody": "To the scholars who preserved this knowledge, to the open-source community, to everyone who reported issues, suggested features or helped with translations, and to you for using Zikr — thank you. May it be a continuing charity (sadaqah jariyah) for all who took part.",
+    "openLink": "Open link",
+    "sources": {
+      "quranText": "Quran text & Mushaf page layout",
+      "quranTranslation": "English Quran translation",
+      "tafsir": "Quran tafsir (commentary)",
+      "recitations": "Quran ayah recitations",
+      "radio": "Quran radio streams",
+      "hadith": "Hadith collections",
+      "azkar": "Azkar & supplications collection",
+      "prayerTimes": "Prayer time calculations"
+    },
+    "sourceNames": {
+      "quranText": "King Fahd Glorious Quran Printing Complex, Madinah",
+      "quranTranslation": "Marmaduke Pickthall · Tanzil.net",
+      "tafsir": "al-Baghawi · as-Saʿdi · Wahiduddin Khan",
+      "recitations": "EveryAyah.com",
+      "radio": "Quran Radio · qurango.net",
+      "hadith": "An-Nawawi's 40 · Riyad as-Salihin · Al-Adab Al-Mufrad · Shamaʾil · Qudsi 40 · Shah Waliullah 40",
+      "azkar": "Hisn al-Muslim (Fortress of the Muslim)",
+      "prayerTimes": "Adhan by Batoul Apps"
+    }
   }
 }

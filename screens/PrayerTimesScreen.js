@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,8 @@ import {
   getLocationFromIP,
   getBrowserLocation
 } from '../utils/PrayerUtils';
-import { usePrayerCheckIn, togglePrayerCheckIn, MANDATORY_PRAYERS } from '../utils/PrayerCheckIn';
+import { usePrayerCheckIn, togglePrayerCheckIn, getCheckInHistory, MANDATORY_PRAYERS } from '../utils/PrayerCheckIn';
+import PrayerHistorySheet from '../components/PrayerHistorySheet';
 
 export default function PrayerTimesScreen({ navigation }) {
   const colors = useColors();
@@ -38,7 +39,9 @@ export default function PrayerTimesScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [calculationMethod, setCalculationMethod] = useState(PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD);
   const [madhab, setMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
-  const { stats: checkInStats } = usePrayerCheckIn();
+  const { state: checkInState, stats: checkInStats } = usePrayerCheckIn();
+  const checkInHistory = useMemo(() => getCheckInHistory(checkInState, 7), [checkInState]);
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   // Load saved settings
   const loadSettings = useCallback(async () => {
@@ -368,33 +371,49 @@ export default function PrayerTimesScreen({ navigation }) {
             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
             marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between'
           }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Feather name="zap" size={22} color={colors.nextPrayer} />
-            <View style={{ ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING }) }}>
-              <Text style={{
-                color: colors.BYellow,
-                ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
-                fontFamily: "Cairo_400Regular",
-              }}>
-                {checkInStats.streak > 0
-                  ? t('prayerTimes.streakDays', { count: checkInStats.streak })
-                  : t('prayerTimes.streakDaysZero')}
-              </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Feather name="zap" size={22} color={colors.nextPrayer} />
+              <View style={{ ...getDirectionalMixedSpacing({ marginLeft: PRAYER_CONSTANTS.SPACING.SMALL_PADDING }) }}>
+                <Text style={{
+                  color: colors.BYellow,
+                  ...PRAYER_CONSTANTS.FONT_STYLES.BODY,
+                  fontFamily: "Cairo_400Regular",
+                }}>
+                  {checkInStats.streak > 0
+                    ? t('prayerTimes.streakDays', { count: checkInStats.streak })
+                    : t('prayerTimes.streakDaysZero')}
+                </Text>
+              </View>
             </View>
+            <Text style={{
+              color: colors.BYellow,
+              fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+              fontFamily: "Cairo_400Regular",
+              opacity: 0.8
+            }}>
+              {t('prayerTimes.prayersCompletedToday', { count: checkInStats.todayCount, total: checkInStats.todayTotal })}
+            </Text>
           </View>
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
-            fontFamily: "Cairo_400Regular",
-            opacity: 0.8
-          }}>
-            {t('prayerTimes.prayersCompletedToday', { count: checkInStats.todayCount, total: checkInStats.todayTotal })}
-          </Text>
+
+          <TouchableOpacity
+            testID="prayer-history-trigger"
+            onPress={() => setHistoryVisible(true)}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            style={{ marginTop: PRAYER_CONSTANTS.SPACING.TINY_PADDING }}
+          >
+            <Text style={{
+              color: colors.BYellow,
+              fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+              fontFamily: "Cairo_400Regular",
+              opacity: 0.55,
+              textAlign: getRTLTextAlign('left'),
+            }}>
+              {t('prayerTimes.history')}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Next Prayer Countdown */}
@@ -535,6 +554,12 @@ export default function PrayerTimesScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <PrayerHistorySheet
+        visible={historyVisible}
+        onClose={() => setHistoryVisible(false)}
+        history={checkInHistory}
+      />
     </View>
   );
 }

@@ -114,6 +114,27 @@ describe('PrayerCheckIn', () => {
     jest.useRealTimers();
   });
 
+  it('getCheckInHistory returns the requested number of days, most recent first', async () => {
+    const mod = await loadAndReset();
+    const d = new Date();
+    const keyFor = (offset) => {
+      const c = new Date(d);
+      c.setDate(c.getDate() - offset);
+      const mm = String(c.getMonth() + 1).padStart(2, '0');
+      const dd = String(c.getDate()).padStart(2, '0');
+      return `${c.getFullYear()}-${mm}-${dd}`;
+    };
+    const state = {
+      days: {
+        [keyFor(1)]: { fajr: 1, dhuhr: 1, asr: 1, maghrib: 1, isha: 1 },
+      },
+    };
+    const history = mod.getCheckInHistory(state, 3);
+    expect(history).toHaveLength(3);
+    expect(history[0]).toMatchObject({ dateKey: keyFor(0), offsetDays: 0, count: 0, complete: false });
+    expect(history[1]).toMatchObject({ dateKey: keyFor(1), offsetDays: 1, count: 5, complete: true });
+  });
+
   it('subscribePrayerCheckIn notifies listeners on commit and unsubscribes correctly', async () => {
     const mod = await loadAndReset();
     await mod.loadPrayerCheckIn();
