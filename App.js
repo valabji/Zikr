@@ -21,9 +21,9 @@ function AppContent() {
   });
   
   React.useEffect(() => {
-    loadResourcesAndDataAsync().then(() => {
-      setResourcesLoaded(true);
-    });
+    loadResourcesAndDataAsync()
+      .catch((e) => { console.error('Resource load failed:', e); })
+      .finally(() => { setResourcesLoaded(true); });
   }, []);
 
   // Refresh the prayer notification schedule when the app comes back to

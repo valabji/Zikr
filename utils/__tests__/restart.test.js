@@ -1,5 +1,9 @@
+const mockUpdatesState = { isEnabled: true };
 jest.mock('expo-updates', () => ({
-  reloadAsync: jest.fn(),
+  reloadAsync: jest.fn(() => Promise.resolve()),
+  get isEnabled() {
+    return mockUpdatesState.isEnabled;
+  },
 }));
 
 import * as Updates from 'expo-updates';
@@ -12,6 +16,7 @@ describe('Restart', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUpdatesState.isEnabled = true;
     originalDev = global.__DEV__;
     originalLocation = global.window?.location;
   });
@@ -45,5 +50,13 @@ describe('Restart', () => {
     global.__DEV__ = false;
     Restart();
     expect(Updates.reloadAsync).toHaveBeenCalled();
+  });
+
+  it('does not call reloadAsync when expo-updates is disabled', () => {
+    global.Platform.OS = 'ios';
+    global.__DEV__ = false;
+    mockUpdatesState.isEnabled = false;
+    Restart();
+    expect(Updates.reloadAsync).not.toHaveBeenCalled();
   });
 });

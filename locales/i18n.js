@@ -255,7 +255,8 @@ export const initializeLanguage = async () => {
       } else {
         moment.locale('en');
       }
-      await setLanguage(currentLanguage, Platform?.OS !== 'web');
+      // Stage RTL but never self-reload during boot — a reload here bricks the splash on builds where expo-updates is disabled.
+      await setLanguage(currentLanguage, false);
     }
   } catch (error) {
     console.warn('Error loading language:', error);
