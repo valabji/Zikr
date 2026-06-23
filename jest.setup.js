@@ -163,12 +163,6 @@ jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(() => Promise.resolve()),
 }), { virtual: true });
 
-jest.mock('expo-speech', () => ({
-  speak: jest.fn(),
-  stop: jest.fn(),
-  isSpeakingAsync: jest.fn(() => Promise.resolve(false)),
-}), { virtual: true });
-
 jest.mock('react-native-view-shot', () => ({
   captureRef: jest.fn(() => Promise.resolve('file:///mock/share-card.png')),
 }), { virtual: true });

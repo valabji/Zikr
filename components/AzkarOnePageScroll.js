@@ -5,7 +5,6 @@ import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
-import { useAzkarAudio } from '../utils/AzkarAudio';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
 import { logAzkarCompletion } from '../utils/AzkarHistory';
@@ -14,7 +13,6 @@ import ShareCardModal from './ShareCardModal';
 export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
-  const azkarAudio = useAzkarAudio();
   const [shareItem, setShareItem] = React.useState(null);
 
   const Item = ({ z, pn, totalCount }) => {
@@ -22,8 +20,6 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
-    const audioKey = `${z.category}-${pn}`;
-    const isAudioActive = azkarAudio.activeKey === audioKey && azkarAudio.isPlaying;
 
     return (
       <View style={{
@@ -40,13 +36,6 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           style={{ position: 'absolute', top: 8, [isRTL() ? 'left' : 'right']: 8, zIndex: 1, padding: 8 }}
         >
           <Feather name="share-2" size={20} color={colors.BYellow} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          testID="azkar-audio-button"
-          onPress={() => azkarAudio.toggle(audioKey, z.zekr)}
-          style={{ position: 'absolute', top: 8, [isRTL() ? 'right' : 'left']: 8, zIndex: 1, padding: 8 }}
-        >
-          <Feather name={isAudioActive ? 'pause' : 'volume-2'} size={20} color={colors.BYellow} />
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}

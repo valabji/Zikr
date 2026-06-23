@@ -6003,15 +6003,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-speech@npm:~14.0.8":
-  version: 14.0.8
-  resolution: "expo-speech@npm:14.0.8"
-  peerDependencies:
-    expo: "*"
-  checksum: b1fa82f6517ea4b031dd862939a30420502812c10baa4cbadfe5c443b3aa99be8d80ca7e5f747a11158b86ef25b1a3258ac80d4a79d6be2538e64d5fa2949365
-  languageName: node
-  linkType: hard
-
 "expo-splash-screen@npm:~31.0.10":
   version: 31.0.12
   resolution: "expo-splash-screen@npm:31.0.12"
@@ -12049,7 +12040,6 @@ __metadata:
     expo-notifications: ^0.32.14
     expo-sensors: ~15.0.7
     expo-sharing: ~14.0.8
-    expo-speech: ~14.0.8
     expo-speech-recognition: ^56.0.1
     expo-splash-screen: ~31.0.10
     expo-updates: ~29.0.11

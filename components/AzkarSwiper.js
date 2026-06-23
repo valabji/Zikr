@@ -6,7 +6,6 @@ import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
-import { useAzkarAudio } from '../utils/AzkarAudio';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
 import { logAzkarCompletion } from '../utils/AzkarHistory';
@@ -15,7 +14,6 @@ import ShareCardModal from './ShareCardModal';
 export default function AzkarSwiper({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
-  const azkarAudio = useAzkarAudio();
   const reverse = Platform.OS === 'web' && isRTL();
   const swp = React.useRef(null);
   const size = azkarList.length;
@@ -162,8 +160,6 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
         stackDepth={1}
       >
         {azkarList.map((i, index) => {
-          const audioKey = `${i.category}-${index + 1}`;
-          const isAudioActive = azkarAudio.activeKey === audioKey && azkarAudio.isPlaying;
           const slideContent = (
             <View style={{
               flex: 1, borderWidth: 1, borderColor: colors.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
@@ -173,13 +169,6 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
                 style={{ position: 'absolute', top: 8, [isRTL() ? 'left' : 'right']: 8, zIndex: 1, padding: 8 }}
               >
                 <Feather name="share-2" size={20} color={colors.BYellow} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="azkar-audio-button"
-                onPress={() => azkarAudio.toggle(audioKey, i.zekr)}
-                style={{ position: 'absolute', top: 8, [isRTL() ? 'right' : 'left']: 8, zIndex: 1, padding: 8 }}
-              >
-                <Feather name={isAudioActive ? 'pause' : 'volume-2'} size={20} color={colors.BYellow} />
               </TouchableOpacity>
               <Item z={i} pn={index + 1} />
             </View>
