@@ -33,7 +33,8 @@ jest.mock('../../locales/i18n', () => ({
     return key;
   },
   isRTL: () => false,
-  getRTLTextAlign: (align) => align
+  getRTLTextAlign: (align) => align,
+  getDirectionalMixedSpacing: (v) => v
 }));
 
 jest.mock('../../components/StarSvg', () => ({

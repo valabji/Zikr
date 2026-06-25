@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { useColors } from '../constants/Colors';
-import { textStyles } from '../constants/Fonts';
+import { textStyles, FONT_FAMILY } from '../constants/Fonts';
+import { cleanForHafs } from '../utils/mushafLayout';
 import { t } from '../locales/i18n';
 
 const ShareCard = React.forwardRef(function ShareCard({ content }, ref) {
   const colors = useColors();
-  const { arabic, quran, translation, reference, description } = content || {};
+  const { arabic, arabicSegments, quran, translation, reference, description } = content || {};
 
   return (
     <View
@@ -22,8 +23,9 @@ const ShareCard = React.forwardRef(function ShareCard({ content }, ref) {
       }}
     >
       <Text
+        allowFontScaling={false}
         style={{
-          fontFamily: 'Hafs',
+          fontFamily: FONT_FAMILY,
           fontSize: 24,
           lineHeight: 44,
           color: colors.text,
@@ -31,10 +33,15 @@ const ShareCard = React.forwardRef(function ShareCard({ content }, ref) {
           writingDirection: 'rtl',
         }}
       >
-        {arabic}
+        {arabicSegments && arabicSegments.length
+          ? arabicSegments.map((s, i) => (
+              <Text key={i} style={{ fontFamily: s.fontFamily }}>{s.text}</Text>
+            ))
+          : arabic}
       </Text>
       {quran ? (
         <Text
+          allowFontScaling={false}
           style={{
             fontFamily: 'Hafs',
             fontSize: 22,
@@ -45,7 +52,7 @@ const ShareCard = React.forwardRef(function ShareCard({ content }, ref) {
             marginTop: 14,
           }}
         >
-          {quran}
+          {cleanForHafs(quran)}
         </Text>
       ) : null}
       {translation ? (

@@ -488,6 +488,7 @@
     "audioScopeAyah": "Only this ayah",
     "audioScopePage": "Till end of page",
     "audioScopeSurah": "Till end of surah",
+    "audioScopeMushaf": "Whole Quran (loop)",
     "playbackSpeed": "Playback Speed",
     "highFidelity": "High-Fidelity Mushaf",
     "highFidelityDesc": "Download the official King Fahd Complex per-page fonts for pixel-exact line layout matching the printed Mushaf.",

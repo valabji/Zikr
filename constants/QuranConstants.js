@@ -80,6 +80,7 @@ export const AUDIO_PLAYBACK_SCOPES = {
   AYAH: 'ayah',
   PAGE: 'page',
   SURAH: 'surah',
+  MUSHAF: 'mushaf',
 };
 
 // source:'bundle' → JSON imported at build time; source:'api' → fetched from api.quran.com on demand.

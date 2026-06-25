@@ -99,14 +99,22 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
               active={scope === AUDIO_PLAYBACK_SCOPES.SURAH}
               onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.SURAH })}
             />
-            <View style={{ flex: 1 }} />
             <Chip
               colors={colors}
-              icon="repeat"
-              label={t('quran.loop')}
-              active={loopOn}
-              onPress={() => update({ loopEnabled: !loopOn })}
+              label={t('quran.audioScopeMushaf')}
+              active={scope === AUDIO_PLAYBACK_SCOPES.MUSHAF}
+              onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.MUSHAF })}
             />
+            <View style={{ flex: 1 }} />
+            {scope !== AUDIO_PLAYBACK_SCOPES.MUSHAF ? (
+              <Chip
+                colors={colors}
+                icon="repeat"
+                label={t('quran.loop')}
+                active={loopOn}
+                onPress={() => update({ loopEnabled: !loopOn })}
+              />
+            ) : null}
           </View>
 
           <Text style={[textStyles.subtitle, { color: colors.BYellow + 'cc', fontSize: 11, marginBottom: 4 }]}>

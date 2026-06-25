@@ -306,3 +306,32 @@ export const toArabicDigits = (n) =>
 const HAFS_CHAR_FIXES = { ' ': ' ', '۟': 'ْ', 'ۣ': 'ۜ', '۫': '۬' };
 const HAFS_CHAR_RE = / |۟|ۣ|۫/g;
 export const arForHafs = (s) => (s ? s.replace(HAFS_CHAR_RE, (c) => HAFS_CHAR_FIXES[c]) : s);
+
+// Hafs.otf lacks ASCII parentheses; the only unrenderable glyphs in the
+// embedded-Azkar verse text are the "(n)" ayah markers. Turn them into the
+// Arabic-Indic digits the reader uses for end-of-ayah numbers and drop any
+// leftover parens so nothing falls back to a mismatched system glyph.
+export const cleanForHafs = (s) => (s
+  ? s.replace(/\((\d+)\)/g, (_, n) => toArabicDigits(n)).replace(/[()]/g, '')
+  : s);
+
+// QCF fonts are per-page private-use glyph sets, so a verse can only be drawn
+// in HD by emitting each word's `code` with that word's page font. Collects an
+// ayah's words in reading order with their page so the caller can group them.
+export function ayahLayoutWords(layoutFile, vk) {
+  const pages = getLayout(layoutFile);
+  const out = [];
+  let started = false;
+  for (let pi = 0; pi < pages.length; pi += 1) {
+    const lines = pages[pi].lines || [];
+    let onPage = false;
+    for (const ln of lines) {
+      for (const w of (ln.words || [])) {
+        if (w.vk === vk) { out.push({ page: pi + 1, code: w.code, ar: w.ar, type: w.type }); onPage = true; }
+      }
+    }
+    if (started && !onPage) break;
+    if (onPage) started = true;
+  }
+  return out;
+}

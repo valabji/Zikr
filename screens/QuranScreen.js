@@ -11,7 +11,8 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
-import { SCREEN_WIDTH, getLayoutOffsets, arForHafs } from '../utils/mushafLayout';
+import * as Font from 'expo-font';
+import { SCREEN_WIDTH, getLayoutOffsets, arForHafs, ayahLayoutWords } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 import translationEn from '../assets/quran/data/translation_en.json';
@@ -20,7 +21,7 @@ import { loadQuranSettings, subscribeQuranSettings } from '../utils/QuranSetting
 import { trackPage } from '../utils/ReadingProgress';
 import QuranAudio from '../utils/QuranAudio';
 import QuranVoiceFollower from '../utils/QuranVoiceFollower';
-import QcfDownloader from '../utils/QcfDownloader';
+import QcfDownloader, { qcfFontFamilyForPage } from '../utils/QcfDownloader';
 import { PageView, PageViewContinuous } from '../components/MushafPage';
 import QuranMiniPlayer from '../components/QuranMiniPlayer';
 import QuranVoiceFollowBar from '../components/QuranVoiceFollowBar';
@@ -42,15 +43,41 @@ for (const pg of pagesData) {
     verseTextByKey[`${a.surah}:${a.ayah}`] = a.text;
   }
 }
-function buildAyahShareContent(a, lang) {
+// Mirrors the reader's active font: when the HD bundle for the current edition
+// is installed and its page fonts are loaded, draw the ayah from QCF glyph
+// codes (grouped by page font); otherwise the caller falls back to plain
+// UthmanicHafs text.
+function ayahQcfSegments(surah, ayah, settings, qcfState) {
+  const edition = getMushafEdition(settings.mushafEdition);
+  const version = edition.qcfVersion;
+  if (!(qcfState[version] && qcfState[version].installed)) return null;
+  const words = ayahLayoutWords(edition.layoutFile, `${surah}:${ayah}`).filter((w) => w.code);
+  if (!words.length) return null;
+  const pages = [...new Set(words.map((w) => w.page))];
+  if (!pages.every((p) => Font.isLoaded(qcfFontFamilyForPage(version, p)))) return null;
+  const segments = [];
+  words.forEach((w, i) => {
+    const fontFamily = qcfFontFamilyForPage(version, w.page);
+    const piece = (i === 0 ? '' : ' ') + w.code;
+    const last = segments[segments.length - 1];
+    if (last && last.fontFamily === fontFamily) last.text += piece;
+    else segments.push({ text: piece, fontFamily });
+  });
+  return segments;
+}
+
+function buildAyahShareContent(a, lang, settings, qcfState) {
   const key = `${a.surah}:${a.ayah}`;
   const surah = surahsData[a.surah - 1];
   const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
   const reference = lang === 'ar'
     ? `${surah.nameAr} ${toArabicDigits(a.surah)}:${toArabicDigits(a.ayah)}`
     : `${surah.nameEn} ${a.surah}:${a.ayah}`;
+  const plain = arForHafs(verseTextByKey[key] || '');
   return {
-    arabic: arForHafs(verseTextByKey[key] || ''),
+    arabic: plain,
+    arabicSegments: ayahQcfSegments(a.surah, a.ayah, settings, qcfState)
+      || [{ text: plain, fontFamily: 'UthmanicHafs' }],
     translation: translationEn[key],
     reference,
   };
@@ -453,7 +480,7 @@ export default function QuranScreen({ navigation }) {
       />
       <ShareCardModal
         visible={!!shareAyah}
-        content={shareAyah ? buildAyahShareContent(shareAyah, isRTL() ? 'ar' : 'en') : null}
+        content={shareAyah ? buildAyahShareContent(shareAyah, isRTL() ? 'ar' : 'en', settings, qcfState) : null}
         onClose={() => setShareAyah(null)}
       />
       <QuranSettingsModal

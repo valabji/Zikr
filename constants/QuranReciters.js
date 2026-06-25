@@ -4,12 +4,14 @@ export const RECITERS = [
     nameAr: 'مشاري راشد العفاسي',
     nameEn: 'Mishary Alafasy',
     everyAyahSlug: 'Alafasy_128kbps',
+    qdcId: 7,
   },
   {
     id: 'husary',
     nameAr: 'محمود خليل الحصري',
     nameEn: 'Mahmoud Khalil Al-Husary',
     everyAyahSlug: 'Husary_128kbps',
+    qdcId: 6,
   },
   {
     id: 'husary_mujawwad',
@@ -22,12 +24,14 @@ export const RECITERS = [
     nameAr: 'عبد الباسط عبد الصمد',
     nameEn: 'Abdul-Basit Abdul-Samad',
     everyAyahSlug: 'Abdul_Basit_Murattal_64kbps',
+    qdcId: 2,
   },
   {
     id: 'abdulbasit_mujawwad',
     nameAr: 'عبد الباسط عبد الصمد (مجود)',
     nameEn: 'Abdul-Basit (Mujawwad)',
     everyAyahSlug: 'Abdul_Basit_Mujawwad_128kbps',
+    qdcId: 1,
   },
   {
     id: 'maher',
@@ -40,12 +44,14 @@ export const RECITERS = [
     nameAr: 'عبد الرحمن السديس',
     nameEn: 'Abdurrahmaan As-Sudais',
     everyAyahSlug: 'Abdurrahmaan_As-Sudais_192kbps',
+    qdcId: 3,
   },
   {
     id: 'shuraym',
     nameAr: 'سعود الشريم',
     nameEn: 'Saood Ash-Shuraym',
     everyAyahSlug: 'Saood_ash-Shuraym_128kbps',
+    qdcId: 10,
   },
   {
     id: 'ghamdi',
@@ -64,6 +70,7 @@ export const RECITERS = [
     nameAr: 'محمد صديق المنشاوي',
     nameEn: 'Mohamed Siddiq Al-Minshawi',
     everyAyahSlug: 'Minshawy_Murattal_128kbps',
+    qdcId: 9,
   },
   {
     id: 'minshawi_mujawwad',
@@ -82,6 +89,7 @@ export const RECITERS = [
     nameAr: 'ياسر الدوسري',
     nameEn: 'Yasser Ad-Dussary',
     everyAyahSlug: 'Yasser_Ad-Dussary_128kbps',
+    qdcId: 97,
   },
   {
     id: 'basfar',
@@ -94,12 +102,14 @@ export const RECITERS = [
     nameAr: 'هاني الرفاعي',
     nameEn: 'Hani Ar-Rifai',
     everyAyahSlug: 'Hani_Rifai_192kbps',
+    qdcId: 5,
   },
   {
     id: 'shaatree',
     nameAr: 'أبو بكر الشاطري',
     nameEn: 'Abu Bakr Ash-Shaatree',
     everyAyahSlug: 'Abu_Bakr_Ash-Shaatree_128kbps',
+    qdcId: 4,
   },
   {
     id: 'mohammad_ayyoub',
@@ -113,6 +123,10 @@ export const DEFAULT_RECITER_ID = 'alafasy';
 
 export function getReciter(id) {
   return RECITERS.find((r) => r.id === id) || RECITERS[0];
+}
+
+export function reciterHasSurahAudio(id) {
+  return !!getReciter(id).qdcId;
 }
 
 export function buildAyahAudioUrl(reciterId, surah, ayah) {

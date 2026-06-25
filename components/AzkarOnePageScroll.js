@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
-import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign, getDirectionalMixedSpacing } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
@@ -33,7 +33,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
       }}>
         <TouchableOpacity
           onPress={() => setShareItem(z)}
-          style={{ position: 'absolute', top: 8, [isRTL() ? 'left' : 'right']: 8, zIndex: 1, padding: 8 }}
+          style={{ position: 'absolute', zIndex: 1, padding: 8, ...getDirectionalMixedSpacing({ top: 8, right: 8 }) }}
         >
           <Feather name="share-2" size={20} color={colors.BYellow} />
         </TouchableOpacity>
