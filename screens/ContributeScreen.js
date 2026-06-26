@@ -388,8 +388,7 @@ export default function ContributeScreen({ navigation }) {
             fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
             fontFamily: "Cairo_400Regular",
             textAlign: 'center',
-            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL,
-            fontStyle: 'italic'
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL
           }}>
             {t('contribute.thankYou')}
           </Text>

@@ -120,7 +120,7 @@ function BookmarkRow({ item, colors, lang, fmtNum, pageLabel, onPress, onRemove,
           </TouchableOpacity>
         </View>
       ) : item.note ? (
-        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8, fontStyle: 'italic' }]} numberOfLines={2}>
+        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8 }]} numberOfLines={2}>
           {item.note}
         </Text>
       ) : null}

@@ -206,7 +206,6 @@ export default function AboutScreen({ navigation }) {
           fontSize: 13,
           fontFamily: 'Cairo_400Regular',
           textAlign: 'center',
-          fontStyle: 'italic',
           opacity: 0.7,
           marginBottom: 24,
         }}>{t('about.madeWith')}</Text>

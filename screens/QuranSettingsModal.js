@@ -245,7 +245,7 @@ export default function QuranSettingsModal({ visible, onClose }) {
               ))}
             </View>
             {(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v2-1441' ? (
-              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8, fontStyle: 'italic' }]}>
+              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8 }]}>
                 {t('quran.mushaf1441Note')}
               </Text>
             ) : null}

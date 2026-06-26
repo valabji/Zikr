@@ -134,7 +134,6 @@ export default function CreditsScreen({ navigation }) {
             fontFamily: 'Cairo_400Regular',
             lineHeight: 24,
             textAlign: getRTLTextAlign('left'),
-            fontStyle: 'italic',
           }}>{t('credits.thanksBody')}</Text>
         </View>
       </ScrollView>
