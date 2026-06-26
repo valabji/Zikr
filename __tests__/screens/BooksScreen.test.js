@@ -54,7 +54,6 @@ describe('BooksScreen', () => {
     expect(getByTestId('books-screen')).toBeTruthy();
     await waitFor(() => {
       expect(getByTestId('book-nawawi40')).toBeTruthy();
-      expect(getByTestId('book-qudsi40')).toBeTruthy();
     });
   });
 

@@ -1,15 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import booksCatalog from '../assets/books/data/books.json';
-import { BOOKS_CONSTANTS } from '../constants/BooksConstants';
+import { BOOKS_CONSTANTS, NEEDS_VERIFICATION } from '../constants/BooksConstants';
 import { bookFileUri } from './BooksDownloader';
 
 const { STORAGE_KEYS } = BOOKS_CONSTANTS;
 
 const contentLoaders = {
   nawawi40: () => require('../assets/books/data/nawawi40.json'),
-  qudsi40: () => require('../assets/books/data/qudsi40.json'),
-  shahwaliullah40: () => require('../assets/books/data/shahwaliullah40.json'),
   riyad_assalihin: () => require('../assets/books/data/riyad_assalihin.json'),
   aladab_almufrad: () => require('../assets/books/data/aladab_almufrad.json'),
   shamail_muhammadiyah: () => require('../assets/books/data/shamail_muhammadiyah.json'),
@@ -18,7 +16,7 @@ const contentLoaders = {
 const bookCache = {};
 
 export function getBooksCatalog() {
-  return booksCatalog;
+  return booksCatalog.filter((b) => !NEEDS_VERIFICATION.has(b.id));
 }
 
 export function getBookMeta(id) {

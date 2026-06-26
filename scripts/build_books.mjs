@@ -10,8 +10,6 @@ const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'assets', '
 
 const BOOKS = [
   { id: 'nawawi40', dir: 'forties', bundled: true, nameAr: 'الأربعون النووية', nameEn: "An-Nawawi's 40 Hadith", authorAr: 'الإمام النووي', authorEn: 'Imam an-Nawawi' },
-  { id: 'qudsi40', dir: 'forties', bundled: true, nameAr: 'الأربعون القدسية', nameEn: 'Forty Hadith Qudsi', authorAr: '', authorEn: '' },
-  { id: 'shahwaliullah40', dir: 'forties', bundled: true, nameAr: 'الأربعون لولي الله الدهلوي', nameEn: "Shah Waliullah's 40 Hadith", authorAr: 'الشاه ولي الله الدهلوي', authorEn: 'Shah Waliullah ad-Dahlawi' },
   { id: 'riyad_assalihin', dir: 'other_books', bundled: true, nameAr: 'رياض الصالحين', nameEn: 'Riyad as-Salihin', authorAr: 'الإمام النووي', authorEn: 'Imam an-Nawawi' },
   { id: 'aladab_almufrad', dir: 'other_books', bundled: true, nameAr: 'الأدب المفرد', nameEn: 'Al-Adab Al-Mufrad', authorAr: 'الإمام البخاري', authorEn: 'Imam al-Bukhari' },
   { id: 'shamail_muhammadiyah', dir: 'other_books', bundled: true, nameAr: 'الشمائل المحمدية', nameEn: "Shama'il Muhammadiyah", authorAr: 'الإمام الترمذي', authorEn: 'Imam at-Tirmidhi' },
@@ -27,6 +25,8 @@ const BOOKS = [
   { id: 'darimi', dir: 'the_9_books', bundled: false, sizeMB: 3.1, nameAr: 'سنن الدارمي', nameEn: 'Sunan ad-Darimi', authorAr: 'الإمام الدارمي', authorEn: 'Imam ad-Darimi' },
   { id: 'bulugh_almaram', dir: 'other_books', bundled: false, sizeMB: 2.0, nameAr: 'بلوغ المرام', nameEn: 'Bulugh al-Maram', authorAr: 'الحافظ ابن حجر العسقلاني', authorEn: 'Ibn Hajar al-Asqalani' },
   { id: 'mishkat_almasabih', dir: 'other_books', bundled: false, sizeMB: 5.2, nameAr: 'مشكاة المصابيح', nameEn: 'Mishkat al-Masabih', authorAr: 'الخطيب التبريزي', authorEn: 'Al-Khatib at-Tabrizi' },
+  { id: 'qudsi40', dir: 'forties', bundled: false, sizeMB: 0.1, nameAr: 'الأربعون القدسية', nameEn: 'Forty Hadith Qudsi', authorAr: '', authorEn: '' },
+  { id: 'shahwaliullah40', dir: 'forties', bundled: false, sizeMB: 0.1, nameAr: 'الأربعون لولي الله الدهلوي', nameEn: "Shah Waliullah's 40 Hadith", authorAr: 'الشاه ولي الله الدهلوي', authorEn: 'Shah Waliullah ad-Dahlawi' },
 ];
 
 async function fetchJson(dir, id) {

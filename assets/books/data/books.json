@@ -11,28 +11,6 @@
   "file": "nawawi40.json"
  },
  {
-  "id": "qudsi40",
-  "nameAr": "الأربعون القدسية",
-  "nameEn": "Forty Hadith Qudsi",
-  "authorAr": "",
-  "authorEn": "",
-  "category": "hadith",
-  "count": 40,
-  "bundled": true,
-  "file": "qudsi40.json"
- },
- {
-  "id": "shahwaliullah40",
-  "nameAr": "الأربعون لولي الله الدهلوي",
-  "nameEn": "Shah Waliullah's 40 Hadith",
-  "authorAr": "الشاه ولي الله الدهلوي",
-  "authorEn": "Shah Waliullah ad-Dahlawi",
-  "category": "hadith",
-  "count": 40,
-  "bundled": true,
-  "file": "shahwaliullah40.json"
- },
- {
   "id": "riyad_assalihin",
   "nameAr": "رياض الصالحين",
   "nameEn": "Riyad as-Salihin",
@@ -196,5 +174,29 @@
   "bundled": false,
   "src": "other_books/mishkat_almasabih.json",
   "sizeMB": 5.2
+ },
+ {
+  "id": "qudsi40",
+  "nameAr": "الأربعون القدسية",
+  "nameEn": "Forty Hadith Qudsi",
+  "authorAr": "",
+  "authorEn": "",
+  "category": "hadith",
+  "count": 40,
+  "bundled": false,
+  "src": "forties/qudsi40.json",
+  "sizeMB": 0.1
+ },
+ {
+  "id": "shahwaliullah40",
+  "nameAr": "الأربعون لولي الله الدهلوي",
+  "nameEn": "Shah Waliullah's 40 Hadith",
+  "authorAr": "الشاه ولي الله الدهلوي",
+  "authorEn": "Shah Waliullah ad-Dahlawi",
+  "category": "hadith",
+  "count": 40,
+  "bundled": false,
+  "src": "forties/shahwaliullah40.json",
+  "sizeMB": 0.1
  }
 ]

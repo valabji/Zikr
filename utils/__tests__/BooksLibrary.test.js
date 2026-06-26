@@ -17,7 +17,8 @@ describe('BooksLibrary', () => {
   it('exposes the bundled catalog', () => {
     const catalog = getBooksCatalog();
     expect(Array.isArray(catalog)).toBe(true);
-    expect(catalog.map((b) => b.id)).toEqual(expect.arrayContaining(['nawawi40', 'qudsi40']));
+    expect(catalog.map((b) => b.id)).toEqual(expect.arrayContaining(['nawawi40', 'riyad_assalihin']));
+    expect(catalog.find((b) => b.id === 'qudsi40')).toBeUndefined();
   });
 
   it('getBookMeta returns metadata or null', () => {

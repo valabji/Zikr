@@ -27,3 +27,5 @@ export const FONT_SCALE_RANGE = { min: 0.75, max: 2.5, step: 0.05, default: 1.0 
 export const BOOK_CATEGORIES = {
   HADITH: 'hadith',
 };
+
+export const NEEDS_VERIFICATION = new Set(['qudsi40', 'shahwaliullah40']);
