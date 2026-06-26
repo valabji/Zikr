@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  ActivityIndicator, Alert,
+  ActivityIndicator, Alert, useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
@@ -12,7 +12,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
 import * as Font from 'expo-font';
-import { SCREEN_WIDTH, getLayoutOffsets, arForHafs, ayahLayoutWords } from '../utils/mushafLayout';
+import { getLayoutOffsets, maxPageHeightForWidth, arForHafs, ayahLayoutWords } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 import translationEn from '../assets/quran/data/translation_en.json';
@@ -230,7 +230,8 @@ export default function QuranScreen({ navigation }) {
     viewabilityConfig: { itemVisiblePercentThreshold: 60 },
     onViewableItemsChanged: ({ viewableItems }) => {
       if (!viewableItems || viewableItems.length === 0) return;
-      const page = viewableItems[0].item.page;
+      const item = viewableItems[0].item;
+      const page = isPairedRef.current ? item.rightPage.page : item.page;
       if (page !== currentPageRef.current) {
         currentPageRef.current = page;
         setCurrentPage(page);
@@ -259,7 +260,8 @@ export default function QuranScreen({ navigation }) {
 
   const jumpToPage = React.useCallback((page) => {
     const target = Math.max(1, Math.min(TOTAL_PAGES, page));
-    listRef.current?.scrollToIndex({ index: target - 1, animated: false });
+    const idx = isPairedRef.current ? Math.floor((target - 1) / 2) : target - 1;
+    listRef.current?.scrollToIndex({ index: idx, animated: false });
     currentPageRef.current = target;
     setCurrentPage(target);
     persistLastPage(target);
@@ -300,42 +302,76 @@ export default function QuranScreen({ navigation }) {
     }
   }, [voiceState.active, audioState.activeAyah, currentPage]);
 
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const isContinuous = settings.viewMode === 'continuous';
+  const isLandscape = windowWidth > windowHeight;
+  const isPaired = !isContinuous && isLandscape && settings.landscapeTwoPage !== false;
   const fontScale = settings.customLineSize ? (settings.fontScale || 1) : 1;
   const activeLayoutFile = getMushafEdition(settings.mushafEdition).layoutFile;
 
-  const getItemLayout = React.useCallback((_, index) => {
-    if (!isContinuous) {
-      return { length: SCREEN_WIDTH, offset: SCREEN_WIDTH * index, index };
+  const availableHeight = windowHeight - insets.top - insets.bottom - 56;
+  const effectiveBaseWidth = isPaired ? Math.floor(windowWidth / 2) : windowWidth;
+  const maxWidthForFit = React.useMemo(() => {
+    if (isContinuous) return effectiveBaseWidth;
+    if (maxPageHeightForWidth(activeLayoutFile, effectiveBaseWidth) <= availableHeight) return effectiveBaseWidth;
+    let lo = 50, hi = effectiveBaseWidth;
+    for (let i = 0; i < 15; i++) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (maxPageHeightForWidth(activeLayoutFile, mid) <= availableHeight) {
+        lo = mid;
+      } else {
+        hi = mid - 1;
+      }
     }
-    const { heights, offsets } = getLayoutOffsets(activeLayoutFile);
-    return {
-      length: heights[index] * fontScale,
-      offset: offsets[index] * fontScale,
-      index,
-    };
-  }, [isContinuous, fontScale, activeLayoutFile]);
+    return Math.max(50, lo);
+  }, [isContinuous, activeLayoutFile, availableHeight, effectiveBaseWidth]);
+
+  const isPairedRef = React.useRef(isPaired);
+  isPairedRef.current = isPaired;
+
+  const listData = React.useMemo(() => {
+    if (!isPaired) return pagesData;
+    const pairs = [];
+    for (let i = 0; i < pagesData.length; i += 2) {
+      pairs.push({ rightPage: pagesData[i], leftPage: pagesData[i + 1] || null });
+    }
+    return pairs;
+  }, [isPaired]);
+
+  const getItemLayout = React.useCallback((_, index) => {
+    if (isContinuous) {
+      const { heights, offsets } = getLayoutOffsets(activeLayoutFile);
+      return {
+        length: heights[index] * fontScale,
+        offset: offsets[index] * fontScale,
+        index,
+      };
+    }
+    return { length: windowWidth, offset: windowWidth * index, index };
+  }, [isContinuous, fontScale, activeLayoutFile, windowWidth]);
 
   const initialScrollIndex = React.useMemo(() => {
     if (!ready) return 0;
+    if (isPaired) return Math.floor((currentPage - 1) / 2);
     return currentPage - 1;
-  }, [ready, currentPage]);
+  }, [ready, currentPage, isPaired]);
 
   const offsetForIndex = React.useCallback((index) => {
     if (isContinuous) {
       const { offsets } = getLayoutOffsets(activeLayoutFile);
       return offsets[index] * fontScale;
     }
-    return SCREEN_WIDTH * index;
-  }, [isContinuous, activeLayoutFile, fontScale]);
+    return windowWidth * index;
+  }, [isContinuous, activeLayoutFile, fontScale, windowWidth]);
 
   const restoredRef = React.useRef(false);
-  React.useEffect(() => { restoredRef.current = false; }, [isContinuous]);
+  React.useEffect(() => { restoredRef.current = false; }, [isContinuous, isPaired]);
 
   const handleListLayout = React.useCallback(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
-    const idx = currentPageRef.current - 1;
+    const pageIdx = currentPageRef.current - 1;
+    const idx = isPairedRef.current ? Math.floor(pageIdx / 2) : pageIdx;
     if (idx <= 0) return;
     requestAnimationFrame(() => {
       listRef.current?.scrollToOffset({ offset: offsetForIndex(idx), animated: false });
@@ -369,7 +405,8 @@ export default function QuranScreen({ navigation }) {
     setCurrentPage(page);
     persistLastPage(page);
     try {
-      listRef.current?.scrollToIndex({ index: page - 1, animated: true });
+      const idx = isPairedRef.current ? Math.floor((page - 1) / 2) : page - 1;
+      listRef.current?.scrollToIndex({ index: idx, animated: true });
     } catch {}
   }, [effectiveAyahKey, ready, persistLastPage]);
 
@@ -390,11 +427,12 @@ export default function QuranScreen({ navigation }) {
       {ready ? (
         <View style={{ flex: 1, paddingBottom: insets.bottom }}>
         <FlatList
+          style={{ flex: 1 }}
           ref={listRef}
-          key={isContinuous ? 'cont' : 'paged'}
+          key={isContinuous ? 'cont' : (isPaired ? 'paired' : 'paged')}
           testID="quran-pager"
-          data={pagesData}
-          keyExtractor={(item) => String(item.page)}
+          data={listData}
+          keyExtractor={(item) => isPaired ? String(item.rightPage.page) : String(item.page)}
           horizontal={!isContinuous}
           pagingEnabled={!isContinuous}
           showsHorizontalScrollIndicator={false}
@@ -414,21 +452,47 @@ export default function QuranScreen({ navigation }) {
           renderItem={({ item }) => {
             const edition = getMushafEdition(settings.mushafEdition);
             const qcfReady = !!(qcfState[edition.qcfVersion] && qcfState[edition.qcfVersion].installed);
-            const Component = isContinuous ? PageViewContinuous : PageView;
-            return (
-              <Component
-                page={item}
-                colors={colors}
-                settings={settings}
-                qcfVersion={qcfReady ? edition.qcfVersion : null}
-                playingAyahKey={effectiveAyahKey}
-                playingWordIdx={effectiveWordIdx}
-                playingWordMistake={effectiveWordMistake}
-                onAyahPress={handleAyahPress}
-                onAyahLongPress={handleAyahLongPress}
-                onWordPress={handleWordPress}
-              />
-            );
+            const qcfVersion = qcfReady ? edition.qcfVersion : null;
+            const sharedProps = {
+              colors, settings, qcfVersion,
+              playingAyahKey: effectiveAyahKey,
+              playingWordIdx: effectiveWordIdx,
+              playingWordMistake: effectiveWordMistake,
+              onAyahPress: handleAyahPress,
+              onAyahLongPress: handleAyahLongPress,
+              onWordPress: handleWordPress,
+            };
+            const fitEnabled = settings.fitPageToHeight !== false;
+            if (isPaired) {
+              const basePageWidth = windowWidth / 2;
+              const effectivePageWidth = fitEnabled
+                ? Math.min(basePageWidth, maxWidthForFit)
+                : basePageWidth;
+              const makeSlot = (pageData) => (
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  {pageData && <PageView page={pageData} pageWidth={effectivePageWidth} {...sharedProps} />}
+                </View>
+              );
+              const leftSlot = makeSlot(item.leftPage);
+              const rightSlot = makeSlot(item.rightPage);
+              return (
+                <View style={{ width: windowWidth, flex: 1, flexDirection: 'row' }}>
+                  {isRTL() ? rightSlot : leftSlot}
+                  {isRTL() ? leftSlot : rightSlot}
+                </View>
+              );
+            }
+            if (!isContinuous) {
+              const effectivePageWidth = fitEnabled
+                ? Math.min(windowWidth, maxWidthForFit)
+                : windowWidth;
+              return (
+                <View style={{ width: windowWidth, flex: 1, alignItems: 'center' }}>
+                  <PageView page={item} pageWidth={effectivePageWidth} {...sharedProps} />
+                </View>
+              );
+            }
+            return <PageViewContinuous page={item} {...sharedProps} />;
           }}
         />
         </View>

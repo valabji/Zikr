@@ -53,6 +53,8 @@ export const QURAN_CONSTANTS = {
     viewMode: 'paged',
     customLineSize: false,
     tafsirId: 'muyassar_ar',
+    landscapeTwoPage: true,
+    fitPageToHeight: true,
   },
 };
 

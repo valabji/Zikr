@@ -20,10 +20,11 @@ import { BismillahLine, MushafLine } from './MushafLine';
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const ayahKey = (s, a) => `${s}:${a}`;
 
-function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, playingWordMistake, onAyahPress, onAyahLongPress, onWordPress }) {
+function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, playingWordMistake, onAyahPress, onAyahLongPress, onWordPress, pageWidth: pageWidthProp }) {
   const customLineSize = !!settings.customLineSize;
   const fontScale = customLineSize ? (settings.fontScale || 1) : 1;
   const { width: windowWidth } = useWindowDimensions();
+  const effectiveWidth = pageWidthProp || windowWidth;
   const edition = getMushafEdition(settings.mushafEdition);
   // Only treat QCF as active once this page's font is truly registered, so we
   // never render or measure the codes with a system-fallback font.
@@ -81,7 +82,7 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   }, [probeStrings]);
 
   const [probeState, setProbeState] = React.useState(() => {
-    const cached = getCachedMushafLineSizes(windowWidth, fontFamily, edition.layoutFile, pageIndex);
+    const cached = getCachedMushafLineSizes(effectiveWidth, fontFamily, edition.layoutFile, pageIndex);
     return cached ? { sizes: cached.sizes, emPx: cached.emPx, refined: true } : { sizes: null, emPx: null, refined: false };
   });
   const [probeAttempt, setProbeAttempt] = React.useState(0);
@@ -90,14 +91,14 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   React.useEffect(() => {
     probeWidthsRef.current = { pass: 1, widths: {} };
     setProbeAttempt(0);
-    const cached = getCachedMushafLineSizes(windowWidth, fontFamily, edition.layoutFile, pageIndex);
+    const cached = getCachedMushafLineSizes(effectiveWidth, fontFamily, edition.layoutFile, pageIndex);
     setProbeState(cached ? { sizes: cached.sizes, emPx: cached.emPx, refined: true } : { sizes: null, emPx: null, refined: false });
-  }, [windowWidth, fontFamily, edition.layoutFile, pageIndex]);
+  }, [effectiveWidth, fontFamily, edition.layoutFile, pageIndex]);
 
   const probePass = probeState.sizes ? 2 : 1;
 
   const applyProbeWidths = React.useCallback((pass, widths) => {
-    const avail = windowWidth - MUSHAF_HORIZONTAL_PADDING;
+    const avail = effectiveWidth - MUSHAF_HORIZONTAL_PADDING;
     if (pass === 1) {
       const sizes = computeMushafLineSizes(widths, probeStrings.length, avail, qcfActive);
       if (!sizes) return;
@@ -109,10 +110,10 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
       const refined = refineMushafLineSizes(probeState.sizes, widths, avail, qcfActive);
       const emPx = {};
       for (const k in widths) emPx[k] = widths[k] / probeState.sizes[k];
-      setCachedMushafLineSizes(windowWidth, fontFamily, edition.layoutFile, pageIndex, refined, emPx);
+      setCachedMushafLineSizes(effectiveWidth, fontFamily, edition.layoutFile, pageIndex, refined, emPx);
       setProbeState({ sizes: refined, emPx, refined: true });
     }
-  }, [probeStrings, probeState, qcfActive, windowWidth, fontFamily, edition.layoutFile, pageIndex]);
+  }, [probeStrings, probeState, qcfActive, effectiveWidth, fontFamily, edition.layoutFile, pageIndex]);
 
   // Native: one onTextLayout event delivers every line's width atomically, so a
   // single dropped per-line onLayout can no longer strand the page on the estimate.
@@ -155,12 +156,12 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   // letter-count heuristic remains as a last resort if a table is missing.
   const fallbackSizes = React.useMemo(() => {
     const est = estimatedLineSizesForPage(
-      edition.layoutFile, pageIndex, windowWidth - MUSHAF_HORIZONTAL_PADDING, qcfActive);
+      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, qcfActive);
     if (est) return est;
-    const pageFit = mushafFontSizeForWidth(windowWidth, getPageProbeLen(edition.layoutFile, pageIndex));
+    const pageFit = mushafFontSizeForWidth(effectiveWidth, getPageProbeLen(edition.layoutFile, pageIndex));
     if (qcfActive) return new Array(lineCount).fill(pageFit);
     return perLineFontSizesForPage(edition.layoutFile, pageIndex, pageFit);
-  }, [windowWidth, qcfActive, edition.layoutFile, pageIndex, lineCount]);
+  }, [effectiveWidth, qcfActive, edition.layoutFile, pageIndex, lineCount]);
 
   const lineSizes = probeState.sizes || fallbackSizes;
 
@@ -169,8 +170,8 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   const spaceExtras = React.useMemo(() => {
     if (customLineSize) return null;
     return justifiedSpaceExtrasForPage(
-      edition.layoutFile, pageIndex, windowWidth - MUSHAF_HORIZONTAL_PADDING, lineSizes, qcfActive, measuredEmPx);
-  }, [customLineSize, edition.layoutFile, pageIndex, windowWidth, lineSizes, qcfActive, measuredEmPx]);
+      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, lineSizes, qcfActive, measuredEmPx);
+  }, [customLineSize, edition.layoutFile, pageIndex, effectiveWidth, lineSizes, qcfActive, measuredEmPx]);
 
   // In customLineSize mode we want one continuous text block per run of
   // consecutive text lines, so words flow across line boundaries instead of
@@ -327,14 +328,15 @@ function PageFooter({ page, colors }) {
   );
 }
 
-export function PageView(props) {
+export function PageView({ pageWidth, ...props }) {
+  const w = pageWidth || SCREEN_WIDTH;
   return (
-    <View style={{ width: SCREEN_WIDTH, flex: 1 }}>
+    <View style={{ width: w, flex: 1 }}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingTop: 8, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        <PageContent {...props} />
+        <PageContent pageWidth={pageWidth} {...props} />
       </ScrollView>
       <PageFooter page={props.page} colors={props.colors} />
     </View>
@@ -342,9 +344,10 @@ export function PageView(props) {
 }
 
 export function PageViewContinuous(props) {
+  const { width: windowWidth } = useWindowDimensions();
   return (
     <View style={{
-      width: SCREEN_WIDTH,
+      width: windowWidth,
       paddingTop: 12,
       borderTopWidth: 1,
       borderTopColor: props.colors.accent + '22',

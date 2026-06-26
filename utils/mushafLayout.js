@@ -297,6 +297,26 @@ export function getLayoutOffsets(layoutFile) {
   return layoutOffsetCache[layoutFile];
 }
 
+export function maxPageHeightForWidth(layoutFile, width) {
+  const pages = getLayout(layoutFile);
+  let max = 0;
+  for (let i = 0; i < pages.length; i++) {
+    const pageFit = mushafFontSizeForWidth(width, getPageProbeLen(layoutFile, i));
+    const perLine = perLineFontSizesForPage(layoutFile, i, pageFit);
+    let h = PAGE_CHROME_PX;
+    for (let li = 0; li < pages[i].lines.length; li++) {
+      const line = pages[i].lines[li];
+      if (LINE_PX_FIXED[line.type] != null) {
+        h += LINE_PX_FIXED[line.type];
+      } else {
+        h += mushafLineHeightFor(perLine[li]);
+      }
+    }
+    if (h > max) max = h;
+  }
+  return max;
+}
+
 export const toArabicDigits = (n) =>
   String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 

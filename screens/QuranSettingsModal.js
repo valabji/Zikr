@@ -6,7 +6,7 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
-import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID, PLAYBACK_RATES } from '../constants/QuranConstants';
+import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID, PLAYBACK_RATES, QURAN_CONSTANTS } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QcfDownloader from '../utils/QcfDownloader';
 import QuranReciterPicker from '../components/QuranReciterPicker';
@@ -177,6 +177,56 @@ export default function QuranSettingsModal({ visible, onClose }) {
                 onPress={() => update({ viewMode: VIEW_MODES.CONTINUOUS })}
               />
             </View>
+            {(settings.viewMode || 'paged') === VIEW_MODES.PAGED ? (
+              <>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTopWidth: 1,
+                  borderTopColor: colors.accent + '22',
+                }}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
+                      {t('quran.landscapeTwoPage')}
+                    </Text>
+                    <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
+                      {t('quran.landscapeTwoPageDesc')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={settings.landscapeTwoPage !== false}
+                    onValueChange={(v) => update({ landscapeTwoPage: v })}
+                    trackColor={{ true: colors.accent, false: colors.accent + '44' }}
+                    thumbColor={(settings.landscapeTwoPage !== false) ? colors.accent : '#f4f3f4'}
+                  />
+                </View>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTopWidth: 1,
+                  borderTopColor: colors.accent + '22',
+                }}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
+                      {t('quran.fitPageToHeight')}
+                    </Text>
+                    <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
+                      {t('quran.fitPageToHeightDesc')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={settings.fitPageToHeight !== false}
+                    onValueChange={(v) => update({ fitPageToHeight: v })}
+                    trackColor={{ true: colors.accent, false: colors.accent + '44' }}
+                    thumbColor={(settings.fitPageToHeight !== false) ? colors.accent : '#f4f3f4'}
+                  />
+                </View>
+              </>
+            ) : null}
           </Row>
 
           <Row label={t('quran.mushafEdition')} colors={colors}>
