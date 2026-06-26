@@ -1,12 +1,11 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useEffect, useState } from "react";
-import { I18nManager, Share, ScrollView, Platform } from "react-native";
+import { I18nManager, ScrollView, Platform } from "react-native";
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import ContributeScreen from '../screens/ContributeScreen';
 import PrayerTimesScreen from '../screens/PrayerTimesScreen';
 import QiblaScreen from '../screens/QiblaScreen';
 import QuranScreen from '../screens/QuranScreen';
@@ -382,63 +381,6 @@ export function DNav() {
                 ]}>{t('navigation.hifzTracker')}</Text>
                 <View style={{ flex: 1 }} />
                 <Feather name="bookmark" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  Share.share({
-                    message: t('share.message'),
-                  });
-                }}
-                style={{
-                  // width: "100%",
-                  height: 64,
-                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 5,
-                  backgroundColor: colors.DGreen,
-                  flexDirection: "row",
-                }}>
-                {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                )}
-                <Text style={[
-                  textStyles.navigation,
-                  {
-                    color: colors.BYellow,
-                    marginTop: 7,
-                  }
-                ]}>{t('navigation.shareApp')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="share-2" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="contribute-screen"
-                onPress={() => {
-                  navigation.toggleDrawer()
-                  navigation.navigate("Contribute")
-                }}
-                style={{
-                  height: 64,
-                  ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
-                  marginTop: 5,
-                  backgroundColor: colors.DGreen,
-                  flexDirection: "row",
-                }}>
-                {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
-                )}
-                <Text style={[
-                  textStyles.navigation,
-                  {
-                    color: colors.BYellow,
-                    marginTop: 7,
-                  }
-                ]}>{t('navigation.contribute')}</Text>
-                <View style={{ flex: 1 }} />
-                <Feather name="help-circle" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
               <TouchableOpacity
                 testID="about-screen"

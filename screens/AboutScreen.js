@@ -144,6 +144,31 @@ export default function AboutScreen({ navigation }) {
         </View>
 
         <TouchableOpacity
+          testID="about-contribute-link"
+          onPress={() => navigation.navigate('Contribute')}
+          style={[card, { flexDirection: 'row', alignItems: 'center', marginBottom: 16 }]}
+        >
+          <Feather name="help-circle" size={24} color={colors.BYellow} />
+          <View style={{ flex: 1, ...getDirectionalMixedSpacing({ marginLeft: 14, marginRight: 14 }) }}>
+            <Text style={{
+              color: colors.BYellow,
+              fontSize: 16,
+              fontFamily: 'Cairo_400Regular',
+              textAlign: getRTLTextAlign('left'),
+            }}>{t('about.contribute')}</Text>
+            <Text style={{
+              color: colors.BYellow,
+              fontSize: 13,
+              fontFamily: 'Cairo_400Regular',
+              opacity: 0.8,
+              marginTop: 2,
+              textAlign: getRTLTextAlign('left'),
+            }}>{t('about.contributeDesc')}</Text>
+          </View>
+          <Feather name={isRTL() ? 'chevron-left' : 'chevron-right'} size={24} color={colors.BYellow} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           testID="about-credits-link"
           onPress={() => navigation.navigate('Credits')}
           style={[card, { flexDirection: 'row', alignItems: 'center', marginBottom: 16 }]}

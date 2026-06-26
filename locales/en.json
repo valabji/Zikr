@@ -589,6 +589,8 @@
     "github": "Source Code",
     "playStore": "Google Play",
     "shareApp": "Share App",
+    "contribute": "Contribute",
+    "contributeDesc": "Help with reference checking, translation, feature suggestions and bug reports",
     "creditsLink": "Credits, Licenses & Acknowledgements",
     "creditsLinkDesc": "Data sources, open-source libraries and thank-yous",
     "rights": "© 2020–{year} Abdalrahman Valabji · MIT License",
