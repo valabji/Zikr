@@ -27,9 +27,11 @@ import PrayerCountdownService from '../utils/PrayerCountdownService';
 import PrayerNotificationScheduler from '../utils/PrayerNotificationScheduler';
 import AdhanDownloader from '../utils/AdhanDownloader';
 import { ADHAN_CATALOG, getAdhanById, SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '../constants/AdhanCatalog';
+import { useTestedMode } from '../utils/TestedMode';
 
 export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const colors = useColors();
+    const testedMode = useTestedMode();
 
     // Location states
     const [searchQuery, setSearchQuery] = useState('');
@@ -1190,8 +1192,8 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         </TouchableOpacity>
                                     )}
 
-                                    {/* Dev-only: fire a test adhan in 60 seconds */}
-                                    {__DEV__ && (
+                                    {/* Tested mode: fire a test adhan in 60 seconds */}
+                                    {testedMode && (
                                         <TouchableOpacity
                                             onPress={handleTestNotification}
                                             style={{
@@ -1215,7 +1217,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                     fontWeight: 'bold',
                                                     marginBottom: 4,
                                                 }}>
-                                                    🧪 Test notification (DEV)
+                                                    🧪 Test notification
                                                 </Text>
                                                 <Text style={{
                                                     color: colors.BYellow,

@@ -14,6 +14,7 @@ import { AntDesign, Feather } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar';
 import { THEME_VARIANT_KEYS } from '../constants/themes';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
+import { useTestedMode, setTestedMode } from '../utils/TestedMode';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS } from 'react-native-reanimated';
 
 export default function SettingsScreen({ navigation }) {
@@ -45,6 +46,7 @@ export default function SettingsScreen({ navigation }) {
   const [azkarVibration, setAzkarVibration] = useState(VIBRATION_TYPES.OFF);
   const [vibrationIntensity, setVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
   const [vibrationSupported, setVibrationSupported] = useState(false);
+  const testedMode = useTestedMode();
 
   // Initial values for change detection
   const [initialLang, setInitialLang] = useState('ar');
@@ -859,6 +861,11 @@ export default function SettingsScreen({ navigation }) {
     const newAutoSave = !autoSave;
     setAutoSave(newAutoSave);
     await AsyncStorage.setItem('@autoSave', newAutoSave.toString());
+  };
+
+  const handleTestedModeToggle = async () => {
+    playClick();
+    await setTestedMode(!testedMode);
   };
 
   const handleDefault = async () => {
@@ -1991,6 +1998,29 @@ export default function SettingsScreen({ navigation }) {
               <Text style={[styles.previewText, { fontSize: tempFontSize }]}>
                 {Azkar && Azkar.length > 0 ? Azkar[0].zekr : 'الحمد لله وحده، والصلاة والسلام على من لا نبي بعده'}
               </Text>
+            </View>
+          </View>
+
+          {/* Tested Mode Setting */}
+          <View style={styles.setting}>
+            <Text style={styles.settingTitle}>{t('settings.testedMode')}</Text>
+            <View style={styles.autoSaveContainer}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.autoSaveDescription}>{t('settings.testedModeDescription')}</Text>
+              </View>
+              <TouchableOpacity
+                testID="tested-mode-toggle"
+                style={[
+                  styles.toggleButton,
+                  testedMode ? styles.toggleButtonActive : styles.toggleButtonInactive
+                ]}
+                onPress={handleTestedModeToggle}
+              >
+                <View style={[
+                  styles.toggleCircle,
+                  testedMode ? styles.toggleCircleActive : styles.toggleCircleInactive
+                ]} />
+              </TouchableOpacity>
             </View>
           </View>
           {isTutorialVisible && (<View style={{ height: 340 }} />)}

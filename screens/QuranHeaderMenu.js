@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t } from '../locales/i18n';
-import { VOICE_FOLLOW_DEBUG } from '../utils/quranDebug';
+import { useTestedMode } from '../utils/TestedMode';
 import { runMicTest } from '../utils/MicTest';
 
 const MIC_TEST_LABELS = {
@@ -37,6 +37,7 @@ function MenuRow({ icon, label, onPress, colors, active }) {
 
 export default function QuranHeaderMenu({ visible, onClose, voiceActive, isBookmarked, onVoiceToggle, onPageInfo, onBookmark, onIndex, onSearch, onSettings }) {
   const colors = useColors();
+  const testedMode = useTestedMode();
   const [micTestState, setMicTestState] = React.useState('idle');
   const micBusy = micTestState === 'recording' || micTestState === 'playing';
   return (
@@ -91,7 +92,7 @@ export default function QuranHeaderMenu({ visible, onClose, voiceActive, isBookm
               label={t('quran.settingsTitle')}
               onPress={() => { onSettings(); onClose(); }}
             />
-            {VOICE_FOLLOW_DEBUG && (
+            {testedMode && (
               <MenuRow
                 colors={colors}
                 icon="radio"

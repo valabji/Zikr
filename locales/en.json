@@ -182,6 +182,8 @@
     "language": "Language",
     "autoSave": "Auto Save",
     "autoSaveDescription": "Automatically save changes when made",
+    "testedMode": "Tested Mode",
+    "testedModeDescription": "Enable test tools like the mic test in the Quran reader and the test adhan in prayer settings",
     "theme": "Theme",
     "themeVariant": "Time-of-Day Variant",
     "themeVariantDescription": "Each theme shifts through dawn, day, dusk, and night moods as prayer times pass. Tap a variant's lock to pin it.",
