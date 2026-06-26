@@ -4,6 +4,13 @@ import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Sounds from './Sounds';
 
+// Bundled via the expo-notifications config plugin (app.config.js). Used as the
+// native sound so the adhan plays even when the app is backgrounded or killed,
+// where JS listeners never run.
+const ADHAN_SOUND = 'adhan_alert.wav';
+const ADHAN_CHANNEL = 'prayer_adhan';
+const SILENT_CHANNEL = 'prayer_silent';
+
 /**
  * NotificationService - Handles all notification operations for adhan reminders
  * 
@@ -59,9 +66,29 @@ class NotificationService {
   async initializeChannels() {
     if (Platform.OS !== 'android') return;
 
-    await Notifications.setNotificationChannelAsync('prayer_reminders', {
-      name: 'Prayer Alarms',
-      description: 'Plays when a prayer time arrives',
+    // The original 'prayer_reminders' channel shipped with sound:null and is
+    // immutable, so on many devices it fell back to the default system sound.
+    // Recreate the alarm under a new channel id that carries the bundled adhan.
+    try {
+      await Notifications.deleteNotificationChannelAsync('prayer_reminders');
+    } catch (e) {
+      console.warn('Could not delete legacy prayer_reminders channel:', e);
+    }
+
+    await Notifications.setNotificationChannelAsync(ADHAN_CHANNEL, {
+      name: 'Prayer Adhan',
+      description: 'Plays the adhan when a prayer time arrives',
+      importance: Notifications.AndroidImportance.MAX,
+      sound: ADHAN_SOUND,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF0000',
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      bypassDnd: true,
+    });
+
+    await Notifications.setNotificationChannelAsync(SILENT_CHANNEL, {
+      name: 'Prayer Reminders (Silent)',
+      description: 'Shows a prayer reminder without sound',
       importance: Notifications.AndroidImportance.MAX,
       sound: null,
       vibrationPattern: [0, 250, 250, 250],
@@ -380,21 +407,24 @@ class NotificationService {
       // Cancel existing notification with same ID
       await this.cancelNotification(id);
 
-      // Prepare notification content
+      // Silent mode shows the reminder with no sound; every other mode plays
+      // the bundled adhan natively so it fires reliably from the background.
+      const isSilent = sound === 'none';
+
       const content = {
         title,
         body,
-        sound: null, // We'll play custom audio separately
+        sound: isSilent ? null : ADHAN_SOUND,
         data: {
           notificationId: id,
-          soundType: sound, // 'short' or 'full'
+          soundType: sound, // 'none' | 'short' | 'full'
           scheduledTime: triggerDate.getTime(),
         },
         priority: Platform.OS === 'android'
           ? Notifications.AndroidNotificationPriority.HIGH
           : undefined,
         categoryIdentifier: 'prayer_reminder',
-        ...(Platform.OS === 'android' && { channelId: 'prayer_reminders' }),
+        ...(Platform.OS === 'android' && { channelId: isSilent ? SILENT_CHANNEL : ADHAN_CHANNEL }),
       };
 
       // Prepare trigger with exact timing

@@ -120,6 +120,12 @@ export default {
         }
       ],
       "expo-audio",
+      [
+        "expo-notifications",
+        {
+          sounds: ["./assets/sound/adhan_alert.wav"]
+        }
+      ],
       "expo-asset",
       "expo-font",
       "expo-web-browser",

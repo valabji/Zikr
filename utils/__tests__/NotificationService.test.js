@@ -8,6 +8,7 @@ jest.mock('expo-notifications', () => ({
   getPermissionsAsync: jest.fn(),
   requestPermissionsAsync: jest.fn(),
   setNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
+  deleteNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
   scheduleNotificationAsync: jest.fn().mockResolvedValue('scheduled-id'),
   cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
   cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
@@ -55,6 +56,7 @@ describe('NotificationService', () => {
     jest.clearAllMocks();
     // Restore default mock implementations after clearAllMocks wipes them
     Notifications.setNotificationChannelAsync.mockResolvedValue(undefined);
+    Notifications.deleteNotificationChannelAsync.mockResolvedValue(undefined);
     Notifications.scheduleNotificationAsync.mockResolvedValue('scheduled-id');
     Notifications.cancelScheduledNotificationAsync.mockResolvedValue(undefined);
     Notifications.cancelAllScheduledNotificationsAsync.mockResolvedValue(undefined);
@@ -93,16 +95,22 @@ describe('NotificationService', () => {
       expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
     });
 
-    it('creates both prayer channels on Android with correct importance', async () => {
+    it('creates the prayer channels on Android with correct importance and bundled adhan', async () => {
       setPlatform('android', 33);
       await service.initialize();
       const calls = Notifications.setNotificationChannelAsync.mock.calls;
-      const alarms = calls.find(([id]) => id === 'prayer_reminders');
+      const adhan = calls.find(([id]) => id === 'prayer_adhan');
+      const silent = calls.find(([id]) => id === 'prayer_silent');
       const countdown = calls.find(([id]) => id === 'prayer-countdown');
-      expect(alarms).toBeDefined();
+      expect(adhan).toBeDefined();
+      expect(silent).toBeDefined();
       expect(countdown).toBeDefined();
-      expect(alarms[1].importance).toBe(Notifications.AndroidImportance.MAX);
+      expect(adhan[1].importance).toBe(Notifications.AndroidImportance.MAX);
+      expect(adhan[1].sound).toBe('adhan_alert.wav');
+      expect(silent[1].sound).toBeNull();
       expect(countdown[1].importance).toBe(Notifications.AndroidImportance.LOW);
+      // The immutable legacy channel is removed so its system-sound fallback can't linger.
+      expect(Notifications.deleteNotificationChannelAsync).toHaveBeenCalledWith('prayer_reminders');
     });
   });
 
@@ -363,14 +371,15 @@ describe('NotificationService', () => {
       expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('fajr');
     });
 
-    it('schedules with the sound metadata in data payload (not the OS sound)', async () => {
+    it('schedules with the bundled adhan sound and adhan channel for audible modes', async () => {
       setPlatform('android', 33);
       const future = new Date(Date.now() + 60_000);
       Notifications.scheduleNotificationAsync.mockResolvedValue('id-123');
       const id = await service.scheduleExactNotification('fajr', 'Fajr', 'Time', future, 'full');
       expect(id).toBe('id-123');
       const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
-      expect(call.content.sound).toBeNull();
+      expect(call.content.sound).toBe('adhan_alert.wav');
+      expect(call.content.channelId).toBe('prayer_adhan');
       expect(call.content.data).toMatchObject({
         notificationId: 'fajr',
         soundType: 'full',
@@ -380,6 +389,16 @@ describe('NotificationService', () => {
         date: future,
       });
       expect(call.content.priority).toBe(Notifications.AndroidNotificationPriority.HIGH);
+    });
+
+    it('schedules silently with no sound and the silent channel for none mode', async () => {
+      setPlatform('android', 33);
+      const future = new Date(Date.now() + 60_000);
+      await service.scheduleExactNotification('fajr', 'Fajr', 'Time', future, 'none');
+      const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
+      expect(call.content.sound).toBeNull();
+      expect(call.content.channelId).toBe('prayer_silent');
+      expect(call.content.data.soundType).toBe('none');
     });
 
     it('returns null when expo-notifications throws', async () => {

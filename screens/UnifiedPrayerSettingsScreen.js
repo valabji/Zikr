@@ -13,7 +13,7 @@ import {
     Modal
 } from 'react-native';
 import { useColors } from '../constants/Colors';
-import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing, getRTLTextAlign, isRTL } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import CustomToggle from '../components/CustomToggle';
 import { Feather, AntDesign } from '@expo/vector-icons';
@@ -22,11 +22,11 @@ import * as Location from 'expo-location';
 import moment from 'moment-timezone';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 import { searchLocations, getLocationFromIP, getBrowserLocation } from '../utils/PrayerUtils';
-import { Restart } from '../utils/restart';
 import NotificationService from '../utils/NotificationService';
 import PrayerCountdownService from '../utils/PrayerCountdownService';
 import PrayerNotificationScheduler from '../utils/PrayerNotificationScheduler';
-import Sounds from '../utils/Sounds';
+import AdhanDownloader from '../utils/AdhanDownloader';
+import { ADHAN_CATALOG, getAdhanById, SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '../constants/AdhanCatalog';
 
 export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const colors = useColors();
@@ -45,6 +45,8 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const [madhab, setMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [audioMode, setAudioMode] = useState('short');
+    const [selectedAdhan, setSelectedAdhan] = useState(DEFAULT_ADHAN_ID);
+    const [adhanState, setAdhanState] = useState({});
     const [notificationTimes, setNotificationTimes] = useState({
         fajr: true,
         dhuhr: true,
@@ -59,6 +61,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const [isCalculationMethodModalVisible, setCalculationMethodModalVisible] = useState(false);
     const [isMadhabModalVisible, setMadhabModalVisible] = useState(false);
     const [isAudioModeModalVisible, setAudioModeModalVisible] = useState(false);
+    const [isAdhanModalVisible, setAdhanModalVisible] = useState(false);
 
     // Initial values for change detection
     const [initialLocation, setInitialLocation] = useState(null);
@@ -66,6 +69,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const [initialMadhab, setInitialMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
     const [initialNotificationsEnabled, setInitialNotificationsEnabled] = useState(false);
     const [initialAudioMode, setInitialAudioMode] = useState('short');
+    const [initialSelectedAdhan, setInitialSelectedAdhan] = useState(DEFAULT_ADHAN_ID);
     const [initialNotificationTimes, setInitialNotificationTimes] = useState({
         fajr: true,
         dhuhr: true,
@@ -74,6 +78,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         isha: true
     });
     const [initialShowPersistentCountdown, setInitialShowPersistentCountdown] = useState(false);
+
+    // Set once a save (or explicit discard) has resolved so the beforeRemove
+    // guard lets the navigation through without re-prompting.
+    const skipUnsavedGuardRef = useRef(false);
     const [initialValuesSet, setInitialValuesSet] = useState(false);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
@@ -95,6 +103,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             // Load new notification settings (using new storage keys)
             const savedNotifications = await AsyncStorage.getItem('@notifications_enabled');
             const savedAudioMode = await AsyncStorage.getItem('@audio_mode');
+            const savedAdhan = await AsyncStorage.getItem(SELECTED_ADHAN_KEY);
             const savedNotificationTimes = await AsyncStorage.getItem('@enabled_prayers');
             const savedPersistentCountdown = await AsyncStorage.getItem('@persistent_countdown');
 
@@ -109,6 +118,9 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             }
             if (savedAudioMode) {
                 setAudioMode(savedAudioMode);
+            }
+            if (savedAdhan) {
+                setSelectedAdhan(savedAdhan);
             }
             if (savedNotificationTimes) {
                 setNotificationTimes(JSON.parse(savedNotificationTimes));
@@ -136,11 +148,18 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             setInitialMadhab(madhab);
             setInitialNotificationsEnabled(notificationsEnabled);
             setInitialAudioMode(audioMode);
+            setInitialSelectedAdhan(selectedAdhan);
             setInitialNotificationTimes({ ...notificationTimes });
             setInitialShowPersistentCountdown(showPersistentCountdown);
             setInitialValuesSet(true);
         }
-    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, audioMode, notificationTimes, showPersistentCountdown]);
+    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, audioMode, selectedAdhan, notificationTimes, showPersistentCountdown]);
+
+    useEffect(() => {
+        AdhanDownloader.checkInstalled();
+        const unsubscribe = AdhanDownloader.subscribe(setAdhanState);
+        return unsubscribe;
+    }, []);
 
     // Location search with debouncing
     const handleSearch = async (query) => {
@@ -259,12 +278,12 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         }
     };
 
-    // Save all settings (location + prayer settings)
+    // Save all settings (location + prayer settings). Returns true on success.
     const saveAllSettings = async () => {
         // Allow saving if we have either selectedLocation or currentLocation
         if (!selectedLocation && !currentLocation) {
             Alert.alert(t('locationSettings.error'), t('locationSettings.noLocationSelected'));
-            return;
+            return false;
         }
 
         try {
@@ -281,6 +300,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             // Save new notification settings (using new storage keys)
             await AsyncStorage.setItem('@notifications_enabled', notificationsEnabled.toString());
             await AsyncStorage.setItem('@audio_mode', audioMode);
+            await AsyncStorage.setItem(SELECTED_ADHAN_KEY, selectedAdhan);
             await AsyncStorage.setItem('@enabled_prayers', JSON.stringify(notificationTimes));
             await AsyncStorage.setItem('@persistent_countdown', showPersistentCountdown.toString());
 
@@ -292,26 +312,25 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 await PrayerCountdownService.stop();
             }
 
-            // Reschedule adhan notifications with new settings.
-            // The boot path also re-runs the scheduler, but we refresh here
-            // so the schedule is correct even if the user doesn't restart.
+            // Reschedule adhan notifications so the new settings take effect
+            // immediately — no app restart required.
             await PrayerNotificationScheduler.refresh();
 
-            // Unload native audio resources before the bundle reloads.
-            // Without this, expo-av's playback status callbacks can fire
-            // during teardown → "Player is accessed on the wrong thread".
-            try {
-                await Sounds.cleanup();
-            } catch (e) {
-                console.warn('Sounds cleanup before restart failed:', e);
-            }
+            // Sync the change-detection baselines so the unsaved-changes guard clears.
+            if (selectedLocation) setInitialLocation(selectedLocation);
+            setInitialCalculationMethod(calculationMethod);
+            setInitialMadhab(madhab);
+            setInitialNotificationsEnabled(notificationsEnabled);
+            setInitialAudioMode(audioMode);
+            setInitialSelectedAdhan(selectedAdhan);
+            setInitialNotificationTimes({ ...notificationTimes });
+            setInitialShowPersistentCountdown(showPersistentCountdown);
 
-            setTimeout(() => {
-                Restart();
-            }, 100);
+            return true;
         } catch (error) {
             console.error('Error saving settings:', error);
             Alert.alert(t('common.error'), t('prayerSettings.saveError'));
+            return false;
         }
     };
 
@@ -349,6 +368,16 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const handleAudioModeSelection = (mode) => {
         setAudioMode(mode);
         setAudioModeModalVisible(false);
+    };
+
+    // Pick a recitation; download it first if it isn't on the device yet.
+    const handleAdhanSelection = (id) => {
+        const entry = getAdhanById(id);
+        setSelectedAdhan(id);
+        if (!entry.bundled && !AdhanDownloader.isDownloaded(id)) {
+            AdhanDownloader.start(id);
+        }
+        setAdhanModalVisible(false);
     };
 
     // Handle notifications toggle
@@ -458,11 +487,12 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         if (madhab !== initialMadhab) return true;
         if (notificationsEnabled !== initialNotificationsEnabled) return true;
         if (audioMode !== initialAudioMode) return true;
+        if (selectedAdhan !== initialSelectedAdhan) return true;
         if (JSON.stringify(notificationTimes) !== JSON.stringify(initialNotificationTimes)) return true;
         if (showPersistentCountdown !== initialShowPersistentCountdown) return true;
 
         return false;
-    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, audioMode, initialAudioMode, notificationTimes, initialNotificationTimes, showPersistentCountdown, initialShowPersistentCountdown]);
+    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, audioMode, initialAudioMode, selectedAdhan, initialSelectedAdhan, notificationTimes, initialNotificationTimes, showPersistentCountdown, initialShowPersistentCountdown]);
 
     useEffect(() => {
         loadSettings();
@@ -483,21 +513,25 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     // Handle back navigation with unsaved changes warning
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (hasUnsavedChanges()) {
-                e.preventDefault();
-                Alert.alert(
-                    t('common.unsavedChanges'),
-                    t('common.unsavedChangesMessage'),
-                    [
-                        { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
-                        { text: t('common.discard'), style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
-                        { text: t('common.save'), style: 'default', onPress: async () => {
-                            await saveAllSettings();
-                            navigation.dispatch(e.data.action);
-                        } }
-                    ]
-                );
+            if (skipUnsavedGuardRef.current || !hasUnsavedChanges()) {
+                return;
             }
+            e.preventDefault();
+            Alert.alert(
+                t('common.unsavedChanges'),
+                t('common.unsavedChangesMessage'),
+                [
+                    { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
+                    { text: t('common.discard'), style: 'destructive', onPress: () => { skipUnsavedGuardRef.current = true; navigation.dispatch(e.data.action); } },
+                    { text: t('common.save'), style: 'default', onPress: async () => {
+                        const ok = await saveAllSettings();
+                        if (ok) {
+                            skipUnsavedGuardRef.current = true;
+                            navigation.dispatch(e.data.action);
+                        }
+                    } }
+                ]
+            );
         });
 
         return unsubscribe;
@@ -523,9 +557,9 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
 
     // Audio mode options
     const audioModeOptions = [
-        { id: 'none', labelEn: 'Silent (No Sound)', labelAr: 'صامت (بدون صوت)' },
-        { id: 'short', labelEn: 'Short Alert (3-5 sec)', labelAr: 'تنبيه قصير (٣-٥ ثانية)' },
-        { id: 'full', labelEn: 'Full Adhan (2-3 min)', labelAr: 'أذان كامل (٢-٣ دقيقة)' },
+        { id: 'none', labelEn: 'Silent (No Sound)', labelAr: 'صامت (بدون صوت)', descriptionEn: 'Show the reminder with no sound', descriptionAr: 'يعرض التذكير بدون صوت' },
+        { id: 'short', labelEn: 'Short Alert', labelAr: 'تنبيه قصير', descriptionEn: 'Plays a short takbir when the prayer time arrives', descriptionAr: 'يشغّل تكبيرًا قصيرًا عند دخول وقت الصلاة' },
+        { id: 'full', labelEn: 'Full Adhan', labelAr: 'أذان كامل', descriptionEn: 'Short takbir on arrival; tap the notification for the full adhan', descriptionAr: 'تكبير قصير عند الوصول، اضغط على الإشعار لسماع الأذان كاملاً' },
     ];
 
     const renderLocationItem = ({ item }) => (
@@ -1101,11 +1135,60 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
                                                 fontFamily: "Cairo_400Regular",
                                             }}>
-                                                {audioModeOptions.find(m => m.id === audioMode)?.[t('common.currentLanguage') === 'ar' ? 'labelAr' : 'labelEn'] || 'Short Alert'}
+                                                {audioModeOptions.find(m => m.id === audioMode)?.[isRTL() ? 'labelAr' : 'labelEn'] || 'Short Alert'}
                                             </Text>
                                         </View>
                                         <AntDesign name="right" size={20} color={colors.BYellow} />
                                     </TouchableOpacity>
+
+                                    {/* Adhan Recitation Selection (played when the notification is tapped) */}
+                                    {audioMode !== 'none' && (
+                                        <TouchableOpacity
+                                            onPress={() => setAdhanModalVisible(true)}
+                                            style={{
+                                                backgroundColor: colors.BGreen,
+                                                borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                                padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                                marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between'
+                                            }}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                    fontWeight: 'bold',
+                                                    marginBottom: 4,
+                                                }}>
+                                                    {t('settings.notifications.adhanRecitation') || 'Adhan Recitation'}
+                                                </Text>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                }}>
+                                                    {isRTL() ? getAdhanById(selectedAdhan).nameAr : getAdhanById(selectedAdhan).nameEn}
+                                                </Text>
+                                                {adhanState[selectedAdhan]?.downloading && (
+                                                    <Text style={{
+                                                        color: colors.BYellow,
+                                                        fontSize: 12,
+                                                        fontFamily: "Cairo_400Regular",
+                                                        opacity: 0.7,
+                                                        marginTop: 2,
+                                                    }}>
+                                                        {(t('settings.notifications.downloading') || 'Downloading') + ` ${Math.round((adhanState[selectedAdhan]?.progress || 0) * 100)}%`}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                            {adhanState[selectedAdhan]?.downloading
+                                                ? <ActivityIndicator size="small" color={colors.BYellow} />
+                                                : <AntDesign name="right" size={20} color={colors.BYellow} />}
+                                        </TouchableOpacity>
+                                    )}
 
                                     {/* Dev-only: fire a test adhan in 60 seconds */}
                                     {__DEV__ && (
@@ -1273,7 +1356,17 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
 
             {/* Floating Save Button */}
             <TouchableOpacity
-                onPress={saveAllSettings}
+                onPress={async () => {
+                    const ok = await saveAllSettings();
+                    if (ok) {
+                        skipUnsavedGuardRef.current = true;
+                        Alert.alert(
+                            t('common.success'),
+                            t('prayerSettings.saveSuccess'),
+                            [{ text: t('common.ok'), onPress: () => navigation.goBack() }]
+                        );
+                    }
+                }}
                 disabled={!selectedLocation && !currentLocation}
                 style={{
                     position: Platform.OS === 'web' ? 'fixed' : 'absolute',
@@ -1545,7 +1638,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         fontFamily: audioMode === option.id ? "Cairo_400Regular" : "Cairo_400Regular",
                                         fontWeight: audioMode === option.id ? 'bold' : 'normal',
                                     }}>
-                                        {t('common.currentLanguage') === 'ar' ? option.labelAr : option.labelEn}
+                                        {isRTL() ? option.labelAr : option.labelEn}
                                     </Text>
                                     <Text style={{
                                         color: colors.BYellow,
@@ -1554,7 +1647,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         opacity: 0.7,
                                         marginTop: 2,
                                     }}>
-                                        {t('common.currentLanguage') === 'ar' ? option.descriptionAr : option.descriptionEn}
+                                        {isRTL() ? option.descriptionAr : option.descriptionEn}
                                     </Text>
                                 </View>
                                 {audioMode === option.id && (
@@ -1562,6 +1655,117 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 )}
                             </TouchableOpacity>
                         ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Adhan Recitation Modal */}
+            <Modal
+                visible={isAdhanModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setAdhanModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    activeOpacity={1}
+                    onPress={() => setAdhanModalVisible(false)}
+                >
+                    <View style={{
+                        width: '85%',
+                        maxHeight: '80%',
+                        backgroundColor: colors.DGreen,
+                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+                        borderWidth: 1,
+                        borderColor: colors.BYellow,
+                        overflow: 'hidden',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4.65,
+                        elevation: 8,
+                    }}>
+                        <View style={{
+                            backgroundColor: colors.BGreen,
+                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.BYellow + '33'
+                        }}>
+                            <Text style={{
+                                color: colors.BYellow,
+                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
+                                fontFamily: "Cairo_400Regular",
+                                textAlign: 'center'
+                            }}>
+                                {t('settings.notifications.adhanRecitation') || 'Adhan Recitation'}
+                            </Text>
+                        </View>
+
+                        <ScrollView>
+                            {ADHAN_CATALOG.map((option) => {
+                                const st = adhanState[option.id];
+                                const isDownloaded = option.bundled || st?.downloaded;
+                                const isDownloading = st?.downloading;
+                                let status;
+                                if (option.bundled) status = isRTL() ? option.reciterAr : option.reciterEn;
+                                else if (isDownloading) status = (t('settings.notifications.downloading') || 'Downloading') + ` ${Math.round((st?.progress || 0) * 100)}%`;
+                                else if (st?.downloaded) status = t('settings.notifications.downloaded') || 'Downloaded';
+                                else status = `${(option.bytes / 1048576).toFixed(1)} MB · ${t('settings.notifications.tapToDownload') || 'tap to download'}`;
+                                return (
+                                    <TouchableOpacity
+                                        key={option.id}
+                                        style={{
+                                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                            borderBottomWidth: 1,
+                                            borderBottomColor: colors.BYellow + '1A',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            backgroundColor: selectedAdhan === option.id ? colors.BYellow + '20' : 'transparent'
+                                        }}
+                                        onPress={() => handleAdhanSelection(option.id)}
+                                    >
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                fontFamily: "Cairo_400Regular",
+                                                fontWeight: selectedAdhan === option.id ? 'bold' : 'normal',
+                                            }}>
+                                                {isRTL() ? option.nameAr : option.nameEn}
+                                            </Text>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: 12,
+                                                fontFamily: "Cairo_400Regular",
+                                                opacity: 0.7,
+                                                marginTop: 2,
+                                            }}>
+                                                {status}
+                                            </Text>
+                                        </View>
+                                        {!option.bundled && st?.downloaded && (
+                                            <TouchableOpacity
+                                                onPress={() => AdhanDownloader.remove(option.id)}
+                                                style={{ paddingHorizontal: 8 }}
+                                            >
+                                                <Feather name="trash-2" size={18} color={colors.BYellow} />
+                                            </TouchableOpacity>
+                                        )}
+                                        {isDownloading
+                                            ? <ActivityIndicator size="small" color={colors.BYellow} />
+                                            : selectedAdhan === option.id
+                                                ? <AntDesign name="checkcircle" size={20} color={colors.BYellow} />
+                                                : (!isDownloaded && <Feather name="download" size={20} color={colors.BYellow} />)}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </ScrollView>
                     </View>
                 </TouchableOpacity>
             </Modal>

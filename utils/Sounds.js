@@ -1,6 +1,8 @@
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
+import AdhanDownloader from './AdhanDownloader';
+import { SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '../constants/AdhanCatalog';
 
 const audioSource = require('../assets/sound/kikhires.mp3');
 const VOLUME_KEY = '@zikr/click_volume';
@@ -20,8 +22,33 @@ class Sounds {
   constructor() {
     this.shortAlertSound = null;  // 3-5 second alert
     this.fullAdhanSound = null;   // 2-3 minute full adhan
+    this.fullAdhanSourceId = DEFAULT_ADHAN_ID;
     this.isInitialized = false;
     this.isPlayingFullAdhan = false;
+  }
+
+  // Swap the full-adhan player to the user's selected recitation when one is
+  // downloaded; otherwise keep the bundled adhan. Reloads only on change.
+  async _ensureFullAdhanSource() {
+    const selected = (await AsyncStorage.getItem(SELECTED_ADHAN_KEY)) || DEFAULT_ADHAN_ID;
+    let uri = null;
+    if (selected !== DEFAULT_ADHAN_ID) {
+      uri = await AdhanDownloader.getPlayableUri(selected);
+    }
+    const resolvedId = uri ? selected : DEFAULT_ADHAN_ID;
+    if (resolvedId === this.fullAdhanSourceId && this.fullAdhanSound) return;
+
+    if (this.fullAdhanSound) {
+      try { this.fullAdhanSound.setOnPlaybackStatusUpdate(null); } catch {}
+      try { await this.fullAdhanSound.unloadAsync(); } catch {}
+      this.fullAdhanSound = null;
+    }
+
+    const source = uri ? { uri } : require('../assets/sound/adhan_full.mp3');
+    const { sound } = await Audio.Sound.createAsync(source, { shouldPlay: false });
+    this.fullAdhanSound = sound;
+    this.fullAdhanSound.setOnPlaybackStatusUpdate(this._onFullAdhanPlaybackUpdate);
+    this.fullAdhanSourceId = resolvedId;
   }
 
   /**
@@ -116,6 +143,8 @@ class Sounds {
         await this.initialize();
       }
 
+      await this._ensureFullAdhanSource();
+
       if (!this.fullAdhanSound) {
         console.error('Full adhan sound not loaded');
         return;
@@ -203,15 +232,13 @@ class Sounds {
    */
   async playNotificationSound(soundType, isTapped = false) {
     try {
-      if (soundType === 'short' && !isTapped) {
-        // Auto-play short alert when notification fires
+      if (soundType === 'none') return;
+      if (isTapped) {
+        // Tapping always plays the full adhan, regardless of mode.
+        await this.playFullAdhan();
+      } else {
+        // Foreground arrival plays the short alert; never auto-blast the full adhan.
         await this.playShortAlert();
-      } else if (soundType === 'full' && isTapped) {
-        // Play full adhan when user taps notification
-        await this.playFullAdhan();
-      } else if (soundType === 'short' && isTapped) {
-        // User tapped notification with short alert - play full adhan
-        await this.playFullAdhan();
       }
     } catch (error) {
       console.error('Error playing notification sound:', error);
@@ -246,6 +273,7 @@ class Sounds {
 
       this.isInitialized = false;
       this.isPlayingFullAdhan = false;
+      this.fullAdhanSourceId = DEFAULT_ADHAN_ID;
       console.log('🧹 Audio system cleaned up');
 
     } catch (error) {

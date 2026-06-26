@@ -30,7 +30,9 @@ jest.mock('expo-av', () => {
 });
 
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Sounds from '../Sounds';
+import AdhanDownloader from '../AdhanDownloader';
 
 const flush = () => new Promise((r) => setImmediate(r));
 
@@ -150,6 +152,33 @@ describe('Sounds (singleton audio service)', () => {
     });
   });
 
+  describe('selected recitation source', () => {
+    it('reloads the full adhan from the selected downloaded recitation', async () => {
+      await Sounds.initialize();
+      Audio.Sound.createAsync.mockClear();
+      AsyncStorage.getItem.mockResolvedValueOnce('alafasy');
+      const spy = jest
+        .spyOn(AdhanDownloader, 'getPlayableUri')
+        .mockResolvedValueOnce('/mock/document/adhans/alafasy.mp3');
+      await Sounds.playFullAdhan();
+      expect(Audio.Sound.createAsync).toHaveBeenCalledWith(
+        { uri: '/mock/document/adhans/alafasy.mp3' },
+        expect.anything()
+      );
+      spy.mockRestore();
+    });
+
+    it('keeps the bundled adhan when the selection is not downloaded', async () => {
+      await Sounds.initialize();
+      Audio.Sound.createAsync.mockClear();
+      AsyncStorage.getItem.mockResolvedValueOnce('alafasy');
+      const spy = jest.spyOn(AdhanDownloader, 'getPlayableUri').mockResolvedValueOnce(null);
+      await Sounds.playFullAdhan();
+      expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
+
   describe('_onFullAdhanPlaybackUpdate', () => {
     it('mirrors isPlaying status', () => {
       Sounds.isPlayingFullAdhan = true;
@@ -199,10 +228,21 @@ describe('Sounds (singleton audio service)', () => {
       fullSpy.mockRestore();
     });
 
-    it('does nothing for soundType=full when not tapped (don\'t auto-play full adhan)', async () => {
+    it('plays the short alert (not the full adhan) for soundType=full when not tapped', async () => {
       const shortSpy = jest.spyOn(Sounds, 'playShortAlert').mockResolvedValue();
       const fullSpy = jest.spyOn(Sounds, 'playFullAdhan').mockResolvedValue();
       await Sounds.playNotificationSound('full', false);
+      expect(shortSpy).toHaveBeenCalled();
+      expect(fullSpy).not.toHaveBeenCalled();
+      shortSpy.mockRestore();
+      fullSpy.mockRestore();
+    });
+
+    it('does nothing for soundType=none', async () => {
+      const shortSpy = jest.spyOn(Sounds, 'playShortAlert').mockResolvedValue();
+      const fullSpy = jest.spyOn(Sounds, 'playFullAdhan').mockResolvedValue();
+      await Sounds.playNotificationSound('none', false);
+      await Sounds.playNotificationSound('none', true);
       expect(shortSpy).not.toHaveBeenCalled();
       expect(fullSpy).not.toHaveBeenCalled();
       shortSpy.mockRestore();
