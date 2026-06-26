@@ -43,6 +43,7 @@ jest.mock('../../utils/TasbihStore', () => ({
     },
   }),
   getCounterDisplayName: () => 'counter.presets.subhanAllah',
+  computeCounterStats: () => ({ weeklyTotal: 0, monthlyTotal: 0 }),
 }));
 
 // Mock Sound utils

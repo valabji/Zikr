@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, ScrollView, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
@@ -235,93 +235,90 @@ export default function TasbihCountersSheet({ visible, onClose }) {
 
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlayBackground }}>
+      <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlayBackground }}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={StyleSheet.absoluteFill} />
+        </TouchableWithoutFeedback>
+        <View
+          testID="tasbih-counters-sheet"
+          style={{
+            backgroundColor: colors.surface,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            maxHeight: '85%',
+            shadowColor: colors.shadowColor,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            elevation: 8,
+          }}
+        >
           <View
-            onStartShouldSetResponder={() => true}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.accent + '22',
+            }}
           >
-            <View
-              testID="tasbih-counters-sheet"
-              style={{
-                backgroundColor: colors.surface,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                maxHeight: '85%',
-                shadowColor: colors.shadowColor,
-                shadowOffset: { width: 0, height: -2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                elevation: 8,
-              }}
+            <Text style={[textStyles.subtitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+              {t('counter.switchCounter')}
+            </Text>
+            <TouchableOpacity
+              onPress={() => { setAdding((v) => !v); setManage(false); }}
+              style={{ padding: 6, ...getDirectionalMixedSpacing({ marginRight: 6 }) }}
             >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingHorizontal: 16,
-                  paddingVertical: 14,
-                  borderBottomWidth: 1,
-                  borderBottomColor: colors.accent + '22',
-                }}
-              >
-                <Text style={[textStyles.subtitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
-                  {t('counter.switchCounter')}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => { setAdding((v) => !v); setManage(false); }}
-                  style={{ padding: 6, ...getDirectionalMixedSpacing({ marginRight: 6 }) }}
-                >
-                  <Feather name="plus" size={24} color={colors.accent} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => { setManage((v) => !v); setAdding(false); }}
-                  style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.accent + '44' }}
-                >
-                  <Text style={[textStyles.base, { color: colors.accent, fontSize: 14 }]}>
-                    {manage ? t('counter.done') : t('counter.manage')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderBottomWidth: 1,
-                  borderBottomColor: colors.accent + '22',
-                  flexDirection: 'row',
-                }}
-              >
-                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13 }]}>
-                  {t('counter.weekly') + ': ' + (stats ? stats.weeklyTotal : 0) + '   ' + t('counter.monthly') + ': ' + (stats ? stats.monthlyTotal : 0)}
-                </Text>
-              </View>
-
-              <ScrollView keyboardShouldPersistTaps="handled">
-                {adding ? (
-                  <AddForm colors={colors} onSave={handleSave} onCancel={() => setAdding(false)} />
-                ) : null}
-                {counters.map((c, i) => (
-                  <CounterRow
-                    key={c.id}
-                    counter={c}
-                    isActive={c.id === state.activeId}
-                    manage={manage}
-                    isFirst={i === 0}
-                    isLast={i === counters.length - 1}
-                    colors={colors}
-                    onSelect={handleSelect}
-                    onRename={renameCounter}
-                    onSetTarget={setTarget}
-                    onMove={moveCounter}
-                    onDelete={deleteCounter}
-                  />
-                ))}
-              </ScrollView>
-            </View>
+              <Feather name="plus" size={24} color={colors.accent} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { setManage((v) => !v); setAdding(false); }}
+              style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.accent + '44' }}
+            >
+              <Text style={[textStyles.base, { color: colors.accent, fontSize: 14 }]}>
+                {manage ? t('counter.done') : t('counter.manage')}
+              </Text>
+            </TouchableOpacity>
           </View>
+
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.accent + '22',
+              flexDirection: 'row',
+            }}
+          >
+            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13 }]}>
+              {t('counter.weekly') + ': ' + (stats ? stats.weeklyTotal : 0) + '   ' + t('counter.monthly') + ': ' + (stats ? stats.monthlyTotal : 0)}
+            </Text>
+          </View>
+
+          <ScrollView keyboardShouldPersistTaps="handled">
+            {adding ? (
+              <AddForm colors={colors} onSave={handleSave} onCancel={() => setAdding(false)} />
+            ) : null}
+            {counters.map((c, i) => (
+              <CounterRow
+                key={c.id}
+                counter={c}
+                isActive={c.id === state.activeId}
+                manage={manage}
+                isFirst={i === 0}
+                isLast={i === counters.length - 1}
+                colors={colors}
+                onSelect={handleSelect}
+                onRename={renameCounter}
+                onSetTarget={setTarget}
+                onMove={moveCounter}
+                onDelete={deleteCounter}
+              />
+            ))}
+          </ScrollView>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }
