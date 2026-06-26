@@ -135,6 +135,33 @@ describe('PrayerCheckIn', () => {
     expect(history[1]).toMatchObject({ dateKey: keyFor(1), offsetDays: 1, count: 5, complete: true });
   });
 
+  it('togglePrayerCheckInForDate marks a prayer for a past date', async () => {
+    const mod = await loadAndReset();
+    await mod.loadPrayerCheckIn();
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const pastKey = `${d.getFullYear()}-${mm}-${dd}`;
+    mod.togglePrayerCheckInForDate('maghrib', pastKey);
+    const state = mod.getCachedPrayerCheckIn();
+    expect(state.days[pastKey].maghrib).toBeTruthy();
+  });
+
+  it('togglePrayerCheckInForDate unmarks on second call', async () => {
+    const mod = await loadAndReset();
+    await mod.loadPrayerCheckIn();
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const pastKey = `${d.getFullYear()}-${mm}-${dd}`;
+    mod.togglePrayerCheckInForDate('fajr', pastKey);
+    mod.togglePrayerCheckInForDate('fajr', pastKey);
+    const state = mod.getCachedPrayerCheckIn();
+    expect(state.days[pastKey]?.fajr).toBeUndefined();
+  });
+
   it('subscribePrayerCheckIn notifies listeners on commit and unsubscribes correctly', async () => {
     const mod = await loadAndReset();
     await mod.loadPrayerCheckIn();

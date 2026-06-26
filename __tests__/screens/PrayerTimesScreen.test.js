@@ -59,7 +59,7 @@ describe('PrayerTimesScreen', () => {
     });
   });
 
-  it('opens the prayer history sheet from the one-line trigger', async () => {
+  it('toggles the prayer history inline from the trigger', async () => {
     AsyncStorage.getItem.mockImplementation((key) => {
       if (key === PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION) return Promise.resolve(LOC);
       if (key === PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD)
@@ -71,9 +71,12 @@ describe('PrayerTimesScreen', () => {
     const { getByTestId, queryByTestId } = render(<PrayerTimesScreen navigation={navigation} />);
     await waitFor(() => expect(getByTestId('prayer-history-trigger')).toBeTruthy());
 
-    expect(queryByTestId('prayer-history-sheet')).toBeNull();
+    const todayKey = new Date().toISOString().slice(0, 10);
+    expect(queryByTestId(`history-row-${todayKey}`)).toBeNull();
     fireEvent.press(getByTestId('prayer-history-trigger'));
-    await waitFor(() => expect(getByTestId('prayer-history-sheet')).toBeTruthy());
+    await waitFor(() => expect(getByTestId(`history-row-${todayKey}`)).toBeTruthy());
+    fireEvent.press(getByTestId('prayer-history-trigger'));
+    await waitFor(() => expect(queryByTestId(`history-row-${todayKey}`)).toBeNull());
   });
 
   it('does not crash on storage error', async () => {

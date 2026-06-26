@@ -165,6 +165,18 @@ export function togglePrayerCheckIn(prayerName) {
   commit({ ...state, days: { ...state.days, [today]: day } });
 }
 
+export function togglePrayerCheckInForDate(prayerName, dateKey) {
+  if (!MANDATORY_PRAYERS.includes(prayerName)) return;
+  const state = getState();
+  const day = { ...(state.days[dateKey] || {}) };
+  if (day[prayerName]) {
+    delete day[prayerName];
+  } else {
+    day[prayerName] = Date.now();
+  }
+  commit({ ...state, days: { ...state.days, [dateKey]: day } });
+}
+
 export function usePrayerCheckIn() {
   const [state, setState] = useState(() => cached || seedState());
   useEffect(() => {
