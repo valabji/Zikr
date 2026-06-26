@@ -22,12 +22,38 @@ export function computeTasbihStats(history, dailyGoal) {
   const dayMs = 86400000;
   const todayMs = new Date(today).getTime();
   const last7Days = [];
+  let weeklyTotal = 0;
+  let monthlyTotal = 0;
   for (let i = 6; i >= 0; i--) {
     const ms = todayMs - i * dayMs;
     const key = new Date(ms).toISOString().slice(0, 10);
-    last7Days.push({ date: key, count: h[key] || 0 });
+    const count = h[key] || 0;
+    last7Days.push({ date: key, count });
+    weeklyTotal += count;
   }
-  return { todayTotal, dailyGoal: goal, goalPct, last7Days };
+  for (let i = 0; i < 30; i++) {
+    const key = new Date(todayMs - i * dayMs).toISOString().slice(0, 10);
+    monthlyTotal += h[key] || 0;
+  }
+  return { todayTotal, dailyGoal: goal, goalPct, last7Days, weeklyTotal, monthlyTotal };
+}
+
+export function computeCounterStats(counter) {
+  const h = (counter && counter.history) || {};
+  const today = todayKey();
+  const dayMs = 86400000;
+  const todayMs = new Date(today).getTime();
+  let weeklyTotal = 0;
+  let monthlyTotal = 0;
+  for (let i = 0; i < 7; i++) {
+    const key = new Date(todayMs - i * dayMs).toISOString().slice(0, 10);
+    weeklyTotal += h[key] || 0;
+  }
+  for (let i = 0; i < 30; i++) {
+    const key = new Date(todayMs - i * dayMs).toISOString().slice(0, 10);
+    monthlyTotal += h[key] || 0;
+  }
+  return { weeklyTotal, monthlyTotal };
 }
 
 let cached = null;
@@ -49,6 +75,7 @@ function seedState() {
     rounds: 0,
     totalRounds: 0,
     total: 0,
+    history: {},
     createdAt: Date.now(),
   }));
   return { counters, activeId: counters[0].id, dailyGoal: DEFAULT_DAILY_GOAL, history: {} };
@@ -64,6 +91,7 @@ function normalizeCounter(c) {
     rounds: typeof c.rounds === 'number' ? c.rounds : 0,
     totalRounds: typeof c.totalRounds === 'number' ? c.totalRounds : (c.rounds || 0),
     total: typeof c.total === 'number' ? c.total : 0,
+    history: c.history && typeof c.history === 'object' ? c.history : {},
     createdAt: c.createdAt || Date.now(),
   };
 }
@@ -154,16 +182,18 @@ export function getCounterDisplayName(counter) {
 export function increment() {
   const state = getState();
   let result = { completed: false };
+  const today = todayKey();
   const counters = state.counters.map((c) => {
     if (c.id !== state.activeId) return c;
     const total = c.total + 1;
+    const counterHistory = { ...(c.history || {}) };
+    counterHistory[today] = (counterHistory[today] || 0) + 1;
     if (c.target > 0 && c.count + 1 >= c.target) {
       result = { completed: true };
-      return { ...c, total, rounds: c.rounds + 1, totalRounds: c.totalRounds + 1, count: 0 };
+      return { ...c, total, rounds: c.rounds + 1, totalRounds: c.totalRounds + 1, count: 0, history: counterHistory };
     }
-    return { ...c, total, count: c.count + 1 };
+    return { ...c, total, count: c.count + 1, history: counterHistory };
   });
-  const today = todayKey();
   const history = { ...(state.history || {}) };
   history[today] = (history[today] || 0) + 1;
   commit({ ...state, counters, history });
@@ -200,9 +230,10 @@ export function addCounter({ name, target } = {}) {
     rounds: 0,
     totalRounds: 0,
     total: 0,
+    history: {},
     createdAt: Date.now(),
   };
-  commit({ counters: [...state.counters, counter], activeId: counter.id });
+  commit({ ...state, counters: [...state.counters, counter], activeId: counter.id });
   return counter;
 }
 

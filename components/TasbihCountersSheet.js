@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing } from '../locales/i18n';
-import { useTasbih, getCounterDisplayName } from '../utils/TasbihStore';
+import { useTasbih, getCounterDisplayName, computeCounterStats } from '../utils/TasbihStore';
 import { TASBIH_CONSTANTS } from '../constants/TasbihConstants';
 
 function TargetChips({ value, onChange, colors }) {
@@ -83,6 +83,8 @@ function CounterRow({ counter, isActive, manage, isFirst, isLast, colors, onSele
 
   const targetLabel = counter.target > 0 ? t('counter.target') + ': ' + counter.target : t('counter.noTarget');
   const statsLabel = t('counter.total') + ': ' + (counter.total || 0) + '  ·  ' + t('counter.rounds') + ': ' + (counter.rounds || 0) + '  ·  ' + t('counter.totalRounds') + ': ' + (counter.totalRounds || 0);
+  const { weeklyTotal, monthlyTotal } = computeCounterStats(counter);
+  const periodLabel = t('counter.weekly') + ': ' + weeklyTotal + '  ·  ' + t('counter.monthly') + ': ' + monthlyTotal;
 
   return (
     <View
@@ -117,6 +119,7 @@ function CounterRow({ counter, isActive, manage, isFirst, isLast, colors, onSele
           )}
           <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>{targetLabel}</Text>
           <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 2 }]}>{statsLabel}</Text>
+          <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 1 }]}>{periodLabel}</Text>
         </View>
         {!manage ? (
           <Text style={[textStyles.title, { color: isActive ? colors.accent : colors.text }]}>{counter.count || 0}</Text>
@@ -217,7 +220,7 @@ function AddForm({ colors, onSave, onCancel }) {
 
 export default function TasbihCountersSheet({ visible, onClose }) {
   const colors = useColors();
-  const { state, setActiveId, addCounter, renameCounter, setTarget, deleteCounter, moveCounter } = useTasbih();
+  const { state, stats, setActiveId, addCounter, renameCounter, setTarget, deleteCounter, moveCounter } = useTasbih();
   const [manage, setManage] = React.useState(false);
   const [adding, setAdding] = React.useState(false);
 
@@ -234,7 +237,9 @@ export default function TasbihCountersSheet({ visible, onClose }) {
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlayBackground }}>
-          <TouchableWithoutFeedback>
+          <View
+            onStartShouldSetResponder={() => true}
+          >
             <View
               testID="tasbih-counters-sheet"
               style={{
@@ -278,6 +283,20 @@ export default function TasbihCountersSheet({ visible, onClose }) {
                 </TouchableOpacity>
               </View>
 
+              <View
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.accent + '22',
+                  flexDirection: 'row',
+                }}
+              >
+                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13 }]}>
+                  {t('counter.weekly') + ': ' + (stats ? stats.weeklyTotal : 0) + '   ' + t('counter.monthly') + ': ' + (stats ? stats.monthlyTotal : 0)}
+                </Text>
+              </View>
+
               <ScrollView keyboardShouldPersistTaps="handled">
                 {adding ? (
                   <AddForm colors={colors} onSave={handleSave} onCancel={() => setAdding(false)} />
@@ -300,7 +319,7 @@ export default function TasbihCountersSheet({ visible, onClose }) {
                 ))}
               </ScrollView>
             </View>
-          </TouchableWithoutFeedback>
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>

@@ -143,6 +143,8 @@
     "dailyGoal": "Daily Goal",
     "todayProgress": "Today",
     "weeklyChart": "Last 7 days",
+    "weekly": "This week",
+    "monthly": "This month",
     "noGoal": "No goal",
     "presets": {
       "counter": "Counter",

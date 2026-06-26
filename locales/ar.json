@@ -143,6 +143,8 @@
     "dailyGoal": "الهدف اليومي",
     "todayProgress": "اليوم",
     "weeklyChart": "آخر 7 أيام",
+    "weekly": "هذا الأسبوع",
+    "monthly": "هذا الشهر",
     "noGoal": "بدون هدف",
     "presets": {
       "counter": "عداد",
