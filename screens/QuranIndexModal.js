@@ -7,10 +7,11 @@ import { t, isRTL } from '../locales/i18n';
 import surahsData from '../assets/quran/data/surahs.json';
 import juzData from '../assets/quran/data/juz.json';
 import { getStats, subscribeProgress } from '../utils/ReadingProgress';
+import QuranDownloadsList from '../components/QuranDownloadsList';
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
-const TABS = ['surahs', 'juzs', 'bookmarks', 'progress'];
+const TABS = ['surahs', 'juzs', 'bookmarks', 'downloads', 'progress'];
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 const WEEKDAY_EN = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -267,6 +268,7 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
             />
           )
         )}
+        {tab === 'downloads' && <QuranDownloadsList />}
         {tab === 'progress' && (
           <View style={{ flex: 1, padding: 20 }}>
             <View style={{

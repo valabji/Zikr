@@ -89,6 +89,17 @@ describe('NotificationService', () => {
       expect(Notifications.addNotificationResponseReceivedListener).toHaveBeenCalled();
     });
 
+    it('suppresses the foreground banner for the live download notification', async () => {
+      await service.initialize();
+      const handlerArg = Notifications.setNotificationHandler.mock.calls[0][0];
+      const result = await handlerArg.handleNotification({
+        request: { content: { data: { type: 'quran-download' } } },
+      });
+      expect(result.shouldShowBanner).toBe(false);
+      expect(result.shouldSetBadge).toBe(false);
+      expect(result.shouldShowList).toBe(true);
+    });
+
     it('does NOT create Android channels on iOS', async () => {
       setPlatform('ios', 15);
       await service.initialize();

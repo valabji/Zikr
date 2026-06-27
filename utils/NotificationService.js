@@ -10,6 +10,7 @@ import Sounds from './Sounds';
 const ADHAN_SOUND = 'adhan_alert.wav';
 const ADHAN_CHANNEL = 'prayer_adhan';
 const SILENT_CHANNEL = 'prayer_silent';
+const DOWNLOAD_CHANNEL = 'quran_downloads';
 
 /**
  * NotificationService - Handles all notification operations for adhan reminders
@@ -38,12 +39,23 @@ class NotificationService {
   async initialize() {
     // Set notification handler (how notifications appear)
     Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowBanner: true,  // Shows banner notification
-        shouldShowList: true,    // Shows in notification list
-        shouldPlaySound: false,  // We'll play custom audio separately
-        shouldSetBadge: true,
-      }),
+      handleNotification: async (notification) => {
+        // Suppress the banner so the live download notification updates in place instead of re-popping.
+        if (notification?.request?.content?.data?.type === 'quran-download') {
+          return {
+            shouldShowBanner: false,
+            shouldShowList: true,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+          };
+        }
+        return {
+          shouldShowBanner: true,  // Shows banner notification
+          shouldShowList: true,    // Shows in notification list
+          shouldPlaySound: false,  // We'll play custom audio separately
+          shouldSetBadge: true,
+        };
+      },
     });
 
     // Setup notification listeners
@@ -100,6 +112,16 @@ class NotificationService {
     await Notifications.setNotificationChannelAsync('prayer-countdown', {
       name: 'Next Prayer',
       description: 'Persistent countdown to the next prayer',
+      importance: Notifications.AndroidImportance.LOW,
+      sound: null,
+      vibrationPattern: null,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      bypassDnd: false,
+    });
+
+    await Notifications.setNotificationChannelAsync(DOWNLOAD_CHANNEL, {
+      name: 'Qur\'an Downloads',
+      description: 'Shows progress while Qur\'an audio is downloading',
       importance: Notifications.AndroidImportance.LOW,
       sound: null,
       vibrationPattern: null,
@@ -563,6 +585,50 @@ class NotificationService {
       console.log('🚫 Hidden persistent countdown notification');
     } catch (error) {
       console.error('Error hiding persistent countdown:', error);
+    }
+  }
+
+  async ensurePermission() {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status === 'granted') return true;
+      const { status: requested } = await Notifications.requestPermissionsAsync();
+      return requested === 'granted';
+    } catch (error) {
+      console.error('Error ensuring notification permission:', error);
+      return false;
+    }
+  }
+
+  async showDownloadProgress(id, title, body) {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        identifier: id,
+        content: {
+          title,
+          body,
+          sound: null,
+          sticky: true,
+          autoDismiss: false,
+          priority: Platform.OS === 'android'
+            ? Notifications.AndroidNotificationPriority.LOW
+            : undefined,
+          ...(Platform.OS === 'android' && { channelId: DOWNLOAD_CHANNEL }),
+          data: { type: 'quran-download' },
+        },
+        trigger: null,
+      });
+    } catch (error) {
+      console.error('Error showing download progress:', error);
+    }
+  }
+
+  async hideDownloadProgress(id) {
+    try {
+      await Notifications.dismissNotificationAsync(id);
+      await Notifications.cancelScheduledNotificationAsync(id);
+    } catch (error) {
+      console.error('Error hiding download progress:', error);
     }
   }
 }

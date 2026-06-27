@@ -180,6 +180,34 @@ jest.mock('expo-file-system/legacy', () => ({
   createDownloadResumable: jest.fn(() => ({ downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })) })),
 }), { virtual: true });
 
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(),
+  getPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted', granted: true })),
+  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted', granted: true })),
+  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
+  deleteNotificationChannelAsync: jest.fn(() => Promise.resolve()),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('scheduled-id')),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
+  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
+  getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  getPresentedNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  dismissNotificationAsync: jest.fn(() => Promise.resolve()),
+  AndroidNotificationPriority: { HIGH: 'high', LOW: 'low' },
+  AndroidImportance: { MAX: 5, LOW: 2 },
+  AndroidNotificationVisibility: { PUBLIC: 1 },
+  SchedulableTriggerInputTypes: { DATE: 'date' },
+}), { virtual: true });
+
+jest.mock('expo-intent-launcher', () => ({
+  startActivityAsync: jest.fn(() => Promise.resolve()),
+  ActivityAction: {
+    APPLICATION_DETAILS_SETTINGS: 'app_details_settings',
+    IGNORE_BATTERY_OPTIMIZATION_SETTINGS: 'ignore_battery_opt',
+  },
+}), { virtual: true });
+
 // Mock Sound functionality and utils
 jest.mock('./utils/Sounds', () => ({
   useAudio: jest.fn(() => ({

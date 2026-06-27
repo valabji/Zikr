@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import { getSurahAudioManifest } from './QuranSurahAudio';
+import QuranSurahDownloader from './QuranSurahDownloader';
 import { QURAN_CONSTANTS } from '../constants/QuranConstants';
 import pagesData from '../assets/quran/data/pages.json';
 import wordsData from '../assets/quran/data/words.json';
@@ -202,9 +203,10 @@ class QuranAudioService {
     this.isPlaying = true;
     this.playingWordIdx = null;
     this._emit();
+    const localUri = await QuranSurahDownloader.getLocalAudioUri(this.reciterId, surah);
     try {
       const { sound } = await Audio.Sound.createAsync(
-        { uri: manifest.audioUrl },
+        { uri: localUri || manifest.audioUrl },
         { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true, positionMillis: start.from }
       );
       this.sound = sound;
