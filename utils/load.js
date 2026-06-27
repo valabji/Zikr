@@ -16,6 +16,7 @@ import PrayerNotificationScheduler from './PrayerNotificationScheduler';
 import QcfDownloader from './QcfDownloader';
 import { loadTasbih } from './TasbihStore';
 import RadioService from './RadioService';
+import MediaSessionController from './MediaSessionController';
 
 
 export async function loadResourcesAndDataAsync() {
@@ -68,6 +69,12 @@ export async function loadResourcesAndDataAsync() {
             } catch (error) {
                 console.error('Failed to initialize radio service:', error);
             }
+        }
+
+        try {
+            MediaSessionController.initialize();
+        } catch (error) {
+            console.error('Failed to initialize media session controller:', error);
         }
 
     } catch (e) {

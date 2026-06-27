@@ -18,6 +18,7 @@ module.exports = {
     '^react-native-svg$': '<rootDir>/__mocks__/svgMock.js',
     '^@react-native-community/slider$': '<rootDir>/__mocks__/Slider.js',
     '^expo-speech-recognition$': '<rootDir>/__mocks__/expo-speech-recognition.js',
+    'modules/expo-media-session$': '<rootDir>/__mocks__/expo-media-session.js',
   },
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',
