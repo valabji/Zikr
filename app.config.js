@@ -19,6 +19,7 @@ export default {
     assetBundlePatterns: ["**/*"],
     ios: {
       bundleIdentifier: "com.valabji.zikr",
+      appleTeamId: "VB895DBGS7",
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST,
       supportsTablet: true,
       buildNumber: "15",
