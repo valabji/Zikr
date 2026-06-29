@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
-import Svg, { Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import {
   SURA_BORDER_PATH_D,
   SURA_BORDER_VIEWBOX_W,
@@ -23,8 +23,6 @@ function surahNameGlyph(surahId) {
 }
 
 const SURA_BORDER_ASPECT = SURA_BORDER_VIEWBOX_W / SURA_BORDER_VIEWBOX_H;
-// viewBox is "0 -500 16320 2000" → vertical midline at y=500.
-const SURA_BORDER_MID_Y = SURA_BORDER_VIEWBOX_MIN_Y + SURA_BORDER_VIEWBOX_H / 2;
 
 export default function SurahCartouche({ surahId, colors, fontScale }) {
   const surah = surahById[surahId];
@@ -34,11 +32,8 @@ export default function SurahCartouche({ surahId, colors, fontScale }) {
   const [containerWidth, setContainerWidth] = React.useState(SCREEN_WIDTH - 36);
   const borderHeight = containerWidth / SURA_BORDER_ASPECT;
 
-  // All coordinates in SVG viewBox space (W=16320, H=2000, x in [0,16320], y in [-500,1500]).
-  const midX = SURA_BORDER_VIEWBOX_W / 2;
-  const nameFontSize = SURA_BORDER_VIEWBOX_H * 0.55 * fontScale;
-  // SVG text y coordinate is the baseline; shift down so glyphs sit vertically centered.
-  const nameTextY = SURA_BORDER_MID_Y + nameFontSize * 0.32;
+  // Convert SVG-unit font size to screen pixels: SVG_H * 0.55 * scale * (px / SVG_W) = borderHeight * 0.55 * scale
+  const nameFontSize = borderHeight * 0.55 * fontScale;
 
   // Medallion centers in screen px (pixel-density scan: 20.8% / 79.3% of width).
   const medallionBoxWidth = containerWidth * 0.08;
@@ -60,18 +55,33 @@ export default function SurahCartouche({ surahId, colors, fontScale }) {
         viewBox={`0 ${SURA_BORDER_VIEWBOX_MIN_Y} ${SURA_BORDER_VIEWBOX_W} ${SURA_BORDER_VIEWBOX_H}`}
       >
         <Path fill={colors.accent} d={SURA_BORDER_PATH_D} />
-        <SvgText
-          x={midX}
-          y={nameTextY}
-          fill={colors.text}
-          fontFamily="KFGQPC_SurahNames"
-          fontSize={nameFontSize}
-          textAnchor="middle"
+      </Svg>
+      {/* Surah name — RN overlay; react-native-svg textAnchor is unreliable with PUA fonts on Android */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0, bottom: 0,
+          left: 0, right: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          allowFontScaling={false}
+          numberOfLines={1}
+          style={{
+            fontFamily: 'KFGQPC_SurahNames',
+            fontSize: nameFontSize,
+            color: colors.text,
+            textAlign: 'center',
+            includeFontPadding: false,
+          }}
         >
           {surahNameGlyph(surahId)}
-        </SvgText>
-      </Svg>
-      {/* Mecca/Medina label - RN Text overlay so the UthmanicHafs font applies. */}
+        </Text>
+      </View>
+      {/* Mecca/Medina label */}
       <View
         pointerEvents="none"
         style={{
@@ -99,8 +109,7 @@ export default function SurahCartouche({ surahId, colors, fontScale }) {
           {placeAr}
         </Text>
       </View>
-      {/* Ayah count label — body font, not UthmanicHafs, so digits aren't
-          rendered as ornamental ayah-end markers. */}
+      {/* Ayah count label */}
       <View
         pointerEvents="none"
         style={{
