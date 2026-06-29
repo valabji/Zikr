@@ -24,8 +24,8 @@ function ayahWordBase(vk, lineSpeakable) {
   return 0;
 }
 
-// KFGQPC Bismillah font: single ornate calligraphic ligature at U+FDFD.
-const BISMILLAH_GLYPH = '﷽';
+// PUA U+E200 maps to the ornate Bismillah glyph; avoids Android font-fallback overriding U+FDFD.
+const BISMILLAH_GLYPH = '';
 
 export function BismillahLine({ colors, fontScale }) {
   return (
