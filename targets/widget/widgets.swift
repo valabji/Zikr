@@ -133,3 +133,94 @@ struct widgets: Widget {
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
+
+private let hijriMonthNames = [
+    "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+    "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+    "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+]
+
+struct HijriEntry: TimelineEntry {
+    let date: Date
+    let hijriDay: Int
+    let hijriMonth: String
+    let hijriYear: Int
+    let gregorianLabel: String
+}
+
+struct HijriProvider: TimelineProvider {
+    func placeholder(in context: Context) -> HijriEntry {
+        makeEntry()
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (HijriEntry) -> Void) {
+        completion(makeEntry())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        components.day = (components.day ?? 1) + 1
+        components.hour = 0
+        components.minute = 0
+        let nextMidnight = Calendar.current.date(from: components) ?? Date()
+        completion(Timeline(entries: [makeEntry()], policy: .after(nextMidnight)))
+    }
+
+    private func makeEntry() -> HijriEntry {
+        let now = Date()
+        let hijriCal = Calendar(identifier: .islamicCivil)
+        let comps = hijriCal.dateComponents([.year, .month, .day], from: now)
+        let monthIndex = max(0, min((comps.month ?? 1) - 1, 11))
+        let gregCal = Calendar.current
+        let gregComps = gregCal.dateComponents([.year, .month, .day], from: now)
+        let gregLabel = "\(gregComps.day ?? 1)/\(gregComps.month ?? 1)/\(gregComps.year ?? 2025)"
+        return HijriEntry(
+            date: now,
+            hijriDay: comps.day ?? 1,
+            hijriMonth: hijriMonthNames[monthIndex],
+            hijriYear: comps.year ?? 1446,
+            gregorianLabel: gregLabel
+        )
+    }
+}
+
+struct HijriWidgetEntryView: View {
+    var entry: HijriProvider.Entry
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 3) {
+            Text("Hijri Date")
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.7))
+            Text("\(entry.hijriDay) \(entry.hijriMonth)")
+                .font(.headline)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.7)
+            Text("\(entry.hijriYear) AH")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.9))
+            Text(entry.gregorianLabel)
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.6))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+        .containerBackground(for: .widget) {
+            Color(red: 0.106, green: 0.369, blue: 0.125)
+        }
+    }
+}
+
+struct HijriCalendarWidget: Widget {
+    let kind: String = "HijriCalendar"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: HijriProvider()) { entry in
+            HijriWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Hijri Calendar")
+        .description("Shows today's Hijri (Islamic) date.")
+        .supportedFamilies([.systemSmall])
+    }
+}

@@ -164,6 +164,15 @@ export default {
               minHeight: "100dp",
               resizeMode: "horizontal|vertical",
               updatePeriodMillis: 1800000
+            },
+            {
+              name: "HijriCalendar",
+              label: "Zikr Hijri Calendar",
+              description: "Shows today's Hijri (Islamic) date.",
+              minWidth: "120dp",
+              minHeight: "100dp",
+              resizeMode: "horizontal|vertical",
+              updatePeriodMillis: 1800000
             }
           ]
         }

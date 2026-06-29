@@ -2,6 +2,7 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 import { getWidgetPrayerData } from '../utils/PrayerWidgetService';
 import { renderPrayerWidget } from './PrayerWidget';
+import { renderHijriWidget } from './HijriWidget';
 
 const renderPlaceholder = () => (
   <FlexWidget
@@ -23,8 +24,12 @@ export const widgetTaskHandler = async (props) => {
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
-      const data = await getWidgetPrayerData();
-      props.renderWidget(data ? renderPrayerWidget(data) : renderPlaceholder());
+      if (props.widgetName === 'HijriCalendar') {
+        props.renderWidget(renderHijriWidget());
+      } else {
+        const data = await getWidgetPrayerData();
+        props.renderWidget(data ? renderPrayerWidget(data) : renderPlaceholder());
+      }
       break;
     }
     default:

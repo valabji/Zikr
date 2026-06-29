@@ -5,5 +5,6 @@ import SwiftUI
 struct ZikrWidgetBundle: WidgetBundle {
     var body: some Widget {
         widgets()
+        HijriCalendarWidget()
     }
 }
