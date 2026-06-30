@@ -12,24 +12,26 @@ import QuranDownloadsList from '../components/QuranDownloadsList';
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
 const TABS = ['surahs', 'juzs', 'bookmarks', 'downloads', 'progress'];
+const TAB_ICONS = { surahs: 'book-open', juzs: 'layers', bookmarks: 'bookmark', downloads: 'download', progress: 'bar-chart-2' };
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 const WEEKDAY_EN = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const WEEKDAY_AR = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 
-function TabButton({ label, active, onPress, colors }) {
+function TabButton({ label, icon, active, onPress, colors }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 10,
         alignItems: 'center',
         borderBottomWidth: 2,
         borderBottomColor: active ? colors.accent : 'transparent',
       }}
     >
-      <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.textSecondary }]}>
+      <Feather name={icon} size={20} color={active ? colors.accent : colors.textSecondary} />
+      <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.textSecondary, fontSize: 10, marginTop: 3 }]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -227,6 +229,7 @@ export default function QuranIndexModal({ visible, onClose, currentPage, bookmar
             <TabButton
               key={key}
               colors={colors}
+              icon={TAB_ICONS[key]}
               label={t(`quran.${key}`)}
               active={tab === key}
               onPress={() => setTab(key)}
