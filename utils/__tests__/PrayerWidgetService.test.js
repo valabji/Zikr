@@ -14,6 +14,7 @@ import {
   WIDGET_APP_GROUP,
   WIDGET_DATA_KEY,
   WIDGET_THEME_KEY,
+  WIDGET_LANGUAGE_KEY,
 } from '../PrayerWidgetService';
 import { PRAYER_CONSTANTS } from '../../constants/PrayerConstants';
 
@@ -137,6 +138,7 @@ describe('PrayerWidgetService', () => {
     it('writes to SharedGroupPreferences on iOS', async () => {
       Platform.OS = 'ios';
       AsyncStorage.getItem
+        .mockResolvedValueOnce('en')
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
         .mockResolvedValueOnce('MuslimWorldLeague')
         .mockResolvedValueOnce('Shafi')
@@ -155,12 +157,18 @@ describe('PrayerWidgetService', () => {
         expect.objectContaining({ bg: expect.any(String) }),
         WIDGET_APP_GROUP
       );
+      expect(SharedGroupPreferences.setItem).toHaveBeenCalledWith(
+        WIDGET_LANGUAGE_KEY,
+        'en',
+        WIDGET_APP_GROUP
+      );
       expect(requestWidgetUpdate).not.toHaveBeenCalled();
     });
 
     it('requests a widget update on Android', async () => {
       Platform.OS = 'android';
       AsyncStorage.getItem
+        .mockResolvedValueOnce('ar')
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
         .mockResolvedValueOnce('MuslimWorldLeague')
         .mockResolvedValueOnce('Shafi')

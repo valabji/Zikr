@@ -2,11 +2,8 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 const PRAYER_LABELS = {
-  fajr: 'Fajr',
-  dhuhr: 'Dhuhr',
-  asr: 'Asr',
-  maghrib: 'Maghrib',
-  isha: 'Isha',
+  en: { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
+  ar: { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
 };
 
 const DEFAULT_THEME = { bg: '#003C34', text: '#FFE29D', textSecondary: '#D1955E' };
@@ -39,6 +36,10 @@ export const renderPrayerWidget = (data) => {
   const { current, next } = findCurrentAndNext(data.prayers);
   const theme = data.theme || DEFAULT_THEME;
   const isSmall = data.widgetInfo && data.widgetInfo.width < 110;
+  const lang = data.lang === 'ar' ? 'ar' : 'en';
+  const labels = PRAYER_LABELS[lang];
+  const nowLabel = lang === 'ar' ? 'الآن' : 'Now';
+  const openLabel = lang === 'ar' ? 'افتح ذكر' : 'Open Zikr';
 
   if (isSmall) {
     return (
@@ -58,16 +59,16 @@ export const renderPrayerWidget = (data) => {
         {next ? (
           <>
             <TextWidget
-              text={PRAYER_LABELS[next.name]}
-              style={{ fontSize: 15, fontWeight: 'bold', color: theme.text, textAlign: 'center' }}
+              text={labels[next.name]}
+              style={{ fontSize: 15, fontFamily: 'Cairo_700Bold', color: theme.text, textAlign: 'center' }}
             />
             <TextWidget
               text={formatTime(next.time)}
-              style={{ fontSize: 12, color: theme.textSecondary, textAlign: 'center' }}
+              style={{ fontSize: 12, fontFamily: 'Cairo_400Regular', color: theme.textSecondary, textAlign: 'center' }}
             />
           </>
         ) : (
-          <TextWidget text="Open Zikr" style={{ fontSize: 11, color: theme.text, textAlign: 'center' }} />
+          <TextWidget text={openLabel} style={{ fontSize: 11, fontFamily: 'Cairo_400Regular', color: theme.text, textAlign: 'center' }} />
         )}
       </FlexWidget>
     );
@@ -88,18 +89,18 @@ export const renderPrayerWidget = (data) => {
       clickAction="OPEN_APP"
     >
       {!!data.city && (
-        <TextWidget text={data.city} style={{ fontSize: 12, color: theme.textSecondary }} />
+        <TextWidget text={data.city} style={{ fontSize: 12, fontFamily: 'Cairo_400Regular', color: theme.textSecondary }} />
       )}
       {next && (
         <TextWidget
-          text={`${PRAYER_LABELS[next.name]} ${formatTime(next.time)}`}
-          style={{ fontSize: 18, fontWeight: 'bold', color: theme.text }}
+          text={`${labels[next.name]} ${formatTime(next.time)}`}
+          style={{ fontSize: 18, fontFamily: 'Cairo_700Bold', color: theme.text }}
         />
       )}
       {current && (
         <TextWidget
-          text={`Now: ${PRAYER_LABELS[current.name]}`}
-          style={{ fontSize: 12, color: theme.textSecondary }}
+          text={`${nowLabel}: ${labels[current.name]}`}
+          style={{ fontSize: 12, fontFamily: 'Cairo_400Regular', color: theme.textSecondary }}
         />
       )}
     </FlexWidget>

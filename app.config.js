@@ -128,7 +128,12 @@ export default {
         }
       ],
       "expo-asset",
-      "expo-font",
+      ["expo-font", {
+        fonts: [
+          "./node_modules/@expo-google-fonts/cairo/Cairo_400Regular.ttf",
+          "./node_modules/@expo-google-fonts/cairo/Cairo_700Bold.ttf"
+        ]
+      }],
       "expo-web-browser",
       "@react-native-firebase/app",
       [

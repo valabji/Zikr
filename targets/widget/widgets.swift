@@ -4,6 +4,7 @@ import SwiftUI
 let widgetAppGroup = "group.com.valabji.zikr.widget"
 let widgetDataKey = "prayerWidgetData"
 let widgetThemeKey = "widgetThemeData"
+let widgetLanguageKey = "widgetLanguage"
 
 // MARK: - Theme
 
@@ -30,6 +31,14 @@ extension Color {
             blue: Double(rgb & 0xFF) / 255
         )
     }
+}
+
+func loadWidgetLanguage() -> String {
+    if let defaults = UserDefaults(suiteName: widgetAppGroup),
+       let lang = defaults.string(forKey: widgetLanguageKey) {
+        return lang
+    }
+    return "en"
 }
 
 func loadWidgetColors() -> WidgetColors {
@@ -87,7 +96,17 @@ struct SimpleEntry: TimelineEntry {
     let allPrayers: [PrayerItem]
 }
 
-func prayerLabel(_ name: String) -> String {
+func prayerLabel(_ name: String, lang: String) -> String {
+    if lang == "ar" {
+        switch name {
+        case "fajr": return "الفجر"
+        case "dhuhr": return "الظهر"
+        case "asr": return "العصر"
+        case "maghrib": return "المغرب"
+        case "isha": return "العشاء"
+        default: return name
+        }
+    }
     switch name {
     case "fajr": return "Fajr"
     case "dhuhr": return "Dhuhr"
@@ -154,6 +173,8 @@ struct PrayerWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
 
     private var c: WidgetColors { loadWidgetColors() }
+    private var lang: String { loadWidgetLanguage() }
+    private var isArabic: Bool { lang == "ar" }
 
     var body: some View {
         Group {
@@ -172,15 +193,15 @@ struct PrayerWidgetEntryView: View {
     @ViewBuilder var smallBody: some View {
         VStack(spacing: 4) {
             if let next = entry.nextPrayer, let nextTime = entry.nextPrayerTime {
-                Text(prayerLabel(next))
-                    .font(.headline)
+                Text(prayerLabel(next, lang: lang))
+                    .font(.custom("Cairo-Bold", size: 17))
                     .foregroundColor(c.text)
                 Text(nextTime, style: .time)
-                    .font(.subheadline)
+                    .font(.custom("Cairo-Regular", size: 15))
                     .foregroundColor(c.textMuted)
             } else {
-                Text("Open Zikr")
-                    .font(.caption)
+                Text(isArabic ? "افتح ذكر" : "Open Zikr")
+                    .font(.custom("Cairo-Regular", size: 12))
                     .foregroundColor(c.text)
                     .multilineTextAlignment(.center)
             }
@@ -192,24 +213,24 @@ struct PrayerWidgetEntryView: View {
         VStack(alignment: .leading, spacing: 4) {
             if !entry.city.isEmpty {
                 Text(entry.city)
-                    .font(.caption2)
+                    .font(.custom("Cairo-Regular", size: 11))
                     .foregroundColor(c.textMuted)
             }
             if let next = entry.nextPrayer, let nextTime = entry.nextPrayerTime {
-                Text(prayerLabel(next))
-                    .font(.headline)
+                Text(prayerLabel(next, lang: lang))
+                    .font(.custom("Cairo-Bold", size: 17))
                     .foregroundColor(c.text)
                 Text(nextTime, style: .time)
-                    .font(.subheadline)
+                    .font(.custom("Cairo-Regular", size: 15))
                     .foregroundColor(c.text.opacity(0.9))
             } else {
-                Text("Open Zikr to set location")
-                    .font(.caption)
+                Text(isArabic ? "افتح ذكر لضبط الموقع" : "Open Zikr to set location")
+                    .font(.custom("Cairo-Regular", size: 12))
                     .foregroundColor(c.text)
             }
             if let current = entry.currentPrayer {
-                Text("Now: \(prayerLabel(current))")
-                    .font(.caption2)
+                Text("\(isArabic ? "الآن" : "Now"): \(prayerLabel(current, lang: lang))")
+                    .font(.custom("Cairo-Regular", size: 11))
                     .foregroundColor(c.textMuted)
             }
         }
@@ -221,25 +242,24 @@ struct PrayerWidgetEntryView: View {
         VStack(alignment: .leading, spacing: 10) {
             if !entry.city.isEmpty {
                 Text(entry.city)
-                    .font(.caption)
+                    .font(.custom("Cairo-Regular", size: 12))
                     .foregroundColor(c.textMuted)
             }
             ForEach(entry.allPrayers) { prayer in
+                let isCurrent = prayer.name == entry.currentPrayer
                 HStack {
-                    Text(prayerLabel(prayer.name))
-                        .font(.body)
-                        .fontWeight(prayer.name == entry.currentPrayer ? .bold : .regular)
-                        .foregroundColor(prayer.name == entry.currentPrayer ? c.text : c.textMuted)
+                    Text(prayerLabel(prayer.name, lang: lang))
+                        .font(.custom(isCurrent ? "Cairo-Bold" : "Cairo-Regular", size: 17))
+                        .foregroundColor(isCurrent ? c.text : c.textMuted)
                     Spacer()
                     Text(prayer.time, style: .time)
-                        .font(.body)
-                        .fontWeight(prayer.name == entry.currentPrayer ? .bold : .regular)
-                        .foregroundColor(prayer.name == entry.currentPrayer ? c.text : c.textMuted)
+                        .font(.custom(isCurrent ? "Cairo-Bold" : "Cairo-Regular", size: 17))
+                        .foregroundColor(isCurrent ? c.text : c.textMuted)
                 }
             }
             if entry.allPrayers.isEmpty {
-                Text("Open Zikr to set location")
-                    .font(.caption)
+                Text(isArabic ? "افتح ذكر لضبط الموقع" : "Open Zikr to set location")
+                    .font(.custom("Cairo-Regular", size: 12))
                     .foregroundColor(c.text)
             }
         }
@@ -263,10 +283,16 @@ struct widgets: Widget {
 
 // MARK: - Hijri calendar widget
 
-private let hijriMonthNames = [
+private let hijriMonthNamesEn = [
     "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
     "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
     "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+]
+
+private let hijriMonthNamesAr = [
+    "محرم", "صفر", "ربيع الأول", "ربيع الثاني",
+    "جمادى الأولى", "جمادى الثانية", "رجب", "شعبان",
+    "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
 ]
 
 struct HijriEntry: TimelineEntry {
@@ -300,13 +326,14 @@ struct HijriProvider: TimelineProvider {
         let hijriCal = Calendar(identifier: .islamicCivil)
         let comps = hijriCal.dateComponents([.year, .month, .day], from: now)
         let monthIndex = max(0, min((comps.month ?? 1) - 1, 11))
+        let monthNames = loadWidgetLanguage() == "ar" ? hijriMonthNamesAr : hijriMonthNamesEn
         let gregCal = Calendar.current
         let gregComps = gregCal.dateComponents([.year, .month, .day], from: now)
         let gregLabel = "\(gregComps.day ?? 1)/\(gregComps.month ?? 1)/\(gregComps.year ?? 2025)"
         return HijriEntry(
             date: now,
             hijriDay: comps.day ?? 1,
-            hijriMonth: hijriMonthNames[monthIndex],
+            hijriMonth: monthNames[monthIndex],
             hijriYear: comps.year ?? 1446,
             gregorianLabel: gregLabel
         )
@@ -318,6 +345,7 @@ struct HijriWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
 
     private var c: WidgetColors { loadWidgetColors() }
+    private var isArabic: Bool { loadWidgetLanguage() == "ar" }
 
     var body: some View {
         Group {
@@ -333,10 +361,10 @@ struct HijriWidgetEntryView: View {
     @ViewBuilder var smallBody: some View {
         VStack(spacing: 2) {
             Text("\(entry.hijriDay)")
-                .font(.system(size: 36, weight: .bold))
+                .font(.custom("Cairo-Bold", size: 36))
                 .foregroundColor(c.text)
             Text(entry.hijriMonth)
-                .font(.caption2)
+                .font(.custom("Cairo-Regular", size: 11))
                 .foregroundColor(c.textMuted)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
@@ -346,19 +374,19 @@ struct HijriWidgetEntryView: View {
 
     @ViewBuilder var mediumBody: some View {
         VStack(alignment: .center, spacing: 3) {
-            Text("Hijri Date")
-                .font(.caption2)
+            Text(isArabic ? "التاريخ الهجري" : "Hijri Date")
+                .font(.custom("Cairo-Regular", size: 11))
                 .foregroundColor(c.textMuted)
             Text("\(entry.hijriDay) \(entry.hijriMonth)")
-                .font(.headline)
+                .font(.custom("Cairo-Bold", size: 17))
                 .foregroundColor(c.text)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.7)
-            Text("\(entry.hijriYear) AH")
-                .font(.subheadline)
+            Text("\(entry.hijriYear) \(isArabic ? "هـ" : "AH")")
+                .font(.custom("Cairo-Regular", size: 15))
                 .foregroundColor(c.textMuted)
             Text(entry.gregorianLabel)
-                .font(.caption2)
+                .font(.custom("Cairo-Regular", size: 11))
                 .foregroundColor(c.textMuted.opacity(0.7))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

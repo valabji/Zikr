@@ -32,11 +32,11 @@ export const renderHijriWidget = ({ theme = DEFAULT_THEME, widgetInfo, lang = 'a
       >
         <TextWidget
           text={`${iDay}`}
-          style={{ fontSize: 28, fontWeight: 'bold', color: theme.text, textAlign: 'center' }}
+          style={{ fontSize: 28, fontFamily: 'Cairo_700Bold', color: theme.text, textAlign: 'center' }}
         />
         <TextWidget
           text={iMonthName}
-          style={{ fontSize: 10, color: theme.textSecondary, textAlign: 'center' }}
+          style={{ fontSize: 10, fontFamily: 'Cairo_400Regular', color: theme.textSecondary, textAlign: 'center' }}
         />
       </FlexWidget>
     );
@@ -56,13 +56,13 @@ export const renderHijriWidget = ({ theme = DEFAULT_THEME, widgetInfo, lang = 'a
       }}
       clickAction="OPEN_APP"
     >
-      <TextWidget text={hijriLabel} style={{ fontSize: 11, color: theme.textSecondary }} />
+      <TextWidget text={hijriLabel} style={{ fontSize: 11, fontFamily: 'Cairo_400Regular', color: theme.textSecondary }} />
       <TextWidget
         text={`${iDay} ${iMonthName}`}
-        style={{ fontSize: 18, fontWeight: 'bold', color: theme.text, textAlign: 'center' }}
+        style={{ fontSize: 18, fontFamily: 'Cairo_700Bold', color: theme.text, textAlign: 'center' }}
       />
-      <TextWidget text={`${iYear} ${ahLabel}`} style={{ fontSize: 13, color: theme.textSecondary }} />
-      <TextWidget text={gregorianLabel()} style={{ fontSize: 11, color: theme.textSecondary, marginTop: 4 }} />
+      <TextWidget text={`${iYear} ${ahLabel}`} style={{ fontSize: 13, fontFamily: 'Cairo_400Regular', color: theme.textSecondary }} />
+      <TextWidget text={gregorianLabel()} style={{ fontSize: 11, fontFamily: 'Cairo_400Regular', color: theme.textSecondary, marginTop: 4 }} />
     </FlexWidget>
   );
 };

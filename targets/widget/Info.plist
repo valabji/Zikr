@@ -7,5 +7,10 @@
       <key>NSExtensionPointIdentifier</key>
       <string>com.apple.widgetkit-extension</string>
     </dict>
+    <key>UIAppFonts</key>
+    <array>
+      <string>Cairo_400Regular.ttf</string>
+      <string>Cairo_700Bold.ttf</string>
+    </array>
   </dict>
 </plist>

@@ -35,9 +35,12 @@ export const widgetTaskHandler = async (props) => {
         ]);
         props.renderWidget(renderHijriWidget({ theme, widgetInfo, lang }));
       } else {
-        const data = await getWidgetPrayerData();
+        const [data, lang] = await Promise.all([
+          getWidgetPrayerData(),
+          AsyncStorage.getItem('@language').then((v) => v || 'en'),
+        ]);
         if (data) {
-          props.renderWidget(renderPrayerWidget({ ...data, widgetInfo }));
+          props.renderWidget(renderPrayerWidget({ ...data, widgetInfo, lang }));
         } else {
           const theme = await getWidgetThemeColors();
           props.renderWidget(renderPlaceholder(theme));

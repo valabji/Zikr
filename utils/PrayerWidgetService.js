@@ -7,6 +7,7 @@ import { themes } from '../constants/themes';
 export const WIDGET_APP_GROUP = 'group.com.valabji.zikr.widget';
 export const WIDGET_DATA_KEY = 'prayerWidgetData';
 export const WIDGET_THEME_KEY = 'widgetThemeData';
+export const WIDGET_LANGUAGE_KEY = 'widgetLanguage';
 export const ANDROID_WIDGET_NAME = 'PrayerTimes';
 export const ANDROID_HIJRI_WIDGET_NAME = 'HijriCalendar';
 
@@ -55,29 +56,30 @@ export const getWidgetPrayerData = async () => {
   return { ...schedule, theme };
 };
 
-const syncIOSWidget = async (data) => {
+const syncIOSWidget = async (data, lang) => {
   const SharedGroupPreferences = require('react-native-shared-group-preferences').default;
   await SharedGroupPreferences.setItem(WIDGET_DATA_KEY, data, WIDGET_APP_GROUP);
   if (data.theme) {
     await SharedGroupPreferences.setItem(WIDGET_THEME_KEY, data.theme, WIDGET_APP_GROUP);
   }
+  await SharedGroupPreferences.setItem(WIDGET_LANGUAGE_KEY, lang, WIDGET_APP_GROUP);
 };
 
-const syncAndroidWidget = async (data, theme) => {
+const syncAndroidWidget = async (data, theme, lang) => {
   const { requestWidgetUpdate } = require('react-native-android-widget');
   const { renderPrayerWidget } = require('../widgets/PrayerWidget');
   const { renderHijriWidget } = require('../widgets/HijriWidget');
   const updates = [
     requestWidgetUpdate({
       widgetName: ANDROID_HIJRI_WIDGET_NAME,
-      renderWidget: () => renderHijriWidget({ theme }),
+      renderWidget: () => renderHijriWidget({ theme, lang }),
     }),
   ];
   if (data) {
     updates.push(
       requestWidgetUpdate({
         widgetName: ANDROID_WIDGET_NAME,
-        renderWidget: () => renderPrayerWidget(data),
+        renderWidget: () => renderPrayerWidget({ ...data, lang }),
       })
     );
   }
@@ -89,13 +91,14 @@ const syncAndroidWidget = async (data, theme) => {
 // snapshot written to App Group shared storage for the WidgetKit extension to read.
 export const syncWidgetData = async () => {
   try {
+    const lang = (await AsyncStorage.getItem('@language')) || 'en';
     if (Platform.OS === 'ios') {
       const data = await getWidgetPrayerData();
-      if (data) await syncIOSWidget(data);
+      if (data) await syncIOSWidget(data, lang);
     } else if (Platform.OS === 'android') {
       const data = await getWidgetPrayerData();
       const theme = data?.theme ?? (await getWidgetThemeColors());
-      await syncAndroidWidget(data, theme);
+      await syncAndroidWidget(data, theme, lang);
     }
   } catch (error) {
     console.error('Error syncing widget data:', error);
