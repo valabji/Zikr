@@ -69,6 +69,8 @@ class MediaSessionModule : Module() {
         stopService()
         MediaSessionHolder.session?.release()
         MediaSessionHolder.session = null
+        MediaSessionHolder.commandEmitter = null
+        MediaSessionHolder.seekEmitter = null
       }
     }
   }
@@ -76,6 +78,10 @@ class MediaSessionModule : Module() {
   private fun ensureSession() {
     if (MediaSessionHolder.session != null) return
     val session = MediaSessionCompat(context, "ZikrMediaSession")
+    session.setFlags(
+      MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+    )
     session.setCallback(object : MediaSessionCompat.Callback() {
       override fun onPlay() { MediaSessionHolder.emit("play") }
       override fun onPause() { MediaSessionHolder.emit("pause") }

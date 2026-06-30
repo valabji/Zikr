@@ -14,15 +14,13 @@ struct MediaMetadata: Record {
 }
 
 public class MediaSessionModule: Module {
-  private var commandsConfigured = false
-
   public func definition() -> ModuleDefinition {
     Name("ExpoMediaSession")
 
     Events("onCommand")
 
     AsyncFunction("updateMetadata") { (meta: MediaMetadata) in
-      self.configureCommandsIfNeeded()
+      self.configureCommands()
       self.applyMetadata(meta)
     }.runOnQueue(.main)
 
@@ -53,32 +51,43 @@ public class MediaSessionModule: Module {
     center.previousTrackCommand.isEnabled = meta.canPrevious
   }
 
-  private func configureCommandsIfNeeded() {
-    if commandsConfigured { return }
-    commandsConfigured = true
+  private func configureCommands() {
     let center = MPRemoteCommandCenter.shared()
 
     center.playCommand.isEnabled = true
+    center.playCommand.removeTarget(nil)
     center.playCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "play"]); return .success
     }
     center.pauseCommand.isEnabled = true
+    center.pauseCommand.removeTarget(nil)
     center.pauseCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "pause"]); return .success
     }
     center.togglePlayPauseCommand.isEnabled = true
+    center.togglePlayPauseCommand.removeTarget(nil)
     center.togglePlayPauseCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "togglePlayPause"]); return .success
     }
+    center.nextTrackCommand.removeTarget(nil)
     center.nextTrackCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "next"]); return .success
     }
+    center.previousTrackCommand.removeTarget(nil)
     center.previousTrackCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "previous"]); return .success
     }
     center.stopCommand.isEnabled = true
+    center.stopCommand.removeTarget(nil)
     center.stopCommand.addTarget { [weak self] _ in
       self?.sendEvent("onCommand", ["command": "stop"]); return .success
+    }
+    center.changePlaybackPositionCommand.isEnabled = true
+    center.changePlaybackPositionCommand.removeTarget(nil)
+    center.changePlaybackPositionCommand.addTarget { [weak self] event in
+      guard let e = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+      self?.sendEvent("onCommand", ["command": "seek", "positionMs": e.positionTime * 1000])
+      return .success
     }
   }
 }

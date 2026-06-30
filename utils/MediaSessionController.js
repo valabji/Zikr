@@ -108,9 +108,11 @@ function recompute() {
   else clear();
 }
 
-function handleCommand(command) {
+function handleCommand(command, positionMs) {
   if (activeSource === 'radio') {
     if (command === 'stop') RadioService.stop();
+    else if (command === 'pause') RadioService.toggle();
+    else if (command === 'play') RadioService.toggle();
     else RadioService.toggle();
     return;
   }
@@ -118,6 +120,9 @@ function handleCommand(command) {
     case 'next': QuranAudio.next(); break;
     case 'previous': QuranAudio.previous(); break;
     case 'stop': QuranAudio.stop(); break;
+    case 'pause': QuranAudio.pause(); break;
+    case 'play': QuranAudio.play(); break;
+    case 'seek': if (positionMs != null) QuranAudio.seekToMs(positionMs); break;
     default: QuranAudio.toggle();
   }
 }
@@ -128,7 +133,7 @@ function initialize() {
   QuranAudio.subscribe(() => recompute());
   RadioService.subscribe(() => recompute());
   if (Platform.OS !== 'web') {
-    MediaSession.addCommandListener(({ command }) => handleCommand(command));
+    MediaSession.addCommandListener(({ command, positionMs }) => handleCommand(command, positionMs));
   }
 }
 

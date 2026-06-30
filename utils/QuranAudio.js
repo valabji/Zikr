@@ -429,6 +429,44 @@ class QuranAudioService {
     await this._playAyahFile(prev.surah, prev.ayah);
   }
 
+  async play() {
+    if (!this.sound) {
+      if (this.activeAyah) await this.playAyah(this.activeAyah.surah, this.activeAyah.ayah);
+      return;
+    }
+    try {
+      const status = await this.sound.getStatusAsync();
+      if (!status.isLoaded || status.isPlaying) return;
+      await this.sound.playAsync();
+      this.isPlaying = true;
+      this._emit();
+    } catch (e) {
+      console.warn('QuranAudio: play failed', e);
+    }
+  }
+
+  async pause() {
+    if (!this.sound) return;
+    try {
+      const status = await this.sound.getStatusAsync();
+      if (!status.isLoaded || !status.isPlaying) return;
+      await this.sound.pauseAsync();
+      this.isPlaying = false;
+      this._emit();
+    } catch (e) {
+      console.warn('QuranAudio: pause failed', e);
+    }
+  }
+
+  async seekToMs(ms) {
+    if (!this.sound) return;
+    try {
+      await this.sound.setPositionAsync(ms);
+    } catch (e) {
+      console.warn('QuranAudio: seekToMs failed', e);
+    }
+  }
+
   async toggle() {
     if (!this.sound) {
       if (this.activeAyah) {
