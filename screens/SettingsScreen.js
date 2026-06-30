@@ -15,6 +15,7 @@ import Azkar from '../constants/Azkar';
 import { THEME_VARIANT_KEYS } from '../constants/themes';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 import { useTestedMode, setTestedMode } from '../utils/TestedMode';
+import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS } from 'react-native-reanimated';
 
 export default function SettingsScreen({ navigation }) {
@@ -47,6 +48,8 @@ export default function SettingsScreen({ navigation }) {
   const [vibrationIntensity, setVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
   const [vibrationSupported, setVibrationSupported] = useState(false);
   const testedMode = useTestedMode();
+  const [menuConfig, setMenuConfig] = useState(DEFAULT_MENU_CONFIG);
+  const [showDate, setShowDate] = useState(true);
 
   // Initial values for change detection
   const [initialLang, setInitialLang] = useState('ar');
@@ -678,6 +681,13 @@ export default function SettingsScreen({ navigation }) {
         } else {
           setIsFirstTime(false);
         }
+
+        const storedMenuConfig = await AsyncStorage.getItem('@menuConfig');
+        let parsedMenuConfig = null;
+        try { parsedMenuConfig = storedMenuConfig ? JSON.parse(storedMenuConfig) : null; } catch {}
+        setMenuConfig(Array.isArray(parsedMenuConfig) ? parsedMenuConfig : DEFAULT_MENU_CONFIG);
+        const storedShowDate = await AsyncStorage.getItem('@menuShowDate');
+        setShowDate(storedShowDate !== 'false');
       } catch (error) {
         console.warn('Failed to load settings:', error);
       }
@@ -1053,6 +1063,27 @@ export default function SettingsScreen({ navigation }) {
         setLastSavedVibrationIntensity(intensity);
       }, 100);
     }
+  };
+
+  const handleMenuItemToggle = async (idx) => {
+    const updated = menuConfig.map((item, i) => i === idx ? { ...item, visible: !item.visible } : item);
+    setMenuConfig(updated);
+    await AsyncStorage.setItem('@menuConfig', JSON.stringify(updated));
+  };
+
+  const handleMenuItemMove = async (idx, direction) => {
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= menuConfig.length) return;
+    const updated = [...menuConfig];
+    [updated[idx], updated[newIdx]] = [updated[newIdx], updated[idx]];
+    setMenuConfig(updated);
+    await AsyncStorage.setItem('@menuConfig', JSON.stringify(updated));
+  };
+
+  const handleDateToggle = async () => {
+    const newVal = !showDate;
+    setShowDate(newVal);
+    await AsyncStorage.setItem('@menuShowDate', newVal ? 'true' : 'false');
   };
 
   // Check for unsaved changes
@@ -1999,6 +2030,51 @@ export default function SettingsScreen({ navigation }) {
                 {Azkar && Azkar.length > 0 ? Azkar[0].zekr : 'الحمد لله وحده، والصلاة والسلام على من لا نبي بعده'}
               </Text>
             </View>
+          </View>
+
+          {/* Menu Customization */}
+          <View style={styles.setting}>
+            <Text style={styles.settingTitle}>{t('settings.menu')}</Text>
+            <View style={[styles.autoSaveContainer, { marginBottom: 12 }]}>
+              <Text style={styles.autoSaveText}>{t('settings.menuShowDate')}</Text>
+              <TouchableOpacity
+                style={[styles.toggleButton, showDate ? styles.toggleButtonActive : styles.toggleButtonInactive]}
+                onPress={handleDateToggle}
+              >
+                <View style={[styles.toggleCircle, showDate ? styles.toggleCircleActive : styles.toggleCircleInactive]} />
+              </TouchableOpacity>
+            </View>
+            {menuConfig.map((item, idx) => {
+              const def = ITEM_DEFS[item.id];
+              if (!def) return null;
+              return (
+                <View key={item.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, opacity: item.visible ? 1 : 0.45 }}>
+                  <View style={{ flexDirection: 'column', ...getDirectionalMixedSpacing({ marginRight: 6 }) }}>
+                    <TouchableOpacity
+                      onPress={() => handleMenuItemMove(idx, -1)}
+                      disabled={idx === 0}
+                      style={{ padding: 4, opacity: idx === 0 ? 0.3 : 1 }}
+                    >
+                      <Feather name="chevron-up" size={16} color={colors.BYellow} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleMenuItemMove(idx, 1)}
+                      disabled={idx === menuConfig.length - 1}
+                      style={{ padding: 4, opacity: idx === menuConfig.length - 1 ? 0.3 : 1 }}
+                    >
+                      <Feather name="chevron-down" size={16} color={colors.BYellow} />
+                    </TouchableOpacity>
+                  </View>
+                  <Feather name={def.icon} size={16} color={colors.BYellow} style={{ ...getDirectionalMixedSpacing({ marginRight: 8 }) }} />
+                  <Text style={[textStyles.body, { color: colors.BYellow, flex: 1 }]}>
+                    {t(def.labelKey)}
+                  </Text>
+                  <TouchableOpacity onPress={() => handleMenuItemToggle(idx)} style={{ padding: 4 }}>
+                    <Feather name={item.visible ? 'eye' : 'eye-off'} size={20} color={colors.BYellow} />
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
           </View>
 
           {/* Tested Mode Setting */}
