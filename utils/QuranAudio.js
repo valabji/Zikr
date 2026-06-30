@@ -344,6 +344,7 @@ class QuranAudioService {
     }
     try {
       await this.sound.setPositionAsync(t.from);
+      await this.sound.setRateAsync(this.playbackRate, true);
       await this.sound.playAsync();
       this.activeAyah = { surah: m.surah, ayah: targetAyah };
       this.isPlaying = true;
@@ -437,6 +438,7 @@ class QuranAudioService {
     try {
       const status = await this.sound.getStatusAsync();
       if (!status.isLoaded || status.isPlaying) return;
+      await this.sound.setRateAsync(this.playbackRate, true);
       await this.sound.playAsync();
       this.isPlaying = true;
       this._emit();
@@ -481,6 +483,7 @@ class QuranAudioService {
         await this.sound.pauseAsync();
         this.isPlaying = false;
       } else {
+        await this.sound.setRateAsync(this.playbackRate, true);
         await this.sound.playAsync();
         this.isPlaying = true;
       }
