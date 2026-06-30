@@ -1,3 +1,5 @@
+jest.mock('../../locales/i18n', () => ({ getCurrentLanguage: () => 'en' }));
+
 import {
   dateKey,
   toHijri,

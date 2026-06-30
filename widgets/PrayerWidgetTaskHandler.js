@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getWidgetPrayerData, getWidgetThemeColors } from '../utils/PrayerWidgetService';
 import { renderPrayerWidget } from './PrayerWidget';
 import { renderHijriWidget } from './HijriWidget';
@@ -28,8 +29,11 @@ export const widgetTaskHandler = async (props) => {
     case 'WIDGET_RESIZED': {
       const widgetInfo = props.widgetInfo;
       if (props.widgetInfo.widgetName === 'HijriCalendar') {
-        const theme = await getWidgetThemeColors();
-        props.renderWidget(renderHijriWidget({ theme, widgetInfo }));
+        const [theme, lang] = await Promise.all([
+          getWidgetThemeColors(),
+          AsyncStorage.getItem('@language').then((v) => v || 'ar'),
+        ]);
+        props.renderWidget(renderHijriWidget({ theme, widgetInfo, lang }));
       } else {
         const data = await getWidgetPrayerData();
         if (data) {

@@ -9,8 +9,10 @@ const gregorianLabel = () => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
-export const renderHijriWidget = ({ theme = DEFAULT_THEME, widgetInfo } = {}) => {
-  const { iDay, iMonthName, iYear } = toHijri(new Date());
+export const renderHijriWidget = ({ theme = DEFAULT_THEME, widgetInfo, lang = 'ar' } = {}) => {
+  const { iDay, iMonthName, iYear } = toHijri(new Date(), lang);
+  const hijriLabel = lang === 'ar' ? 'التاريخ الهجري' : 'Hijri Date';
+  const ahLabel = lang === 'ar' ? 'هـ' : 'AH';
   const isSmall = widgetInfo && widgetInfo.width < 110;
 
   if (isSmall) {
@@ -54,12 +56,12 @@ export const renderHijriWidget = ({ theme = DEFAULT_THEME, widgetInfo } = {}) =>
       }}
       clickAction="OPEN_APP"
     >
-      <TextWidget text="Hijri Date" style={{ fontSize: 11, color: theme.textSecondary }} />
+      <TextWidget text={hijriLabel} style={{ fontSize: 11, color: theme.textSecondary }} />
       <TextWidget
         text={`${iDay} ${iMonthName}`}
         style={{ fontSize: 18, fontWeight: 'bold', color: theme.text, textAlign: 'center' }}
       />
-      <TextWidget text={`${iYear} AH`} style={{ fontSize: 13, color: theme.textSecondary }} />
+      <TextWidget text={`${iYear} ${ahLabel}`} style={{ fontSize: 13, color: theme.textSecondary }} />
       <TextWidget text={gregorianLabel()} style={{ fontSize: 11, color: theme.textSecondary, marginTop: 4 }} />
     </FlexWidget>
   );

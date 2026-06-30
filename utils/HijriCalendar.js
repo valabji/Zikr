@@ -1,5 +1,16 @@
 import moment from 'moment-hijri';
 import { ISLAMIC_CALENDAR_CONSTANTS } from '../constants/IslamicCalendarConstants';
+import { getCurrentLanguage } from '../locales/i18n';
+
+const AR_HIJRI_MONTHS = [
+  'محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني',
+  'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
+  'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة',
+];
+
+function hijriMonthName(iMonthIndex, lang) {
+  return lang === 'ar' ? AR_HIJRI_MONTHS[iMonthIndex] : moment().locale('en').iMonth(iMonthIndex).format('iMMMM');
+}
 
 export function dateKey(date) {
   const d = date instanceof Date ? date : new Date(date);
@@ -8,21 +19,22 @@ export function dateKey(date) {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-export function toHijri(date = new Date()) {
+export function toHijri(date = new Date(), lang = getCurrentLanguage()) {
   const m = moment(date).locale('en');
   return {
     iYear: m.iYear(),
     iMonth: m.iMonth(),
     iDay: m.iDate(),
-    iMonthName: m.format('iMMMM'),
+    iMonthName: hijriMonthName(m.iMonth(), lang),
   };
 }
 
-export function formatHijriDate(date = new Date()) {
-  return moment(date).locale('en').format('iD iMMMM iYYYY');
+export function formatHijriDate(date = new Date(), lang = getCurrentLanguage()) {
+  const m = moment(date).locale('en');
+  return `${m.iDate()} ${hijriMonthName(m.iMonth(), lang)} ${m.iYear()}`;
 }
 
-export function getHijriMonthGrid(iYear, iMonth) {
+export function getHijriMonthGrid(iYear, iMonth, lang = getCurrentLanguage()) {
   const monthStart = moment().locale('en').iYear(iYear).iMonth(iMonth).iDate(1).startOf('day');
   const daysInMonth = monthStart.iDaysInMonth();
   const leading = monthStart.day();
@@ -49,7 +61,7 @@ export function getHijriMonthGrid(iYear, iMonth) {
   return {
     iYear,
     iMonth,
-    monthName: monthStart.format('iMMMM'),
+    monthName: hijriMonthName(iMonth, lang),
     daysInMonth,
     weeks,
   };
