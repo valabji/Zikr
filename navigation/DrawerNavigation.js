@@ -1,5 +1,5 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { I18nManager, ScrollView, Platform } from "react-native";
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
@@ -22,6 +22,7 @@ import { MuslimIconSvg } from '../components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 import { LogoSvg } from '../components/LogoSvg';
 import { PRAYER_CONSTANTS } from "../constants/PrayerConstants";
+import { formatHijriDate } from '../utils/HijriCalendar';
 
 const Drawer = createDrawerNavigator();
 
@@ -58,6 +59,7 @@ export function DNav() {
   const colors = useColors();
   const [hasLocation, setHasLocation] = useState(false);
   const initial = useInitialDrawerRoute();
+  const hijriDate = useMemo(() => formatHijriDate(), []);
 
   useEffect(() => {
     AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION).then(loc => {
@@ -96,6 +98,9 @@ export function DNav() {
                   height={148}
                 />
               </View>
+              <Text style={{ color: colors.BYellow, fontSize: 11, textAlign: 'center', opacity: 0.7, marginTop: 4 }}>
+                {hijriDate}
+              </Text>
               <TouchableOpacity
                 testID="quran-screen"
                 onPress={() => {
