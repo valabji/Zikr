@@ -160,8 +160,8 @@ export default {
               name: "PrayerTimes",
               label: "Zikr Prayer Times",
               description: "Shows the current and next prayer time.",
-              minWidth: "180dp",
-              minHeight: "100dp",
+              minWidth: "40dp",
+              minHeight: "40dp",
               resizeMode: "horizontal|vertical",
               updatePeriodMillis: 1800000
             },
@@ -169,8 +169,8 @@ export default {
               name: "HijriCalendar",
               label: "Zikr Hijri Calendar",
               description: "Shows today's Hijri (Islamic) date.",
-              minWidth: "120dp",
-              minHeight: "100dp",
+              minWidth: "40dp",
+              minHeight: "40dp",
               resizeMode: "horizontal|vertical",
               updatePeriodMillis: 1800000
             }

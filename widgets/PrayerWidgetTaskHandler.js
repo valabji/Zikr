@@ -1,21 +1,23 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
-import { getWidgetPrayerData } from '../utils/PrayerWidgetService';
+import { getWidgetPrayerData, getWidgetThemeColors } from '../utils/PrayerWidgetService';
 import { renderPrayerWidget } from './PrayerWidget';
 import { renderHijriWidget } from './HijriWidget';
 
-const renderPlaceholder = () => (
+const DEFAULT_THEME = { bg: '#003C34', text: '#FFE29D', textSecondary: '#D1955E' };
+
+const renderPlaceholder = (theme = DEFAULT_THEME) => (
   <FlexWidget
     style={{
       height: 'match_parent',
       width: 'match_parent',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#1B5E20',
+      backgroundColor: theme.bg,
       borderRadius: 16,
     }}
   >
-    <TextWidget text="Set prayer location in Zikr" style={{ fontSize: 12, color: '#FFFFFF' }} />
+    <TextWidget text="Set prayer location in Zikr" style={{ fontSize: 12, color: theme.text }} />
   </FlexWidget>
 );
 
@@ -24,11 +26,18 @@ export const widgetTaskHandler = async (props) => {
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
-      if (props.widgetName === 'HijriCalendar') {
-        props.renderWidget(renderHijriWidget());
+      const widgetInfo = props.widgetInfo;
+      if (props.widgetInfo.widgetName === 'HijriCalendar') {
+        const theme = await getWidgetThemeColors();
+        props.renderWidget(renderHijriWidget({ theme, widgetInfo }));
       } else {
         const data = await getWidgetPrayerData();
-        props.renderWidget(data ? renderPrayerWidget(data) : renderPlaceholder());
+        if (data) {
+          props.renderWidget(renderPrayerWidget({ ...data, widgetInfo }));
+        } else {
+          const theme = await getWidgetThemeColors();
+          props.renderWidget(renderPlaceholder(theme));
+        }
       }
       break;
     }

@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from './Colors';
 import { themes } from './themes';
 import { getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '../utils/ThemeVariant';
+import { syncWidgetData } from '../utils/PrayerWidgetService';
 
 const VARIANT_AUTO_KEY = '@theme_variant_auto';
 const VARIANT_LOCKED_KEY = '@theme_variant_locked';
@@ -78,9 +79,10 @@ export const ThemeProvider = ({ children }) => {
   }, []);
 
   const setTheme = async (theme) => {
+    setCurrentTheme(theme);
     try {
       await AsyncStorage.setItem('@theme', theme);
-      setCurrentTheme(theme);
+      syncWidgetData();
     } catch (error) {
       console.error('Error saving theme:', error);
     }

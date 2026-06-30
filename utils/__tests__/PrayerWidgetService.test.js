@@ -13,6 +13,7 @@ import {
   syncWidgetData,
   WIDGET_APP_GROUP,
   WIDGET_DATA_KEY,
+  WIDGET_THEME_KEY,
 } from '../PrayerWidgetService';
 import { PRAYER_CONSTANTS } from '../../constants/PrayerConstants';
 
@@ -81,7 +82,8 @@ describe('PrayerWidgetService', () => {
       AsyncStorage.getItem
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
         .mockResolvedValueOnce('Egyptian')
-        .mockResolvedValueOnce('Hanafi');
+        .mockResolvedValueOnce('Hanafi')
+        .mockResolvedValueOnce('originalGreen');
       PrayerUtils.calculatePrayerTimes
         .mockReturnValueOnce(FULL_DAY)
         .mockReturnValueOnce({ fajr: makeTime(4) });
@@ -100,11 +102,13 @@ describe('PrayerWidgetService', () => {
         'Hanafi'
       );
       expect(result.prayers).toHaveLength(6);
+      expect(result.theme).toEqual(expect.objectContaining({ bg: expect.any(String) }));
     });
 
     it('falls back to default method/madhab when not stored', async () => {
       AsyncStorage.getItem
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
       PrayerUtils.calculatePrayerTimes.mockReturnValue(FULL_DAY);
@@ -135,7 +139,8 @@ describe('PrayerWidgetService', () => {
       AsyncStorage.getItem
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
         .mockResolvedValueOnce('MuslimWorldLeague')
-        .mockResolvedValueOnce('Shafi');
+        .mockResolvedValueOnce('Shafi')
+        .mockResolvedValueOnce('originalGreen');
       PrayerUtils.calculatePrayerTimes.mockReturnValue(FULL_DAY);
 
       await syncWidgetData();
@@ -143,6 +148,11 @@ describe('PrayerWidgetService', () => {
       expect(SharedGroupPreferences.setItem).toHaveBeenCalledWith(
         WIDGET_DATA_KEY,
         expect.objectContaining({ city: 'New York' }),
+        WIDGET_APP_GROUP
+      );
+      expect(SharedGroupPreferences.setItem).toHaveBeenCalledWith(
+        WIDGET_THEME_KEY,
+        expect.objectContaining({ bg: expect.any(String) }),
         WIDGET_APP_GROUP
       );
       expect(requestWidgetUpdate).not.toHaveBeenCalled();
@@ -153,7 +163,8 @@ describe('PrayerWidgetService', () => {
       AsyncStorage.getItem
         .mockResolvedValueOnce(JSON.stringify(LOCATION))
         .mockResolvedValueOnce('MuslimWorldLeague')
-        .mockResolvedValueOnce('Shafi');
+        .mockResolvedValueOnce('Shafi')
+        .mockResolvedValueOnce('originalGreen');
       PrayerUtils.calculatePrayerTimes.mockReturnValue(FULL_DAY);
 
       await syncWidgetData();
