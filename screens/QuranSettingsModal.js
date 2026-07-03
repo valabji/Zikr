@@ -17,6 +17,7 @@ import {
   SettingsField,
   SettingsRow,
   SettingsSegmented,
+  SettingsSelect,
   SettingsToggle,
   SettingsSlider,
   SettingsButton,
@@ -215,17 +216,18 @@ export default function QuranSettingsModal({ visible, onClose }) {
           />
         </SettingsSection>
 
-        <SettingsSection title={t('quran.ayahInteraction')} description={t('quran.ayahInteractionDesc')}>
-          <SettingsField>
-            <SettingsSegmented
-              value={settings.ayahInteractionMode || 'menu'}
-              options={[
-                { id: AYAH_INTERACTION_MODES.MENU, label: t('quran.ayahInteractionMenu') },
-                { id: AYAH_INTERACTION_MODES.DIRECT, label: t('quran.ayahInteractionDirect') },
-              ]}
-              onChange={(id) => update({ ayahInteractionMode: id })}
-            />
-          </SettingsField>
+        <SettingsSection>
+          <SettingsSelect
+            value={settings.ayahInteractionMode || 'menu'}
+            options={[
+              { id: AYAH_INTERACTION_MODES.MENU, label: t('quran.ayahInteractionMenu') },
+              { id: AYAH_INTERACTION_MODES.DIRECT, label: t('quran.ayahInteractionDirect') },
+            ]}
+            onChange={(id) => update({ ayahInteractionMode: id })}
+            label={t('quran.ayahInteraction')}
+            description={t('quran.ayahInteractionDesc')}
+            title={t('quran.ayahInteraction')}
+          />
         </SettingsSection>
 
         <SettingsSection title={t('quran.reciter')}>
@@ -236,17 +238,19 @@ export default function QuranSettingsModal({ visible, onClose }) {
               onChange={(id) => update({ reciterId: id })}
             />
           </SettingsField>
-          <SettingsField label={t('quran.audioScope')} description={t('quran.audioScopeDesc')}>
-            <SettingsSegmented
-              value={settings.audioPlaybackScope || 'ayah'}
-              options={[
-                { id: AUDIO_PLAYBACK_SCOPES.AYAH, label: t('quran.audioScopeAyah') },
-                { id: AUDIO_PLAYBACK_SCOPES.PAGE, label: t('quran.audioScopePage') },
-                { id: AUDIO_PLAYBACK_SCOPES.SURAH, label: t('quran.audioScopeSurah') },
-              ]}
-              onChange={(id) => update({ audioPlaybackScope: id })}
-            />
-          </SettingsField>
+          <SettingsSelect
+            value={settings.audioPlaybackScope || 'ayah'}
+            options={[
+              { id: AUDIO_PLAYBACK_SCOPES.AYAH, label: t('quran.audioScopeAyah') },
+              { id: AUDIO_PLAYBACK_SCOPES.PAGE, label: t('quran.audioScopePage') },
+              { id: AUDIO_PLAYBACK_SCOPES.SURAH, label: t('quran.audioScopeSurah') },
+              { id: AUDIO_PLAYBACK_SCOPES.MUSHAF, label: t('quran.audioScopeMushaf') },
+            ]}
+            onChange={(id) => update({ audioPlaybackScope: id })}
+            label={t('quran.audioScope')}
+            description={t('quran.audioScopeDesc')}
+            title={t('quran.audioScope')}
+          />
           <SettingsField label={t('quran.playbackSpeed')}>
             <SettingsSegmented
               value={settings.playbackRate || 1.0}
