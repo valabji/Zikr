@@ -819,9 +819,9 @@ export default function SettingsScreen({ navigation }) {
               options={THEME_VARIANT_KEYS.map((k) => ({
                 id: k,
                 label: t(`settings.themeVariants.${k}`),
-                icon: (!autoVariant && lockedVariant === k) ? 'lock' : 'unlock',
+                icon: (!autoVariant && lockedVariant === k) ? 'lock' : undefined,
               }))}
-              onChange={(id) => { playClick(); lockVariant(id); }}
+              onChange={(id) => { playClick(); (!autoVariant && lockedVariant === id) ? setAutoVariantEnabled(true) : lockVariant(id); }}
               getTestID={(opt) => `theme-variant-${opt.id}`}
             />
           </SettingsField>

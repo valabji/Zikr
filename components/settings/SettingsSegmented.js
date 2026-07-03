@@ -17,6 +17,7 @@ export default function SettingsSegmented({ value, options, onChange, testID, ge
         padding: 4,
         flexWrap: wrap ? 'wrap' : 'nowrap',
         gap: wrap ? 6 : 0,
+        justifyContent: wrap ? 'space-between' : 'flex-start',
       }]}
     >
       {options.map((opt) => {
