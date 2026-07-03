@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {
-  Modal, View, Text, ScrollView, TouchableOpacity, SafeAreaView, Pressable, ActivityIndicator,
-} from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Platform, Modal, TouchableOpacity, SafeAreaView, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
@@ -10,9 +8,13 @@ import { setQuranSettings } from '../utils/QuranSettings';
 import { arForHafs } from '../utils/mushafLayout';
 import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '../utils/tafsirLoader';
 import TafsirDropdown from '../components/TafsirDropdown';
+import { CONTENT_MAX_WIDTH, webCursor } from '../constants/settingsTokens';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 import translationEn from '../assets/quran/data/translation_en.json';
+
+const isWeb = Platform.OS === 'web';
+const capped = isWeb ? { width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' } : null;
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
@@ -23,10 +25,10 @@ function TabButton({ label, active, onPress, colors }) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
+      style={[{
         flex: 1, paddingVertical: 12, alignItems: 'center',
         borderBottomWidth: 2, borderBottomColor: active ? colors.accent : 'transparent',
-      }}
+      }, webCursor]}
     >
       <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.textSecondary, fontSize: 14 }]}>
         {label}
@@ -43,7 +45,7 @@ function AyahRow({ ayah, tab, tafsirText, tafsirLoading, tafsirDirection, onPres
   return (
     <Pressable
       onPress={() => onPress({ surah: ayah.surah, ayah: ayah.ayah, page: null })}
-      style={{ paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.accent + '22' }}
+      style={[{ paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.accent + '22' }, webCursor]}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
         <View style={{
@@ -144,7 +146,7 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSe
               paddingHorizontal: 12, paddingVertical: 10,
               borderBottomWidth: 1, borderBottomColor: colors.accent + '22',
             }}>
-              <TouchableOpacity onPress={onClose} style={{ padding: 6 }}>
+              <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel={t('common.close')} style={[{ padding: 6 }, webCursor]}>
                 <Feather name="chevron-down" size={26} color={colors.text} />
               </TouchableOpacity>
               <View style={{ flex: 1, alignItems: 'center' }}>
@@ -175,7 +177,7 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSe
               </View>
             )}
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={[{ paddingBottom: 20 }, capped]}>
               {pageData && pageData.ayahs.map((ayah) => {
                 const k = `${ayah.surah}:${ayah.ayah}`;
                 const activeCfg = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);

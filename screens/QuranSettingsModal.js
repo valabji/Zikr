@@ -1,56 +1,30 @@
 import * as React from 'react';
-import { Modal, View, Text, TouchableOpacity, ScrollView, SafeAreaView, Switch, Platform, StatusBar } from 'react-native';
-import Slider from '@react-native-community/slider';
+import { ScrollView, View, Text } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
+import { useRTL } from '../hooks/useRTL';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { DEFAULT_RECITER_ID } from '../constants/QuranReciters';
-import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID, PLAYBACK_RATES, QURAN_CONSTANTS } from '../constants/QuranConstants';
+import { MUSHAF_EDITIONS, DEFAULT_MUSHAF_EDITION, AYAH_INTERACTION_MODES, AUDIO_PLAYBACK_SCOPES, VIEW_MODES, FONT_SCALE_RANGE, DEFAULT_TAFSIR_ID, PLAYBACK_RATES } from '../constants/QuranConstants';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QcfDownloader from '../utils/QcfDownloader';
 import QuranReciterPicker from '../components/QuranReciterPicker';
 import TafsirDropdown from '../components/TafsirDropdown';
-
-const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
-
-function Row({ label, children, colors }) {
-  return (
-    <View style={{
-      paddingVertical: 14,
-      paddingHorizontal: 18,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.accent + '22',
-    }}>
-      <Text style={[textStyles.subtitle, { color: colors.text, marginBottom: 8 }]}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
-function Choice({ active, label, onPress, colors }) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        marginRight: 8,
-        marginTop: 6,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: active ? colors.accent : colors.accent + '44',
-        backgroundColor: active ? colors.accent + '22' : 'transparent',
-      }}
-    >
-      <Text style={[textStyles.base, { color: active ? colors.accent : colors.text, fontSize: 14 }]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-}
+import {
+  SettingsModalShell,
+  SettingsSection,
+  SettingsField,
+  SettingsRow,
+  SettingsSegmented,
+  SettingsToggle,
+  SettingsSlider,
+  SettingsButton,
+} from '../components/settings';
+import { SPACING, RADIUS, withAlpha } from '../constants/settingsTokens';
 
 function HdRow({ version, sizeLabel, labelKey, status, colors }) {
+  const { getDirectionalMixedSpacing } = useRTL();
   const installed = !!(status && status.installed);
   const downloading = !!(status && status.downloading);
   const pct = Math.round(((status && status.progress) || 0) * 100);
@@ -58,54 +32,49 @@ function HdRow({ version, sizeLabel, labelKey, status, colors }) {
   return (
     <View style={{
       borderWidth: 1,
-      borderColor: colors.accent + '33',
-      borderRadius: 8,
-      paddingVertical: 10,
-      paddingHorizontal: 12,
+      borderColor: withAlpha(colors.accent, 'border'),
+      borderRadius: RADIUS.control,
+      paddingVertical: SPACING.md,
+      paddingHorizontal: SPACING.md,
     }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-        <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14, flex: 1 }]}>
+      <View style={[{ flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm }]}>
+        <Text style={[textStyles.subtitle, { color: colors.text, flex: 1 }]}>
           {t(labelKey)}
         </Text>
-        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12 }]}>{sizeLabel}</Text>
+        <Text style={[textStyles.base, { color: colors.textSecondary }]}>{sizeLabel}</Text>
       </View>
       {installed ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={[{ flexDirection: 'row', alignItems: 'center' }]}>
           <Feather name="check-circle" size={16} color={colors.accent} />
-          <Text style={[textStyles.base, { color: colors.accent, marginLeft: 6, fontSize: 13 }]}>
+          <Text style={[textStyles.base, { color: colors.accent }, getDirectionalMixedSpacing({ marginLeft: SPACING.sm })]}>
             {t('quran.highFidelityInstalled')}
           </Text>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity
+          <SettingsButton
+            variant="outline"
+            label={t('quran.remove')}
             onPress={() => QcfDownloader.uninstall(version)}
-            style={{ paddingVertical: 4, paddingHorizontal: 10, borderRadius: 6, borderWidth: 1, borderColor: colors.accent + '44' }}
-          >
-            <Text style={[textStyles.base, { color: colors.text, fontSize: 12 }]}>{t('quran.remove')}</Text>
-          </TouchableOpacity>
+          />
         </View>
       ) : downloading ? (
         <View>
-          <Text style={[textStyles.base, { color: colors.text, fontSize: 13 }]}>{pct}%</Text>
-          <View style={{ height: 5, marginTop: 4, backgroundColor: colors.accent + '22', borderRadius: 3 }}>
-            <View style={{ height: 5, width: `${pct}%`, backgroundColor: colors.accent, borderRadius: 3 }} />
+          <Text style={[textStyles.base, { color: colors.text }]}>{pct}%</Text>
+          <View style={{ height: 5, marginTop: SPACING.xs, backgroundColor: withAlpha(colors.accent, 'activeRow'), borderRadius: RADIUS.pill }}>
+            <View style={{ height: 5, width: `${pct}%`, backgroundColor: colors.accent, borderRadius: RADIUS.pill }} />
           </View>
-          <TouchableOpacity onPress={() => QcfDownloader.cancel(version)} style={{ marginTop: 8, alignSelf: 'flex-start' }}>
-            <Text style={[textStyles.base, { color: colors.accent, fontSize: 13 }]}>{t('common.cancel')}</Text>
-          </TouchableOpacity>
+          <SettingsButton
+            variant="text"
+            label={t('common.cancel')}
+            onPress={() => QcfDownloader.cancel(version)}
+            style={{ marginTop: SPACING.sm }}
+          />
         </View>
       ) : (
-        <TouchableOpacity
+        <SettingsButton
+          variant="primary"
+          label={t('quran.download')}
           onPress={() => QcfDownloader.start(version).catch(() => {})}
-          style={{
-            paddingVertical: 8, paddingHorizontal: 14,
-            borderRadius: 6, backgroundColor: colors.accent,
-            alignSelf: 'flex-start',
-          }}
-        >
-          <Text style={[textStyles.subtitle, { color: colors.primaryDark, fontSize: 13 }]}>
-            {t('quran.download')}
-          </Text>
-        </TouchableOpacity>
+        />
       )}
     </View>
   );
@@ -115,7 +84,6 @@ export default function QuranSettingsModal({ visible, onClose }) {
   const colors = useColors();
   const lang = isRTL() ? 'ar' : 'en';
   const [settings, setLocal] = React.useState(null);
-  const [fontScaleDraft, setFontScaleDraft] = React.useState(null);
   const [qcfStatus, setQcfStatus] = React.useState({
     v1: { installed: false, downloading: false, progress: 0 },
     v2: { installed: false, downloading: false, progress: 0 },
@@ -138,287 +106,164 @@ export default function QuranSettingsModal({ visible, onClose }) {
 
   if (!settings) return null;
 
+  const viewMode = settings.viewMode || 'paged';
+  const editionLabel = lang === 'ar' ? 'هـ' : 'H';
+
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, paddingTop: ANDROID_STATUS_BAR }}>
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.accent + '22',
-        }}>
-          <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
-            <Feather name="x" size={26} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[textStyles.header, { color: colors.text, flex: 1, textAlign: 'center', marginHorizontal: 8 }]} numberOfLines={1}>
-            {t('quran.settingsTitle')}
-          </Text>
-          <View style={{ width: 42 }} />
-        </View>
-
-        <ScrollView>
-          <Row label={t('quran.viewMode')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 8 }]}>
-              {t('quran.viewModeDesc')}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              <Choice
-                colors={colors}
-                label={t('quran.viewModePaged')}
-                active={(settings.viewMode || 'paged') === VIEW_MODES.PAGED}
-                onPress={() => update({ viewMode: VIEW_MODES.PAGED })}
-              />
-              <Choice
-                colors={colors}
-                label={t('quran.viewModeContinuous')}
-                active={(settings.viewMode || 'paged') === VIEW_MODES.CONTINUOUS}
-                onPress={() => update({ viewMode: VIEW_MODES.CONTINUOUS })}
-              />
-            </View>
-            {(settings.viewMode || 'paged') === VIEW_MODES.PAGED ? (
-              <>
-                <View style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 12,
-                  paddingTop: 12,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.accent + '22',
-                }}>
-                  <View style={{ flex: 1, paddingRight: 12 }}>
-                    <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
-                      {t('quran.landscapeTwoPage')}
-                    </Text>
-                    <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
-                      {t('quran.landscapeTwoPageDesc')}
-                    </Text>
-                  </View>
-                  <Switch
-                    value={settings.landscapeTwoPage !== false}
-                    onValueChange={(v) => update({ landscapeTwoPage: v })}
-                    trackColor={{ true: colors.accent, false: colors.accent + '44' }}
-                    thumbColor={(settings.landscapeTwoPage !== false) ? colors.accent : '#f4f3f4'}
-                  />
-                </View>
-                <View style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 12,
-                  paddingTop: 12,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.accent + '22',
-                }}>
-                  <View style={{ flex: 1, paddingRight: 12 }}>
-                    <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
-                      {t('quran.fitPageToHeight')}
-                    </Text>
-                    <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
-                      {t('quran.fitPageToHeightDesc')}
-                    </Text>
-                  </View>
-                  <Switch
-                    value={settings.fitPageToHeight !== false}
-                    onValueChange={(v) => update({ fitPageToHeight: v })}
-                    trackColor={{ true: colors.accent, false: colors.accent + '44' }}
-                    thumbColor={(settings.fitPageToHeight !== false) ? colors.accent : '#f4f3f4'}
-                  />
-                </View>
-              </>
-            ) : null}
-          </Row>
-
-          <Row label={t('quran.mushafEdition')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 8 }]}>
-              {t('quran.mushafEditionDesc')}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {MUSHAF_EDITIONS.map((m) => (
-                <Choice
-                  key={m.id}
-                  colors={colors}
-                  label={`${m.year} ${lang === 'ar' ? 'هـ' : 'H'}`}
-                  active={(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === m.id}
-                  onPress={() => update({ mushafEdition: m.id })}
+    <SettingsModalShell visible={visible} onClose={onClose} title={t('quran.settingsTitle')}>
+      <ScrollView contentContainerStyle={{ padding: SPACING.lg }}>
+        <SettingsSection title={t('quran.viewMode')} description={t('quran.viewModeDesc')}>
+          <SettingsField>
+            <SettingsSegmented
+              value={viewMode}
+              options={[
+                { id: VIEW_MODES.PAGED, label: t('quran.viewModePaged') },
+                { id: VIEW_MODES.CONTINUOUS, label: t('quran.viewModeContinuous') },
+              ]}
+              onChange={(id) => update({ viewMode: id })}
+            />
+          </SettingsField>
+          {viewMode === VIEW_MODES.PAGED ? (
+            <SettingsRow
+              label={t('quran.landscapeTwoPage')}
+              description={t('quran.landscapeTwoPageDesc')}
+              trailing={
+                <SettingsToggle
+                  value={settings.landscapeTwoPage !== false}
+                  onValueChange={(v) => update({ landscapeTwoPage: v })}
                 />
-              ))}
-            </View>
-            {(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v2-1441' ? (
-              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 8 }]}>
-                {t('quran.mushaf1441Note')}
-              </Text>
-            ) : null}
-          </Row>
+              }
+            />
+          ) : null}
+          {viewMode === VIEW_MODES.PAGED ? (
+            <SettingsRow
+              label={t('quran.fitPageToHeight')}
+              description={t('quran.fitPageToHeightDesc')}
+              trailing={
+                <SettingsToggle
+                  value={settings.fitPageToHeight !== false}
+                  onValueChange={(v) => update({ fitPageToHeight: v })}
+                />
+              }
+            />
+          ) : null}
+        </SettingsSection>
 
-          <Row label={t('quran.showTranslation')} colors={colors}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, flex: 1 }]}>
-                {t('quran.showTranslationDesc')}
-              </Text>
-              <Switch
+        <SettingsSection
+          title={t('quran.mushafEdition')}
+          description={t('quran.mushafEditionDesc')}
+          footnote={(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v2-1441' ? t('quran.mushaf1441Note') : undefined}
+        >
+          <SettingsField>
+            <SettingsSegmented
+              value={settings.mushafEdition || DEFAULT_MUSHAF_EDITION}
+              options={MUSHAF_EDITIONS.map((m) => ({ id: m.id, label: `${m.year} ${editionLabel}` }))}
+              onChange={(id) => update({ mushafEdition: id })}
+            />
+          </SettingsField>
+        </SettingsSection>
+
+        <SettingsSection title={t('quran.tafsirSelection')}>
+          <SettingsRow
+            label={t('quran.showTranslation')}
+            description={t('quran.showTranslationDesc')}
+            trailing={
+              <SettingsToggle
                 value={settings.showTranslation}
                 onValueChange={(v) => update({ showTranslation: v })}
-                trackColor={{ true: colors.accent, false: colors.accent + '44' }}
-                thumbColor={settings.showTranslation ? colors.accent : '#f4f3f4'}
               />
-            </View>
-          </Row>
-
-          <Row label={t('quran.wordTooltip')} colors={colors}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, flex: 1 }]}>
-                {t('quran.wordTooltipDesc')}
-              </Text>
-              <Switch
+            }
+          />
+          <SettingsRow
+            label={t('quran.wordTooltip')}
+            description={t('quran.wordTooltipDesc')}
+            trailing={
+              <SettingsToggle
                 value={!!settings.showWBW}
                 onValueChange={(v) => update({ showWBW: v })}
-                trackColor={{ true: colors.accent, false: colors.accent + '44' }}
-                thumbColor={settings.showWBW ? colors.accent : '#f4f3f4'}
               />
-            </View>
-          </Row>
-
-          <Row label={t('quran.tafsirSelection')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 10 }]}>
-              {t('quran.tafsirSelectionDesc')}
-            </Text>
+            }
+          />
+          <SettingsField label={t('quran.tafsirSelection')} description={t('quran.tafsirSelectionDesc')}>
             <TafsirDropdown
               tafsirId={settings.tafsirId || DEFAULT_TAFSIR_ID}
               onChange={(id) => update({ tafsirId: id })}
             />
-          </Row>
+          </SettingsField>
+        </SettingsSection>
 
-          <Row label={t('quran.fontSize')} colors={colors}>
-            {(() => {
-              const persisted = settings.fontScale ?? FONT_SCALE_RANGE.default;
-              const value = fontScaleDraft ?? persisted;
-              return (
-                <View>
-                  <Slider
-                    style={{ width: '100%', height: 36 }}
-                    minimumValue={FONT_SCALE_RANGE.min}
-                    maximumValue={FONT_SCALE_RANGE.max}
-                    step={FONT_SCALE_RANGE.step}
-                    value={value}
-                    onValueChange={setFontScaleDraft}
-                    onSlidingComplete={(v) => {
-                      setFontScaleDraft(null);
-                      update({ fontScale: Number(v.toFixed(2)) });
-                    }}
-                    minimumTrackTintColor={colors.accent}
-                    maximumTrackTintColor={colors.accent + '44'}
-                    thumbTintColor={colors.accent}
-                  />
-                  <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, textAlign: 'center' }]}>
-                    {value.toFixed(2)}×
-                  </Text>
-                </View>
-              );
-            })()}
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginTop: 12,
-              paddingTop: 12,
-              borderTopWidth: 1,
-              borderTopColor: colors.accent + '22',
-            }}>
-              <View style={{ flex: 1, paddingRight: 12 }}>
-                <Text style={[textStyles.subtitle, { color: colors.text, fontSize: 14 }]}>
-                  {t('quran.customLineSize')}
-                </Text>
-                <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }]}>
-                  {t('quran.customLineSizeDesc')}
-                </Text>
-              </View>
-              <Switch
+        <SettingsSection title={t('quran.fontSize')}>
+          <SettingsField>
+            <SettingsSlider
+              value={settings.fontScale ?? FONT_SCALE_RANGE.default}
+              min={FONT_SCALE_RANGE.min}
+              max={FONT_SCALE_RANGE.max}
+              step={FONT_SCALE_RANGE.step}
+              onSlidingComplete={(v) => update({ fontScale: Number(v.toFixed(2)) })}
+              format={(v) => `${v.toFixed(2)}×`}
+            />
+          </SettingsField>
+          <SettingsRow
+            label={t('quran.customLineSize')}
+            description={t('quran.customLineSizeDesc')}
+            trailing={
+              <SettingsToggle
                 value={!!settings.customLineSize}
                 onValueChange={(v) => update({ customLineSize: v })}
-                trackColor={{ true: colors.accent, false: colors.accent + '44' }}
-                thumbColor={settings.customLineSize ? colors.accent : '#f4f3f4'}
               />
-            </View>
-          </Row>
+            }
+          />
+        </SettingsSection>
 
-          <Row label={t('quran.ayahInteraction')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 8 }]}>
-              {t('quran.ayahInteractionDesc')}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              <Choice
-                colors={colors}
-                label={t('quran.ayahInteractionMenu')}
-                active={(settings.ayahInteractionMode || 'menu') === AYAH_INTERACTION_MODES.MENU}
-                onPress={() => update({ ayahInteractionMode: AYAH_INTERACTION_MODES.MENU })}
-              />
-              <Choice
-                colors={colors}
-                label={t('quran.ayahInteractionDirect')}
-                active={(settings.ayahInteractionMode || 'menu') === AYAH_INTERACTION_MODES.DIRECT}
-                onPress={() => update({ ayahInteractionMode: AYAH_INTERACTION_MODES.DIRECT })}
-              />
-            </View>
-          </Row>
+        <SettingsSection title={t('quran.ayahInteraction')} description={t('quran.ayahInteractionDesc')}>
+          <SettingsField>
+            <SettingsSegmented
+              value={settings.ayahInteractionMode || 'menu'}
+              options={[
+                { id: AYAH_INTERACTION_MODES.MENU, label: t('quran.ayahInteractionMenu') },
+                { id: AYAH_INTERACTION_MODES.DIRECT, label: t('quran.ayahInteractionDirect') },
+              ]}
+              onChange={(id) => update({ ayahInteractionMode: id })}
+            />
+          </SettingsField>
+        </SettingsSection>
 
-          <Row label={t('quran.reciter')} colors={colors}>
+        <SettingsSection title={t('quran.reciter')}>
+          <SettingsField label={t('quran.reciter')}>
             <QuranReciterPicker
               colors={colors}
               reciterId={settings.reciterId || DEFAULT_RECITER_ID}
               onChange={(id) => update({ reciterId: id })}
             />
-          </Row>
+          </SettingsField>
+          <SettingsField label={t('quran.audioScope')} description={t('quran.audioScopeDesc')}>
+            <SettingsSegmented
+              value={settings.audioPlaybackScope || 'ayah'}
+              options={[
+                { id: AUDIO_PLAYBACK_SCOPES.AYAH, label: t('quran.audioScopeAyah') },
+                { id: AUDIO_PLAYBACK_SCOPES.PAGE, label: t('quran.audioScopePage') },
+                { id: AUDIO_PLAYBACK_SCOPES.SURAH, label: t('quran.audioScopeSurah') },
+              ]}
+              onChange={(id) => update({ audioPlaybackScope: id })}
+            />
+          </SettingsField>
+          <SettingsField label={t('quran.playbackSpeed')}>
+            <SettingsSegmented
+              value={settings.playbackRate || 1.0}
+              options={PLAYBACK_RATES.map((rate) => ({ id: rate, label: `${rate}x` }))}
+              onChange={(rate) => update({ playbackRate: rate })}
+            />
+          </SettingsField>
+        </SettingsSection>
 
-          <Row label={t('quran.audioScope')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 8 }]}>
-              {t('quran.audioScopeDesc')}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              <Choice
-                colors={colors}
-                label={t('quran.audioScopeAyah')}
-                active={(settings.audioPlaybackScope || 'ayah') === AUDIO_PLAYBACK_SCOPES.AYAH}
-                onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.AYAH })}
-              />
-              <Choice
-                colors={colors}
-                label={t('quran.audioScopePage')}
-                active={(settings.audioPlaybackScope || 'ayah') === AUDIO_PLAYBACK_SCOPES.PAGE}
-                onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.PAGE })}
-              />
-              <Choice
-                colors={colors}
-                label={t('quran.audioScopeSurah')}
-                active={(settings.audioPlaybackScope || 'ayah') === AUDIO_PLAYBACK_SCOPES.SURAH}
-                onPress={() => update({ audioPlaybackScope: AUDIO_PLAYBACK_SCOPES.SURAH })}
-              />
-            </View>
-          </Row>
-
-          <Row label={t('quran.playbackSpeed')} colors={colors}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {PLAYBACK_RATES.map((rate) => (
-                <Choice
-                  key={rate}
-                  colors={colors}
-                  label={`${rate}x`}
-                  active={(settings.playbackRate || 1.0) === rate}
-                  onPress={() => update({ playbackRate: rate })}
-                />
-              ))}
-            </View>
-          </Row>
-
-          <Row label={t('quran.highFidelity')} colors={colors}>
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginBottom: 10 }]}>
-              {t('quran.highFidelityDesc')}
-            </Text>
+        <SettingsSection title={t('quran.highFidelity')} description={t('quran.highFidelityDesc')}>
+          <SettingsField>
             <HdRow version="v1" sizeLabel="~95 MB" labelKey="quran.hd1405" status={qcfStatus.v1} colors={colors} />
-            <View style={{ height: 10 }} />
+            <View style={{ height: SPACING.md }} />
             <HdRow version="v2" sizeLabel="~208 MB" labelKey="quran.hd1421" status={qcfStatus.v2} colors={colors} />
-          </Row>
-        </ScrollView>
-      </SafeAreaView>
-    </Modal>
+          </SettingsField>
+        </SettingsSection>
+      </ScrollView>
+    </SettingsModalShell>
   );
 }

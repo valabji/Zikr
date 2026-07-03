@@ -1,10 +1,14 @@
 import * as React from 'react';
-import { Modal, View, Text, TouchableOpacity, FlatList, Pressable, SafeAreaView } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, FlatList, Pressable, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
+import { useRTL } from '../hooks/useRTL';
 import { textStyles } from '../constants/Fonts';
-import { t, isRTL } from '../locales/i18n';
+import { t } from '../locales/i18n';
+import { SPACING, RADIUS, withAlpha, webCursor } from '../constants/settingsTokens';
 import { TAFSIRS, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
+
+const isWeb = Platform.OS === 'web';
 
 const LANG_LABEL = {
   ar: { ar: 'عربي', en: 'Arabic' },
@@ -13,14 +17,15 @@ const LANG_LABEL = {
 
 export default function TafsirDropdown({ tafsirId, onChange, compact = false }) {
   const colors = useColors();
+  const { isRTL, getTextAlign, getDirectionalMixedSpacing } = useRTL();
   const [open, setOpen] = React.useState(false);
-  const uiLang = isRTL() ? 'ar' : 'en';
+  const uiLang = isRTL ? 'ar' : 'en';
   const selected = TAFSIRS.find((tf) => tf.id === (tafsirId || DEFAULT_TAFSIR_ID)) || TAFSIRS[0];
   const selectedLabel = uiLang === 'ar' ? selected.nameAr : selected.nameEn;
 
   const triggerColor = compact ? colors.BYellow : colors.text;
-  const triggerBorder = compact ? colors.BYellow + '55' : colors.accent + '44';
-  const triggerBg = compact ? 'transparent' : colors.accent + '0a';
+  const triggerBorder = compact ? withAlpha(colors.BYellow, 'strong') : withAlpha(colors.accent, 'border');
+  const triggerBg = compact ? 'transparent' : withAlpha(colors.accent, 'subtle');
 
   const grouped = ['ar', 'en'].map((lang) => ({
     lang,
@@ -40,99 +45,111 @@ export default function TafsirDropdown({ tafsirId, onChange, compact = false }) 
     <>
       <TouchableOpacity
         onPress={() => setOpen(true)}
-        style={{
+        style={[{
           flexDirection: 'row',
           alignItems: 'center',
-          paddingVertical: compact ? 6 : 10,
-          paddingHorizontal: compact ? 10 : 12,
-          borderRadius: compact ? 14 : 8,
+          paddingVertical: compact ? SPACING.xs + 2 : SPACING.md - 2,
+          paddingHorizontal: compact ? SPACING.sm + 2 : SPACING.md,
+          borderRadius: compact ? RADIUS.card : RADIUS.control,
           borderWidth: 1,
           borderColor: triggerBorder,
           backgroundColor: triggerBg,
-        }}
+        }, webCursor]}
       >
         <Text style={[textStyles.base, { color: triggerColor, fontSize: compact ? 12 : 14, flex: 1 }]} numberOfLines={1}>
           {selectedLabel}
         </Text>
         {selected.source === 'api' && (
-          <Feather name="wifi" size={compact ? 11 : 13} color={triggerColor} style={{ marginLeft: 4, opacity: 0.7 }} />
+          <Feather name="wifi" size={compact ? 11 : 13} color={triggerColor} style={{ ...getDirectionalMixedSpacing({ marginLeft: SPACING.xs }), opacity: 0.7 }} />
         )}
-        <Feather name="chevron-down" size={compact ? 14 : 18} color={triggerColor} style={{ marginLeft: 6 }} />
+        <Feather name="chevron-down" size={compact ? 14 : 18} color={triggerColor} style={getDirectionalMixedSpacing({ marginLeft: SPACING.sm - 2 })} />
       </TouchableOpacity>
 
-      <Modal visible={open} animationType="fade" transparent onRequestClose={() => setOpen(false)} statusBarTranslucent>
+      <Modal visible={open} animationType={isWeb ? 'fade' : 'slide'} transparent onRequestClose={() => setOpen(false)} statusBarTranslucent>
         <Pressable
           onPress={() => setOpen(false)}
-          style={{ flex: 1, backgroundColor: '#0009', justifyContent: 'center', paddingHorizontal: 24 }}
+          style={{
+            flex: 1,
+            backgroundColor: colors.overlayBackground,
+            justifyContent: isWeb ? 'center' : 'flex-end',
+            alignItems: 'center',
+            padding: isWeb ? SPACING.xl : 0,
+          }}
         >
           <Pressable
             onPress={() => {}}
-            style={{
+            style={[{
+              width: '100%',
               maxHeight: '80%',
-              backgroundColor: colors.background,
-              borderRadius: 12,
+              backgroundColor: colors.surface,
               overflow: 'hidden',
-              borderWidth: 1,
-              borderColor: colors.accent + '33',
-            }}
+            }, isWeb
+              ? { maxWidth: 460, borderRadius: RADIUS.modal }
+              : { borderTopLeftRadius: RADIUS.modal, borderTopRightRadius: RADIUS.modal }]}
           >
-            <SafeAreaView>
+            {!isWeb ? (
               <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: colors.accent + '22',
-              }}>
-                <Text style={[textStyles.header, { color: colors.text, flex: 1, fontSize: 16 }]}>
-                  {t('quran.tafsirSelection')}
-                </Text>
-                <TouchableOpacity onPress={() => setOpen(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <Feather name="x" size={22} color={colors.text} />
-                </TouchableOpacity>
-              </View>
-              <FlatList
-                data={listData}
-                keyExtractor={(row, i) => row.type === 'header' ? `h-${row.lang}` : row.id}
-                initialNumToRender={14}
-                renderItem={({ item: row }) => {
-                  if (row.type === 'header') {
-                    return (
-                      <View style={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: 6 }}>
-                        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12 }]}>
-                          {row.label}
-                        </Text>
-                      </View>
-                    );
-                  }
-                  const active = row.id === (tafsirId || DEFAULT_TAFSIR_ID);
-                  const label = uiLang === 'ar' ? row.nameAr : row.nameEn;
+                alignSelf: 'center',
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: withAlpha(colors.textSecondary, 'muted'),
+                marginTop: SPACING.sm,
+              }} />
+            ) : null}
+            <View style={[{ flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: SPACING.lg,
+              paddingVertical: SPACING.md,
+              borderBottomWidth: 1,
+              borderBottomColor: withAlpha(colors.accent, 'hairline'),
+            }]}>
+              <Text style={[textStyles.header, { color: colors.text, flex: 1, fontSize: 16, textAlign: getTextAlign('left') }]}>
+                {t('quran.tafsirSelection')}
+              </Text>
+              <Pressable onPress={() => setOpen(false)} style={[{ padding: 4 }, webCursor]} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="x" size={22} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            <FlatList
+              data={listData}
+              keyExtractor={(row, i) => row.type === 'header' ? `h-${row.lang}` : row.id}
+              initialNumToRender={14}
+              renderItem={({ item: row }) => {
+                if (row.type === 'header') {
                   return (
-                    <TouchableOpacity
-                      onPress={() => { onChange(row.id); setOpen(false); }}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingVertical: 14,
-                        paddingHorizontal: 18,
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors.accent + '15',
-                        backgroundColor: active ? colors.accent + '12' : 'transparent',
-                      }}
-                    >
-                      <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.text, flex: 1 }]} numberOfLines={1}>
-                        {label}
+                    <View style={{ paddingHorizontal: SPACING.lg + 2, paddingTop: SPACING.md + 2, paddingBottom: SPACING.xs + 2 }}>
+                      <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, textAlign: getTextAlign('left') }]}>
+                        {row.label}
                       </Text>
-                      {row.source === 'api' && (
-                        <Feather name="wifi" size={14} color={colors.textSecondary} style={{ marginRight: 8, opacity: 0.7 }} />
-                      )}
-                      {active && <Feather name="check" size={18} color={colors.accent} />}
-                    </TouchableOpacity>
+                    </View>
                   );
-                }}
-              />
-            </SafeAreaView>
+                }
+                const active = row.id === (tafsirId || DEFAULT_TAFSIR_ID);
+                const label = uiLang === 'ar' ? row.nameAr : row.nameEn;
+                return (
+                  <Pressable
+                    onPress={() => { onChange(row.id); setOpen(false); }}
+                    style={({ hovered, pressed }) => [{ flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingVertical: SPACING.md + 2,
+                      paddingHorizontal: SPACING.lg + 2,
+                      backgroundColor: (active || pressed)
+                        ? withAlpha(colors.accent, 'activeRow')
+                        : (hovered ? withAlpha(colors.accent, 'subtle') : 'transparent'),
+                    }, webCursor]}
+                  >
+                    <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.text, flex: 1, textAlign: getTextAlign('left') }]} numberOfLines={1}>
+                      {label}
+                    </Text>
+                    {row.source === 'api' && (
+                      <Feather name="wifi" size={14} color={colors.textSecondary} style={{ ...getDirectionalMixedSpacing({ marginRight: SPACING.sm }), opacity: 0.7 }} />
+                    )}
+                    {active && <Feather name="check" size={18} color={colors.accent} />}
+                  </Pressable>
+                );
+              }}
+            />
           </Pressable>
         </Pressable>
       </Modal>

@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import moment from 'moment-timezone';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
+import { CONTENT_MAX_WIDTH, withAlpha, webCursor } from '../constants/settingsTokens';
 import { searchLocations, getLocationFromIP, getBrowserLocation } from '../utils/PrayerUtils';
 import NotificationService from '../utils/NotificationService';
 import PrayerCountdownService from '../utils/PrayerCountdownService';
@@ -567,14 +568,14 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const renderLocationItem = ({ item }) => (
         <TouchableOpacity
             onPress={() => setSelectedLocation(item)}
-            style={{
-                backgroundColor: selectedLocation?.name === item.name ? colors.nextPrayer : colors.DGreen,
+            style={[{
+                backgroundColor: selectedLocation?.name === item.name ? withAlpha(colors.accent, 'activeRow') : colors.DGreen,
                 borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                 marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
                 borderWidth: 1,
                 borderColor: selectedLocation?.name === item.name ? colors.BYellow : 'transparent'
-            }}
+            }, webCursor]}
         >
             <Text style={{
                 color: colors.BYellow,
@@ -641,10 +642,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         overflowY: 'auto'
                     })
                 }}
-                contentContainerStyle={{ 
+                contentContainerStyle={{
                     padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING,
-                    ...(Platform.OS === 'web' && { 
-                        paddingBottom: 50 
+                    width: '100%',
+                    maxWidth: CONTENT_MAX_WIDTH,
+                    alignSelf: 'center',
+                    ...(Platform.OS === 'web' && {
+                        paddingBottom: 50
                     })
                 }}
                 showsVerticalScrollIndicator={false}
@@ -741,14 +745,14 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 <TouchableOpacity
                                                     key={`search-${index}`}
                                                     onPress={() => setSelectedLocation(item)}
-                                                    style={{
-                                                        backgroundColor: selectedLocation?.name === item.name ? colors.nextPrayer : colors.DGreen,
+                                                    style={[{
+                                                        backgroundColor: selectedLocation?.name === item.name ? withAlpha(colors.accent, 'activeRow') : colors.DGreen,
                                                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                                         marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
                                                         borderWidth: 1,
                                                         borderColor: selectedLocation?.name === item.name ? colors.BYellow : 'transparent'
-                                                    }}
+                                                    }, webCursor]}
                                                 >
                                                     <Text style={{
                                                         color: colors.BYellow,
@@ -822,7 +826,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <TouchableOpacity
                                         onPress={getCurrentLocation}
                                         disabled={isGettingLocation}
-                                        style={{
+                                        style={[{
                                             backgroundColor: colors.BGreen,
                                             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -838,7 +842,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             shadowRadius: 3.84,
                                             elevation: 5,
                                             minHeight: 50
-                                        }}
+                                        }, webCursor]}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
@@ -859,7 +863,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <TouchableOpacity
                                         onPress={getIPLocation}
                                         disabled={isGettingLocation}
-                                        style={{
+                                        style={[{
                                             backgroundColor: colors.BGreen,
                                             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -875,7 +879,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             shadowRadius: 3.84,
                                             elevation: 5,
                                             minHeight: 50
-                                        }}
+                                        }, webCursor]}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
@@ -907,7 +911,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {/* Calculation Method */}
                             <TouchableOpacity
                                 onPress={showCalculationMethodPicker}
-                                style={{
+                                style={[{
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
@@ -922,7 +926,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     shadowOpacity: 0.25,
                                     shadowRadius: 3.84,
                                     elevation: 5,
-                                }}
+                                }, webCursor]}
                             >
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
@@ -948,7 +952,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {/* Madhab */}
                             <TouchableOpacity
                                 onPress={showMadhabPicker}
-                                style={{
+                                style={[{
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
@@ -963,7 +967,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     shadowOpacity: 0.25,
                                     shadowRadius: 3.84,
                                     elevation: 5,
-                                }}
+                                }, webCursor]}
                             >
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
@@ -997,9 +1001,9 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         <>
                             {/* Android Warnings */}
                             {Platform.OS === 'android' && Platform.Version >= 31 && !hasExactAlarm && (
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     onPress={handleOpenExactAlarmSettings}
-                                    style={{
+                                    style={[{
                                         backgroundColor: colors.BYellow + '20',
                                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -1008,7 +1012,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         alignItems: 'center',
                                         borderLeftWidth: 4,
                                         borderLeftColor: colors.BYellow,
-                                    }}
+                                    }, webCursor]}
                                 >
                                     <AntDesign name="exclamationcircle" size={20} color={colors.BYellow} />
                                     <View style={{ flex: 1, marginLeft: 10 }}>
@@ -1034,16 +1038,16 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             )}
 
                             {Platform.OS === 'android' && (
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     onPress={handleOpenBatterySettings}
-                                    style={{
+                                    style={[{
                                         backgroundColor: colors.BYellow + '15',
                                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                         marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
                                         flexDirection: 'row',
                                         alignItems: 'center',
-                                    }}
+                                    }, webCursor]}
                                 >
                                     <Feather name="battery" size={20} color={colors.BYellow} />
                                     <View style={{ flex: 1, marginLeft: 10 }}>
@@ -1112,7 +1116,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 <>
                                     <TouchableOpacity
                                         onPress={() => setAudioModeModalVisible(true)}
-                                        style={{
+                                        style={[{
                                             backgroundColor: colors.BGreen,
                                             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -1120,7 +1124,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             flexDirection: 'row',
                                             alignItems: 'center',
                                             justifyContent: 'space-between'
-                                        }}
+                                        }, webCursor]}
                                     >
                                         <View style={{ flex: 1 }}>
                                             <Text style={{
@@ -1147,7 +1151,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     {audioMode !== 'none' && (
                                         <TouchableOpacity
                                             onPress={() => setAdhanModalVisible(true)}
-                                            style={{
+                                            style={[{
                                                 backgroundColor: colors.BGreen,
                                                 borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -1155,7 +1159,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 flexDirection: 'row',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between'
-                                            }}
+                                            }, webCursor]}
                                         >
                                             <View style={{ flex: 1 }}>
                                                 <Text style={{
@@ -1196,7 +1200,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     {testedMode && (
                                         <TouchableOpacity
                                             onPress={handleTestNotification}
-                                            style={{
+                                            style={[{
                                                 backgroundColor: colors.BGreen,
                                                 borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -1207,7 +1211,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 borderWidth: 1,
                                                 borderColor: colors.BYellow,
                                                 borderStyle: 'dashed',
-                                            }}
+                                            }, webCursor]}
                                         >
                                             <View style={{ flex: 1 }}>
                                                 <Text style={{
@@ -1410,7 +1414,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -1419,6 +1423,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         maxHeight: '70%',
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
@@ -1453,7 +1458,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {Object.values(PRAYER_CONSTANTS.CALCULATION_METHODS).map((method) => (
                                 <TouchableOpacity
                                     key={method}
-                                    style={{
+                                    style={[{
                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                         borderBottomWidth: 1,
                                         borderBottomColor: colors.BYellow + '20',
@@ -1461,13 +1466,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         backgroundColor: calculationMethod === method ? colors.BYellow : 'transparent'
-                                    }}
+                                    }, webCursor]}
                                     onPress={() => handleCalculationMethodSelection(method)}
                                 >
                                     <Text style={{
                                         color: calculationMethod === method ? colors.DGreen : colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: calculationMethod === method ? "Cairo_400Regular" : "Cairo_400Regular",
+                                        fontFamily: "Cairo_400Regular",
                                         textAlign: 'center',
                                         flex: 1
                                     }}>
@@ -1490,7 +1495,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -1499,6 +1504,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                         borderWidth: 1,
@@ -1527,7 +1533,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         </View>
 
                         <TouchableOpacity
-                            style={{
+                            style={[{
                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                 borderBottomWidth: 1,
                                 borderBottomColor: colors.BYellow + '20',
@@ -1535,13 +1541,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 backgroundColor: madhab === 'Shafi' ? colors.BYellow : 'transparent'
-                            }}
+                            }, webCursor]}
                             onPress={() => handleMadhabSelection('Shafi')}
                         >
                             <Text style={{
                                 color: madhab === 'Shafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Shafi' ? "Cairo_400Regular" : "Cairo_400Regular",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>
@@ -1550,19 +1556,19 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={{
+                            style={[{
                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 backgroundColor: madhab === 'Hanafi' ? colors.BYellow : 'transparent'
-                            }}
+                            }, webCursor]}
                             onPress={() => handleMadhabSelection('Hanafi')}
                         >
                             <Text style={{
                                 color: madhab === 'Hanafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Hanafi' ? "Cairo_400Regular" : "Cairo_400Regular",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>
@@ -1583,7 +1589,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -1592,6 +1598,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                         borderWidth: 1,
@@ -1622,7 +1629,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         {audioModeOptions.map((option) => (
                             <TouchableOpacity
                                 key={option.id}
-                                style={{
+                                style={[{
                                     padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                     borderBottomWidth: 1,
                                     borderBottomColor: colors.BYellow + '1A',
@@ -1630,14 +1637,14 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                     backgroundColor: audioMode === option.id ? colors.BYellow + '20' : 'transparent'
-                                }}
+                                }, webCursor]}
                                 onPress={() => handleAudioModeSelection(option.id)}
                             >
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
-                                        color: audioMode === option.id ? colors.BYellow : colors.BYellow,
+                                        color: colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: audioMode === option.id ? "Cairo_400Regular" : "Cairo_400Regular",
+                                        fontFamily: "Cairo_400Regular",
                                         fontWeight: audioMode === option.id ? 'bold' : 'normal',
                                     }}>
                                         {isRTL() ? option.labelAr : option.labelEn}
@@ -1671,7 +1678,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -1680,6 +1687,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         maxHeight: '80%',
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
@@ -1721,7 +1729,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 return (
                                     <TouchableOpacity
                                         key={option.id}
-                                        style={{
+                                        style={[{
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                             borderBottomWidth: 1,
                                             borderBottomColor: colors.BYellow + '1A',
@@ -1729,7 +1737,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
                                             backgroundColor: selectedAdhan === option.id ? colors.BYellow + '20' : 'transparent'
-                                        }}
+                                        }, webCursor]}
                                         onPress={() => handleAdhanSelection(option.id)}
                                     >
                                         <View style={{ flex: 1 }}>
@@ -1754,7 +1762,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         {!option.bundled && st?.downloaded && (
                                             <TouchableOpacity
                                                 onPress={() => AdhanDownloader.remove(option.id)}
-                                                style={{ paddingHorizontal: 8 }}
+                                                style={[{ paddingHorizontal: 8 }, webCursor]}
                                             >
                                                 <Feather name="trash-2" size={18} color={colors.BYellow} />
                                             </TouchableOpacity>

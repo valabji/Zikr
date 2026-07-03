@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { Modal, View, Text, TouchableOpacity, FlatList, Pressable, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, FlatList, Pressable, SafeAreaView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { RECITERS, getReciter } from '../constants/QuranReciters';
-
-const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
+import { webCursor } from '../constants/settingsTokens';
 
 export default function QuranReciterPicker({ colors, reciterId, onChange, compact = false }) {
   const [open, setOpen] = React.useState(false);
@@ -21,7 +20,10 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
     <>
       <TouchableOpacity
         onPress={() => setOpen(true)}
-        style={{
+        accessibilityRole="button"
+        accessibilityLabel={t('quran.reciter')}
+        accessibilityState={{ expanded: open }}
+        style={[{
           flexDirection: 'row',
           alignItems: 'center',
           paddingVertical: compact ? 6 : 10,
@@ -30,7 +32,7 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
           borderWidth: 1,
           borderColor: triggerBorder,
           backgroundColor: triggerBg,
-        }}
+        }, webCursor]}
       >
         <Text
           style={[textStyles.base, { color: triggerColor, fontSize: compact ? 12 : 14, flex: 1 }]}
@@ -44,7 +46,9 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
       <Modal visible={open} animationType="fade" transparent onRequestClose={() => setOpen(false)} statusBarTranslucent>
         <Pressable
           onPress={() => setOpen(false)}
-          style={{ flex: 1, backgroundColor: '#0009', justifyContent: 'center', paddingHorizontal: 24 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+          style={{ flex: 1, backgroundColor: colors.overlayBackground, justifyContent: 'center', paddingHorizontal: 24 }}
         >
           <Pressable
             onPress={() => {}}
@@ -55,7 +59,6 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
               overflow: 'hidden',
               borderWidth: 1,
               borderColor: colors.accent + '33',
-              paddingTop: ANDROID_STATUS_BAR ? 0 : 0,
             }}
           >
             <SafeAreaView>
@@ -70,7 +73,7 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
                 <Text style={[textStyles.header, { color: colors.text, flex: 1, fontSize: 16 }]}>
                   {t('quran.reciter')}
                 </Text>
-                <TouchableOpacity onPress={() => setOpen(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity onPress={() => setOpen(false)} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={webCursor}>
                   <Feather name="x" size={22} color={colors.text} />
                 </TouchableOpacity>
               </View>
@@ -87,7 +90,9 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
                         onChange(item.id);
                         setOpen(false);
                       }}
-                      style={{
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                      style={[{
                         flexDirection: 'row',
                         alignItems: 'center',
                         paddingVertical: 14,
@@ -95,7 +100,7 @@ export default function QuranReciterPicker({ colors, reciterId, onChange, compac
                         borderBottomWidth: 1,
                         borderBottomColor: colors.accent + '15',
                         backgroundColor: active ? colors.accent + '12' : 'transparent',
-                      }}
+                      }, webCursor]}
                     >
                       <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.text, flex: 1 }]} numberOfLines={1}>
                         {label}

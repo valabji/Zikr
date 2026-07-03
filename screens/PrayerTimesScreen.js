@@ -26,9 +26,13 @@ import {
   getBrowserLocation
 } from '../utils/PrayerUtils';
 import { usePrayerCheckIn, togglePrayerCheckIn, togglePrayerCheckInForDate, getCheckInHistory, MANDATORY_PRAYERS } from '../utils/PrayerCheckIn';
+import { SettingsContainer, SettingsCallout, SettingsButton } from '../components/settings';
+import { SPACING, RADIUS, webCursor } from '../constants/settingsTokens';
+import { useRTL } from '../hooks/useRTL';
 
 export default function PrayerTimesScreen({ navigation }) {
   const colors = useColors();
+  const { isRTL } = useRTL();
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [location, setLocation] = useState(null);
   const [currentPrayer, setCurrentPrayer] = useState(null);

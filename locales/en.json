@@ -227,7 +227,10 @@
       "vibrationIntensity": "Set the strength of vibration feedback (mobile only).",
       "clickVolume": "Adjust the volume of click sounds.",
       "fontSize": "Change the font size for azkar text.",
-      "help": "Help"
+      "help": "Help",
+      "previous": "Previous",
+      "next": "Next",
+      "finish": "Finish"
     },
     "notifications": {
       "title": "🔔 Prayer Notifications",
@@ -254,6 +257,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "discard": "Discard",
+    "close": "Close",
     "ok": "OK",
     "reset": "Reset",
     "error": "Error",

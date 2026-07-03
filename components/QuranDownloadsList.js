@@ -8,6 +8,7 @@ import surahsData from '../assets/quran/data/surahs.json';
 import { RECITERS, getReciter, reciterHasSurahAudio, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import QuranSurahDownloader from '../utils/QuranSurahDownloader';
+import { webCursor } from '../constants/settingsTokens';
 
 const TOTAL = surahsData.length;
 const OFFLINE_RECITERS = RECITERS.filter((r) => r.qdcId);
@@ -20,7 +21,7 @@ function DownloadControl({ entry, colors, onDownload, onCancel, onRemove }) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Text style={[textStyles.base, { color: colors.accent, fontSize: 13, marginEnd: 10 }]}>{pct}%</Text>
-        <TouchableOpacity onPress={onCancel} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity onPress={onCancel} accessibilityRole="button" accessibilityLabel={t('common.cancel')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={webCursor}>
           <Feather name="x" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -30,14 +31,14 @@ function DownloadControl({ entry, colors, onDownload, onCancel, onRemove }) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Feather name="check-circle" size={18} color={colors.accent} />
-        <TouchableOpacity onPress={onRemove} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ marginStart: 14 }}>
+        <TouchableOpacity onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('quran.remove')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={[{ marginStart: 14 }, webCursor]}>
           <Feather name="trash-2" size={18} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
     );
   }
   return (
-    <TouchableOpacity onPress={onDownload} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+    <TouchableOpacity onPress={onDownload} accessibilityRole="button" accessibilityLabel={t('quran.download')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={webCursor}>
       <Feather name="download" size={20} color={colors.accent} />
     </TouchableOpacity>
   );
@@ -79,12 +80,15 @@ export default function QuranDownloadsList() {
     <View style={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: 6 }}>
       <TouchableOpacity
         onPress={() => setPickerOpen(true)}
-        style={{
+        accessibilityRole="button"
+        accessibilityLabel={t('quran.reciter')}
+        accessibilityState={{ expanded: pickerOpen }}
+        style={[{
           flexDirection: 'row', alignItems: 'center',
           paddingVertical: 10, paddingHorizontal: 12,
           borderRadius: 8, borderWidth: 1,
           borderColor: colors.accent + '44', backgroundColor: colors.accent + '0a',
-        }}
+        }, webCursor]}
       >
         <Text style={[textStyles.subtitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
           {lang === 'ar' ? reciter.nameAr : reciter.nameEn}
@@ -96,11 +100,11 @@ export default function QuranDownloadsList() {
 
   const picker = (
     <Modal visible={pickerOpen} animationType="fade" transparent onRequestClose={() => setPickerOpen(false)} statusBarTranslucent>
-      <Pressable onPress={() => setPickerOpen(false)} style={{ flex: 1, backgroundColor: '#0009', justifyContent: 'center', paddingHorizontal: 24 }}>
+      <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel={t('common.close')} style={{ flex: 1, backgroundColor: colors.overlayBackground, justifyContent: 'center', paddingHorizontal: 24 }}>
         <Pressable onPress={() => {}} style={{ maxHeight: '80%', backgroundColor: colors.background, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: colors.accent + '33' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.accent + '22' }}>
             <Text style={[textStyles.header, { color: colors.text, flex: 1, fontSize: 16 }]}>{t('quran.reciter')}</Text>
-            <TouchableOpacity onPress={() => setPickerOpen(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={webCursor}>
               <Feather name="x" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
@@ -113,12 +117,14 @@ export default function QuranDownloadsList() {
               return (
                 <TouchableOpacity
                   onPress={() => selectReciter(item.id)}
-                  style={{
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  style={[{
                     flexDirection: 'row', alignItems: 'center',
                     paddingVertical: 14, paddingHorizontal: 18,
                     borderBottomWidth: 1, borderBottomColor: colors.accent + '15',
                     backgroundColor: active ? colors.accent + '12' : 'transparent',
-                  }}
+                  }, webCursor]}
                 >
                   <Text style={[textStyles.subtitle, { color: active ? colors.accent : colors.text, flex: 1 }]} numberOfLines={1}>
                     {lang === 'ar' ? item.nameAr : item.nameEn}
@@ -165,7 +171,7 @@ export default function QuranDownloadsList() {
       {bulkActive ? (
         <TouchableOpacity
           onPress={() => QuranSurahDownloader.cancelAll(reciterId)}
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.accent + '55' }}
+          style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: colors.accent + '55' }, webCursor]}
         >
           <Feather name="x" size={16} color={colors.accent} style={{ marginEnd: 8 }} />
           <Text style={[textStyles.subtitle, { color: colors.accent, fontSize: 14 }]}>
@@ -180,7 +186,7 @@ export default function QuranDownloadsList() {
       ) : (
         <TouchableOpacity
           onPress={() => QuranSurahDownloader.downloadAll(reciterId)}
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 8, backgroundColor: colors.accent }}
+          style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 8, backgroundColor: colors.accent }, webCursor]}
         >
           <Feather name="download" size={16} color={colors.primaryDark} style={{ marginEnd: 8 }} />
           <Text style={[textStyles.subtitle, { color: colors.primaryDark, fontSize: 14 }]}>{t('quran.offlineDownloadAll')}</Text>

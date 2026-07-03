@@ -72,36 +72,33 @@ describe('useRTL hook', () => {
   });
 
   describe('getTextAlign', () => {
-    it('flips left → right when RTL', () => {
+    it('does not flip on native in RTL (textAlign is logical there)', () => {
+      mockIsRTL.mockReturnValue(true);
+      const { result } = renderHook(() => useRTL());
+      expect(result.current.getTextAlign('left')).toBe('left');
+      expect(result.current.getTextAlign('right')).toBe('right');
+    });
+
+    it('flips left/right on web in RTL', () => {
+      global.Platform.OS = 'web';
       mockIsRTL.mockReturnValue(true);
       const { result } = renderHook(() => useRTL());
       expect(result.current.getTextAlign('left')).toBe('right');
       expect(result.current.getTextAlign('right')).toBe('left');
     });
 
-    it('keeps alignment in LTR', () => {
+    it('keeps alignment on web in LTR', () => {
+      global.Platform.OS = 'web';
       const { result } = renderHook(() => useRTL());
       expect(result.current.getTextAlign('left')).toBe('left');
       expect(result.current.getTextAlign('right')).toBe('right');
     });
 
     it('preserves arbitrary defaultAlign values', () => {
+      global.Platform.OS = 'web';
+      mockIsRTL.mockReturnValue(true);
       const { result } = renderHook(() => useRTL());
       expect(result.current.getTextAlign('center')).toBe('center');
-    });
-  });
-
-  describe('getFlexDirection', () => {
-    it('returns row-reverse for "row" in RTL', () => {
-      mockIsRTL.mockReturnValue(true);
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getFlexDirection('row')).toBe('row-reverse');
-    });
-
-    it('preserves column direction', () => {
-      mockIsRTL.mockReturnValue(true);
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getFlexDirection('column')).toBe('column');
     });
   });
 
@@ -174,35 +171,4 @@ describe('useRTL hook', () => {
     });
   });
 
-  describe('getDirectionalPosition', () => {
-    it('swaps left/right when RTL', () => {
-      mockIsRTL.mockReturnValue(true);
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getDirectionalPosition(5, 10)).toEqual({ right: 5, left: 10 });
-    });
-
-    it('returns left/right as given when LTR', () => {
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getDirectionalPosition(5, 10)).toEqual({ left: 5, right: 10 });
-    });
-  });
-
-  describe('getIconTransform', () => {
-    it('returns scaleX:-1 transform when RTL and shouldFlip', () => {
-      mockIsRTL.mockReturnValue(true);
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getIconTransform(true)).toEqual([{ scaleX: -1 }]);
-    });
-
-    it('returns [] when shouldFlip=false', () => {
-      mockIsRTL.mockReturnValue(true);
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getIconTransform(false)).toEqual([]);
-    });
-
-    it('returns [] when LTR', () => {
-      const { result } = renderHook(() => useRTL());
-      expect(result.current.getIconTransform(true)).toEqual([]);
-    });
-  });
 });

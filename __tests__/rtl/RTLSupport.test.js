@@ -22,13 +22,12 @@ jest.mock('../../utils/restart', () => ({
 
 // Test component
 const TestComponent = () => {
-  const { isRTL: isRTLHook, getTextAlign, getFlexDirection } = useRTL();
-  
+  const { isRTL: isRTLHook, getTextAlign } = useRTL();
+
   return (
     <div>
       <div testID="rtl-status">{isRTLHook ? 'RTL' : 'LTR'}</div>
       <div testID="text-align">{getTextAlign()}</div>
-      <div testID="flex-direction">{getFlexDirection()}</div>
     </div>
   );
 };

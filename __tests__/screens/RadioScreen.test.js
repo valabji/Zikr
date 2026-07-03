@@ -8,6 +8,7 @@ import { loadRadioFavorites, toggleRadioFavorite } from '../../utils/RadioFavori
 const mockNavigation = { goBack: jest.fn(), toggleDrawer: jest.fn(), navigate: jest.fn() };
 
 jest.mock('../../locales/i18n', () => ({
+  getCurrentLanguage: jest.fn(() => 'en'),
   t: (key) => key,
   isRTL: () => false,
   getRTLTextAlign: () => 'left',

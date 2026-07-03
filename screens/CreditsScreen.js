@@ -1,13 +1,17 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
+import { View, Text, Linking, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
-import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
+import { t } from '../locales/i18n';
+import { useRTL } from '../hooks/useRTL';
 import CHeader from '../components/CHeader';
 import { DATA_SOURCES, LICENSES } from '../constants/AboutConstants';
+import { SettingsContainer, SettingsSection, SettingsRow } from '../components/settings';
+import { SPACING, RADIUS } from '../constants/settingsTokens';
 
 export default function CreditsScreen({ navigation }) {
   const colors = useColors();
+  const { getTextAlign, getDirectionalMixedSpacing } = useRTL();
 
   const openUrl = (url) => {
     if (!url) return;
@@ -16,127 +20,69 @@ export default function CreditsScreen({ navigation }) {
     });
   };
 
-  const card = {
-    backgroundColor: colors.DGreen,
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 16,
-  };
-
-  const heading = {
-    color: colors.BYellow,
-    fontSize: 18,
-    fontFamily: 'Cairo_400Regular',
-    marginBottom: 12,
-    textAlign: getRTLTextAlign('left'),
-  };
-
-  const Row = ({ children, onPress, last, testID }) => {
-    const inner = (
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomWidth: last ? 0 : 1,
-        borderBottomColor: colors.BGreen,
-      }}>
-        {children}
-      </View>
-    );
-    return onPress ? (
-      <TouchableOpacity testID={testID} onPress={onPress} activeOpacity={0.7}>{inner}</TouchableOpacity>
-    ) : (
-      <View testID={testID}>{inner}</View>
-    );
-  };
-
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="credits-screen-root">
+    <View style={{ flex: 1, backgroundColor: colors.background }} testID="credits-screen-root">
       <CHeader navigation={navigation} title={t('credits.title')} />
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
-        <View style={card}>
+      <SettingsContainer>
+        <SettingsSection>
           <Text style={{
-            color: colors.BYellow,
+            color: colors.text,
             fontSize: 15,
             fontFamily: 'Cairo_400Regular',
             lineHeight: 24,
-            textAlign: getRTLTextAlign('left'),
+            padding: SPACING.lg,
+            textAlign: getTextAlign('left'),
           }}>{t('credits.intro')}</Text>
-        </View>
+        </SettingsSection>
 
-        <View style={card}>
-          <Text style={heading}>{t('credits.dataSources')}</Text>
-          {DATA_SOURCES.map((src, i) => (
-            <Row
+        <SettingsSection title={t('credits.dataSources')}>
+          {DATA_SOURCES.map((src) => (
+            <SettingsRow
               key={src.roleKey}
               testID={`credit-source-${src.roleKey}`}
-              last={i === DATA_SOURCES.length - 1}
-              onPress={src.url ? () => openUrl(src.url) : null}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: 13,
-                  fontFamily: 'Cairo_400Regular',
-                  opacity: 0.8,
-                  textAlign: getRTLTextAlign('left'),
-                }}>{t(`credits.sources.${src.roleKey}`)}</Text>
-                <Text style={{
-                  color: colors.BYellow,
-                  fontSize: 15,
-                  fontFamily: 'Cairo_400Regular',
-                  marginTop: 2,
-                  textAlign: getRTLTextAlign('left'),
-                }}>{t(`credits.sourceNames.${src.roleKey}`)}</Text>
-              </View>
-              {src.url ? <Feather name="external-link" size={18} color={colors.BYellow} /> : null}
-            </Row>
+              label={t(`credits.sourceNames.${src.roleKey}`)}
+              description={t(`credits.sources.${src.roleKey}`)}
+              trailing={src.url ? <Feather name="external-link" size={18} color={colors.accent} /> : null}
+              onPress={src.url ? () => openUrl(src.url) : undefined}
+            />
           ))}
-        </View>
+        </SettingsSection>
 
-        <View style={card}>
-          <Text style={heading}>{t('credits.licenses')}</Text>
+        <SettingsSection title={t('credits.licenses')}>
           {LICENSES.map((lib, i) => (
-            <Row
+            <SettingsRow
               key={lib.name}
               testID={`credit-license-${i}`}
-              last={i === LICENSES.length - 1}
-              onPress={lib.url ? () => openUrl(lib.url) : null}
-            >
-              <Text style={{
-                color: colors.BYellow,
-                fontSize: 15,
-                fontFamily: 'Cairo_400Regular',
-                flex: 1,
-                textAlign: getRTLTextAlign('left'),
-              }}>{lib.name}</Text>
-              <Text style={{
-                color: colors.BGreen,
-                backgroundColor: colors.BYellow,
-                fontSize: 11,
-                fontFamily: 'Cairo_400Regular',
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 6,
-                overflow: 'hidden',
-                ...getDirectionalMixedSpacing({ marginLeft: 10, marginRight: 10 }),
-              }}>{lib.license}</Text>
-            </Row>
+              label={lib.name}
+              trailing={
+                <Text style={{
+                  color: colors.primary,
+                  backgroundColor: colors.accent,
+                  fontSize: 11,
+                  fontFamily: 'Cairo_400Regular',
+                  paddingHorizontal: SPACING.sm,
+                  paddingVertical: 2,
+                  borderRadius: RADIUS.control,
+                  overflow: 'hidden',
+                }}>{lib.license}</Text>
+              }
+              onPress={lib.url ? () => openUrl(lib.url) : undefined}
+            />
           ))}
-        </View>
+        </SettingsSection>
 
-        <View style={card}>
-          <Text style={heading}>{t('credits.thanks')}</Text>
+        <SettingsSection title={t('credits.thanks')}>
           <Text style={{
-            color: colors.BYellow,
+            color: colors.text,
             fontSize: 15,
             fontFamily: 'Cairo_400Regular',
             lineHeight: 24,
-            textAlign: getRTLTextAlign('left'),
+            padding: SPACING.lg,
+            textAlign: getTextAlign('left'),
           }}>{t('credits.thanksBody')}</Text>
-        </View>
-      </ScrollView>
+        </SettingsSection>
+      </SettingsContainer>
     </View>
   );
 }

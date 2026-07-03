@@ -15,6 +15,8 @@ import {
   markSurahReviewed,
 } from '../utils/HifzTracker';
 import surahsData from '../assets/quran/data/surahs.json';
+import { SettingsSegmented } from '../components/settings';
+import { SPACING, RADIUS, CONTENT_MAX_WIDTH, webCursor } from '../constants/settingsTokens';
 
 const { STATUS } = HIFZ_CONSTANTS;
 const NEXT_STATUS = {
@@ -47,14 +49,14 @@ function SurahRow({ surah, entry, due, colors, lang }) {
       testID={`hifz-row-${surah.id}`}
       style={{
         backgroundColor: colors.surface,
-        borderRadius: 16,
-        padding: 14,
-        marginBottom: 10,
+        borderRadius: RADIUS.card,
+        padding: SPACING.md + 2,
+        marginBottom: SPACING.sm + 2,
         flexDirection: 'row',
         alignItems: 'center',
       }}
     >
-      <TouchableOpacity testID={`hifz-status-${surah.id}`} onPress={onCycleStatus} style={{ padding: 4 }}>
+      <TouchableOpacity testID={`hifz-status-${surah.id}`} onPress={onCycleStatus} accessibilityRole="button" accessibilityLabel={name} style={[{ padding: SPACING.xs }, webCursor]}>
         <StatusIcon status={entry.status} colors={colors} />
       </TouchableOpacity>
 
@@ -69,14 +71,16 @@ function SurahRow({ surah, entry, due, colors, lang }) {
         <TouchableOpacity
           testID={`hifz-review-${surah.id}`}
           onPress={onReview}
-          style={{
+          accessibilityRole="button"
+          accessibilityLabel={t('hifz.review')}
+          style={[{
             backgroundColor: colors.warningAccent,
-            borderRadius: 10,
+            borderRadius: RADIUS.control,
             paddingVertical: 6,
-            paddingHorizontal: 10,
+            paddingHorizontal: SPACING.sm + 2,
             flexDirection: 'row',
             alignItems: 'center',
-          }}
+          }, webCursor]}
         >
           <Feather name="refresh-cw" size={14} color={colors.primary} />
           <Text style={{ ...textStyles.caption, color: colors.primary, ...getDirectionalMixedSpacing({ marginLeft: 4, marginRight: 4 }) }}>
@@ -114,52 +118,41 @@ export default function HifzTrackerScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="hifz-tracker-screen">
       <CHeader navigation={navigation} isHome={true} title={t('hifz.title')} />
 
-      <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
-        <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16 }}>
-          <Text style={{ ...textStyles.subtitle, color: colors.text, marginBottom: 8 }}>
-            {t('hifz.progress')}
-          </Text>
-          <Text style={{ ...textStyles.body, color: colors.accent }}>
-            {t('hifz.surahsMemorized', { count: stats.memorizedCount, total: HIFZ_CONSTANTS.TOTAL_SURAHS })}
-          </Text>
-          <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.background, overflow: 'hidden', marginTop: 8 }}>
-            <View style={{
-              height: 8,
-              width: `${Math.min(100, stats.percentMemorized)}%`,
-              backgroundColor: colors.currentPrayer,
-              borderRadius: 4,
-            }} />
-          </View>
-          <Text style={{ ...textStyles.caption, color: colors.textSecondary, marginTop: 8 }}>
-            {t('hifz.ayahProgress', { progress: stats.totalAyahMemorized, total: stats.totalAyahCount })}
-          </Text>
-          {stats.dueReviewCount > 0 && (
-            <Text style={{ ...textStyles.bodySmall, color: colors.warningAccent, marginTop: 8 }}>
-              {t('hifz.dueForReview', { count: stats.dueReviewCount })}
+      <View style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.md }}>
+        <View style={{ width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: RADIUS.card, padding: SPACING.lg }}>
+            <Text style={{ ...textStyles.subtitle, color: colors.text, marginBottom: 8 }}>
+              {t('hifz.progress')}
             </Text>
-          )}
-        </View>
-
-        <View style={{ flexDirection: 'row', marginTop: 12 }}>
-          {FILTERS.map((f) => (
-            <TouchableOpacity
-              key={f}
-              testID={`hifz-filter-${f}`}
-              onPress={() => setFilter(f)}
-              style={{
-                flex: 1,
-                paddingVertical: 8,
-                borderRadius: 10,
-                backgroundColor: filter === f ? colors.accent : colors.surface,
-                marginHorizontal: 3,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ ...textStyles.caption, color: filter === f ? colors.primary : colors.textSecondary }}>
-                {t(`hifz.filters.${f}`)}
+            <Text style={{ ...textStyles.body, color: colors.accent }}>
+              {t('hifz.surahsMemorized', { count: stats.memorizedCount, total: HIFZ_CONSTANTS.TOTAL_SURAHS })}
+            </Text>
+            <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.background, overflow: 'hidden', marginTop: 8 }}>
+              <View style={{
+                height: 8,
+                width: `${Math.min(100, stats.percentMemorized)}%`,
+                backgroundColor: colors.currentPrayer,
+                borderRadius: 4,
+              }} />
+            </View>
+            <Text style={{ ...textStyles.caption, color: colors.textSecondary, marginTop: 8 }}>
+              {t('hifz.ayahProgress', { progress: stats.totalAyahMemorized, total: stats.totalAyahCount })}
+            </Text>
+            {stats.dueReviewCount > 0 && (
+              <Text style={{ ...textStyles.bodySmall, color: colors.warningAccent, marginTop: 8 }}>
+                {t('hifz.dueForReview', { count: stats.dueReviewCount })}
               </Text>
-            </TouchableOpacity>
-          ))}
+            )}
+          </View>
+
+          <View style={{ marginTop: SPACING.md }}>
+            <SettingsSegmented
+              value={filter}
+              options={FILTERS.map((f) => ({ id: f, label: t(`hifz.filters.${f}`) }))}
+              onChange={setFilter}
+              getTestID={(opt) => `hifz-filter-${opt.id}`}
+            />
+          </View>
         </View>
       </View>
 
@@ -167,7 +160,7 @@ export default function HifzTrackerScreen({ navigation }) {
         testID="hifz-surah-list"
         data={rows}
         keyExtractor={({ surah }) => String(surah.id)}
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{ width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center', padding: SPACING.lg, paddingBottom: insets.bottom + SPACING.xxl }}
         renderItem={({ item }) => (
           <SurahRow surah={item.surah} entry={item.entry} due={item.due} colors={colors} lang={lang} />
         )}

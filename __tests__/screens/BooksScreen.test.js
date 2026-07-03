@@ -10,6 +10,7 @@ const mockNavigation = {
 };
 
 jest.mock('../../locales/i18n', () => ({
+  getCurrentLanguage: jest.fn(() => 'en'),
   t: (key) => key,
   isRTL: () => false,
   getDirectionalSpacing: jest.fn(() => ({})),

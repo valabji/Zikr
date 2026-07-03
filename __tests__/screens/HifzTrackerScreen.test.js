@@ -1,4 +1,5 @@
 jest.mock('../../locales/i18n', () => ({
+  getCurrentLanguage: jest.fn(() => 'en'),
   t: (k, params) => (params ? `${k}:${JSON.stringify(params)}` : k),
   getDirectionalMixedSpacing: () => ({}),
   isRTL: () => false,

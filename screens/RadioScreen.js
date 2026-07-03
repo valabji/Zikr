@@ -11,10 +11,16 @@ import RadioService from '../utils/RadioService';
 import {
   loadRadioFavorites, toggleRadioFavorite, subscribeRadioFavorites,
 } from '../utils/RadioFavorites';
+import { SettingsSegmented } from '../components/settings';
+import {
+  SPACING, RADIUS, CONTENT_MAX_WIDTH, withAlpha, webCursor,
+} from '../constants/settingsTokens';
+import { useRTL } from '../hooks/useRTL';
 
 export default function RadioScreen({ navigation }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { isRTL: isRTLLayout, getDirectionalMixedSpacing } = useRTL();
   const lang = isRTL() ? 'ar' : 'en';
 
   const [stations, setStations] = React.useState(null);
@@ -58,18 +64,17 @@ export default function RadioScreen({ navigation }) {
       <TouchableOpacity
         testID={`station-${item.id}`}
         onPress={() => onPressStation(item)}
-        style={{
-          flexDirection: 'row',
+        style={[{ flexDirection: 'row',
           alignItems: 'center',
-          paddingVertical: 14,
-          paddingHorizontal: 18,
+          paddingVertical: SPACING.md + 2,
+          paddingHorizontal: SPACING.lg + 2,
           borderBottomWidth: 1,
-          borderBottomColor: colors.accent + '22',
-        }}
+          borderBottomColor: withAlpha(colors.accent, 'hairline'),
+        }, webCursor]}
       >
         <View style={{
           width: 48, height: 48, borderRadius: 24,
-          backgroundColor: active ? colors.accent : colors.accent + '22',
+          backgroundColor: active ? colors.accent : withAlpha(colors.accent, 'hairline'),
           justifyContent: 'center', alignItems: 'center',
         }}>
           <Feather
@@ -86,8 +91,8 @@ export default function RadioScreen({ navigation }) {
             </Text>
           ) : null}
           {active ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-              <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.accent, marginRight: 6 }} />
+            <View style={[{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }]}>
+              <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.accent, ...getDirectionalMixedSpacing({ marginRight: 6 }) }} />
               <Text style={[textStyles.base, { color: colors.accent, fontSize: 12 }]}>
                 {radio.isBuffering ? t('radio.loading') : t('radio.nowPlaying')}
               </Text>
@@ -98,7 +103,7 @@ export default function RadioScreen({ navigation }) {
           testID={`fav-${item.id}`}
           onPress={() => toggleRadioFavorite(item.id)}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          style={{ paddingHorizontal: 4 }}
+          style={[{ paddingHorizontal: SPACING.xs }, webCursor]}
         >
           <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? colors.accent : colors.textSecondary} />
         </TouchableOpacity>
@@ -106,39 +111,29 @@ export default function RadioScreen({ navigation }) {
     );
   };
 
-  const Tab = ({ id, label }) => {
-    const active = tab === id;
-    return (
-      <TouchableOpacity
-        testID={`radio-tab-${id}`}
-        onPress={() => setTab(id)}
-        style={{
-          flex: 1, paddingVertical: 10, alignItems: 'center',
-          borderBottomWidth: 2,
-          borderBottomColor: active ? colors.accent : 'transparent',
-        }}
-      >
-        <Text style={[textStyles.base, { color: active ? colors.accent : colors.textSecondary, fontSize: 15 }]}>
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  const headerControls = { width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="radio-screen">
       <CustomHeader title={t('navigation.radio')} isHome={true} navigation={navigation} />
 
-      <View style={{ flexDirection: 'row', backgroundColor: colors.surface }}>
-        <Tab id="all" label={t('radio.all')} />
-        <Tab id="favorites" label={t('radio.favorites')} />
+      <View style={[headerControls, { paddingHorizontal: SPACING.lg, paddingTop: SPACING.md, paddingBottom: SPACING.sm }]}>
+        <SettingsSegmented
+          value={tab}
+          onChange={setTab}
+          options={[
+            { id: 'all', label: t('radio.all') },
+            { id: 'favorites', label: t('radio.favorites') },
+          ]}
+          getTestID={(opt) => `radio-tab-${opt.id}`}
+        />
       </View>
 
-      <View style={{ paddingHorizontal: 14, paddingVertical: 10 }}>
-        <View style={{
-          flexDirection: 'row', alignItems: 'center',
-          backgroundColor: colors.surface, borderRadius: 10, paddingHorizontal: 12,
-        }}>
+      <View style={[headerControls, { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm + 2 }]}>
+        <View style={[{ flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: colors.surface, borderRadius: RADIUS.control, paddingHorizontal: SPACING.md,
+        }]}>
           <Feather name="search" size={18} color={colors.textSecondary} />
           <TextInput
             testID="radio-search"
@@ -177,7 +172,7 @@ export default function RadioScreen({ navigation }) {
           data={filtered}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderStation}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 90 }}
+          contentContainerStyle={{ ...headerControls, paddingBottom: insets.bottom + 90 }}
         />
       )}
     </View>

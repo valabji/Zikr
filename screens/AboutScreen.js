@@ -1,15 +1,19 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, Alert, Share } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Linking, Alert, Share } from 'react-native';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
-import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
+import { t } from '../locales/i18n';
+import { useRTL } from '../hooks/useRTL';
 import CHeader from '../components/CHeader';
 import { LogoSvg } from '../components/LogoSvg';
 import { ABOUT_LINKS } from '../constants/AboutConstants';
+import { SettingsContainer, SettingsSection, SettingsRow } from '../components/settings';
+import { SPACING, webCursor } from '../constants/settingsTokens';
 
 export default function AboutScreen({ navigation }) {
   const colors = useColors();
+  const { getTextAlign, getDirectionalMixedSpacing } = useRTL();
   const version = Constants.expoConfig?.version || '';
   const year = new Date().getFullYear();
 
@@ -23,108 +27,67 @@ export default function AboutScreen({ navigation }) {
     Share.share({ message: t('share.message') });
   };
 
-  const card = {
-    backgroundColor: colors.DGreen,
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 16,
-  };
-
-  const heading = {
-    color: colors.BYellow,
-    fontSize: 18,
-    fontFamily: 'Cairo_400Regular',
-    marginBottom: 12,
-    textAlign: getRTLTextAlign('left'),
-  };
-
-  const LinkRow = ({ icon, label, onPress, testID }) => (
-    <TouchableOpacity
-      testID={testID}
-      onPress={onPress}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.BGreen,
-        borderRadius: 10,
-        padding: 14,
-        marginTop: 8,
-      }}
-    >
-      <Feather name={icon} size={20} color={colors.BYellow} />
-      <Text style={{
-        color: colors.BYellow,
-        fontSize: 16,
-        fontFamily: 'Cairo_400Regular',
-        flex: 1,
-        textAlign: getRTLTextAlign('left'),
-        ...getDirectionalMixedSpacing({ marginLeft: 12 }),
-      }}>{label}</Text>
-      <Feather name="external-link" size={18} color={colors.BYellow} />
-    </TouchableOpacity>
-  );
-
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="about-screen-root">
+    <View style={{ flex: 1, backgroundColor: colors.background }} testID="about-screen-root">
       <CHeader navigation={navigation} title={t('about.title')} />
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
-        <View style={[card, { alignItems: 'center' }]}>
-          <LogoSvg color={colors.BYellow} spacing={80} width={110} height={128} />
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: 24,
-            fontWeight: '600',
-            fontFamily: 'Cairo_400Regular',
-            marginTop: 8,
-          }}>{t('app.name')}</Text>
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: 13,
-            fontFamily: 'Cairo_400Regular',
-            opacity: 0.8,
-            marginBottom: 14,
-          }}>{t('about.version', { version })}</Text>
-          <Text style={{
-            color: colors.BYellow,
-            fontSize: 15,
-            fontFamily: 'Cairo_400Regular',
-            lineHeight: 24,
-            textAlign: 'center',
-          }}>{t('about.description')}</Text>
-        </View>
+      <SettingsContainer>
+        <SettingsSection>
+          <View style={{ alignItems: 'center', padding: SPACING.xl }}>
+            <LogoSvg color={colors.accent} spacing={80} width={110} height={128} />
+            <Text style={{
+              color: colors.text,
+              fontSize: 24,
+              fontWeight: '600',
+              fontFamily: 'Cairo_400Regular',
+              marginTop: SPACING.sm,
+            }}>{t('app.name')}</Text>
+            <Text style={{
+              color: colors.textSecondary,
+              fontSize: 13,
+              fontFamily: 'Cairo_400Regular',
+              marginBottom: SPACING.md,
+            }}>{t('about.version', { version })}</Text>
+            <Text style={{
+              color: colors.text,
+              fontSize: 15,
+              fontFamily: 'Cairo_400Regular',
+              lineHeight: 24,
+              textAlign: 'center',
+            }}>{t('about.description')}</Text>
+          </View>
+        </SettingsSection>
 
-        <View style={card}>
-          <Text style={heading}>{t('about.developer')}</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <SettingsSection title={t('about.developer')}>
+          <View style={[{ flexDirection: 'row', alignItems: 'center', padding: SPACING.lg }]}>
             <Image
               source={require('../assets/images/developer.jpg')}
-              style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.BGreen }}
+              style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.surface }}
             />
             <View style={{ flex: 1, ...getDirectionalMixedSpacing({ marginLeft: 14, marginRight: 14 }) }}>
               <Text style={{
-                color: colors.BYellow,
+                color: colors.text,
                 fontSize: 17,
                 fontWeight: '600',
                 fontFamily: 'Cairo_400Regular',
-                textAlign: getRTLTextAlign('left'),
+                textAlign: getTextAlign('left'),
               }}>{t('about.developerName')}</Text>
               <Text style={{
-                color: colors.BYellow,
+                color: colors.textSecondary,
                 fontSize: 13,
                 fontFamily: 'Cairo_400Regular',
-                opacity: 0.8,
                 marginTop: 2,
-                textAlign: getRTLTextAlign('left'),
+                textAlign: getTextAlign('left'),
               }}>{t('about.developerRole')}</Text>
               <TouchableOpacity
                 testID="about-developer-link"
+                accessibilityRole="link"
                 onPress={() => openUrl(ABOUT_LINKS.DEVELOPER)}
-                style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}
+                style={[{ flexDirection: 'row', alignItems: 'center', marginTop: SPACING.sm }, webCursor]}
               >
-                <Feather name="external-link" size={14} color={colors.BYellow} />
+                <Feather name="external-link" size={14} color={colors.accent} />
                 <Text style={{
-                  color: colors.BYellow,
+                  color: colors.accent,
                   fontSize: 13,
                   fontFamily: 'Cairo_400Regular',
                   textDecorationLine: 'underline',
@@ -133,83 +96,48 @@ export default function AboutScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </SettingsSection>
 
-        <View style={card}>
-          <Text style={heading}>{t('about.links')}</Text>
-          <LinkRow testID="about-link-website" icon="globe" label={t('about.website')} onPress={() => openUrl(ABOUT_LINKS.WEBSITE)} />
-          <LinkRow testID="about-link-github" icon="github" label={t('about.github')} onPress={() => openUrl(ABOUT_LINKS.GITHUB)} />
-          <LinkRow testID="about-link-playstore" icon="play" label={t('about.playStore')} onPress={() => openUrl(ABOUT_LINKS.PLAY_STORE)} />
-          <LinkRow testID="about-link-share" icon="share-2" label={t('about.shareApp')} onPress={shareApp} />
-        </View>
+        <SettingsSection title={t('about.links')}>
+          <SettingsRow testID="about-link-website" icon="globe" label={t('about.website')} trailing={<Feather name="external-link" size={18} color={colors.accent} />} onPress={() => openUrl(ABOUT_LINKS.WEBSITE)} />
+          <SettingsRow testID="about-link-github" icon="github" label={t('about.github')} trailing={<Feather name="external-link" size={18} color={colors.accent} />} onPress={() => openUrl(ABOUT_LINKS.GITHUB)} />
+          <SettingsRow testID="about-link-playstore" icon="play" label={t('about.playStore')} trailing={<Feather name="external-link" size={18} color={colors.accent} />} onPress={() => openUrl(ABOUT_LINKS.PLAY_STORE)} />
+          <SettingsRow testID="about-link-share" icon="share-2" label={t('about.shareApp')} trailing={<Feather name="external-link" size={18} color={colors.accent} />} onPress={shareApp} />
+        </SettingsSection>
 
-        <TouchableOpacity
-          testID="about-contribute-link"
-          onPress={() => navigation.navigate('Contribute')}
-          style={[card, { flexDirection: 'row', alignItems: 'center', marginBottom: 16 }]}
-        >
-          <Feather name="help-circle" size={24} color={colors.BYellow} />
-          <View style={{ flex: 1, ...getDirectionalMixedSpacing({ marginLeft: 14, marginRight: 14 }) }}>
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: 16,
-              fontFamily: 'Cairo_400Regular',
-              textAlign: getRTLTextAlign('left'),
-            }}>{t('about.contribute')}</Text>
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: 13,
-              fontFamily: 'Cairo_400Regular',
-              opacity: 0.8,
-              marginTop: 2,
-              textAlign: getRTLTextAlign('left'),
-            }}>{t('about.contributeDesc')}</Text>
-          </View>
-          <Feather name={isRTL() ? 'chevron-left' : 'chevron-right'} size={24} color={colors.BYellow} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          testID="about-credits-link"
-          onPress={() => navigation.navigate('Credits')}
-          style={[card, { flexDirection: 'row', alignItems: 'center', marginBottom: 16 }]}
-        >
-          <Feather name="award" size={24} color={colors.BYellow} />
-          <View style={{ flex: 1, ...getDirectionalMixedSpacing({ marginLeft: 14, marginRight: 14 }) }}>
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: 16,
-              fontFamily: 'Cairo_400Regular',
-              textAlign: getRTLTextAlign('left'),
-            }}>{t('about.creditsLink')}</Text>
-            <Text style={{
-              color: colors.BYellow,
-              fontSize: 13,
-              fontFamily: 'Cairo_400Regular',
-              opacity: 0.8,
-              marginTop: 2,
-              textAlign: getRTLTextAlign('left'),
-            }}>{t('about.creditsLinkDesc')}</Text>
-          </View>
-          <Feather name={isRTL() ? 'chevron-left' : 'chevron-right'} size={24} color={colors.BYellow} />
-        </TouchableOpacity>
+        <SettingsSection>
+          <SettingsRow
+            testID="about-contribute-link"
+            icon="help-circle"
+            label={t('about.contribute')}
+            description={t('about.contributeDesc')}
+            chevron
+            onPress={() => navigation.navigate('Contribute')}
+          />
+          <SettingsRow
+            testID="about-credits-link"
+            icon="award"
+            label={t('about.creditsLink')}
+            description={t('about.creditsLinkDesc')}
+            chevron
+            onPress={() => navigation.navigate('Credits')}
+          />
+        </SettingsSection>
 
         <Text style={{
-          color: colors.BYellow,
+          color: colors.textSecondary,
           fontSize: 13,
           fontFamily: 'Cairo_400Regular',
           textAlign: 'center',
-          opacity: 0.85,
-          marginBottom: 4,
+          marginBottom: SPACING.xs,
         }}>{t('about.rights', { year })}</Text>
         <Text style={{
-          color: colors.BYellow,
+          color: colors.textSecondary,
           fontSize: 13,
           fontFamily: 'Cairo_400Regular',
           textAlign: 'center',
-          opacity: 0.7,
-          marginBottom: 24,
         }}>{t('about.madeWith')}</Text>
-      </ScrollView>
+      </SettingsContainer>
     </View>
   );
 }

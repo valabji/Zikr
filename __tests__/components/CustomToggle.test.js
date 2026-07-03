@@ -1,10 +1,3 @@
-jest.mock('../../hooks/useRTL', () => ({
-  useRTL: () => ({
-    isRTL: false,
-    getFlexDirection: (d) => d,
-  }),
-}));
-
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import CustomToggle from '../../components/CustomToggle';

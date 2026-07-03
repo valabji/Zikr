@@ -23,18 +23,12 @@ jest.mock('react-native-reanimated', () => ({
   },
   // Add other exports if your code uses them
 }));
-// Mock the Colors module
+// Mock the Colors module — keep the real useColors so the shared settings
+// primitives receive the full semantic palette; only stub useTheme's variant spies.
 const mockSetAutoVariantEnabled = jest.fn();
 const mockLockVariant = jest.fn();
 jest.mock('../../constants/Colors', () => ({
-  useColors: () => ({
-    BGreen: '#003C34',
-    DGreen: '#002520',
-    MGreen: '#002B25',
-    BYellow: '#FFE29D',
-    DYellow: '#D1955E',
-    shadowColor: '#000000',
-  }),
+  ...jest.requireActual('../../constants/Colors'),
   useTheme: () => ({
     theme: 'originalGreen',
     setTheme: jest.fn(),
@@ -59,8 +53,10 @@ jest.mock('../../utils/Sounds', () => ({
 jest.mock('../../locales/i18n', () => ({
   setLanguage: jest.fn(),
   t: (key) => key,
+  getCurrentLanguage: jest.fn(() => 'en'),
   getDirectionalMixedSpacing: (spacing) => spacing,
   getRTLTextAlign: () => ({ textAlign: 'left' }),
+  getDirectionalPadding: jest.fn((p) => p),
   isRTL: jest.fn(() => false),
   getDirectionalSpacing: jest.fn((left, right) => ({ marginLeft: left, marginRight: right })),
 }));

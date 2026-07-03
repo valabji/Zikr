@@ -52,6 +52,7 @@ jest.mock('@react-navigation/drawer', () => ({
 
 // Mock i18n
 jest.mock('../../locales/i18n', () => ({
+  getCurrentLanguage: jest.fn(() => 'en'),
   t: (key) => key,
   setLanguage: jest.fn(() => Promise.resolve()),
   isRTL: jest.fn(() => false),

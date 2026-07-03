@@ -17,6 +17,7 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 import { calculateQiblaDirection } from '../utils/PrayerUtils';
+import { CONTENT_MAX_WIDTH } from '../constants/settingsTokens';
 
 export default function QiblaScreen({ navigation }) {
   const colors = useColors();
@@ -213,7 +214,10 @@ export default function QiblaScreen({ navigation }) {
           padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING,
           paddingTop: 10,
           alignItems: 'center',
-          minHeight: '100%'
+          minHeight: '100%',
+          width: '100%',
+          maxWidth: CONTENT_MAX_WIDTH,
+          alignSelf: 'center'
         }}
         showsVerticalScrollIndicator={false}
       >

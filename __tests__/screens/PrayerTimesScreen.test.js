@@ -1,4 +1,5 @@
 jest.mock('../../locales/i18n', () => ({
+  getCurrentLanguage: jest.fn(() => 'en'),
   t: (k) => k,
   getDirectionalMixedSpacing: () => ({}),
   getRTLTextAlign: () => 'left',
