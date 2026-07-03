@@ -1,6 +1,7 @@
 // Reset modules so the singleton's auto-initialize() in module scope runs fresh per test.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
+import { Vibration } from 'react-native';
 
 const VIBRATION_TYPES = {
   OFF: 'off',
@@ -183,19 +184,61 @@ describe('VibrationManager', () => {
       await expect(m.isVibrationSupported()).resolves.toBe(false);
     });
 
-    it('returns true on native when haptics succeed', async () => {
+    it('returns true on native without firing a haptic', async () => {
       AsyncStorage.getItem.mockResolvedValue(null);
       const { default: m } = await loadVibration();
-      Haptics.impactAsync.mockResolvedValueOnce();
       await expect(m.isVibrationSupported()).resolves.toBe(true);
+      expect(Haptics.impactAsync).not.toHaveBeenCalled();
+      expect(Vibration.vibrate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('android path', () => {
+    beforeEach(() => {
+      global.Platform.OS = 'android';
     });
 
-    it('returns false on native when haptics throw', async () => {
-      AsyncStorage.getItem.mockResolvedValue(null);
-      const { default: m } = await loadVibration();
-      Haptics.impactAsync.mockRejectedValueOnce(new Error('no'));
-      await expect(m.isVibrationSupported()).resolves.toBe(false);
+    it('vibrates by duration per intensity and does not use haptics', async () => {
+      const cases = [
+        [VIBRATION_INTENSITY.LIGHT, 20],
+        [VIBRATION_INTENSITY.MEDIUM, 40],
+        [VIBRATION_INTENSITY.HEAVY, 60],
+      ];
+      for (const [intensity, duration] of cases) {
+        AsyncStorage.getItem.mockImplementation((k) => {
+          if (k === '@vibrationTasbih') return Promise.resolve('true');
+          if (k === '@vibrationIntensity') return Promise.resolve(intensity);
+          return Promise.resolve(null);
+        });
+        const { default: m } = await loadVibration();
+        Vibration.vibrate.mockClear();
+        m.vibrateForTasbih();
+        expect(Vibration.vibrate).toHaveBeenCalledWith(duration);
+      }
+      expect(Haptics.impactAsync).not.toHaveBeenCalled();
     });
+
+    it('uses a double-buzz pattern on tasbih complete', async () => {
+      AsyncStorage.getItem.mockImplementation((k) => {
+        if (k === '@vibrationTasbih') return Promise.resolve('true');
+        return Promise.resolve(null);
+      });
+      const { default: m } = await loadVibration();
+      m.vibrateForTasbihComplete();
+      expect(Vibration.vibrate).toHaveBeenCalledWith([0, 30, 40, 30]);
+      expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  it('uses Haptics success notification on tasbih complete (iOS)', async () => {
+    AsyncStorage.getItem.mockImplementation((k) => {
+      if (k === '@vibrationTasbih') return Promise.resolve('true');
+      return Promise.resolve(null);
+    });
+    const { default: m } = await loadVibration();
+    m.vibrateForTasbihComplete();
+    expect(Haptics.notificationAsync).toHaveBeenCalledWith(Haptics.NotificationFeedbackType.Success);
+    expect(Vibration.vibrate).not.toHaveBeenCalled();
   });
 
   it('warns if vibrate methods are called before init', async () => {

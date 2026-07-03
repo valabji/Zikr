@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { Platform, Vibration as RNVibration } from 'react-native';
 
 // Vibration types
 export const VIBRATION_TYPES = {
@@ -14,6 +14,13 @@ export const VIBRATION_INTENSITY = {
   LIGHT: 'light',
   MEDIUM: 'medium',
   HEAVY: 'heavy'
+};
+
+// Android uses RN Vibration (device-default amplitude); expo-haptics' presets are imperceptibly faint on many devices.
+const ANDROID_DURATIONS = {
+  light: 20,
+  medium: 40,
+  heavy: 60
 };
 
 class VibrationManager {
@@ -99,6 +106,10 @@ class VibrationManager {
     if (!this.isInitialized) return;
     if (this.tasbihEnabled) {
       if (Platform.OS === 'web') return;
+      if (Platform.OS === 'android') {
+        RNVibration.vibrate([0, 30, 40, 30]);
+        return;
+      }
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (error) { console.warn('Vibration failed:', error); }
     }
   }
@@ -129,23 +140,18 @@ class VibrationManager {
 
   // Check if vibration is supported
   async isVibrationSupported() {
-    // Skip vibration on web
-    if (Platform.OS === 'web') {
-      return false;
-    }
-
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    return Platform.OS !== 'web';
   }
 
   // Perform the actual vibration
   performVibration(intensity = 'light') {
     // Skip vibration on web
     if (Platform.OS === 'web') {
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      RNVibration.vibrate(ANDROID_DURATIONS[intensity] ?? ANDROID_DURATIONS.light);
       return;
     }
 

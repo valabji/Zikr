@@ -343,6 +343,10 @@ jest.mock('react-native', () => {
     Share: {
       share: jest.fn(),
     },
+    Vibration: {
+      vibrate: jest.fn(),
+      cancel: jest.fn(),
+    },
     Dimensions: {
       get: jest.fn(() => ({ width: 375, height: 667 })),
       addEventListener: jest.fn(),
