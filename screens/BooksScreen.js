@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
+import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
@@ -13,10 +13,12 @@ import {
 } from '../utils/BooksLibrary';
 import BooksDownloader from '../utils/BooksDownloader';
 import { loadBooksSettings, setBooksSettings, subscribeBooksSettings } from '../utils/BooksSettings';
-import { FONT_SCALE_RANGE } from '../constants/BooksConstants';
+import { FONT_SCALE_RANGE, BOOK_GROUPS } from '../constants/BooksConstants';
+import { SPACING, RADIUS, CONTENT_MAX_WIDTH, withAlpha, shadow, webCursor } from '../constants/settingsTokens';
 import BooksIndexModal from './BooksIndexModal';
 import BooksSearchModal from './BooksSearchModal';
 import BooksSettingsModal from './BooksSettingsModal';
+import BookInfoScreen from './BookInfoScreen';
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
@@ -72,8 +74,8 @@ export default function BooksScreen({ navigation }) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [dlState, setDlState] = React.useState({});
+  const [infoBook, setInfoBook] = React.useState(null);
   const [highlightIndex, setHighlightIndex] = React.useState(null);
-  const pendingOpenRef = React.useRef(null);
   const highlightTimeoutRef = React.useRef(null);
 
   React.useEffect(() => () => {
@@ -116,30 +118,45 @@ export default function BooksScreen({ navigation }) {
     setHighlightIndex(null);
   }, []);
 
-  React.useEffect(() => {
-    const id = pendingOpenRef.current;
-    if (id && dlState[id] && dlState[id].installed) {
-      pendingOpenRef.current = null;
-      openBook(id);
-    }
-  }, [dlState, openBook]);
+  const openInfo = React.useCallback((item) => {
+    setInfoBook(item);
+    setMode('info');
+  }, []);
 
-  const onPressCatalog = React.useCallback((item) => {
-    const st = dlState[item.id];
-    if (item.bundled || (st && st.installed)) { openBook(item.id); return; }
-    if (st && st.downloading) { BooksDownloader.cancel(item.id); return; }
-    pendingOpenRef.current = item.id;
-    BooksDownloader.start(item);
-  }, [dlState, openBook]);
+  const closeInfo = React.useCallback(() => {
+    setMode('library');
+    setInfoBook(null);
+  }, []);
 
-  const onLongPressCatalog = React.useCallback((item) => {
-    if (item.bundled || !dlState[item.id] || !dlState[item.id].installed) return;
-    const name = lang === 'ar' ? item.nameAr : item.nameEn;
+  const onInfoRead = React.useCallback(() => {
+    if (infoBook) openBook(infoBook.id);
+  }, [infoBook, openBook]);
+
+  const onInfoDownload = React.useCallback(() => {
+    if (infoBook) BooksDownloader.start(infoBook);
+  }, [infoBook]);
+
+  const onInfoCancel = React.useCallback(() => {
+    if (infoBook) BooksDownloader.cancel(infoBook.id);
+  }, [infoBook]);
+
+  const onInfoRemove = React.useCallback(() => {
+    if (!infoBook) return;
+    const name = lang === 'ar' ? infoBook.nameAr : infoBook.nameEn;
     Alert.alert(name, t('books.removeConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
-      { text: t('books.remove'), style: 'destructive', onPress: () => BooksDownloader.uninstall(item.id) },
+      { text: t('books.remove'), style: 'destructive', onPress: () => BooksDownloader.uninstall(infoBook.id) },
     ]);
-  }, [dlState, lang]);
+  }, [infoBook, lang]);
+
+  const continueBook = React.useMemo(() => {
+    const id = settings?.lastBookId;
+    if (!id) return null;
+    const meta = catalog.find((b) => b.id === id);
+    if (!meta) return null;
+    const ready = meta.bundled || !!(dlState[id] && dlState[id].installed);
+    return ready ? meta : null;
+  }, [settings?.lastBookId, catalog, dlState]);
 
   const jumpToIndex = React.useCallback((index, { highlight = false } = {}) => {
     setIndexOpen(false);
@@ -218,32 +235,38 @@ export default function BooksScreen({ navigation }) {
     [entryLayouts]
   );
 
-  const renderCatalogAccessory = (item, st, ready) => {
-    if (ready) {
-      return <Feather name={isRTL() ? 'chevron-left' : 'chevron-right'} size={22} color={colors.textSecondary} />;
-    }
-    if (st && st.downloading) {
-      return (
-        <View style={{ alignItems: 'center', width: 52 }}>
-          <ActivityIndicator size="small" color={colors.accent} />
-          <Text style={[textStyles.base, { color: colors.accent, fontSize: 11, marginTop: 2 }]}>
-            {fmtNum(Math.round((st.progress || 0) * 100))}%
-          </Text>
-        </View>
-      );
-    }
-    const failed = !!(st && st.error);
+  const renderContinueCard = () => {
+    if (!continueBook) return null;
+    const name = lang === 'ar' ? continueBook.nameAr : continueBook.nameEn;
     return (
-      <View style={{ alignItems: 'center', width: 52 }}>
-        <Feather name={failed ? 'rotate-ccw' : 'download'} size={22} color={failed ? colors.DYellow : colors.accent} />
-        <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 11, marginTop: 2 }]}>
-          {failed ? t('books.downloadRetry') : `${item.sizeMB} MB`}
-        </Text>
-      </View>
+      <TouchableOpacity
+        testID="books-continue"
+        onPress={() => openBook(continueBook.id)}
+        style={[{
+          flexDirection: 'row', alignItems: 'center',
+          backgroundColor: colors.accent,
+          borderRadius: RADIUS.card,
+          padding: SPACING.lg,
+          marginBottom: SPACING.xl,
+        }, shadow(colors.shadowColor), webCursor]}
+      >
+        <View style={{
+          width: 44, height: 44, borderRadius: 22,
+          backgroundColor: withAlpha(colors.primary, 'hairline'),
+          justifyContent: 'center', alignItems: 'center',
+        }}>
+          <Feather name="book-open" size={22} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1, marginHorizontal: SPACING.md, ...(lang === 'ar' ? { direction: 'rtl' } : null) }}>
+          <Text style={[textStyles.caption, { color: colors.primary, opacity: 0.8 }]}>{t('books.continueReading')}</Text>
+          <Text numberOfLines={1} style={[textStyles.subtitle, { color: colors.primary, marginTop: 2 }, lang === 'ar' ? arabicContentStyle() : null]}>{name}</Text>
+        </View>
+        <Feather name={isRTL() ? 'chevron-left' : 'chevron-right'} size={22} color={colors.primary} />
+      </TouchableOpacity>
     );
   };
 
-  const renderCatalogHeader = () => {
+  const renderDownloadAllBanner = () => {
     const downloadable = catalog.filter((b) => !b.bundled);
     if (!downloadable.length) return null;
     const pending = downloadable.filter((b) => !(dlState[b.id] && dlState[b.id].installed));
@@ -256,16 +279,16 @@ export default function BooksScreen({ navigation }) {
         testID="books-download-all"
         disabled={busy}
         onPress={() => BooksDownloader.startAll(pending)}
-        style={{
+        style={[{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-          marginHorizontal: 14, marginTop: 14, marginBottom: 2, paddingVertical: 12,
-          borderRadius: 12, backgroundColor: colors.accent + (busy ? '14' : '22'),
-        }}
+          marginBottom: SPACING.xl, paddingVertical: SPACING.md,
+          borderRadius: RADIUS.card, backgroundColor: withAlpha(colors.accent, busy ? 'subtle' : 'hairline'),
+        }, webCursor]}
       >
         {busy
           ? <ActivityIndicator size="small" color={colors.accent} />
           : <Feather name="download-cloud" size={20} color={colors.accent} />}
-        <Text style={[textStyles.base, { color: colors.accent, fontSize: 15, marginHorizontal: 8 }]}>
+        <Text style={[textStyles.base, { color: colors.accent, fontSize: 15, marginHorizontal: SPACING.sm }]}>
           {busy
             ? t('books.downloadingAll', { done: fmtNum(installed), total: fmtNum(downloadable.length) })
             : `${t('books.downloadAll')} · ${fmtNum(Math.round(totalMB))} MB`}
@@ -274,42 +297,105 @@ export default function BooksScreen({ navigation }) {
     );
   };
 
-  const renderCatalogItem = ({ item }) => {
+  const renderCardBadge = (item, st, ready) => {
+    if (st && st.downloading) {
+      return <Text style={[textStyles.caption, { color: colors.accent }]}>{fmtNum(Math.round((st.progress || 0) * 100))}%</Text>;
+    }
+    if (st && st.error) {
+      return <Feather name="rotate-ccw" size={16} color={colors.DYellow} />;
+    }
+    if (!ready) {
+      return <Feather name="download" size={16} color={colors.textSecondary} />;
+    }
+    if (!item.bundled) {
+      return <Feather name="check-circle" size={16} color={colors.accent} />;
+    }
+    return null;
+  };
+
+  const renderBookCard = (item) => {
     const name = lang === 'ar' ? item.nameAr : item.nameEn;
     const author = lang === 'ar' ? item.authorAr : item.authorEn;
     const st = dlState[item.id];
     const ready = item.bundled || !!(st && st.installed);
-    const countLabel = t('books.entryCount', { count: fmtNum(item.count) });
     return (
       <TouchableOpacity
+        key={item.id}
         testID={`book-${item.id}`}
-        onPress={() => onPressCatalog(item)}
-        onLongPress={() => onLongPressCatalog(item)}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 16,
-          paddingHorizontal: 18,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.accent + '22',
-        }}
+        onPress={() => openInfo(item)}
+        style={[{
+          width: '48%',
+          backgroundColor: colors.surface,
+          borderRadius: RADIUS.card,
+          padding: SPACING.md,
+          marginBottom: SPACING.md,
+        }, shadow(colors.shadowColor), webCursor]}
       >
-        <View style={{
-          width: 48, height: 48, borderRadius: 24,
-          backgroundColor: colors.accent + '22',
-          justifyContent: 'center', alignItems: 'center',
-        }}>
-          <Feather name={ready ? 'book' : 'cloud'} size={22} color={colors.accent} />
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <View style={{
+            width: 40, height: 40, borderRadius: 20,
+            backgroundColor: withAlpha(colors.accent, 'hairline'),
+            justifyContent: 'center', alignItems: 'center',
+          }}>
+            <Feather name="book" size={20} color={colors.accent} />
+          </View>
+          {renderCardBadge(item, st, ready)}
         </View>
-        <View style={{ flex: 1, marginHorizontal: 14, ...(lang === 'ar' ? { direction: 'rtl' } : null) }}>
-          <Text style={[textStyles.subtitle, { color: colors.text }, lang === 'ar' ? arabicContentStyle() : null]} numberOfLines={1}>{name}</Text>
-          {author ? (
-            <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 13, marginTop: 2 }, lang === 'ar' ? arabicContentStyle() : null]} numberOfLines={1}>{author}</Text>
-          ) : null}
-          <Text style={[textStyles.base, { color: colors.accent, fontSize: 12, marginTop: 2 }]}>{countLabel}</Text>
-        </View>
-        {renderCatalogAccessory(item, st, ready)}
+        <Text numberOfLines={2} style={[textStyles.subtitle, { color: colors.text, fontSize: 15, marginTop: SPACING.sm, minHeight: 40 }, lang === 'ar' ? arabicContentStyle() : null]}>{name}</Text>
+        {author ? (
+          <Text numberOfLines={1} style={[textStyles.caption, { color: colors.textSecondary, marginTop: 2 }, lang === 'ar' ? arabicContentStyle() : null]}>{author}</Text>
+        ) : null}
+        <Text style={[textStyles.caption, { color: colors.accent, marginTop: SPACING.xs }]}>{t('books.entryCount', { count: fmtNum(item.count) })}</Text>
       </TouchableOpacity>
+    );
+  };
+
+  const isReady = React.useCallback((item) => {
+    const st = dlState[item.id];
+    return item.bundled || !!(st && st.installed);
+  }, [dlState]);
+
+  const renderGroup = (group, filter) => {
+    const books = group.ids
+      .map((id) => catalog.find((b) => b.id === id))
+      .filter(Boolean)
+      .filter(filter);
+    if (!books.length) return null;
+    return (
+      <View key={group.id} style={{ marginBottom: SPACING.lg }}>
+        <Text style={[textStyles.bodySmall, {
+          color: colors.textSecondary, fontWeight: '600', letterSpacing: 0.5,
+          marginBottom: SPACING.sm, marginHorizontal: SPACING.xs,
+          textAlign: lang === 'ar' ? 'right' : 'left',
+        }]}>
+          {t(`books.groups.${group.id}`)}
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', ...(lang === 'ar' ? { direction: 'rtl' } : null) }}>
+          {books.map(renderBookCard)}
+        </View>
+      </View>
+    );
+  };
+
+  const renderStatusSection = (ready) => {
+    const filter = (b) => isReady(b) === ready;
+    const count = catalog.filter(filter).length;
+    if (!count) return null;
+    return (
+      <View key={ready ? 'downloaded' : 'notDownloaded'} style={{ marginBottom: SPACING.xl }}>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center',
+          marginBottom: SPACING.md, marginHorizontal: SPACING.xs,
+          ...(lang === 'ar' ? { direction: 'rtl' } : null),
+        }}>
+          <Feather name={ready ? 'check-circle' : 'download-cloud'} size={18} color={ready ? colors.accent : colors.textSecondary} />
+          <Text style={[textStyles.subtitle, { color: colors.text, marginHorizontal: SPACING.sm }]}>
+            {t(ready ? 'books.downloadedSection' : 'books.notDownloadedSection')}
+          </Text>
+          <Text style={[textStyles.caption, { color: colors.textSecondary }]}>{fmtNum(count)}</Text>
+        </View>
+        {BOOK_GROUPS.map((g) => renderGroup(g, filter))}
+      </View>
     );
   };
 
@@ -379,15 +465,34 @@ export default function BooksScreen({ navigation }) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }} testID="books-screen">
         <CustomHeader title={t('navigation.books')} isHome={true} navigation={navigation} />
-        <FlatList
-          key="books-catalog"
-          data={catalog}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCatalogItem}
-          ListHeaderComponent={renderCatalogHeader}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-        />
+        <ScrollView
+          contentContainerStyle={{
+            width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center',
+            paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg,
+            paddingBottom: insets.bottom + 20,
+          }}
+        >
+          {renderContinueCard()}
+          {renderDownloadAllBanner()}
+          {renderStatusSection(true)}
+          {renderStatusSection(false)}
+        </ScrollView>
       </View>
+    );
+  }
+
+  if (mode === 'info') {
+    return (
+      <BookInfoScreen
+        book={infoBook}
+        dlState={infoBook ? dlState[infoBook.id] : null}
+        navigation={navigation}
+        onBack={closeInfo}
+        onRead={onInfoRead}
+        onDownload={onInfoDownload}
+        onCancel={onInfoCancel}
+        onRemove={onInfoRemove}
+      />
     );
   }
 

@@ -58,10 +58,19 @@ describe('BooksScreen', () => {
     });
   });
 
-  it('opens a book into the reader when tapped', async () => {
+  it('opens a book info page when its card is tapped', async () => {
     const { getByTestId, findByTestId } = render(<BooksScreen navigation={mockNavigation} />);
     await waitFor(() => expect(getByTestId('book-nawawi40')).toBeTruthy());
     fireEvent.press(getByTestId('book-nawawi40'));
+    expect(await findByTestId('book-info')).toBeTruthy();
+    expect(await findByTestId('book-info-primary')).toBeTruthy();
+  });
+
+  it('opens the reader from the info page primary button', async () => {
+    const { getByTestId, findByTestId } = render(<BooksScreen navigation={mockNavigation} />);
+    await waitFor(() => expect(getByTestId('book-nawawi40')).toBeTruthy());
+    fireEvent.press(getByTestId('book-nawawi40'));
+    fireEvent.press(await findByTestId('book-info-primary'));
     expect(await findByTestId('books-reader')).toBeTruthy();
     expect(await findByTestId('books-pager')).toBeTruthy();
   });

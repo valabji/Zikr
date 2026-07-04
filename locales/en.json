@@ -603,8 +603,30 @@
     "downloadRetry": "Failed — tap to retry",
     "downloadAll": "Download all",
     "downloadingAll": "Downloading… {done}/{total}",
+    "downloadedSection": "Downloaded",
+    "notDownloadedSection": "Not downloaded",
     "remove": "Remove download",
-    "removeConfirm": "Remove this downloaded book from your device?"
+    "removeConfirm": "Remove this downloaded book from your device?",
+    "continueReading": "Continue reading",
+    "read": "Read",
+    "continue": "Continue reading",
+    "cancel": "Cancel download",
+    "about": "About this book",
+    "details": "Details",
+    "source": "Source",
+    "author": "Author",
+    "entriesLabel": "Entries",
+    "size": "Download size",
+    "readOnSunnah": "Read on sunnah.com",
+    "dataSource": "Data source",
+    "dataSourceDesc": "hadith-json on GitHub",
+    "groups": {
+      "sahihain": "The Two Sahihs",
+      "sunan": "The Four Sunan",
+      "muwattaMusnad": "Muwatta & Musnads",
+      "forties": "Forty-Hadith Collections",
+      "selected": "Selected Collections"
+    }
   },
   "radio": {
     "title": "Radio",

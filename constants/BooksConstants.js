@@ -29,3 +29,15 @@ export const BOOK_CATEGORIES = {
 };
 
 export const NEEDS_VERIFICATION = new Set(['qudsi40', 'shahwaliullah40']);
+
+export const SUNNAH_URL = 'https://sunnah.com/';
+
+export const DATA_REPO_URL = 'https://github.com/AhmedBaset/hadith-json';
+
+export const BOOK_GROUPS = [
+  { id: 'sahihain', ids: ['bukhari', 'muslim'] },
+  { id: 'sunan', ids: ['abudawud', 'tirmidhi', 'nasai', 'ibnmajah'] },
+  { id: 'muwattaMusnad', ids: ['malik', 'ahmed', 'darimi'] },
+  { id: 'forties', ids: ['nawawi40', 'qudsi40', 'shahwaliullah40'] },
+  { id: 'selected', ids: ['riyad_assalihin', 'aladab_almufrad', 'shamail_muhammadiyah', 'bulugh_almaram', 'mishkat_almasabih'] },
+];

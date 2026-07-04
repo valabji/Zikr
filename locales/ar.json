@@ -603,8 +603,30 @@
     "downloadRetry": "فشل التنزيل — اضغط للإعادة",
     "downloadAll": "تنزيل الكل",
     "downloadingAll": "جارٍ التنزيل… {done}/{total}",
+    "downloadedSection": "المُنزَّلة",
+    "notDownloadedSection": "غير المُنزَّلة",
     "remove": "حذف التنزيل",
-    "removeConfirm": "حذف هذا الكتاب المُنزَّل من جهازك؟"
+    "removeConfirm": "حذف هذا الكتاب المُنزَّل من جهازك؟",
+    "continueReading": "متابعة القراءة",
+    "read": "قراءة",
+    "continue": "متابعة القراءة",
+    "cancel": "إلغاء التنزيل",
+    "about": "عن الكتاب",
+    "details": "تفاصيل",
+    "source": "المصدر",
+    "author": "المؤلف",
+    "entriesLabel": "عدد الأحاديث",
+    "size": "حجم التنزيل",
+    "readOnSunnah": "اقرأ على sunnah.com",
+    "dataSource": "مصدر البيانات",
+    "dataSourceDesc": "hadith-json على GitHub",
+    "groups": {
+      "sahihain": "الصحيحان",
+      "sunan": "السنن الأربعة",
+      "muwattaMusnad": "الموطأ والمسانيد",
+      "forties": "الأربعينات",
+      "selected": "مختارات وكتب أخرى"
+    }
   },
   "radio": {
     "title": "الراديو",
