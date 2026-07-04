@@ -33,7 +33,7 @@ function Chip({ active, label, onPress, colors, icon }) {
   );
 }
 
-export default function QuranMiniPlayer({ colors, audio, onClose }) {
+export default function QuranMiniPlayer({ colors, audio, onClose, aboveSlot = null }) {
   const insets = useSafeAreaInsets();
   const [expanded, setExpanded] = React.useState(false);
   const [settings, setSettings] = React.useState(null);
@@ -63,6 +63,7 @@ export default function QuranMiniPlayer({ colors, audio, onClose }) {
       backgroundColor: colors.primaryDark,
       borderTopWidth: 1, borderTopColor: colors.accent + '44',
     }}>
+      {aboveSlot}
       {expanded ? (
         <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }}>
           <Text style={[textStyles.subtitle, { color: colors.BYellow + 'cc', fontSize: 11, marginBottom: 4 }]}>

@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, useIsBrightTheme } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
@@ -17,7 +17,7 @@ import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 import translationEn from '../assets/quran/data/translation_en.json';
 import ShareCardModal from '../components/ShareCardModal';
-import { loadQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
+import { loadQuranSettings, setQuranSettings, subscribeQuranSettings } from '../utils/QuranSettings';
 import { trackPage } from '../utils/ReadingProgress';
 import QuranAudio from '../utils/QuranAudio';
 import QuranVoiceFollower from '../utils/QuranVoiceFollower';
@@ -34,6 +34,7 @@ import QuranHdPromptModal from './QuranHdPromptModal';
 import QuranPageInfoSheet from './QuranPageInfoSheet';
 import QuranHeaderMenu from './QuranHeaderMenu';
 import QuranWordTooltip from '../components/QuranWordTooltip';
+import TajweedLegend from '../components/TajweedLegend';
 
 const { TOTAL_PAGES, STORAGE_KEYS, DEFAULT_SETTINGS } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
@@ -47,17 +48,17 @@ for (const pg of pagesData) {
 // is installed and its page fonts are loaded, draw the ayah from QCF glyph
 // codes (grouped by page font); otherwise the caller falls back to plain
 // UthmanicHafs text.
-function ayahQcfSegments(surah, ayah, settings, qcfState) {
+function ayahQcfSegments(surah, ayah, settings, qcfState, dark) {
   const edition = getMushafEdition(settings.mushafEdition);
   const version = edition.qcfVersion;
   if (!(qcfState[version] && qcfState[version].installed)) return null;
   const words = ayahLayoutWords(edition.layoutFile, `${surah}:${ayah}`).filter((w) => w.code);
   if (!words.length) return null;
   const pages = [...new Set(words.map((w) => w.page))];
-  if (!pages.every((p) => Font.isLoaded(qcfFontFamilyForPage(version, p)))) return null;
+  if (!pages.every((p) => Font.isLoaded(qcfFontFamilyForPage(version, p, dark)))) return null;
   const segments = [];
   words.forEach((w, i) => {
-    const fontFamily = qcfFontFamilyForPage(version, w.page);
+    const fontFamily = qcfFontFamilyForPage(version, w.page, dark);
     const piece = (i === 0 ? '' : ' ') + w.code;
     const last = segments[segments.length - 1];
     if (last && last.fontFamily === fontFamily) last.text += piece;
@@ -66,7 +67,7 @@ function ayahQcfSegments(surah, ayah, settings, qcfState) {
   return segments;
 }
 
-function buildAyahShareContent(a, lang, settings, qcfState) {
+function buildAyahShareContent(a, lang, settings, qcfState, dark) {
   const key = `${a.surah}:${a.ayah}`;
   const surah = surahsData[a.surah - 1];
   const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
@@ -76,7 +77,7 @@ function buildAyahShareContent(a, lang, settings, qcfState) {
   const plain = arForHafs(verseTextByKey[key] || '');
   return {
     arabic: plain,
-    arabicSegments: ayahQcfSegments(a.surah, a.ayah, settings, qcfState)
+    arabicSegments: ayahQcfSegments(a.surah, a.ayah, settings, qcfState, dark)
       || [{ text: plain, fontFamily: 'UthmanicHafs' }],
     translation: translationEn[key],
     reference,
@@ -91,11 +92,12 @@ const ayahToPage = (() => {
   return m;
 })();
 
-const HD_SIZE_LABEL = { v1: '~95 MB', v2: '~208 MB' };
+const HD_SIZE_LABEL = { v1: '~95 MB', v2: '~208 MB', v4: '~167 MB' };
 const HD_PROMPT_DISMISSED_KEY = (v) => `@quran_hd_prompt_dismissed_${v}`;
 
 export default function QuranScreen({ navigation }) {
   const colors = useColors();
+  const darkQcf = !useIsBrightTheme();
   const insets = useSafeAreaInsets();
   const listRef = React.useRef(null);
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -114,7 +116,7 @@ export default function QuranScreen({ navigation }) {
   const [settings, setSettings] = React.useState(DEFAULT_SETTINGS);
   const [audioState, setAudioState] = React.useState({ activeAyah: null, isPlaying: false, playingWordIdx: null });
   const [voiceState, setVoiceState] = React.useState({ active: false, activeAyah: null, playingWordIdx: null, mistake: false, pendingPrompt: null });
-  const [qcfState, setQcfState] = React.useState({ v1: { installed: false }, v2: { installed: false } });
+  const [qcfState, setQcfState] = React.useState({ v1: { installed: false }, v2: { installed: false }, v4: { installed: false } });
 
   React.useEffect(() => {
     let cancelled = false;
@@ -495,6 +497,14 @@ export default function QuranScreen({ navigation }) {
             return <PageViewContinuous page={item} {...sharedProps} />;
           }}
         />
+        {getMushafEdition(settings.mushafEdition).qcfVersion === 'v4' &&
+          qcfState.v4.installed && !audioState.activeAyah &&
+          settings.tajweedLegend !== false && settings.tajweedLegend !== 'off' ? (
+          <TajweedLegend
+            mode={settings.tajweedLegend === 'full' ? 'full' : 'compact'}
+            onToggle={() => setQuranSettings({ tajweedLegend: settings.tajweedLegend === 'full' ? 'compact' : 'full' })}
+          />
+        ) : null}
         </View>
       ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -502,7 +512,21 @@ export default function QuranScreen({ navigation }) {
           <Text style={[textStyles.base, { color: colors.textSecondary, marginTop: 12 }]}>{t('quran.loading')}</Text>
         </View>
       )}
-      <QuranMiniPlayer colors={colors} audio={audioState} onClose={closeMiniPlayer} />
+      <QuranMiniPlayer
+        colors={colors}
+        audio={audioState}
+        onClose={closeMiniPlayer}
+        aboveSlot={
+          getMushafEdition(settings.mushafEdition).qcfVersion === 'v4' &&
+          qcfState.v4.installed &&
+          settings.tajweedLegendPlayer !== 'off' ? (
+            <TajweedLegend
+              mode={settings.tajweedLegendPlayer === 'full' ? 'full' : 'compact'}
+              onToggle={() => setQuranSettings({ tajweedLegendPlayer: settings.tajweedLegendPlayer === 'full' ? 'compact' : 'full' })}
+            />
+          ) : null
+        }
+      />
       <QuranVoiceFollowBar colors={colors} voice={voiceState} />
       <QuranIndexModal
         visible={indexOpen}
@@ -544,7 +568,7 @@ export default function QuranScreen({ navigation }) {
       />
       <ShareCardModal
         visible={!!shareAyah}
-        content={shareAyah ? buildAyahShareContent(shareAyah, isRTL() ? 'ar' : 'en', settings, qcfState) : null}
+        content={shareAyah ? buildAyahShareContent(shareAyah, isRTL() ? 'ar' : 'en', settings, qcfState, darkQcf) : null}
         onClose={() => setShareAyah(null)}
       />
       <QuranSettingsModal

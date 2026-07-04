@@ -17,6 +17,12 @@ export const MUSHAF_EDITIONS = [
     qcfVersion: 'v2',
     layoutFile: 'pages_lines_v2',
   },
+  {
+    id: 'v4-tajweed',
+    qcfVersion: 'v4',
+    layoutFile: 'pages_lines_v2',
+    labelKey: 'quran.editionTajweed',
+  },
 ];
 
 export const DEFAULT_MUSHAF_EDITION = 'v2';
@@ -55,8 +61,23 @@ export const QURAN_CONSTANTS = {
     tafsirId: 'muyassar_ar',
     landscapeTwoPage: true,
     fitPageToHeight: true,
+    tajweedLegend: 'compact',
+    tajweedLegendPlayer: 'compact',
   },
 };
+
+// Rule colors from the v4 fonts' CPAL palettes (light = palette 0, dark = palette 1),
+// mapped to rules empirically from words isolating each palette index.
+export const TAJWEED_LEGEND = [
+  { id: 'maddLazim',  light: '#B50000', dark: '#E30000', labelKey: 'quran.tajweedMaddLazim' },
+  { id: 'maddWajib',  light: '#F40000', dark: '#FF5E8E', labelKey: 'quran.tajweedMaddWajib' },
+  { id: 'maddArid',   light: '#FF7B00', dark: '#FF8E3B', labelKey: 'quran.tajweedMaddArid' },
+  { id: 'maddNatural',light: '#CE9E00', dark: '#FFC1E0', labelKey: 'quran.tajweedMaddNatural' },
+  { id: 'ghunnah',    light: '#09B000', dark: '#26B55D', labelKey: 'quran.tajweedGhunnah' },
+  { id: 'qalqalah',   light: '#2FADFF', dark: '#00DEFF', labelKey: 'quran.tajweedQalqalah' },
+  { id: 'tafkheem',   light: '#3F48E6', dark: '#3C84D5', labelKey: 'quran.tajweedTafkheem' },
+  { id: 'silent',     light: '#A5A5A5', dark: '#999999', labelKey: 'quran.tajweedSilent' },
+];
 
 export const FONT_SCALE_RANGE = { min: 0.75, max: 3.0, step: 0.05, default: 1.0 };
 

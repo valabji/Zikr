@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, ScrollView, useWindowDimensions, Platform } from 'react-native';
 import { isRTL } from '../locales/i18n';
 import { textStyles } from '../constants/Fonts';
+import { useIsBrightTheme } from '../constants/Colors';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
 import * as Font from 'expo-font';
 import {
@@ -12,7 +13,7 @@ import {
   PROBE_FONT_SIZE, MUSHAF_HORIZONTAL_PADDING,
   getCachedMushafLineSizes, setCachedMushafLineSizes,
 } from '../utils/mushafLayout';
-import { qcfFontFamilyForPage } from '../utils/QcfDownloader';
+import QcfDownloader, { qcfFontFamilyForPage } from '../utils/QcfDownloader';
 import translationEn from '../assets/quran/data/translation_en.json';
 import SurahCartouche from './SurahCartouche';
 import { BismillahLine, MushafLine } from './MushafLine';
@@ -28,9 +29,20 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   const edition = getMushafEdition(settings.mushafEdition);
   // Only treat QCF as active once this page's font is truly registered, so we
   // never render or measure the codes with a system-fallback font.
-  const qcfFamily = qcfVersion ? qcfFontFamilyForPage(qcfVersion, page.page) : null;
+  const darkQcf = !useIsBrightTheme();
+  const qcfFamily = qcfVersion ? qcfFontFamilyForPage(qcfVersion, page.page, darkQcf) : null;
   const qcfActive = !!qcfFamily && Font.isLoaded(qcfFamily);
+  const [, bumpFontTick] = React.useReducer((x) => x + 1, 0);
+  React.useEffect(() => {
+    if (!qcfFamily || qcfActive) return;
+    let alive = true;
+    QcfDownloader.loadPageFont(qcfVersion, page.page, darkQcf)
+      .then(() => { if (alive) bumpFontTick(); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [qcfFamily, qcfActive, qcfVersion, page.page, darkQcf]);
   const fontFamily = qcfActive ? qcfFamily : FONT_FAMILY;
+  const qcfTable = qcfActive ? (qcfVersion === 'v4' ? 'qcf4' : 'qcf') : null;
   const pageLines = getLayout(edition.layoutFile)[page.page - 1];
 
   // Auto-fit by measurement, in two probe passes: pass 1 renders every text
@@ -156,12 +168,12 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   // letter-count heuristic remains as a last resort if a table is missing.
   const fallbackSizes = React.useMemo(() => {
     const est = estimatedLineSizesForPage(
-      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, qcfActive);
+      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, qcfTable);
     if (est) return est;
     const pageFit = mushafFontSizeForWidth(effectiveWidth, getPageProbeLen(edition.layoutFile, pageIndex));
     if (qcfActive) return new Array(lineCount).fill(pageFit);
     return perLineFontSizesForPage(edition.layoutFile, pageIndex, pageFit);
-  }, [effectiveWidth, qcfActive, edition.layoutFile, pageIndex, lineCount]);
+  }, [effectiveWidth, qcfActive, qcfTable, edition.layoutFile, pageIndex, lineCount]);
 
   const lineSizes = probeState.sizes || fallbackSizes;
 
@@ -170,8 +182,8 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   const spaceExtras = React.useMemo(() => {
     if (customLineSize) return null;
     return justifiedSpaceExtrasForPage(
-      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, lineSizes, qcfActive, measuredEmPx);
-  }, [customLineSize, edition.layoutFile, pageIndex, effectiveWidth, lineSizes, qcfActive, measuredEmPx]);
+      edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, lineSizes, qcfTable, measuredEmPx);
+  }, [customLineSize, edition.layoutFile, pageIndex, effectiveWidth, lineSizes, qcfTable, measuredEmPx]);
 
   // In customLineSize mode we want one continuous text block per run of
   // consecutive text lines, so words flow across line boundaries instead of

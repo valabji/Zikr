@@ -11,12 +11,16 @@ MushafPage.js renders, in milli-em units, and writes line_widths_v{1,2}.json:
   estimated space width at runtime). Requires the 604 page fonts per version,
   downloadable from the quran.com frontend repo:
     https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/{v1,v2}/ttf/p{N}.ttf
+- "qcf4" widths (v2 layout only) do the same with the v4 tajweed fonts but
+  INCLUDING spaces — v4 maps U+0020 with per-page advances, so no runtime
+  space adjustment applies. Fonts:
+    .../hafs/v4/colrv1/ttf/p{N}.ttf
 - "hafs" widths shape the Unicode probe string (including spaces and the
   bare ayah-number digits) with HarfBuzz using the bundled UthmanicHafs font.
 
 Non-text lines (surah headers, bismillah) are 0.
 
-Usage: python3 scripts/build_line_widths.py /path/to/qcf_v1_fonts /path/to/qcf_v2_fonts
+Usage: python3 scripts/build_line_widths.py /path/to/qcf_v1_fonts /path/to/qcf_v2_fonts [/path/to/qcf_v4_fonts]
 """
 import json
 import os
@@ -65,7 +69,7 @@ def probe_string(line, qcf):
     return s
 
 
-def qcf_milli_em(font_path, s):
+def qcf_milli_em(font_path, s, include_spaces=False):
     font = TTFont(font_path, lazy=True)
     cmap = font.getBestCmap()
     hmtx = font['hmtx']
@@ -73,7 +77,7 @@ def qcf_milli_em(font_path, s):
     total = 0
     missing = []
     for ch in s:
-        if ch == ' ':
+        if ch == ' ' and not include_spaces:
             continue
         g = cmap.get(ord(ch))
         if g is None:
@@ -106,19 +110,20 @@ class HafsShaper:
         return round(total / self.upem * 1000)
 
 
-def build(layout_name, qcf_dir):
+def build(layout_name, qcf_dir, qcf4_dir=None):
     pages = json.load(open(os.path.join(DATA, f'pages_lines_{layout_name}.json')))
     shaper = HafsShaper(HAFS_FONT)
-    qcf_out, hafs_out = [], []
+    qcf_out, hafs_out, qcf4_out = [], [], []
     qcf_missing = {}
     for pi, page in enumerate(pages):
         page_no = page.get('page', pi + 1)
         font_path = os.path.join(qcf_dir, f'p{page_no}.ttf')
-        qcf_row, hafs_row = [], []
+        qcf_row, hafs_row, qcf4_row = [], [], []
         for line in page['lines']:
             if line.get('type') != 'text':
                 qcf_row.append(0)
                 hafs_row.append(0)
+                qcf4_row.append(0)
                 continue
             qs = probe_string(line, qcf=True)
             hs = hafs_fix(probe_string(line, qcf=False))
@@ -127,8 +132,14 @@ def build(layout_name, qcf_dir):
                 qcf_missing.setdefault(page_no, []).extend(missing)
             qcf_row.append(w)
             hafs_row.append(shaper.milli_em(hs))
+            if qcf4_dir:
+                w4, missing4 = qcf_milli_em(os.path.join(qcf4_dir, f'p{page_no}.ttf'), qs, include_spaces=True)
+                if missing4:
+                    qcf_missing.setdefault(page_no, []).extend(missing4)
+                qcf4_row.append(w4)
         qcf_out.append(qcf_row)
         hafs_out.append(hafs_row)
+        qcf4_out.append(qcf4_row)
         if page_no % 100 == 0:
             print(f'{layout_name}: page {page_no}')
     if qcf_missing:
@@ -136,13 +147,17 @@ def build(layout_name, qcf_dir):
         print(f'WARNING {layout_name}: {n} code chars missing from QCF cmaps on pages {sorted(qcf_missing)[:10]}...')
     if shaper.cmap_misses:
         print(f'WARNING {layout_name}: hafs cmap misses: {sorted(shaper.cmap_misses)}')
+    out = {'qcf': qcf_out, 'hafs': hafs_out}
+    if qcf4_dir:
+        out['qcf4'] = qcf4_out
     out_path = os.path.join(DATA, f'line_widths_{layout_name}.json')
     with open(out_path, 'w') as f:
-        json.dump({'qcf': qcf_out, 'hafs': hafs_out}, f, separators=(',', ':'))
+        json.dump(out, f, separators=(',', ':'))
     print(f'wrote {out_path} ({os.path.getsize(out_path)} bytes)')
 
 
 if __name__ == '__main__':
     v1_dir, v2_dir = sys.argv[1], sys.argv[2]
+    v4_dir = sys.argv[3] if len(sys.argv) > 3 else None
     build('v1', v1_dir)
-    build('v2', v2_dir)
+    build('v2', v2_dir, v4_dir)

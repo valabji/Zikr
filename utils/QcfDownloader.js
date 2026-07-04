@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Font from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { base64ToBytes, bytesToBase64, patchQcf4Dark } from './qcf4Dark';
 
 const TOTAL = 604;
 
@@ -20,14 +21,24 @@ const VERSIONS = {
     installedKey: '@quran_qcf_v2_installed',
     optOutKey: '@quran_qcf_v2_auto_opt_out',
   },
+  v4: {
+    remoteBase: 'https://raw.githubusercontent.com/quran/quran.com-frontend-next/production/public/fonts/quran/hafs/v4/colrv1/ttf',
+    localDir: FileSystem.documentDirectory + 'quran/fonts/v4/',
+    fontFamilyPrefix: 'QCF4_P',
+    darkFontFamilyPrefix: 'QCF4D_P',
+    installedKey: '@quran_qcf_v4_installed',
+    optOutKey: '@quran_qcf_v4_auto_opt_out',
+  },
 };
 
-function fontFamily(version, page) {
-  return `${VERSIONS[version].fontFamilyPrefix}${String(page).padStart(3, '0')}`;
+function fontFamily(version, page, dark) {
+  const v = VERSIONS[version];
+  const prefix = dark && v.darkFontFamilyPrefix ? v.darkFontFamilyPrefix : v.fontFamilyPrefix;
+  return `${prefix}${String(page).padStart(3, '0')}`;
 }
 
-function localUri(version, page) {
-  return `${VERSIONS[version].localDir}p${page}.ttf`;
+function localUri(version, page, dark) {
+  return `${VERSIONS[version].localDir}p${page}${dark ? 'd' : ''}.ttf`;
 }
 
 function remoteUrl(version, page) {
@@ -40,21 +51,20 @@ function blankVersionState() {
 
 class QcfDownloaderService {
   constructor() {
-    this.state = { v1: blankVersionState(), v2: blankVersionState() };
+    this.state = {};
+    this.cancelled = {};
+    for (const v of Object.keys(VERSIONS)) {
+      this.state[v] = blankVersionState();
+      this.cancelled[v] = false;
+    }
     this.listeners = new Set();
-    this.cancelled = { v1: false, v2: false };
-    this.registered = { v1: false, v2: false };
   }
 
   async checkInstalled() {
     for (const v of Object.keys(VERSIONS)) {
       try {
         const flag = await AsyncStorage.getItem(VERSIONS[v].installedKey);
-        if (flag === '1') {
-          // Register first: installed must never be visible while fonts are still loading.
-          await this._registerFonts(v);
-          this.state[v].installed = true;
-        }
+        if (flag === '1') this.state[v].installed = true;
       } catch {}
     }
     this._emit();
@@ -67,10 +77,9 @@ class QcfDownloaderService {
   }
 
   _snapshot() {
-    return {
-      v1: { ...this.state.v1 },
-      v2: { ...this.state.v2 },
-    };
+    const snap = {};
+    for (const v of Object.keys(VERSIONS)) snap[v] = { ...this.state[v] };
+    return snap;
   }
 
   _emit() {
@@ -112,6 +121,7 @@ class QcfDownloaderService {
 
     try {
       let done = 0;
+      const units = v.darkFontFamilyPrefix ? TOTAL * 2 : TOTAL;
       const CONCURRENCY = 6;
       const queue = [];
       for (let p = 1; p <= TOTAL; p++) queue.push(p);
@@ -130,13 +140,28 @@ class QcfDownloaderService {
             throw e;
           }
           done++;
-          this.state[version].progress = done / TOTAL;
+          this.state[version].progress = done / units;
           if (done % 10 === 0) this._emit();
         }
       };
 
       const workers = Array.from({ length: CONCURRENCY }, () => worker());
       await Promise.all(workers);
+
+      if (v.darkFontFamilyPrefix) {
+        for (let page = 1; page <= TOTAL && !this.cancelled[version]; page++) {
+          const dest = localUri(version, page, true);
+          const info = await FileSystem.getInfoAsync(dest);
+          if (!info.exists || info.size < 1000) {
+            const b64 = await FileSystem.readAsStringAsync(localUri(version, page), { encoding: FileSystem.EncodingType.Base64 });
+            const bytes = patchQcf4Dark(base64ToBytes(b64));
+            await FileSystem.writeAsStringAsync(dest, bytesToBase64(bytes), { encoding: FileSystem.EncodingType.Base64 });
+          }
+          done++;
+          this.state[version].progress = done / units;
+          if (done % 10 === 0) this._emit();
+        }
+      }
 
       if (this.cancelled[version]) {
         this.state[version] = { ...blankVersionState() };
@@ -145,8 +170,6 @@ class QcfDownloaderService {
       }
 
       await AsyncStorage.setItem(v.installedKey, '1');
-      // Register before announcing installed so pages never measure with a fallback font.
-      await this._registerFonts(version);
       this.state[version] = { installed: true, downloading: false, progress: 1, error: null };
       this._emit();
     } catch (e) {
@@ -172,26 +195,17 @@ class QcfDownloaderService {
     await AsyncStorage.removeItem(v.installedKey);
     AsyncStorage.setItem(v.optOutKey, '1').catch(() => {});
     this.state[version] = blankVersionState();
-    this.registered[version] = false;
     this._emit();
   }
 
-  async _registerFonts(version) {
-    if (this.registered[version]) return;
-    try {
-      const fontMap = {};
-      for (let p = 1; p <= TOTAL; p++) {
-        fontMap[fontFamily(version, p)] = localUri(version, p);
-      }
-      await Font.loadAsync(fontMap);
-      this.registered[version] = true;
-    } catch (e) {
-      console.warn(`QcfDownloader[${version}]: font registration failed`, e);
+  // Fonts load per page on demand: bulk-registering all 604+ pages at once can
+  // silently register Typeface.DEFAULT on Android under memory pressure.
+  async loadPageFont(version, page, dark) {
+    const family = fontFamily(version, page, dark);
+    if (!Font.isLoaded(family)) {
+      await Font.loadAsync({ [family]: localUri(version, page, dark) });
     }
-  }
-
-  fontFamilyForPage(version, page) {
-    return fontFamily(version, page);
+    return family;
   }
 
   isInstalled(version) {

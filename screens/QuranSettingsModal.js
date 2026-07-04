@@ -88,6 +88,7 @@ export default function QuranSettingsModal({ visible, onClose }) {
   const [qcfStatus, setQcfStatus] = React.useState({
     v1: { installed: false, downloading: false, progress: 0 },
     v2: { installed: false, downloading: false, progress: 0 },
+    v4: { installed: false, downloading: false, progress: 0 },
   });
 
   React.useEffect(() => {
@@ -153,15 +154,47 @@ export default function QuranSettingsModal({ visible, onClose }) {
         <SettingsSection
           title={t('quran.mushafEdition')}
           description={t('quran.mushafEditionDesc')}
-          footnote={(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v2-1441' ? t('quran.mushaf1441Note') : undefined}
+          footnote={
+            (settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v2-1441' ? t('quran.mushaf1441Note')
+            : (settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v4-tajweed' ? t('quran.mushafTajweedNote')
+            : undefined
+          }
         >
           <SettingsField>
             <SettingsSegmented
               value={settings.mushafEdition || DEFAULT_MUSHAF_EDITION}
-              options={MUSHAF_EDITIONS.map((m) => ({ id: m.id, label: `${m.year} ${editionLabel}` }))}
+              options={MUSHAF_EDITIONS.map((m) => ({ id: m.id, label: m.labelKey ? t(m.labelKey) : `${m.year} ${editionLabel}` }))}
               onChange={(id) => update({ mushafEdition: id })}
             />
           </SettingsField>
+          {(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v4-tajweed' ? (
+            <SettingsSelect
+              value={settings.tajweedLegend === true || settings.tajweedLegend === undefined ? 'compact' : settings.tajweedLegend === false ? 'off' : settings.tajweedLegend}
+              options={[
+                { id: 'compact', label: t('quran.tajweedLegendCompact') },
+                { id: 'full', label: t('quran.tajweedLegendFull') },
+                { id: 'off', label: t('quran.tajweedLegendOff') },
+              ]}
+              onChange={(id) => update({ tajweedLegend: id })}
+              label={t('quran.tajweedLegend')}
+              description={t('quran.tajweedLegendDesc')}
+              title={t('quran.tajweedLegend')}
+            />
+          ) : null}
+          {(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v4-tajweed' ? (
+            <SettingsSelect
+              value={settings.tajweedLegendPlayer || 'compact'}
+              options={[
+                { id: 'compact', label: t('quran.tajweedLegendCompact') },
+                { id: 'full', label: t('quran.tajweedLegendFull') },
+                { id: 'off', label: t('quran.tajweedLegendOff') },
+              ]}
+              onChange={(id) => update({ tajweedLegendPlayer: id })}
+              label={t('quran.tajweedLegendPlayer')}
+              description={t('quran.tajweedLegendPlayerDesc')}
+              title={t('quran.tajweedLegendPlayer')}
+            />
+          ) : null}
         </SettingsSection>
 
         <SettingsSection title={t('quran.tafsirSelection')}>
@@ -265,6 +298,8 @@ export default function QuranSettingsModal({ visible, onClose }) {
             <HdRow version="v1" sizeLabel="~95 MB" labelKey="quran.hd1405" status={qcfStatus.v1} colors={colors} />
             <View style={{ height: SPACING.md }} />
             <HdRow version="v2" sizeLabel="~208 MB" labelKey="quran.hd1421" status={qcfStatus.v2} colors={colors} />
+            <View style={{ height: SPACING.md }} />
+            <HdRow version="v4" sizeLabel="~167 MB" labelKey="quran.hd4Tajweed" status={qcfStatus.v4} colors={colors} />
           </SettingsField>
         </SettingsSection>
       </ScrollView>

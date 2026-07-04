@@ -115,9 +115,9 @@ const JUSTIFY_MIN_FILL = 0.8;
 
 // Print-style justification: per-line extra px to add to each inter-word
 // space so full lines reach the page width exactly.
-export function justifiedSpaceExtrasForPage(layoutFile, pageIndex, availWidth, sizes, qcfActive, measuredEmPx) {
+export function justifiedSpaceExtrasForPage(layoutFile, pageIndex, availWidth, sizes, qcfTable, measuredEmPx) {
   const tables = getLineWidths(layoutFile);
-  const table = qcfActive ? tables.qcf : tables.hafs;
+  const table = qcfTable ? tables[qcfTable] : tables.hafs;
   const row = table && table[pageIndex];
   const entry = PAGE_DATA[layoutFile] && PAGE_DATA[layoutFile][pageIndex];
   if (!row || !entry) return null;
@@ -131,7 +131,7 @@ export function justifiedSpaceExtrasForPage(layoutFile, pageIndex, availWidth, s
     if (!(row[i] > 0) || nsp <= 0) continue;
     const size = sizes[i] || sizes[0];
     const em = row[i] / 1000
-      + (qcfActive ? (nsp + entry.lineCodeSpaces[i]) * QCF_SPACE_EM : 0);
+      + (qcfTable === 'qcf' ? (nsp + entry.lineCodeSpaces[i]) * QCF_SPACE_EM : 0);
     // Probe-measured widths trump the table: they include glyphs the bundled
     // font lacks (e.g. ornate ayah brackets) that render via system fallback.
     const width = measuredEmPx && measuredEmPx[i] > 0 ? measuredEmPx[i] * size : em * size;
@@ -151,15 +151,16 @@ export function getLineWidths(layoutFile) {
   return lineWidthsCache[layoutFile];
 }
 
-// QCF fonts have no U+0020 glyph, so spaces render from the system font;
-// 0.27em approximates that fallback advance.
+// QCF v1/v2 fonts have no U+0020 glyph, so spaces render from the system font;
+// 0.27em approximates that fallback advance. The qcf4 table already includes
+// v4's real space glyph advances, so it needs no adjustment.
 export const QCF_SPACE_EM = 0.27;
 
 // Initial sizes from the build-time width tables (scripts/build_line_widths.py),
 // accurate within ~2% — the live probe only refines these.
-export function estimatedLineSizesForPage(layoutFile, pageIndex, availWidth, qcfActive) {
+export function estimatedLineSizesForPage(layoutFile, pageIndex, availWidth, qcfTable) {
   const tables = getLineWidths(layoutFile);
-  const table = qcfActive ? tables.qcf : tables.hafs;
+  const table = qcfTable ? tables[qcfTable] : tables.hafs;
   const row = table && table[pageIndex];
   if (!row || !row.length) return null;
   const { lineSpaces, lineCodeSpaces } = PAGE_DATA[layoutFile][pageIndex];
@@ -167,11 +168,11 @@ export function estimatedLineSizesForPage(layoutFile, pageIndex, availWidth, qcf
   for (let i = 0; i < row.length; i++) {
     if (row[i] > 0) {
       const em = row[i] / 1000
-        + (qcfActive ? (lineSpaces[i] + lineCodeSpaces[i]) * QCF_SPACE_EM : 0);
+        + (qcfTable === 'qcf' ? (lineSpaces[i] + lineCodeSpaces[i]) * QCF_SPACE_EM : 0);
       widths[i] = em * PROBE_FONT_SIZE;
     }
   }
-  return computeMushafLineSizes(widths, row.length, availWidth, qcfActive);
+  return computeMushafLineSizes(widths, row.length, availWidth, !!qcfTable);
 }
 
 // Available width = window width minus MushafLine's horizontal padding.
