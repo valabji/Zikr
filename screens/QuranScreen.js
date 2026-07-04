@@ -103,6 +103,14 @@ export default function QuranScreen({ navigation }) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [bookmarks, setBookmarks] = React.useState([]);
   const [ready, setReady] = React.useState(false);
+  const [restoring, setRestoring] = React.useState(false);
+  const restoreRef = React.useRef({ pending: false, target: 1, tries: 0 });
+
+  const beginRestore = React.useCallback((page) => {
+    const pending = page > 1;
+    restoreRef.current = { pending, target: page, tries: 0 };
+    setRestoring(pending);
+  }, []);
   const [indexOpen, setIndexOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [detailAyah, setDetailAyah] = React.useState(null);
@@ -130,8 +138,10 @@ export default function QuranScreen({ navigation }) {
         if (cancelled) return;
         const last = lastRaw ? Math.max(1, Math.min(TOTAL_PAGES, parseInt(lastRaw, 10))) : 1;
         setCurrentPage(last);
+        currentPageRef.current = last;
         setBookmarks(bmRaw ? JSON.parse(bmRaw) : []);
         setSettings(s);
+        beginRestore(last);
         setReady(true);
       } catch {
         setReady(true);
@@ -234,6 +244,23 @@ export default function QuranScreen({ navigation }) {
       if (!viewableItems || viewableItems.length === 0) return;
       const item = viewableItems[0].item;
       const page = isPairedRef.current ? item.rightPage.page : item.page;
+      const restore = restoreRef.current;
+      if (restore.pending) {
+        const landed = isPairedRef.current
+          ? Math.floor((page - 1) / 2) === Math.floor((restore.target - 1) / 2)
+          : isContinuousRef.current
+            ? Math.abs(page - restore.target) <= 1
+            : page === restore.target;
+        if (landed) {
+          restore.pending = false;
+          setRestoring(false);
+          if (page !== currentPageRef.current) {
+            currentPageRef.current = page;
+            setCurrentPage(page);
+          }
+        }
+        return;
+      }
       if (page !== currentPageRef.current) {
         currentPageRef.current = page;
         setCurrentPage(page);
@@ -262,6 +289,8 @@ export default function QuranScreen({ navigation }) {
 
   const jumpToPage = React.useCallback((page) => {
     const target = Math.max(1, Math.min(TOTAL_PAGES, page));
+    restoreRef.current.pending = false;
+    setRestoring(false);
     const idx = isPairedRef.current ? Math.floor((target - 1) / 2) : target - 1;
     listRef.current?.scrollToIndex({ index: idx, animated: false });
     currentPageRef.current = target;
@@ -330,6 +359,8 @@ export default function QuranScreen({ navigation }) {
 
   const isPairedRef = React.useRef(isPaired);
   isPairedRef.current = isPaired;
+  const isContinuousRef = React.useRef(isContinuous);
+  isContinuousRef.current = isContinuous;
 
   const listData = React.useMemo(() => {
     if (!isPaired) return pagesData;
@@ -352,12 +383,6 @@ export default function QuranScreen({ navigation }) {
     return { length: windowWidth, offset: windowWidth * index, index };
   }, [isContinuous, fontScale, activeLayoutFile, windowWidth]);
 
-  const initialScrollIndex = React.useMemo(() => {
-    if (!ready) return 0;
-    if (isPaired) return Math.floor((currentPage - 1) / 2);
-    return currentPage - 1;
-  }, [ready, currentPage, isPaired]);
-
   const offsetForIndex = React.useCallback((index) => {
     if (isContinuous) {
       const { offsets } = getLayoutOffsets(activeLayoutFile);
@@ -366,19 +391,32 @@ export default function QuranScreen({ navigation }) {
     return windowWidth * index;
   }, [isContinuous, activeLayoutFile, fontScale, windowWidth]);
 
-  const restoredRef = React.useRef(false);
-  React.useEffect(() => { restoredRef.current = false; }, [isContinuous, isPaired]);
+  const attemptRestore = React.useCallback(() => {
+    const r = restoreRef.current;
+    if (!r.pending) return;
+    r.tries += 1;
+    if (r.tries > 10) {
+      r.pending = false;
+      setRestoring(false);
+      return;
+    }
+    const idx = isPairedRef.current ? Math.floor((r.target - 1) / 2) : r.target - 1;
+    try {
+      listRef.current?.scrollToIndex({ index: idx, animated: false });
+    } catch {}
+  }, []);
 
-  const handleListLayout = React.useCallback(() => {
-    if (restoredRef.current) return;
-    restoredRef.current = true;
-    const pageIdx = currentPageRef.current - 1;
-    const idx = isPairedRef.current ? Math.floor(pageIdx / 2) : pageIdx;
-    if (idx <= 0) return;
-    requestAnimationFrame(() => {
-      listRef.current?.scrollToOffset({ offset: offsetForIndex(idx), animated: false });
-    });
-  }, [offsetForIndex]);
+  const handleListLayout = React.useCallback(() => { attemptRestore(); }, [attemptRestore]);
+
+  React.useEffect(() => {
+    beginRestore(currentPageRef.current);
+  }, [isContinuous, isPaired, beginRestore]);
+
+  React.useEffect(() => {
+    if (!ready || !restoring) return;
+    const id = setInterval(attemptRestore, 350);
+    return () => clearInterval(id);
+  }, [ready, restoring, attemptRestore]);
 
   const headerSurah = (() => {
     const pg = pagesData[currentPage - 1];
@@ -439,7 +477,6 @@ export default function QuranScreen({ navigation }) {
           pagingEnabled={!isContinuous}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
-          initialScrollIndex={initialScrollIndex}
           getItemLayout={getItemLayout}
           onLayout={handleListLayout}
           onScrollToIndexFailed={(info) => {
@@ -504,6 +541,11 @@ export default function QuranScreen({ navigation }) {
             mode={settings.tajweedLegend === 'full' ? 'full' : 'compact'}
             onToggle={() => setQuranSettings({ tajweedLegend: settings.tajweedLegend === 'full' ? 'compact' : 'full' })}
           />
+        ) : null}
+        {restoring ? (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={colors.accent} />
+          </View>
         ) : null}
         </View>
       ) : (
