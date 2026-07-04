@@ -495,6 +495,8 @@
     "tajweedLegendOff": "إيقاف",
     "tajweedLegendPlayer": "دليل الألوان أثناء التشغيل",
     "tajweedLegendPlayerDesc": "إظهار مفتاح الألوان فوق مشغّل الصوت.",
+    "qcf4HighContrast": "خلفية عالية التباين",
+    "qcf4HighContrastDesc": "استخدام صفحة سوداء أو بيضاء خالصة لإبراز ألوان التجويد.",
     "tajweedMaddLazim": "مد ٦ حركات",
     "tajweedMaddWajib": "مد ٤-٥ حركات",
     "tajweedMaddArid": "مد عارض للسكون",

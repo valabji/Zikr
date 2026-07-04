@@ -63,6 +63,7 @@ export const QURAN_CONSTANTS = {
     fitPageToHeight: true,
     tajweedLegend: 'compact',
     tajweedLegendPlayer: 'compact',
+    qcf4HighContrast: false,
   },
 };
 

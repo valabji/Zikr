@@ -195,6 +195,18 @@ export default function QuranSettingsModal({ visible, onClose }) {
               title={t('quran.tajweedLegendPlayer')}
             />
           ) : null}
+          {(settings.mushafEdition || DEFAULT_MUSHAF_EDITION) === 'v4-tajweed' ? (
+            <SettingsRow
+              label={t('quran.qcf4HighContrast')}
+              description={t('quran.qcf4HighContrastDesc')}
+              trailing={
+                <SettingsToggle
+                  value={!!settings.qcf4HighContrast}
+                  onValueChange={(v) => update({ qcf4HighContrast: v })}
+                />
+              }
+            />
+          ) : null}
         </SettingsSection>
 
         <SettingsSection title={t('quran.tafsirSelection')}>

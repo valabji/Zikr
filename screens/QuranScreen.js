@@ -338,7 +338,11 @@ export default function QuranScreen({ navigation }) {
   const isLandscape = windowWidth > windowHeight;
   const isPaired = !isContinuous && isLandscape && settings.landscapeTwoPage !== false;
   const fontScale = settings.customLineSize ? (settings.fontScale || 1) : 1;
-  const activeLayoutFile = getMushafEdition(settings.mushafEdition).layoutFile;
+  const activeEdition = getMushafEdition(settings.mushafEdition);
+  const activeLayoutFile = activeEdition.layoutFile;
+  const readerBg = activeEdition.qcfVersion === 'v4' && settings.qcf4HighContrast
+    ? (darkQcf ? '#000000' : '#FFFFFF')
+    : colors.background;
 
   const availableHeight = windowHeight - insets.top - insets.bottom - 56;
   const effectiveBaseWidth = isPaired ? Math.floor(windowWidth / 2) : windowWidth;
@@ -465,7 +469,7 @@ export default function QuranScreen({ navigation }) {
         )}
       />
       {ready ? (
-        <View style={{ flex: 1, paddingBottom: insets.bottom }}>
+        <View style={{ flex: 1, paddingBottom: insets.bottom, backgroundColor: readerBg }}>
         <FlatList
           style={{ flex: 1 }}
           ref={listRef}
@@ -543,7 +547,7 @@ export default function QuranScreen({ navigation }) {
           />
         ) : null}
         {restoring ? (
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: readerBg, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.accent} />
           </View>
         ) : null}

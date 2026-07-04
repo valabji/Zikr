@@ -495,6 +495,8 @@
     "tajweedLegendOff": "Off",
     "tajweedLegendPlayer": "Color guide while playing",
     "tajweedLegendPlayerDesc": "Show the color key above the audio player.",
+    "qcf4HighContrast": "High contrast background",
+    "qcf4HighContrastDesc": "Use a pure black or white page so the tajweed colors stand out.",
     "tajweedMaddLazim": "Madd 6 counts",
     "tajweedMaddWajib": "Madd 4–5 counts",
     "tajweedMaddArid": "Madd at pause",
