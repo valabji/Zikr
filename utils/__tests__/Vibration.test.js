@@ -200,9 +200,9 @@ describe('VibrationManager', () => {
 
     it('vibrates by duration per intensity and does not use haptics', async () => {
       const cases = [
-        [VIBRATION_INTENSITY.LIGHT, 20],
-        [VIBRATION_INTENSITY.MEDIUM, 40],
-        [VIBRATION_INTENSITY.HEAVY, 60],
+        [VIBRATION_INTENSITY.LIGHT, 40],
+        [VIBRATION_INTENSITY.MEDIUM, 70],
+        [VIBRATION_INTENSITY.HEAVY, 100],
       ];
       for (const [intensity, duration] of cases) {
         AsyncStorage.getItem.mockImplementation((k) => {
@@ -216,6 +216,25 @@ describe('VibrationManager', () => {
         expect(Vibration.vibrate).toHaveBeenCalledWith(duration);
       }
       expect(Haptics.impactAsync).not.toHaveBeenCalled();
+    });
+
+    it('prefers the strong vibration module when available', async () => {
+      AsyncStorage.getItem.mockImplementation((k) => {
+        if (k === '@vibrationTasbih') return Promise.resolve('true');
+        return Promise.resolve(null);
+      });
+      let mod, strong;
+      await jest.isolateModulesAsync(async () => {
+        strong = require('../../modules/expo-strong-vibration');
+        strong.isAvailable.mockReturnValue(true);
+        mod = require('../Vibration');
+      });
+      await new Promise((r) => setImmediate(r));
+      mod.default.vibrateForTasbih();
+      expect(strong.vibrate).toHaveBeenCalledWith(40);
+      mod.default.vibrateForTasbihComplete();
+      expect(strong.vibratePattern).toHaveBeenCalledWith([0, 30, 40, 30]);
+      expect(Vibration.vibrate).not.toHaveBeenCalled();
     });
 
     it('uses a double-buzz pattern on tasbih complete', async () => {

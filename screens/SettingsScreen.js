@@ -563,6 +563,7 @@ export default function SettingsScreen({ navigation }) {
 
   const handleIntensityChange = (intensity) => {
     playClick();
+    vibrationManager.performVibration(intensity);
     setTempVibrationIntensity(intensity);
     if (autoSave) {
       setTimeout(async () => {

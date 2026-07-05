@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform, Vibration as RNVibration } from 'react-native';
+import * as StrongVibration from '../modules/expo-strong-vibration';
 
 // Vibration types
 export const VIBRATION_TYPES = {
@@ -16,11 +17,21 @@ export const VIBRATION_INTENSITY = {
   HEAVY: 'heavy'
 };
 
-// Android uses RN Vibration (device-default amplitude); expo-haptics' presets are imperceptibly faint on many devices.
+// Android prefers the local StrongVibration module (max amplitude, notification usage) — RN Vibration's USAGE_UNKNOWN one-shots get muted by OEM touch-feedback sliders.
 const ANDROID_DURATIONS = {
-  light: 20,
-  medium: 40,
-  heavy: 60
+  light: 40,
+  medium: 70,
+  heavy: 100
+};
+
+const androidVibrate = (durationMs) => {
+  if (StrongVibration.isAvailable()) StrongVibration.vibrate(durationMs);
+  else RNVibration.vibrate(durationMs);
+};
+
+const androidVibratePattern = (pattern) => {
+  if (StrongVibration.isAvailable()) StrongVibration.vibratePattern(pattern);
+  else RNVibration.vibrate(pattern);
 };
 
 class VibrationManager {
@@ -107,7 +118,7 @@ class VibrationManager {
     if (this.tasbihEnabled) {
       if (Platform.OS === 'web') return;
       if (Platform.OS === 'android') {
-        RNVibration.vibrate([0, 30, 40, 30]);
+        androidVibratePattern([0, 30, 40, 30]);
         return;
       }
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (error) { console.warn('Vibration failed:', error); }
@@ -140,7 +151,9 @@ class VibrationManager {
 
   // Check if vibration is supported
   async isVibrationSupported() {
-    return Platform.OS !== 'web';
+    if (Platform.OS === 'web') return false;
+    if (Platform.OS === 'android' && StrongVibration.isAvailable()) return StrongVibration.hasVibrator();
+    return true;
   }
 
   // Perform the actual vibration
@@ -151,7 +164,7 @@ class VibrationManager {
     }
 
     if (Platform.OS === 'android') {
-      RNVibration.vibrate(ANDROID_DURATIONS[intensity] ?? ANDROID_DURATIONS.light);
+      androidVibrate(ANDROID_DURATIONS[intensity] ?? ANDROID_DURATIONS.light);
       return;
     }
 
