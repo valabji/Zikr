@@ -100,3 +100,45 @@ export async function getStations(lang, { now } = {}) {
   if (isCacheFresh(cached, ts)) return cached.stations;
   return fetchStations(lang, { now: ts });
 }
+
+const OFFLINE_TTL_MS = 60 * 60 * 1000;
+const offlineCache = {};
+
+export async function checkStationOnline(streamUrl, { timeoutMs = 8000 } = {}) {
+  if (!streamUrl) return false;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(streamUrl, { method: 'GET', signal: controller.signal });
+    controller.abort();
+    return res.status >= 200 && res.status < 400;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function getOfflineStations(lang, stations, { now, onOffline, force, concurrency = 4, timeoutMs = 8000 } = {}) {
+  const ts = typeof now === 'number' ? now : Date.now();
+  const key = apiLang(lang);
+  const cached = offlineCache[key];
+  if (!force && cached && ts - cached.timestamp < OFFLINE_TTL_MS) return new Set(cached.offline);
+
+  const list = Array.isArray(stations) ? stations : [];
+  const offline = new Set();
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < list.length) {
+      const station = list[cursor++];
+      const online = await checkStationOnline(station.streamUrl, { timeoutMs });
+      if (!online) {
+        offline.add(station.id);
+        if (onOffline) onOffline(station.id);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, list.length) }, () => worker()));
+  offlineCache[key] = { offline: new Set(offline), timestamp: ts };
+  return offline;
+}

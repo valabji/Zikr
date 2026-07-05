@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
-import { getStations, getStationSubtitle } from '../utils/RadioStations';
+import { getStations, getStationSubtitle, getOfflineStations } from '../utils/RadioStations';
 import RadioService from '../utils/RadioService';
 import {
   loadRadioFavorites, toggleRadioFavorite, subscribeRadioFavorites,
@@ -27,11 +27,20 @@ export default function RadioScreen({ navigation }) {
   const [tab, setTab] = React.useState('all');
   const [query, setQuery] = React.useState('');
   const [favorites, setFavorites] = React.useState([]);
+  const [offline, setOffline] = React.useState(() => new Set());
   const [radio, setRadio] = React.useState(RadioService._state());
 
   React.useEffect(() => {
     let cancelled = false;
-    getStations(lang).then((list) => { if (!cancelled) setStations(list); });
+    setOffline(new Set());
+    getStations(lang).then((list) => {
+      if (cancelled) return;
+      setStations(list);
+      if (Platform.OS === 'web') return;
+      getOfflineStations(lang, list, {
+        onOffline: (id) => { if (!cancelled) setOffline((prev) => new Set(prev).add(id)); },
+      }).then((set) => { if (!cancelled) setOffline(new Set(set)); });
+    });
     loadRadioFavorites().then((f) => { if (!cancelled) setFavorites(f); });
     const unsubFav = subscribeRadioFavorites((f) => setFavorites([...f]));
     const unsubRadio = RadioService.subscribe(setRadio);
@@ -58,6 +67,7 @@ export default function RadioScreen({ navigation }) {
 
   const renderStation = ({ item }) => {
     const active = radio.activeStation && radio.activeStation.id === item.id;
+    const isOffline = !active && offline.has(item.id);
     const isFav = favorites.includes(item.id);
     const subtitle = getStationSubtitle(item.streamUrl, lang);
     return (
@@ -70,6 +80,7 @@ export default function RadioScreen({ navigation }) {
           paddingHorizontal: SPACING.lg + 2,
           borderBottomWidth: 1,
           borderBottomColor: withAlpha(colors.accent, 'hairline'),
+          opacity: isOffline ? 0.55 : 1,
         }, webCursor]}
       >
         <View style={{
@@ -78,14 +89,18 @@ export default function RadioScreen({ navigation }) {
           justifyContent: 'center', alignItems: 'center',
         }}>
           <Feather
-            name={active && radio.isPlaying ? 'volume-2' : 'radio'}
+            name={isOffline ? 'wifi-off' : (active && radio.isPlaying ? 'volume-2' : 'radio')}
             size={22}
-            color={active ? colors.primaryDark : colors.accent}
+            color={active ? colors.primaryDark : (isOffline ? colors.textSecondary : colors.accent)}
           />
         </View>
         <View style={{ flex: 1, marginHorizontal: 14 }}>
           <Text style={[textStyles.subtitle, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
-          {subtitle ? (
+          {isOffline ? (
+            <View style={{ alignSelf: 'flex-start', marginTop: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.control, backgroundColor: withAlpha(colors.textSecondary, 'hairline') }}>
+              <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 11 }]}>{t('radio.offline')}</Text>
+            </View>
+          ) : subtitle ? (
             <Text style={[textStyles.base, { color: colors.textSecondary, fontSize: 12, marginTop: 1 }]} numberOfLines={1}>
               {subtitle}
             </Text>

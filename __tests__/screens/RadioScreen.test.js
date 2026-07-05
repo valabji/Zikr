@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import RadioScreen from '../../screens/RadioScreen';
 import RadioService from '../../utils/RadioService';
-import { getStations } from '../../utils/RadioStations';
+import { getStations, getOfflineStations } from '../../utils/RadioStations';
 import { loadRadioFavorites, toggleRadioFavorite } from '../../utils/RadioFavorites';
 
 const mockNavigation = { goBack: jest.fn(), toggleDrawer: jest.fn(), navigate: jest.fn() };
@@ -47,6 +47,7 @@ jest.mock('../../utils/RadioStations', () => ({
     { id: 2, name: 'Beta', streamUrl: 'https://s/2' },
   ])),
   getStationSubtitle: jest.fn(() => ''),
+  getOfflineStations: jest.fn(() => Promise.resolve(new Set())),
 }));
 
 jest.mock('../../utils/RadioFavorites', () => ({
@@ -121,5 +122,12 @@ describe('RadioScreen', () => {
       expect(queryByTestId('station-1')).toBeNull();
       expect(getByTestId('station-2')).toBeTruthy();
     });
+  });
+
+  it('marks unreachable stations as offline', async () => {
+    getOfflineStations.mockResolvedValue(new Set([2]));
+    const { getByTestId, queryAllByText } = render(<RadioScreen navigation={mockNavigation} />);
+    await waitFor(() => expect(getByTestId('station-2')).toBeTruthy());
+    await waitFor(() => expect(queryAllByText('radio.offline').length).toBe(1));
   });
 });

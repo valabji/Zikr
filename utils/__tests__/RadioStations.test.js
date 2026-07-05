@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getBundledStations, fetchStations, getStations, isCacheFresh, getStationSubtitle,
+  checkStationOnline, getOfflineStations,
 } from '../RadioStations';
 import { RADIO_CONSTANTS } from '../../constants/RadioConstants';
 
@@ -108,6 +109,41 @@ describe('RadioStations', () => {
     expect(getStationSubtitle('https://backup.qurango.net/radio/abdulrasheed_soufi_khalaf', 'en')).toBe('Khalaf narration');
     expect(getStationSubtitle('', 'en')).toBe('');
     expect(getStationSubtitle('https://backup.qurango.net/radio/ahmad_alajmy/', 'en')).toBe('');
+  });
+
+  it('checkStationOnline treats 2xx/3xx as reachable and everything else as offline', async () => {
+    global.fetch.mockResolvedValueOnce({ status: 200 });
+    expect(await checkStationOnline('https://s/1')).toBe(true);
+    global.fetch.mockResolvedValueOnce({ status: 302 });
+    expect(await checkStationOnline('https://s/2')).toBe(true);
+    global.fetch.mockResolvedValueOnce({ status: 404 });
+    expect(await checkStationOnline('https://s/3')).toBe(false);
+    global.fetch.mockRejectedValueOnce(new Error('network down'));
+    expect(await checkStationOnline('https://s/4')).toBe(false);
+    expect(await checkStationOnline('')).toBe(false);
+  });
+
+  it('getOfflineStations returns ids of unreachable stations and caches per language', async () => {
+    const stations = [
+      { id: 1, streamUrl: 'https://s/1' },
+      { id: 2, streamUrl: 'https://s/2' },
+      { id: 3, streamUrl: 'https://s/3' },
+    ];
+    global.fetch.mockImplementation((url) =>
+      url.endsWith('/2') ? Promise.reject(new Error('down')) : Promise.resolve({ status: 200 }));
+    const marked = [];
+    const offline = await getOfflineStations('en', stations, { now: 1000, onOffline: (id) => marked.push(id) });
+    expect([...offline]).toEqual([2]);
+    expect(marked).toEqual([2]);
+
+    global.fetch.mockClear();
+    const cached = await getOfflineStations('en', stations, { now: 2000 });
+    expect([...cached]).toEqual([2]);
+    expect(global.fetch).not.toHaveBeenCalled();
+
+    const refreshed = await getOfflineStations('en', stations, { now: 3000, force: true });
+    expect([...refreshed]).toEqual([2]);
+    expect(global.fetch).toHaveBeenCalled();
   });
 
   it('isCacheFresh respects the TTL window', () => {
