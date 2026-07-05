@@ -142,15 +142,17 @@ export default function QuranMiniPlayer({ colors, audio, onClose, aboveSlot = nu
         <Text style={[textStyles.subtitle, { color: colors.BYellow, flex: 1, fontSize: 14 }]} numberOfLines={1}>
           {label}
         </Text>
-        <TouchableOpacity onPress={() => QuranAudio.previous()} style={{ paddingHorizontal: 6 }}>
-          <Feather name="skip-back" size={22} color={colors.BYellow} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => QuranAudio.toggle()} style={{ paddingHorizontal: 10 }}>
-          <Feather name={audio.isPlaying ? 'pause' : 'play'} size={26} color={colors.BYellow} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => QuranAudio.next()} style={{ paddingHorizontal: 6 }}>
-          <Feather name="skip-forward" size={22} color={colors.BYellow} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', direction: 'ltr' }}>
+          <TouchableOpacity onPress={() => QuranAudio.previous()} style={{ paddingHorizontal: 6 }}>
+            <Feather name="skip-back" size={22} color={colors.BYellow} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => QuranAudio.toggle()} style={{ paddingHorizontal: 10 }}>
+            <Feather name={audio.isPlaying ? 'pause' : 'play'} size={26} color={colors.BYellow} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => QuranAudio.next()} style={{ paddingHorizontal: 6 }}>
+            <Feather name="skip-forward" size={22} color={colors.BYellow} />
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
           onPress={() => setExpanded((v) => !v)}
           accessibilityLabel={expanded ? t('quran.collapsePlayer') : t('quran.expandPlayer')}
