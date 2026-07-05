@@ -5,7 +5,7 @@ export default {
     privacy: "public",
     platforms: ["ios", "android", "web"],
     version: "1.1.23",
-    orientation: "portrait",
+    orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     backgroundColor: "#ffffff",
