@@ -37,6 +37,7 @@ class QuranAudioService {
     this.segEndAyah = null;
     this.segEndMs = null;
     this._advancing = false;
+    this._opId = 0;
   }
 
   async _ensureAudioMode() {
@@ -124,9 +125,11 @@ class QuranAudioService {
   }
 
   async _playAyahFile(surah, ayah) {
+    const op = ++this._opId;
     await this._ensureAudioMode();
     await this._ensureSettings();
     await this._unload();
+    if (op !== this._opId) return;
     this.mode = 'ayah';
     this.surahManifest = null;
     this._advancing = false;
@@ -140,6 +143,10 @@ class QuranAudioService {
         { uri },
         { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true }
       );
+      if (op !== this._opId) {
+        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
+        return;
+      }
       this.sound = sound;
       sound.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) {
@@ -176,6 +183,7 @@ class QuranAudioService {
         if (changed) this._emit();
       });
     } catch (e) {
+      if (op !== this._opId) return;
       console.warn('QuranAudio: playAyah failed', e);
       this.isPlaying = false;
       this._emit();
@@ -183,9 +191,11 @@ class QuranAudioService {
   }
 
   async _playGapless(surah, fromAyah, scope) {
+    const op = ++this._opId;
     const manifest = await getSurahAudioManifest(this.reciterId, surah);
     if (!manifest) return this._playAyahFile(surah, fromAyah);
     await this._unload();
+    if (op !== this._opId) return;
     this.mode = 'gapless';
     this.gaplessScope = scope;
     this.surahManifest = manifest;
@@ -209,9 +219,14 @@ class QuranAudioService {
         { uri: localUri || manifest.audioUrl },
         { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true, positionMillis: start.from }
       );
+      if (op !== this._opId) {
+        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
+        return;
+      }
       this.sound = sound;
       sound.setOnPlaybackStatusUpdate((status) => this._onGaplessStatus(status));
     } catch (e) {
+      if (op !== this._opId) return;
       console.warn('QuranAudio: playGapless failed', e);
       this.isPlaying = false;
       this._emit();
@@ -501,6 +516,7 @@ class QuranAudioService {
   }
 
   async stop() {
+    this._opId++;
     await this._unload();
     this.mode = 'ayah';
     this.surahManifest = null;

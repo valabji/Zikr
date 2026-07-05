@@ -14,6 +14,7 @@ class RadioService {
     this.isBuffering = false;
     this.audioModeReady = false;
     this.listeners = new Set();
+    this._opId = 0;
   }
 
   async initialize() {
@@ -63,10 +64,12 @@ class RadioService {
 
   async playStation(station) {
     if (!station || !station.streamUrl) return;
+    const op = ++this._opId;
     await this._ensureAudioMode();
     try { await QuranAudio.stop(); } catch {}
     try { await Sounds.stopFullAdhan(); } catch {}
     await this._unload();
+    if (op !== this._opId) return;
     this.activeStation = station;
     this.isPlaying = true;
     this.isBuffering = true;
@@ -76,6 +79,10 @@ class RadioService {
         { uri: station.streamUrl },
         { shouldPlay: true }
       );
+      if (op !== this._opId) {
+        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
+        return;
+      }
       this.sound = sound;
       sound.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) {
@@ -97,6 +104,7 @@ class RadioService {
       });
       this._persistLastPlayed(station);
     } catch (e) {
+      if (op !== this._opId) return;
       console.warn('RadioService: playStation failed', e);
       this.isPlaying = false;
       this.isBuffering = false;
@@ -132,6 +140,7 @@ class RadioService {
   }
 
   async stop() {
+    this._opId++;
     await this._unload();
     this.activeStation = null;
     this.isPlaying = false;

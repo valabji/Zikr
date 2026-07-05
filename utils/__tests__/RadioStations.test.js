@@ -112,15 +112,33 @@ describe('RadioStations', () => {
   });
 
   it('checkStationOnline treats 2xx/3xx as reachable and everything else as offline', async () => {
-    global.fetch.mockResolvedValueOnce({ status: 200 });
-    expect(await checkStationOnline('https://s/1')).toBe(true);
-    global.fetch.mockResolvedValueOnce({ status: 302 });
-    expect(await checkStationOnline('https://s/2')).toBe(true);
-    global.fetch.mockResolvedValueOnce({ status: 404 });
-    expect(await checkStationOnline('https://s/3')).toBe(false);
-    global.fetch.mockRejectedValueOnce(new Error('network down'));
-    expect(await checkStationOnline('https://s/4')).toBe(false);
+    expect(await checkStationOnline('https://s/1', { probe: () => Promise.resolve(200) })).toBe(true);
+    expect(await checkStationOnline('https://s/2', { probe: () => Promise.resolve(302) })).toBe(true);
+    expect(await checkStationOnline('https://s/3', { probe: () => Promise.resolve(404), retries: 0 })).toBe(false);
     expect(await checkStationOnline('')).toBe(false);
+  });
+
+  it('treats a redirecting stream host (302 on GET) as online even when HEAD would 404', async () => {
+    expect(await checkStationOnline('https://stream.radiojar.com/abc', { probe: () => Promise.resolve(302) })).toBe(true);
+  });
+
+  it('checkStationOnline retries transient failures before giving up', async () => {
+    let blip = 0;
+    const flaky = () => { blip += 1; return blip === 1 ? Promise.reject(new Error('timeout')) : Promise.resolve(200); };
+    expect(await checkStationOnline('https://s/blip', { probe: flaky })).toBe(true);
+    expect(blip).toBe(2);
+
+    let down = 0;
+    const dead = () => { down += 1; return Promise.reject(new Error('down')); };
+    expect(await checkStationOnline('https://s/dead', { probe: dead, retries: 2 })).toBe(false);
+    expect(down).toBe(3);
+  });
+
+  it('checkStationOnline does not retry a definitive http status', async () => {
+    let calls = 0;
+    const probe = () => { calls += 1; return Promise.resolve(404); };
+    expect(await checkStationOnline('https://s/404', { probe, retries: 2 })).toBe(false);
+    expect(calls).toBe(1);
   });
 
   it('getOfflineStations returns ids of unreachable stations and caches per language', async () => {
@@ -129,21 +147,34 @@ describe('RadioStations', () => {
       { id: 2, streamUrl: 'https://s/2' },
       { id: 3, streamUrl: 'https://s/3' },
     ];
-    global.fetch.mockImplementation((url) =>
-      url.endsWith('/2') ? Promise.reject(new Error('down')) : Promise.resolve({ status: 200 }));
+    const probe = (url) => (url.endsWith('/2') ? Promise.reject(new Error('down')) : Promise.resolve(200));
     const marked = [];
-    const offline = await getOfflineStations('en', stations, { now: 1000, onOffline: (id) => marked.push(id) });
+    const offline = await getOfflineStations('en', stations, { now: 1000, retries: 0, probe, onOffline: (id) => marked.push(id) });
     expect([...offline]).toEqual([2]);
     expect(marked).toEqual([2]);
 
-    global.fetch.mockClear();
-    const cached = await getOfflineStations('en', stations, { now: 2000 });
+    let cachedCalls = 0;
+    const cached = await getOfflineStations('en', stations, { now: 2000, probe: () => { cachedCalls += 1; return Promise.resolve(200); } });
     expect([...cached]).toEqual([2]);
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(cachedCalls).toBe(0);
 
-    const refreshed = await getOfflineStations('en', stations, { now: 3000, force: true });
+    const refreshed = await getOfflineStations('en', stations, { now: 3000, force: true, retries: 0, probe });
     expect([...refreshed]).toEqual([2]);
-    expect(global.fetch).toHaveBeenCalled();
+  });
+
+  it('getOfflineStations re-verifies suspects so a load-throttled station is not marked offline', async () => {
+    const stations = [
+      { id: 1, streamUrl: 'https://s/1' },
+      { id: 2, streamUrl: 'https://s/2' },
+    ];
+    let hits = 0;
+    const probe = (url) => {
+      if (url.endsWith('/1')) return Promise.resolve(200);
+      hits += 1;
+      return hits === 1 ? Promise.reject(new Error('throttled')) : Promise.resolve(200);
+    };
+    const offline = await getOfflineStations('en', stations, { now: 9000, force: true, retries: 0, probe });
+    expect([...offline]).toEqual([]);
   });
 
   it('isCacheFresh respects the TTL window', () => {

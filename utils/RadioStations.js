@@ -104,41 +104,67 @@ export async function getStations(lang, { now } = {}) {
 const OFFLINE_TTL_MS = 60 * 60 * 1000;
 const offlineCache = {};
 
-export async function checkStationOnline(streamUrl, { timeoutMs = 8000 } = {}) {
-  if (!streamUrl) return false;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(streamUrl, { method: 'GET', signal: controller.signal });
-    controller.abort();
-    return res.status >= 200 && res.status < 400;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timer);
-  }
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function xhrProbe(streamUrl, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    let settled = false;
+    const done = (cb, val) => {
+      if (settled) return;
+      settled = true;
+      try { xhr.abort(); } catch {}
+      cb(val);
+    };
+    xhr.open('GET', streamUrl);
+    xhr.timeout = timeoutMs;
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState >= 2 && xhr.status > 0) done(resolve, xhr.status);
+      else if (xhr.readyState === 4) done(reject, new Error('no response'));
+    };
+    xhr.onerror = () => done(reject, new Error('network error'));
+    xhr.ontimeout = () => done(reject, new Error('timeout'));
+    try { xhr.send(); } catch (e) { done(reject, e); }
+  });
 }
 
-export async function getOfflineStations(lang, stations, { now, onOffline, force, concurrency = 4, timeoutMs = 8000 } = {}) {
+export async function checkStationOnline(streamUrl, { timeoutMs = 8000, retries = 2, probe = xhrProbe } = {}) {
+  if (!streamUrl) return false;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const status = await probe(streamUrl, timeoutMs);
+      return status >= 200 && status < 400;
+    } catch {
+      if (attempt < retries) await delay(500);
+    }
+  }
+  return false;
+}
+
+export async function getOfflineStations(lang, stations, { now, onOffline, force, concurrency = 4, timeoutMs = 8000, retries = 2, probe } = {}) {
   const ts = typeof now === 'number' ? now : Date.now();
   const key = apiLang(lang);
   const cached = offlineCache[key];
   if (!force && cached && ts - cached.timestamp < OFFLINE_TTL_MS) return new Set(cached.offline);
 
   const list = Array.isArray(stations) ? stations : [];
-  const offline = new Set();
+  const suspects = [];
   let cursor = 0;
   const worker = async () => {
     while (cursor < list.length) {
       const station = list[cursor++];
-      const online = await checkStationOnline(station.streamUrl, { timeoutMs });
-      if (!online) {
-        offline.add(station.id);
-        if (onOffline) onOffline(station.id);
-      }
+      if (!(await checkStationOnline(station.streamUrl, { timeoutMs, retries, probe }))) suspects.push(station);
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, list.length) }, () => worker()));
+
+  const offline = new Set();
+  for (const station of suspects) {
+    if (!(await checkStationOnline(station.streamUrl, { timeoutMs, retries, probe }))) {
+      offline.add(station.id);
+      if (onOffline) onOffline(station.id);
+    }
+  }
   offlineCache[key] = { offline: new Set(offline), timestamp: ts };
   return offline;
 }

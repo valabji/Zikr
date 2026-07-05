@@ -42,11 +42,13 @@ jest.mock('../Sounds', () => ({
 }));
 
 const station = { id: 3, name: 'Test Radio', streamUrl: 'https://stream.example/3' };
+const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('RadioService', () => {
   let store;
   beforeEach(() => {
     jest.clearAllMocks();
+    Audio.Sound.createAsync.mockImplementation(() => Promise.resolve({ sound: mockMakeSound() }));
     mockState.lastSound = null;
     store = {};
     AsyncStorage.setItem.mockImplementation((k, v) => { store[k] = v; return Promise.resolve(); });
@@ -122,6 +124,50 @@ describe('RadioService', () => {
     await RadioService.toggle();
     expect(sound.playAsync).toHaveBeenCalled();
     expect(RadioService.isPlaying).toBe(true);
+  });
+
+  it('a second play during load unloads the first sound (no orphan)', async () => {
+    const created = [];
+    const gate = [];
+    Audio.Sound.createAsync.mockImplementation(() => new Promise((resolve) => {
+      const sound = mockMakeSound();
+      created.push(sound);
+      gate.push(() => resolve({ sound }));
+    }));
+
+    const p1 = RadioService.playStation(station);
+    await flush();
+    const p2 = RadioService.playStation(station);
+    await flush();
+    gate[0]();
+    gate[1]();
+    await Promise.all([p1, p2]);
+
+    expect(created).toHaveLength(2);
+    expect(created[0].unloadAsync).toHaveBeenCalled();
+    expect(RadioService.sound).toBe(created[1]);
+
+    await RadioService.stop();
+    expect(created[1].unloadAsync).toHaveBeenCalled();
+    expect(RadioService.sound).toBeNull();
+  });
+
+  it('stop supersedes an in-flight play so its sound never leaks', async () => {
+    let resolveCreate;
+    Audio.Sound.createAsync.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveCreate = () => resolve({ sound: mockMakeSound() });
+    }));
+
+    const playing = RadioService.playStation(station);
+    await flush();
+    await RadioService.stop();
+    resolveCreate();
+    await playing;
+
+    const leaked = mockState.lastSound;
+    expect(leaked.unloadAsync).toHaveBeenCalled();
+    expect(RadioService.sound).toBeNull();
+    expect(RadioService.activeStation).toBeNull();
   });
 
   it('stop unloads the sound and clears state', async () => {
