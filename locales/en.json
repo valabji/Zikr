@@ -625,6 +625,8 @@
     "readOnSunnah": "Read on sunnah.com",
     "dataSource": "Data source",
     "dataSourceDesc": "hadith-json on GitHub",
+    "incompleteTitle": "Incomplete collection",
+    "incompleteBody": "This data source includes only {count} of Musnad Ahmad's roughly 28,000 narrations. The rest of the collection isn't available yet.",
     "groups": {
       "sahihain": "The Two Sahihs",
       "sunan": "The Four Sunan",

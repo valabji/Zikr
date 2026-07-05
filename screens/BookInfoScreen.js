@@ -7,8 +7,8 @@ import { textStyles, FONT_FAMILY } from '../constants/Fonts';
 import { useRTL } from '../hooks/useRTL';
 import { t, isRTL, arabicContentStyle } from '../locales/i18n';
 import { getLastRead } from '../utils/BooksLibrary';
-import { SUNNAH_URL, DATA_REPO_URL } from '../constants/BooksConstants';
-import { SettingsContainer, SettingsSection, SettingsRow, SettingsButton } from '../components/settings';
+import { SUNNAH_URL, DATA_REPO_URL, INCOMPLETE_SOURCE } from '../constants/BooksConstants';
+import { SettingsContainer, SettingsSection, SettingsRow, SettingsButton, SettingsCallout } from '../components/settings';
 import { SPACING, RADIUS, withAlpha } from '../constants/settingsTokens';
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
@@ -100,6 +100,17 @@ export default function BookInfoScreen({ book, dlState, navigation, onBack, onRe
         {downloading ? (
           <View style={{ height: 4, borderRadius: 2, backgroundColor: withAlpha(colors.accent, 'hairline'), marginBottom: SPACING.xl, overflow: 'hidden' }}>
             <View style={{ height: 4, width: `${Math.round((st.progress || 0) * 100)}%`, backgroundColor: colors.accent }} />
+          </View>
+        ) : null}
+
+        {INCOMPLETE_SOURCE.has(book.id) ? (
+          <View style={{ marginBottom: SPACING.xl }}>
+            <SettingsCallout
+              testID="book-info-incomplete"
+              tone="warning"
+              title={t('books.incompleteTitle')}
+              body={t('books.incompleteBody', { count: fmtNum(book.count) })}
+            />
           </View>
         ) : null}
 

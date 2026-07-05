@@ -625,6 +625,8 @@
     "readOnSunnah": "اقرأ على sunnah.com",
     "dataSource": "مصدر البيانات",
     "dataSourceDesc": "hadith-json على GitHub",
+    "incompleteTitle": "مجموعة غير مكتملة",
+    "incompleteBody": "يتضمّن مصدر البيانات {count} حديثًا فقط من نحو ٢٨٬٠٠٠ حديث في مسند الإمام أحمد. باقي المسند غير متوفّر بعد.",
     "groups": {
       "sahihain": "الصحيحان",
       "sunan": "السنن الأربعة",
