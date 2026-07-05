@@ -1,6 +1,9 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BooksDownloader, { bookFileUri } from '../BooksDownloader';
+import { BOOKS_CONSTANTS } from '../../constants/BooksConstants';
+
+const VERSION_TAG = String(BOOKS_CONSTANTS.DATA_VERSION);
 
 const RAW_BOOK = JSON.stringify({
   hadiths: [
@@ -37,7 +40,7 @@ describe('BooksDownloader', () => {
     const payload = JSON.parse(written[1]);
     expect(payload.id).toBe('bukhari');
     expect(payload.entries).toHaveLength(2);
-    expect(store['@books_installed_bukhari']).toBe('1');
+    expect(store['@books_installed_bukhari']).toBe(VERSION_TAG);
     expect(BooksDownloader.isInstalled('bukhari')).toBe(true);
   });
 
@@ -59,28 +62,36 @@ describe('BooksDownloader', () => {
   });
 
   it('startAll downloads every pending book and skips installed ones', async () => {
-    store['@books_installed_tirmidhi'] = '1';
+    store['@books_installed_tirmidhi'] = VERSION_TAG;
     await BooksDownloader.checkInstalled(['tirmidhi']);
     await BooksDownloader.startAll([
       { id: 'tirmidhi', src: 'the_9_books/tirmidhi.json' },
       { id: 'nasai', src: 'the_9_books/nasai.json' },
       { id: 'nosrc' },
     ]);
-    expect(store['@books_installed_nasai']).toBe('1');
+    expect(store['@books_installed_nasai']).toBe(VERSION_TAG);
     expect(BooksDownloader.isInstalled('nasai')).toBe(true);
     const wroteTirmidhi = FileSystem.writeAsStringAsync.mock.calls.some((c) => c[0] === bookFileUri('tirmidhi'));
     expect(wroteTirmidhi).toBe(false);
   });
 
   it('checkInstalled reads persisted flags', async () => {
-    store['@books_installed_malik'] = '1';
+    store['@books_installed_malik'] = VERSION_TAG;
     await BooksDownloader.checkInstalled(['malik', 'ahmed']);
     expect(BooksDownloader.isInstalled('malik')).toBe(true);
     expect(BooksDownloader.isInstalled('ahmed')).toBe(false);
   });
 
+  it('treats an outdated format flag as stale and re-downloads', async () => {
+    store['@books_installed_abudawud'] = '1';
+    await BooksDownloader.checkInstalled(['abudawud']);
+    expect(FileSystem.deleteAsync).toHaveBeenCalledWith(bookFileUri('abudawud'), { idempotent: true });
+    expect(store['@books_installed_abudawud']).toBeUndefined();
+    expect(BooksDownloader.isInstalled('abudawud')).toBe(false);
+  });
+
   it('uninstall removes the file and clears the flag', async () => {
-    store['@books_installed_darimi'] = '1';
+    store['@books_installed_darimi'] = VERSION_TAG;
     await BooksDownloader.checkInstalled(['darimi']);
     await BooksDownloader.uninstall('darimi');
     expect(FileSystem.deleteAsync).toHaveBeenCalledWith(bookFileUri('darimi'), { idempotent: true });

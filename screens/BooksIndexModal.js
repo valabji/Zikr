@@ -9,8 +9,6 @@ import { SPACING, RADIUS, CONTENT_MAX_WIDTH, withAlpha, webCursor } from '../con
 
 const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
 
-const TABS = ['entries', 'bookmarks'];
-
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
 
 const snippet = (text, len = 60) => {
@@ -79,7 +77,7 @@ function EntryRow({ number, preview, onPress, onRemove, bookmarked, colors, isRT
   );
 }
 
-export default function BooksIndexModal({ visible, onClose, book, bookmarks, onSelectEntry, onRemoveBookmark, onOpenSearch, onOpenSettings }) {
+export default function BooksIndexModal({ visible, onClose, book, bookmarks, onSelectEntry, onSelectChapter, onRemoveBookmark, onOpenSearch, onOpenSettings }) {
   const colors = useColors();
   const { isRTL: isRTLLayout } = useRTL();
   const [tab, setTab] = React.useState('entries');
@@ -87,6 +85,10 @@ export default function BooksIndexModal({ visible, onClose, book, bookmarks, onS
   const fmtNum = (n) => (lang === 'ar' ? toArabicDigits(n) : n);
 
   const entries = book?.entries || [];
+  const chapters = book?.chapters || [];
+  const hasChapters = !!onSelectChapter && chapters.length > 1;
+  const tabs = hasChapters ? ['chapters', 'entries', 'bookmarks'] : ['entries', 'bookmarks'];
+  const activeTab = tab === 'chapters' && !hasChapters ? 'entries' : tab;
   const bookmarkSet = React.useMemo(() => new Set(bookmarks || []), [bookmarks]);
 
   const renderEntry = ({ item, index }) => (
@@ -120,6 +122,43 @@ export default function BooksIndexModal({ visible, onClose, book, bookmarks, onS
     );
   };
 
+  const renderChapter = ({ item, index }) => {
+    const name = lang === 'ar' ? item.ar : (item.en || item.ar);
+    return (
+      <TouchableOpacity
+        onPress={() => onSelectChapter(item.id)}
+        style={[{ flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: SPACING.md + 2,
+          paddingHorizontal: SPACING.lg + 2,
+          borderBottomWidth: 1,
+          borderBottomColor: withAlpha(colors.accent, 'hairline'),
+        }, webCursor]}
+      >
+        <View style={{
+          minWidth: 36, height: 36, borderRadius: RADIUS.pill, paddingHorizontal: 8,
+          backgroundColor: withAlpha(colors.accent, 'hairline'),
+          justifyContent: 'center', alignItems: 'center',
+        }}>
+          <Text style={[textStyles.base, { color: colors.accent, fontSize: 14 }]}>{fmtNum(index + 1)}</Text>
+        </View>
+        <Text
+          numberOfLines={2}
+          style={arabicContentStyle({
+            flex: 1,
+            marginHorizontal: SPACING.md + 2,
+            fontFamily: FONT_FAMILY,
+            fontSize: 16,
+            color: colors.text,
+          })}
+        >
+          {name}
+        </Text>
+        <Feather name={isRTLLayout ? 'chevron-left' : 'chevron-right'} size={20} color={colors.textSecondary} />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, paddingTop: ANDROID_STATUS_BAR }}>
@@ -149,17 +188,24 @@ export default function BooksIndexModal({ visible, onClose, book, bookmarks, onS
             ) : null}
           </View>
           <View style={{ flexDirection: 'row' }}>
-            {TABS.map((key) => (
+            {tabs.map((key) => (
               <TabButton
                 key={key}
                 colors={colors}
                 label={t(`books.${key}`)}
-                active={tab === key}
+                active={activeTab === key}
                 onPress={() => setTab(key)}
               />
             ))}
           </View>
-          {tab === 'entries' && (
+          {activeTab === 'chapters' && (
+            <FlatList
+              data={chapters}
+              keyExtractor={(item, index) => String(item.id ?? index)}
+              renderItem={renderChapter}
+            />
+          )}
+          {activeTab === 'entries' && (
             <FlatList
               data={entries}
               keyExtractor={(item, index) => String(index)}
@@ -167,7 +213,7 @@ export default function BooksIndexModal({ visible, onClose, book, bookmarks, onS
               getItemLayout={(_, i) => ({ length: 65, offset: 65 * i, index: i })}
             />
           )}
-          {tab === 'bookmarks' && (
+          {activeTab === 'bookmarks' && (
             sortedBookmarks.length === 0 ? (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.xxl + SPACING.sm }}>
                 <Feather name="bookmark" size={48} color={colors.textSecondary} style={{ marginBottom: SPACING.lg, opacity: 0.5 }} />

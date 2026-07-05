@@ -29,7 +29,7 @@ export function loadBook(id) {
   const loader = contentLoaders[id];
   if (!meta || !loader) return null;
   const content = loader();
-  const book = { ...meta, entries: content.entries || [] };
+  const book = { ...meta, entries: content.entries || [], chapters: content.chapters || [] };
   bookCache[id] = book;
   return book;
 }
@@ -43,7 +43,7 @@ export async function loadBookAsync(id) {
     const info = await FileSystem.getInfoAsync(bookFileUri(id));
     if (!info.exists) return null;
     const content = JSON.parse(await FileSystem.readAsStringAsync(bookFileUri(id)));
-    const book = { ...meta, entries: content.entries || [] };
+    const book = { ...meta, entries: content.entries || [], chapters: content.chapters || [] };
     bookCache[id] = book;
     return book;
   } catch {

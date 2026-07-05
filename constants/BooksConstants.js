@@ -15,14 +15,19 @@ export const BOOKS_CONSTANTS = {
 
   LOCAL_DIR: 'books/',
 
+  DATA_VERSION: 2,
+
   DEFAULT_SETTINGS: {
     fontScale: 1.0,
     showTranslation: false,
+    viewMode: 'scroll',
     lastBookId: null,
   },
 };
 
 export const FONT_SCALE_RANGE = { min: 0.75, max: 2.5, step: 0.05, default: 1.0 };
+
+export const BOOK_VIEW_MODES = ['scroll', 'pages'];
 
 export const BOOK_CATEGORIES = {
   HADITH: 'hadith',

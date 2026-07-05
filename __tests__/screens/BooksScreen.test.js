@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BooksScreen from '../../screens/BooksScreen';
+import { _resetForTests as resetBooksSettings } from '../../utils/BooksSettings';
 
 const mockNavigation = {
   goBack: jest.fn(),
@@ -46,6 +47,7 @@ jest.mock('../../constants/Colors', () => ({
 describe('BooksScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetBooksSettings();
     AsyncStorage.getItem.mockResolvedValue(undefined);
     AsyncStorage.setItem.mockResolvedValue(undefined);
   });
@@ -73,5 +75,18 @@ describe('BooksScreen', () => {
     fireEvent.press(await findByTestId('book-info-primary'));
     expect(await findByTestId('books-reader')).toBeTruthy();
     expect(await findByTestId('books-pager')).toBeTruthy();
+  });
+
+  it('renders the page pager when reading mode is pages', async () => {
+    AsyncStorage.getItem.mockImplementation((k) =>
+      Promise.resolve(k === '@books_settings' ? JSON.stringify({ viewMode: 'pages' }) : undefined)
+    );
+    const { getByTestId, findByTestId } = render(<BooksScreen navigation={mockNavigation} />);
+    await waitFor(() => expect(getByTestId('book-nawawi40')).toBeTruthy());
+    fireEvent.press(getByTestId('book-nawawi40'));
+    fireEvent.press(await findByTestId('book-info-primary'));
+    const container = await findByTestId('books-page-container');
+    fireEvent(container, 'layout', { nativeEvent: { layout: { width: 360, height: 640 } } });
+    expect(await findByTestId('books-page-pager')).toBeTruthy();
   });
 });

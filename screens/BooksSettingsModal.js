@@ -9,6 +9,7 @@ import {
   SettingsRow,
   SettingsSlider,
   SettingsToggle,
+  SettingsSegmented,
 } from '../components/settings';
 import { SPACING } from '../constants/settingsTokens';
 
@@ -36,6 +37,18 @@ export default function BooksSettingsModal({ visible, onClose }) {
   return (
     <SettingsModalShell visible={visible} onClose={onClose} title={t('books.settingsTitle')}>
       <ScrollView contentContainerStyle={{ padding: SPACING.lg }}>
+        <SettingsSection title={t('books.readingMode')} footnote={t('books.readingModeDesc')}>
+          <SettingsSegmented
+            testID="books-reading-mode"
+            value={settings.viewMode === 'pages' ? 'pages' : 'scroll'}
+            onChange={(v) => update({ viewMode: v })}
+            options={[
+              { id: 'scroll', label: t('books.readingModeScroll'), icon: 'align-justify' },
+              { id: 'pages', label: t('books.readingModePages'), icon: 'book-open' },
+            ]}
+          />
+        </SettingsSection>
+
         <SettingsSection title={t('books.fontSize')}>
           <SettingsSlider
             value={fontScale}

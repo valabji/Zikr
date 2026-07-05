@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BOOKS_CONSTANTS } from '../constants/BooksConstants';
 import { transformRawBook } from './booksTransform';
 
-const { SOURCE, LOCAL_DIR, STORAGE_KEYS } = BOOKS_CONSTANTS;
+const { SOURCE, LOCAL_DIR, STORAGE_KEYS, DATA_VERSION } = BOOKS_CONSTANTS;
+const VERSION_TAG = String(DATA_VERSION);
 
 const localDir = FileSystem.documentDirectory + LOCAL_DIR;
 
@@ -65,8 +66,12 @@ class BooksDownloaderService {
   async checkInstalled(ids) {
     for (const id of ids) {
       try {
-        if (await AsyncStorage.getItem(installedKey(id)) === '1') {
+        const tag = await AsyncStorage.getItem(installedKey(id));
+        if (tag === VERSION_TAG) {
           this._get(id).installed = true;
+        } else if (tag != null) {
+          try { await FileSystem.deleteAsync(bookFileUri(id), { idempotent: true }); } catch {}
+          await AsyncStorage.removeItem(installedKey(id));
         }
       } catch {}
     }
@@ -105,11 +110,11 @@ class BooksDownloaderService {
       if (this.cancelled[id]) { await this._cleanup(id); return; }
 
       const rawStr = await FileSystem.readAsStringAsync(tmp);
-      const { entries } = transformRawBook(JSON.parse(rawStr));
-      if (!entries.length) throw new Error('empty book');
-      await FileSystem.writeAsStringAsync(bookFileUri(id), JSON.stringify({ id, entries }));
+      const transformed = transformRawBook(JSON.parse(rawStr));
+      if (!transformed.entries.length) throw new Error('empty book');
+      await FileSystem.writeAsStringAsync(bookFileUri(id), JSON.stringify({ id, format: DATA_VERSION, ...transformed }));
       try { await FileSystem.deleteAsync(tmp, { idempotent: true }); } catch {}
-      await AsyncStorage.setItem(installedKey(id), '1');
+      await AsyncStorage.setItem(installedKey(id), VERSION_TAG);
       this.state[id] = { installed: true, downloading: false, progress: 1, error: null };
       delete this.handles[id];
       this._emit();

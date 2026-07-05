@@ -52,4 +52,56 @@ describe('booksTransform', () => {
     expect(transformRawBook({})).toEqual({ entries: [] });
     expect(transformRawBook({ hadiths: 'nope' })).toEqual({ entries: [] });
   });
+
+  it('keeps chapters and tags entries when more than one chapter is used', () => {
+    const raw = {
+      chapters: [
+        { id: 1, arabic: 'باب الأول', english: 'Chapter One' },
+        { id: 2, arabic: 'باب الثاني', english: 'Chapter Two' },
+      ],
+      hadiths: [
+        { idInBook: 1, arabic: 'أ', chapterId: 1 },
+        { idInBook: 2, arabic: 'ب', chapterId: 2 },
+      ],
+    };
+    const result = transformRawBook(raw);
+    expect(result.chapters).toEqual([
+      { id: 1, ar: 'باب الأول', en: 'Chapter One' },
+      { id: 2, ar: 'باب الثاني', en: 'Chapter Two' },
+    ]);
+    expect(result.entries[0]).toEqual({ n: 1, textAr: 'أ', c: 1 });
+    expect(result.entries[1]).toEqual({ n: 2, textAr: 'ب', c: 2 });
+  });
+
+  it('drops chapters and chapter tags when only one chapter is used', () => {
+    const raw = {
+      chapters: [
+        { id: 1, arabic: 'باب واحد', english: 'Only Chapter' },
+        { id: 2, arabic: 'غير مستخدم', english: 'Unused' },
+      ],
+      hadiths: [
+        { idInBook: 1, arabic: 'أ', chapterId: 1 },
+        { idInBook: 2, arabic: 'ب', chapterId: 1 },
+      ],
+    };
+    const result = transformRawBook(raw);
+    expect(result.chapters).toBeUndefined();
+    expect(result.entries).toEqual([
+      { n: 1, textAr: 'أ' },
+      { n: 2, textAr: 'ب' },
+    ]);
+  });
+
+  it('ignores chapterId that has no matching chapter', () => {
+    const raw = {
+      chapters: [{ id: 1, arabic: 'باب', english: 'Chapter' }],
+      hadiths: [
+        { idInBook: 1, arabic: 'أ', chapterId: 1 },
+        { idInBook: 2, arabic: 'ب', chapterId: 99 },
+      ],
+    };
+    const result = transformRawBook(raw);
+    expect(result.chapters).toBeUndefined();
+    expect(result.entries[1].c).toBeUndefined();
+  });
 });

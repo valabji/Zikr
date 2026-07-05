@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions, useWindowDimensions } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
 import { useColors } from '../constants/Colors';
-import { textStyles, FONT_FAMILY } from '../constants/Fonts';
+import { textStyles } from '../constants/Fonts';
 import { t, isRTL, arabicContentStyle } from '../locales/i18n';
 import {
   getBooksCatalog, loadBookAsync,
@@ -19,29 +19,11 @@ import BooksIndexModal from './BooksIndexModal';
 import BooksSearchModal from './BooksSearchModal';
 import BooksSettingsModal from './BooksSettingsModal';
 import BookInfoScreen from './BookInfoScreen';
+import BookPage from '../components/BookPage';
+import BookEntry from '../components/BookEntry';
+import { paginateBook, estimateEntryHeight } from '../utils/booksPaginate';
 
 const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
-
-const ENTRY_FRAME_HEIGHT = 32 /* padding */ + 44 /* header row */ + 16 /* card margins */;
-
-const estimateEntryHeight = (item, fontScale, showTranslation, containerWidth) => {
-  const hasAr = !!item.textAr;
-  const hasEn = !!item.textEn;
-  const showEn = hasEn && (showTranslation || !hasAr);
-  let height = ENTRY_FRAME_HEIGHT;
-  if (hasAr) {
-    const charsPerLine = Math.max(8, containerWidth / (20 * fontScale * 0.55));
-    const lines = Math.max(1, Math.ceil((item.textAr || '').length / charsPerLine));
-    height += lines * (38 * fontScale);
-  }
-  if (showEn) {
-    const enFontSize = (hasAr ? 15 : 18) * fontScale;
-    const charsPerLine = Math.max(8, containerWidth / (enFontSize * 0.5));
-    const lines = Math.max(1, Math.ceil((item.textEn || '').length / charsPerLine));
-    height += (hasAr ? 12 : 0) + lines * ((hasAr ? 24 : 30) * fontScale);
-  }
-  return height;
-};
 
 function EntryFlashCard({ active, baseColor, flashColor, style, children }) {
   const anim = React.useRef(new Animated.Value(0)).current;
@@ -60,7 +42,11 @@ function EntryFlashCard({ active, baseColor, flashColor, style, children }) {
 export default function BooksScreen({ navigation }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { width: winW } = useWindowDimensions();
   const listRef = React.useRef(null);
+  const pageListRef = React.useRef(null);
+  const paginationRef = React.useRef(null);
+  const pageRestoredRef = React.useRef(false);
   const lang = isRTL() ? 'ar' : 'en';
   const fmtNum = (n) => (lang === 'ar' ? toArabicDigits(n) : n);
 
@@ -162,9 +148,14 @@ export default function BooksScreen({ navigation }) {
     setIndexOpen(false);
     setSearchOpen(false);
     currentIndexRef.current = index;
+    const pag = paginationRef.current;
     requestAnimationFrame(() => {
       try {
-        listRef.current?.scrollToIndex({ index, animated: false });
+        if (pag) {
+          pageListRef.current?.scrollToIndex({ index: pag.entryToPage[index] ?? 0, animated: false });
+        } else {
+          listRef.current?.scrollToIndex({ index, animated: false });
+        }
       } catch {}
     });
     if (highlight) {
@@ -172,6 +163,19 @@ export default function BooksScreen({ navigation }) {
       setHighlightIndex(index);
       highlightTimeoutRef.current = setTimeout(() => setHighlightIndex(null), 1500);
     }
+  }, []);
+
+  const jumpToChapter = React.useCallback((chapterId) => {
+    setIndexOpen(false);
+    const pag = paginationRef.current;
+    if (!pag) return;
+    const pageIndex = pag.chapterToPage.get(chapterId);
+    if (pageIndex == null) return;
+    requestAnimationFrame(() => {
+      try {
+        pageListRef.current?.scrollToIndex({ index: pageIndex, animated: true });
+      } catch {}
+    });
   }, []);
 
   const selectByNumber = React.useCallback((n) => {
@@ -200,6 +204,21 @@ export default function BooksScreen({ navigation }) {
     },
   }]);
 
+  const pageViewabilityPairs = React.useRef([{
+    viewabilityConfig: { itemVisiblePercentThreshold: 60 },
+    onViewableItemsChanged: ({ viewableItems }) => {
+      if (!viewableItems || viewableItems.length === 0) return;
+      const pageIndex = viewableItems[0].index;
+      if (pageIndex == null) return;
+      const pag = paginationRef.current;
+      const id = bookRef.current?.id;
+      if (!pag || !id) return;
+      const entryIndex = pag.pageFirstEntry[pageIndex] ?? 0;
+      currentIndexRef.current = entryIndex;
+      setLastRead(id, entryIndex);
+    },
+  }]);
+
   const bookRef = React.useRef(book);
   bookRef.current = book;
 
@@ -217,6 +236,43 @@ export default function BooksScreen({ navigation }) {
 
   const fontScale = settings?.fontScale ?? FONT_SCALE_RANGE.default;
   const showTranslation = !!settings?.showTranslation;
+  const viewMode = settings?.viewMode === 'pages' ? 'pages' : 'scroll';
+  const isPaged = viewMode === 'pages';
+
+  const [pagerHeight, setPagerHeight] = React.useState(0);
+  const bookmarkSet = React.useMemo(() => new Set(bookmarks), [bookmarks]);
+
+  const pageContentWidth = Math.min(winW, CONTENT_MAX_WIDTH) - SPACING.sm * 2 - SPACING.md * 2;
+
+  const pagination = React.useMemo(() => {
+    if (!isPaged || !book || pagerHeight <= 0) return null;
+    return paginateBook({
+      entries: book.entries,
+      chapters: book.chapters,
+      pageHeight: pagerHeight - SPACING.md * 2,
+      fontScale,
+      showTranslation,
+      containerWidth: pageContentWidth,
+    });
+  }, [isPaged, book, pagerHeight, fontScale, showTranslation, pageContentWidth]);
+  paginationRef.current = pagination;
+
+  React.useEffect(() => {
+    restoredRef.current = false;
+    pageRestoredRef.current = false;
+  }, [isPaged, book]);
+
+  React.useEffect(() => {
+    if (!isPaged || !pagination || pageRestoredRef.current) return;
+    pageRestoredRef.current = true;
+    const targetPage = pagination.entryToPage[currentIndexRef.current] || 0;
+    if (targetPage <= 0) return;
+    requestAnimationFrame(() => {
+      try {
+        pageListRef.current?.scrollToIndex({ index: targetPage, animated: false });
+      } catch {}
+    });
+  }, [isPaged, pagination]);
 
   const entryLayouts = React.useMemo(() => {
     if (!book) return [];
@@ -399,67 +455,49 @@ export default function BooksScreen({ navigation }) {
     );
   };
 
-  const renderEntry = ({ item, index }) => {
-    const bookmarked = bookmarks.includes(index);
-    const hasAr = !!item.textAr;
-    const hasEn = !!item.textEn;
-    const showEn = hasEn && (showTranslation || !hasAr);
-    return (
-      <EntryFlashCard
-        active={index === highlightIndex}
-        baseColor={colors.surface}
-        flashColor={colors.accent + '55'}
-        style={{
-          borderRadius: 12,
-          marginHorizontal: 12,
-          marginVertical: 8,
-          padding: 16,
-          direction: hasAr ? 'rtl' : 'ltr',
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <View style={{
-            minWidth: 34, height: 34, borderRadius: 17, paddingHorizontal: 8,
-            backgroundColor: colors.accent + '22',
-            justifyContent: 'center', alignItems: 'center',
-          }}>
-            <Text style={[textStyles.base, { color: colors.accent, fontSize: 14 }]}>{fmtNum(item.n)}</Text>
-          </View>
-          <TouchableOpacity
-            testID={`book-bookmark-${index}`}
-            onPress={() => toggleBookmark(index)}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name={bookmarked ? 'bookmark' : 'bookmark-outline'} size={22} color={bookmarked ? colors.accent : colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-        {hasAr ? (
-          <Text
-            style={arabicContentStyle({
-              fontFamily: FONT_FAMILY,
-              fontSize: 20 * fontScale,
-              lineHeight: 38 * fontScale,
-              color: colors.text,
-            })}
-          >
-            {item.textAr}
-          </Text>
-        ) : null}
-        {showEn ? (
-          <Text style={[textStyles.base, {
-            color: hasAr ? colors.textSecondary : colors.text,
-            fontSize: (hasAr ? 15 : 18) * fontScale,
-            lineHeight: (hasAr ? 24 : 30) * fontScale,
-            marginTop: hasAr ? 12 : 0,
-            textAlign: 'left',
-            writingDirection: 'ltr',
-          }]}>
-            {item.textEn}
-          </Text>
-        ) : null}
-      </EntryFlashCard>
-    );
-  };
+  const renderEntry = ({ item, index }) => (
+    <EntryFlashCard
+      active={index === highlightIndex}
+      baseColor={colors.surface}
+      flashColor={colors.accent + '55'}
+      style={{
+        borderRadius: 12,
+        marginHorizontal: 12,
+        marginVertical: 8,
+        padding: 16,
+      }}
+    >
+      <BookEntry
+        item={item}
+        index={index}
+        colors={colors}
+        fontScale={fontScale}
+        showTranslation={showTranslation}
+        bookmarked={bookmarks.includes(index)}
+        onToggleBookmark={toggleBookmark}
+        fmtNum={fmtNum}
+      />
+    </EntryFlashCard>
+  );
+
+  const renderPage = ({ item }) => (
+    <BookPage
+      page={item}
+      width={winW}
+      height={pagerHeight}
+      chapters={book.chapters}
+      colors={colors}
+      fontScale={fontScale}
+      showTranslation={showTranslation}
+      bookmarkSet={bookmarkSet}
+      onToggleBookmark={toggleBookmark}
+      onJumpChapter={jumpToChapter}
+      highlightIndex={highlightIndex}
+      lang={lang}
+      fmtNum={fmtNum}
+      indexTitle={t('books.chapters')}
+    />
+  );
 
   if (mode === 'library') {
     return (
@@ -519,28 +557,62 @@ export default function BooksScreen({ navigation }) {
         )}
       />
       {book && settings ? (
-        <FlatList
-          key="books-pager"
-          ref={listRef}
-          testID="books-pager"
-          data={book.entries}
-          keyExtractor={(item, index) => String(index)}
-          renderItem={renderEntry}
-          getItemLayout={getItemLayout}
-          initialNumToRender={6}
-          maxToRenderPerBatch={6}
-          windowSize={9}
-          onLayout={handleListLayout}
-          onScrollToIndexFailed={(info) => {
-            setTimeout(() => {
-              try {
-                listRef.current?.scrollToIndex({ index: info.index, animated: false });
-              } catch {}
-            }, 50);
-          }}
-          viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
-          contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 20 }}
-        />
+        isPaged ? (
+          <View testID="books-page-container" style={{ flex: 1 }} onLayout={(e) => setPagerHeight(e.nativeEvent.layout.height)}>
+            {pagination ? (
+              <FlatList
+                key="books-page-pager"
+                ref={pageListRef}
+                testID="books-page-pager"
+                data={pagination.pages}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item, index) => String(index)}
+                renderItem={renderPage}
+                getItemLayout={(data, index) => ({ length: winW, offset: winW * index, index })}
+                initialNumToRender={2}
+                maxToRenderPerBatch={2}
+                windowSize={5}
+                onScrollToIndexFailed={(info) => {
+                  setTimeout(() => {
+                    try {
+                      pageListRef.current?.scrollToIndex({ index: info.index, animated: false });
+                    } catch {}
+                  }, 50);
+                }}
+                viewabilityConfigCallbackPairs={pageViewabilityPairs.current}
+              />
+            ) : (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.accent} />
+              </View>
+            )}
+          </View>
+        ) : (
+          <FlatList
+            key="books-pager"
+            ref={listRef}
+            testID="books-pager"
+            data={book.entries}
+            keyExtractor={(item, index) => String(index)}
+            renderItem={renderEntry}
+            getItemLayout={getItemLayout}
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={9}
+            onLayout={handleListLayout}
+            onScrollToIndexFailed={(info) => {
+              setTimeout(() => {
+                try {
+                  listRef.current?.scrollToIndex({ index: info.index, animated: false });
+                } catch {}
+              }, 50);
+            }}
+            viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
+            contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 20 }}
+          />
+        )
       ) : (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.accent} />
@@ -552,6 +624,7 @@ export default function BooksScreen({ navigation }) {
         book={book}
         bookmarks={bookmarks}
         onSelectEntry={jumpToIndex}
+        onSelectChapter={isPaged ? jumpToChapter : null}
         onRemoveBookmark={(idx) => toggleBookmark(idx)}
         onOpenSearch={() => { setIndexOpen(false); setSearchOpen(true); }}
         onOpenSettings={() => { setIndexOpen(false); setSettingsOpen(true); }}
