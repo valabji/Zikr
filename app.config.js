@@ -8,6 +8,7 @@ export default {
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
+    backgroundColor: "#ffffff",
     splash: {
       image: "./assets/images/splash.png",
       resizeMode: "contain",
@@ -112,6 +113,7 @@ export default {
     },
     plugins: [
       "./plugins/withNonModularHeaderFix",
+      "./plugins/withSplashForceDarkOff",
       [
         "expo-speech-recognition",
         {
