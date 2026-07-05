@@ -677,22 +677,30 @@
     "sources": {
       "quranText": "Quran text & Mushaf page layout",
       "quranTranslation": "English Quran translation",
-      "tafsir": "Quran tafsir (commentary)",
+      "tafsir": "Quran tafsir — bundled & via Quran.com API",
+      "quranApi": "Gapless surah recitations, word-by-word timings, tafsir API & Mushaf fonts",
       "recitations": "Quran ayah recitations",
-      "radio": "Quran radio streams",
-      "hadith": "Hadith collections",
+      "radio": "Quran radio streams & stations directory",
+      "adhanAudio": "Adhan recordings",
+      "hadith": "Hadith books: An-Nawawi's 40, Riyad as-Salihin, Al-Adab Al-Mufrad, Shamaʾil Muhammadiyah, Sahih al-Bukhari, Sahih Muslim, Sunan Abu Dawud, Jamiʿ at-Tirmidhi, Sunan an-Nasaʾi, Sunan Ibn Majah, Muwatta Malik, Musnad Ahmad, Sunan ad-Darimi, Bulugh al-Maram, Mishkat al-Masabih, Forty Hadith Qudsi & Shah Waliullah's 40",
       "azkar": "Azkar & supplications collection",
-      "prayerTimes": "Prayer time calculations"
+      "prayerTimes": "Prayer time calculations",
+      "location": "Approximate location for prayer times (IP lookup)",
+      "artwork": "Surah name frame artwork (CC BY-SA 4.0)"
     },
     "sourceNames": {
       "quranText": "King Fahd Glorious Quran Printing Complex, Madinah",
       "quranTranslation": "Marmaduke Pickthall · Tanzil.net",
-      "tafsir": "al-Baghawi · as-Saʿdi · Wahiduddin Khan",
+      "tafsir": "al-Muyassar · as-Saʿdi · al-Baghawi · al-Wasit · Ibn Kathir · at-Tabari · al-Qurtubi · Maʿariful Quran · Wahiduddin Khan",
+      "quranApi": "Quran.com · Quran Foundation",
       "recitations": "EveryAyah.com",
-      "radio": "Quran Radio · qurango.net",
-      "hadith": "An-Nawawi's 40 · Riyad as-Salihin · Al-Adab Al-Mufrad · Shamaʾil · Qudsi 40 · Shah Waliullah 40",
+      "radio": "mp3quran.net · Quran Radio (qurango.net)",
+      "adhanAudio": "aladhan.com (Islamic Network) · Archive.org",
+      "hadith": "sunnah.com · hadith-json project",
       "azkar": "Hisn al-Muslim (Fortress of the Muslim)",
-      "prayerTimes": "Adhan by Batoul Apps"
+      "prayerTimes": "Adhan by Batoul Apps",
+      "location": "ipinfo.io",
+      "artwork": "Hadysylmy · Wikipedia"
     }
   }
 }
