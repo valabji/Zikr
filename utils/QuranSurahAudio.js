@@ -17,6 +17,20 @@ async function ensureDir() {
   } catch {}
 }
 
+// QDC data quirks: first words can start before timestamp_from (Alafasy, up to ~1.2s)
+// and some verses have segment spans inflated far past timestamp_to (AbdulBasit).
+function sanitizeVerse(v) {
+  const segs = v.segments || [];
+  if (!segs.length) return v;
+  const s0 = segs[0][1];
+  const from = Number.isFinite(s0) && s0 < v.from && v.from - s0 < 3000 ? s0 : v.from;
+  const end = segs[segs.length - 1][2];
+  if (end <= v.to + 1500 || end <= s0) return { ...v, from };
+  const k = (v.to - from) / (end - s0);
+  const segments = segs.map(([w, s, e]) => [w, Math.round(from + (s - s0) * k), Math.round(from + (e - s0) * k)]);
+  return { ...v, from, segments };
+}
+
 function normalize(json, surah) {
   const f = json && json.audio_files && json.audio_files[0];
   if (!f || !f.audio_url) return null;
@@ -28,7 +42,8 @@ function normalize(json, surah) {
         .map((s) => [s[0], s[1], s[2]]);
       return { ayah, from: v.timestamp_from, to: v.timestamp_to, segments };
     })
-    .filter((v) => Number.isFinite(v.ayah) && Number.isFinite(v.from));
+    .filter((v) => Number.isFinite(v.ayah) && Number.isFinite(v.from))
+    .map(sanitizeVerse);
   if (!verseTimings.length) return null;
   return { surah, audioUrl: f.audio_url, duration: f.duration || 0, verseTimings };
 }
@@ -62,6 +77,7 @@ export async function getSurahAudioManifest(reciterId, surah) {
       if (info.exists) {
         const parsed = JSON.parse(await FileSystem.readAsStringAsync(file));
         if (parsed && parsed.audioUrl) {
+          parsed.verseTimings = (parsed.verseTimings || []).map(sanitizeVerse);
           memCache[key] = parsed;
           return parsed;
         }

@@ -16,6 +16,18 @@ for (const pg of pagesData) {
   }
 }
 
+// During the silence between two words, keep the finished word highlighted
+// rather than pre-lighting the next one.
+function segWordIdx(segs, pos) {
+  let idx = segs[segs.length - 1][0] - 1;
+  for (let i = 0; i < segs.length; i++) {
+    const [w, s, e] = segs[i];
+    if (pos < s) { idx = i > 0 ? segs[i - 1][0] - 1 : w - 1; break; }
+    if (pos < e) { idx = w - 1; break; }
+  }
+  return idx;
+}
+
 class QuranAudioService {
   constructor() {
     this.sound = null;
@@ -31,6 +43,7 @@ class QuranAudioService {
     this.unsubSettings = null;
     this.mode = 'ayah';
     this.surahManifest = null;
+    this.ayahSegments = null;
     this._timingPtr = 0;
     this.gaplessScope = null;
     this.gaplessPage = null;
@@ -138,10 +151,18 @@ class QuranAudioService {
     this.activeAyah = { surah, ayah };
     this.isPlaying = true;
     this._emit();
+    this.ayahSegments = null;
+    getSurahAudioManifest(this.reciterId, surah)
+      .then((m) => {
+        if (op !== this._opId || !m) return;
+        const t = m.verseTimings.find((v) => v.ayah === ayah);
+        if (t && t.segments && t.segments.length) this.ayahSegments = t.segments;
+      })
+      .catch(() => {});
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true }
+        { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true, progressUpdateIntervalMillis: 100 }
       );
       if (op !== this._opId) {
         try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
@@ -167,13 +188,18 @@ class QuranAudioService {
 
         if (this.activeAyah && status.isPlaying) {
           const key = `${this.activeAyah.surah}:${this.activeAyah.ayah}`;
-          const words = wordsData[key] || [];
-          const speakable = words.filter((w) => w.type !== 'end');
-          const wordCount = speakable.length || 1;
-          const wordIdx = Math.min(
-            wordCount - 1,
-            Math.floor((status.positionMillis / (status.durationMillis || 1)) * wordCount)
-          );
+          const wordCount = (wordsData[key] || []).length || 1;
+          const dur = status.durationMillis || 1;
+          const segs = this.ayahSegments;
+          let wordIdx;
+          if (segs && segs.length) {
+            const t0 = segs[0][1];
+            const span = segs[segs.length - 1][2] - t0;
+            wordIdx = segWordIdx(segs, t0 + (status.positionMillis / dur) * span);
+          } else {
+            wordIdx = Math.floor((status.positionMillis / dur) * wordCount);
+          }
+          wordIdx = Math.max(0, Math.min(wordCount - 1, wordIdx));
           if (wordIdx !== this.playingWordIdx) {
             this.playingWordIdx = wordIdx;
             changed = true;
@@ -217,7 +243,16 @@ class QuranAudioService {
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: localUri || manifest.audioUrl },
-        { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true, positionMillis: start.from }
+        {
+          shouldPlay: true,
+          rate: this.playbackRate,
+          shouldCorrectPitch: true,
+          positionMillis: start.from,
+          progressUpdateIntervalMillis: 100,
+          // iOS seeks with infinite tolerance unless these are set, landing far from the ayah start.
+          seekMillisToleranceBefore: 0,
+          seekMillisToleranceAfter: 0,
+        }
       );
       if (op !== this._opId) {
         try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
@@ -329,15 +364,9 @@ class QuranAudioService {
   _wordAt(timing, pos) {
     const segs = timing.segments;
     if (!segs || !segs.length) return null;
-    let idx = segs[segs.length - 1][0] - 1;
-    for (let i = 0; i < segs.length; i++) {
-      const [w, s, e] = segs[i];
-      if (pos < s) { idx = w - 1; break; }
-      if (pos < e) { idx = w - 1; break; }
-    }
     const key = `${this.surahManifest.surah}:${timing.ayah}`;
-    const count = (wordsData[key] || []).filter((wd) => wd.type !== 'end').length || 1;
-    return Math.max(0, Math.min(count - 1, idx));
+    const count = (wordsData[key] || []).length || 1;
+    return Math.max(0, Math.min(count - 1, segWordIdx(segs, pos)));
   }
 
   async _seekToAyah(targetAyah) {
@@ -358,7 +387,7 @@ class QuranAudioService {
       return;
     }
     try {
-      await this.sound.setPositionAsync(t.from);
+      await this.sound.setPositionAsync(t.from, { toleranceMillisBefore: 0, toleranceMillisAfter: 0 });
       await this.sound.setRateAsync(this.playbackRate, true);
       await this.sound.playAsync();
       this.activeAyah = { surah: m.surah, ayah: targetAyah };
@@ -478,7 +507,7 @@ class QuranAudioService {
   async seekToMs(ms) {
     if (!this.sound) return;
     try {
-      await this.sound.setPositionAsync(ms);
+      await this.sound.setPositionAsync(ms, { toleranceMillisBefore: 0, toleranceMillisAfter: 0 });
     } catch (e) {
       console.warn('QuranAudio: seekToMs failed', e);
     }

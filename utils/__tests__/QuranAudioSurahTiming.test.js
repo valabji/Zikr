@@ -39,4 +39,16 @@ describe('QuranAudio full-surah timing mapping', () => {
     const t = { ayah: 1, from: 0, to: 50, segments: [[99, 0, 50]] };
     expect(QuranAudio._wordAt(t, 25)).toBe(3);
   });
+
+  it('keeps the previous word highlighted during a gap between words', () => {
+    const t = { ayah: 1, from: 0, to: 50, segments: [[1, 0, 10], [2, 20, 30], [3, 40, 50]] };
+    expect(QuranAudio._wordAt(t, 15)).toBe(0);
+    expect(QuranAudio._wordAt(t, 35)).toBe(1);
+    expect(QuranAudio._wordAt(t, 45)).toBe(2);
+  });
+
+  it('highlights the first word during lead-in silence', () => {
+    const t = { ayah: 1, from: 0, to: 50, segments: [[1, 5, 10], [2, 10, 50]] };
+    expect(QuranAudio._wordAt(t, 2)).toBe(0);
+  });
 });

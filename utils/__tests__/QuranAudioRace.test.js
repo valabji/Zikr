@@ -41,6 +41,7 @@ const makeSound = () => ({
 describe('QuranAudio play race conditions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getSurahAudioManifest.mockResolvedValue(null);
     Audio.Sound.createAsync.mockImplementation(() => Promise.resolve({ sound: makeSound() }));
     loadQuranSettings.mockResolvedValue({
       reciterId: 'r1', audioPlaybackScope: 'ayah', loopEnabled: false, playbackRate: 1,
