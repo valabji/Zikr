@@ -5,7 +5,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '../constants/QuranConstants';
 import { setQuranSettings } from '../utils/QuranSettings';
-import { arForHafs } from '../utils/mushafLayout';
+import { arForHafs, pageAyahsForLayout } from '../utils/mushafLayout';
 import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '../utils/tafsirLoader';
 import TafsirDropdown from '../components/TafsirDropdown';
 import { CONTENT_MAX_WIDTH, webCursor } from '../constants/settingsTokens';
@@ -18,6 +18,12 @@ const capped = isWeb ? { width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+const verseTextByKey = {};
+for (const pg of pagesData) {
+  for (const a of pg.ayahs) {
+    verseTextByKey[`${a.surah}:${a.ayah}`] = a.text;
+  }
+}
 
 const TABS = ['translation', 'tafsir'];
 
@@ -85,22 +91,25 @@ function AyahRow({ ayah, tab, tafsirText, tafsirLoading, tafsirDirection, onPres
   );
 }
 
-export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSelectAyah, colors, tafsirId }) {
+export default function QuranPageInfoSheet({ visible, onClose, currentPage, layoutFile, onSelectAyah, colors, tafsirId }) {
   const [tab, setTab] = React.useState('translation');
   const [tafsirTexts, setTafsirTexts] = React.useState({});
   const [tafsirLoading, setTafsirLoading] = React.useState(false);
 
   const effectiveTafsirId = tafsirId || DEFAULT_TAFSIR_ID;
-  const pageData = pagesData[currentPage - 1];
+  const pageAyahs = React.useMemo(
+    () => pageAyahsForLayout(layoutFile, currentPage).map((a) => ({ ...a, text: verseTextByKey[`${a.surah}:${a.ayah}`] })),
+    [layoutFile, currentPage],
+  );
 
   React.useEffect(() => {
-    if (tab !== 'tafsir' || !pageData) return;
+    if (tab !== 'tafsir' || !pageAyahs.length) return;
     const config = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);
 
     if (!config || config.source === 'bundle') {
       const data = BUNDLED_TAFSIR_DATA[effectiveTafsirId] || BUNDLED_TAFSIR_DATA.muyassar_ar;
       const texts = {};
-      for (const a of pageData.ayahs) {
+      for (const a of pageAyahs) {
         const k = `${a.surah}:${a.ayah}`;
         texts[k] = data[k] ?? null;
       }
@@ -113,7 +122,7 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSe
     setTafsirLoading(true);
     setTafsirTexts({});
     Promise.all(
-      pageData.ayahs.map((a) => {
+      pageAyahs.map((a) => {
         const k = `${a.surah}:${a.ayah}`;
         return fetchApiTafsir(config.apiId, k).then((text) => [k, text]);
       })
@@ -123,9 +132,9 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSe
       setTafsirLoading(false);
     });
     return () => { cancelled = true; };
-  }, [tab, effectiveTafsirId, currentPage]);
+  }, [tab, effectiveTafsirId, pageAyahs]);
 
-  const firstSurah = pageData ? surahById[pageData.ayahs[0].surah] : null;
+  const firstSurah = pageAyahs.length ? surahById[pageAyahs[0].surah] : null;
   const headerTitle = firstSurah
     ? `${t('quran.pageNumber', { n: currentPage })} · ${isRTL() ? firstSurah.nameAr : firstSurah.nameEn}`
     : t('quran.pageNumber', { n: currentPage });
@@ -178,7 +187,7 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, onSe
             )}
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={[{ paddingBottom: 20 }, capped]}>
-              {pageData && pageData.ayahs.map((ayah) => {
+              {pageAyahs.map((ayah) => {
                 const k = `${ayah.surah}:${ayah.ayah}`;
                 const activeCfg = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);
                 return (

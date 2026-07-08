@@ -3,7 +3,8 @@ import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../constants/QuranReciter
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import { getSurahAudioManifest } from './QuranSurahAudio';
 import QuranSurahDownloader from './QuranSurahDownloader';
-import { QURAN_CONSTANTS } from '../constants/QuranConstants';
+import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
+import { ayahPageForLayout, pageAyahsForLayout } from './mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import wordsData from '../assets/quran/data/words.json';
 
@@ -76,7 +77,9 @@ class QuranAudioService {
       this.playbackScope = s.audioPlaybackScope || 'ayah';
       this.loopEnabled = s.loopEnabled === true;
       this.playbackRate = typeof s.playbackRate === 'number' ? s.playbackRate : 1.0;
+      this.mushafEdition = s.mushafEdition;
       this.unsubSettings = subscribeQuranSettings((next) => {
+        this.mushafEdition = next.mushafEdition;
         const newReciter = next.reciterId || DEFAULT_RECITER_ID;
         const reciterChanged = newReciter !== this.reciterId;
         this.reciterId = newReciter;
@@ -132,9 +135,12 @@ class QuranAudioService {
     return this._playAyahFile(surah, ayah);
   }
 
+  _layoutFile() {
+    return getMushafEdition(this.mushafEdition).layoutFile;
+  }
+
   _pageOf(surah, ayah) {
-    const idx = verseIndex[`${surah}:${ayah}`];
-    return idx != null ? flatVerses[idx].page : 1;
+    return ayahPageForLayout(this._layoutFile(), `${surah}:${ayah}`) || 1;
   }
 
   async _playAyahFile(surah, ayah) {
@@ -271,20 +277,16 @@ class QuranAudioService {
   _segEndAyah(manifest, scope) {
     const last = manifest.verseTimings[manifest.verseTimings.length - 1].ayah;
     if (scope === 'page') {
-      const pg = pagesData[this.gaplessPage - 1];
-      if (pg) {
-        const inSurah = pg.ayahs.filter((a) => a.surah === manifest.surah).map((a) => a.ayah);
-        if (inSurah.length) return Math.min(last, Math.max(...inSurah));
-      }
+      const inSurah = pageAyahsForLayout(this._layoutFile(), this.gaplessPage)
+        .filter((a) => a.surah === manifest.surah).map((a) => a.ayah);
+      if (inSurah.length) return Math.min(last, Math.max(...inSurah));
     }
     return last;
   }
 
   _nextPageAyah(curSurah, endAyah) {
-    const pg = pagesData[this.gaplessPage - 1];
-    if (!pg) return null;
     const endIdx = verseIndex[`${curSurah}:${endAyah}`];
-    for (const a of pg.ayahs) {
+    for (const a of pageAyahsForLayout(this._layoutFile(), this.gaplessPage)) {
       if (verseIndex[`${a.surah}:${a.ayah}`] > endIdx) return a;
     }
     return null;
@@ -301,7 +303,7 @@ class QuranAudioService {
       const nextAyah = this._nextPageAyah(curSurah, this.segEndAyah);
       if (nextAyah) return this._playGapless(nextAyah.surah, nextAyah.ayah, 'page');
       if (this.loopEnabled) {
-        const first = pagesData[this.gaplessPage - 1] && pagesData[this.gaplessPage - 1].ayahs[0];
+        const first = pageAyahsForLayout(this._layoutFile(), this.gaplessPage)[0];
         if (first) return this._playGapless(first.surah, first.ayah, 'page');
       }
       return this.stop();

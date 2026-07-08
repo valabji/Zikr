@@ -12,7 +12,7 @@ import { textStyles } from '../constants/Fonts';
 import { t, isRTL } from '../locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
 import * as Font from 'expo-font';
-import { getLayoutOffsets, maxPageHeightForWidth, arForHafs, ayahLayoutWords } from '../utils/mushafLayout';
+import { getLayoutOffsets, maxPageHeightForWidth, arForHafs, ayahLayoutWords, ayahPageForLayout, pageAyahsForLayout } from '../utils/mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import surahsData from '../assets/quran/data/surahs.json';
 import translationEn from '../assets/quran/data/translation_en.json';
@@ -84,13 +84,6 @@ function buildAyahShareContent(a, lang, settings, qcfState, dark) {
   };
 }
 const ayahKey = (s, a) => `${s}:${a}`;
-const ayahToPage = (() => {
-  const m = {};
-  pagesData.forEach((pg) => {
-    pg.ayahs.forEach((a) => { m[ayahKey(a.surah, a.ayah)] = pg.page; });
-  });
-  return m;
-})();
 
 const HD_SIZE_LABEL = { v1: '~95 MB', v2: '~208 MB', v4: '~167 MB' };
 const HD_PROMPT_DISMISSED_KEY = (v) => `@quran_hd_prompt_dismissed_${v}`;
@@ -274,7 +267,7 @@ export default function QuranScreen({ navigation }) {
 
   const toggleBookmark = React.useCallback(() => {
     const exists = bookmarks.some((b) => b.page === currentPage);
-    const firstAyah = pagesData[currentPage - 1].ayahs[0];
+    const firstAyah = pageAyahsForLayout(activeLayoutFile, currentPage)[0];
     const next = exists
       ? bookmarks.filter((b) => b.page !== currentPage)
       : [...bookmarks, {
@@ -302,6 +295,8 @@ export default function QuranScreen({ navigation }) {
 
   const settingsRef = React.useRef(settings);
   settingsRef.current = settings;
+  const activeEdition = getMushafEdition(settings.mushafEdition);
+  const activeLayoutFile = activeEdition.layoutFile;
 
   const handleAyahPress = React.useCallback((ayah) => {
     const mode = settingsRef.current.ayahInteractionMode || 'menu';
@@ -328,18 +323,16 @@ export default function QuranScreen({ navigation }) {
     if (voiceState.active) {
       QuranVoiceFollower.stop();
     } else {
-      const startAyah = audioState.activeAyah || pagesData[currentPage - 1].ayahs[0];
+      const startAyah = audioState.activeAyah || pageAyahsForLayout(activeLayoutFile, currentPage)[0];
       QuranVoiceFollower.start(startAyah);
     }
-  }, [voiceState.active, audioState.activeAyah, currentPage]);
+  }, [voiceState.active, audioState.activeAyah, currentPage, activeLayoutFile]);
 
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const isContinuous = settings.viewMode === 'continuous';
   const isLandscape = windowWidth > windowHeight;
   const isPaired = !isContinuous && isLandscape && settings.landscapeTwoPage !== false;
   const fontScale = settings.customLineSize ? (settings.fontScale || 1) : 1;
-  const activeEdition = getMushafEdition(settings.mushafEdition);
-  const activeLayoutFile = activeEdition.layoutFile;
   const readerBg = activeEdition.qcfVersion === 'v4' && settings.qcf4HighContrast
     ? (darkQcf ? '#000000' : '#FFFFFF')
     : colors.background;
@@ -423,8 +416,8 @@ export default function QuranScreen({ navigation }) {
   }, [ready, restoring, attemptRestore]);
 
   const headerSurah = (() => {
-    const pg = pagesData[currentPage - 1];
-    return pg ? surahById[pg.ayahs[0].surah] : null;
+    const first = pageAyahsForLayout(activeLayoutFile, currentPage)[0];
+    return first ? surahById[first.surah] : null;
   })();
   const headerTitle = headerSurah ? (isRTL() ? headerSurah.nameAr : headerSurah.nameEn) : '';
 
@@ -443,7 +436,7 @@ export default function QuranScreen({ navigation }) {
 
   React.useEffect(() => {
     if (!ready || !effectiveAyahKey) return;
-    const page = ayahToPage[effectiveAyahKey];
+    const page = ayahPageForLayout(activeLayoutFile, effectiveAyahKey);
     if (!page || page === currentPageRef.current) return;
     currentPageRef.current = page;
     setCurrentPage(page);
@@ -452,7 +445,7 @@ export default function QuranScreen({ navigation }) {
       const idx = isPairedRef.current ? Math.floor((page - 1) / 2) : page - 1;
       listRef.current?.scrollToIndex({ index: idx, animated: true });
     } catch {}
-  }, [effectiveAyahKey, ready, persistLastPage]);
+  }, [effectiveAyahKey, ready, persistLastPage, activeLayoutFile]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="quran-screen">
@@ -596,7 +589,7 @@ export default function QuranScreen({ navigation }) {
       <QuranSearchModal
         visible={searchOpen}
         onClose={() => setSearchOpen(false)}
-        onSelectAyah={({ page }) => jumpToPage(page)}
+        onSelectAyah={({ surah, ayah, page }) => jumpToPage(ayahPageForLayout(activeLayoutFile, ayahKey(surah, ayah)) || page)}
       />
       <QuranAyahDetailSheet
         ayah={detailAyah}
@@ -637,6 +630,7 @@ export default function QuranScreen({ navigation }) {
         visible={pageInfoOpen}
         onClose={() => setPageInfoOpen(false)}
         currentPage={currentPage}
+        layoutFile={activeLayoutFile}
         onSelectAyah={({ page }) => { if (page) jumpToPage(page); setPageInfoOpen(false); }}
         colors={colors}
         tafsirId={settings.tafsirId}

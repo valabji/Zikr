@@ -339,6 +339,39 @@ export const cleanForHafs = (s) => (s
 // QCF fonts are per-page private-use glyph sets, so a verse can only be drawn
 // in HD by emitting each word's `code` with that word's page font. Collects an
 // ayah's words in reading order with their page so the caller can group them.
+const ayahPagesCache = {};
+function getAyahPages(layoutFile) {
+  if (!ayahPagesCache[layoutFile]) {
+    const pages = getLayout(layoutFile);
+    const vkToPage = {};
+    const pageAyahs = new Array(pages.length);
+    for (let pi = 0; pi < pages.length; pi += 1) {
+      const list = [];
+      for (const ln of pages[pi].lines) {
+        if (ln.type !== 'text') continue;
+        for (const w of ln.words) {
+          if (vkToPage[w.vk] === undefined) {
+            vkToPage[w.vk] = pi + 1;
+            const [s, a] = w.vk.split(':').map(Number);
+            list.push({ surah: s, ayah: a });
+          }
+        }
+      }
+      pageAyahs[pi] = list;
+    }
+    ayahPagesCache[layoutFile] = { vkToPage, pageAyahs };
+  }
+  return ayahPagesCache[layoutFile];
+}
+
+export function ayahPageForLayout(layoutFile, vk) {
+  return getAyahPages(layoutFile).vkToPage[vk] || null;
+}
+
+export function pageAyahsForLayout(layoutFile, page) {
+  return getAyahPages(layoutFile).pageAyahs[page - 1] || [];
+}
+
 export function ayahLayoutWords(layoutFile, vk) {
   const pages = getLayout(layoutFile);
   const out = [];
