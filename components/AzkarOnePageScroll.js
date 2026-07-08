@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
-import { t, isRTL, getRTLTextAlign, getDirectionalMixedSpacing } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
@@ -31,12 +31,6 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
         borderRadius: 10,
         minHeight: 200
       }}>
-        <TouchableOpacity
-          onPress={() => setShareItem(z)}
-          style={{ position: 'absolute', zIndex: 1, padding: 8, ...getDirectionalMixedSpacing({ top: 8, right: 8 }) }}
-        >
-          <Feather name="share-2" size={20} color={colors.BYellow} />
-        </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
@@ -107,9 +101,18 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           <View style={{
             height: 96,
             flexDirection: "row-reverse",
-            alignItems: 'center',
-            justifyContent: 'space-between'
+            alignItems: 'center'
           }}>
+            <View style={{ width: 96, justifyContent: "center", alignItems: "flex-end" }}>
+              <TouchableOpacity
+                onPress={(e) => { e?.stopPropagation?.(); setShareItem(z); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={{ padding: 10 }}
+              >
+                <Feather name="share-2" size={22} color={colors.BYellow} />
+              </TouchableOpacity>
+            </View>
+
             <View style={{
               flex: 1,
               justifyContent: "center",
@@ -119,7 +122,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
                 style={[
                   textStyles.body,
                   {
-                    textAlign: "right",
+                    textAlign: "center",
                     color: colors.BYellow,
                     fontSize: 18,
                   }

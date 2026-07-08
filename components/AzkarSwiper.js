@@ -4,7 +4,7 @@ import Swiper from 'react-native-web-swiper';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
-import { t, isRTL, getRTLTextAlign, getDirectionalMixedSpacing } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
@@ -97,22 +97,28 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
           <View style={{ flex: 1 }} />
           <View style={{ borderTopWidth: 0, height: 0, width: "100%", borderStyle: "dotted" }} />
           <View style={{ flex: 1 }} />
-          <View style={{ height: 96, flexDirection: "row-reverse" }}>
-            <View
-              style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-            >
+          <View style={{ height: 96, flexDirection: "row-reverse", alignItems: "center" }}>
+            <View style={{ width: 96, justifyContent: "center", alignItems: "flex-end" }}>
+              <TouchableOpacity
+                onPress={(e) => { e?.stopPropagation?.(); setShareItem(z); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={{ padding: 10 }}
+              >
+                <Feather name="share-2" size={22} color={colors.BYellow} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
               <Text
                 style={[
                   textStyles.body,
                   {
-                    textAlign: "right",
+                    textAlign: "center",
                     color: colors.BYellow,
                     fontSize: 18,
                   }
                 ]}
               >{t('counter.page', { current: pn, total: size })}</Text>
             </View>
-            <View style={{ flex: 1 }} />
             <View style={{ width: 96, height: 96, alignSelf: "center", justifyContent: "center", alignItems: "center" }}>
               <StarSvgFilled width={96} height={96} />
               <Text
@@ -164,12 +170,6 @@ export default function AzkarSwiper({ azkarList, zikrFontSize }) {
             <View style={{
               flex: 1, borderWidth: 1, borderColor: colors.BYellow, margin: 7, borderStyle: "dashed", padding: 10, borderRadius: 10
             }}>
-              <TouchableOpacity
-                onPress={() => setShareItem(i)}
-                style={{ position: 'absolute', zIndex: 1, padding: 8, ...getDirectionalMixedSpacing({ top: 8, right: 8 }) }}
-              >
-                <Feather name="share-2" size={20} color={colors.BYellow} />
-              </TouchableOpacity>
               <Item z={i} pn={index + 1} />
             </View>
           );

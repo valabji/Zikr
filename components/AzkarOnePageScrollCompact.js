@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
-import { t, isRTL, getRTLTextAlign, getDirectionalMixedSpacing } from '../locales/i18n';
+import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
@@ -30,12 +30,6 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
         padding: 10,
         borderRadius: 10,
       }}>
-        <TouchableOpacity
-          onPress={() => setShareItem(z)}
-          style={{ position: 'absolute', zIndex: 1, padding: 8, ...getDirectionalMixedSpacing({ top: 8, right: 8 }) }}
-        >
-          <Feather name="share-2" size={18} color={colors.BYellow} />
-        </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
@@ -80,18 +74,30 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
           <View style={{
             marginTop: 12,
             flexDirection: "row-reverse",
-            alignItems: 'center',
-            justifyContent: 'space-between'
+            alignItems: 'center'
           }}>
-            <Text
-              style={[
-                textStyles.body,
-                {
-                  color: colors.BYellow,
-                  fontSize: 14,
-                }
-              ]}
-            >{t('counter.page', { current: pn, total: totalCount })}</Text>
+            <View style={{ width: 56, justifyContent: "center", alignItems: "flex-end" }}>
+              <TouchableOpacity
+                onPress={(e) => { e?.stopPropagation?.(); setShareItem(z); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={{ padding: 8 }}
+              >
+                <Feather name="share-2" size={20} color={colors.BYellow} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <Text
+                style={[
+                  textStyles.body,
+                  {
+                    textAlign: "center",
+                    color: colors.BYellow,
+                    fontSize: 14,
+                  }
+                ]}
+              >{t('counter.page', { current: pn, total: totalCount })}</Text>
+            </View>
 
             <View style={{
               width: 56,
