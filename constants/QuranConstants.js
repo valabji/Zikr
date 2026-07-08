@@ -41,6 +41,7 @@ export const QURAN_CONSTANTS = {
     BOOKMARKS: '@quran_bookmarks',
     SETTINGS: '@quran_settings',
     READING_PROGRESS: '@quran_reading_progress',
+    OVERFLOW_WARNED: '@quran_overflow_warned',
   },
 
   FONT_FAMILY: 'UthmanicHafs',

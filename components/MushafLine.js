@@ -51,7 +51,7 @@ export function MushafLine({
   line, fontFamily, qcfActive, colors, fontScale,
   mushafFontSize, mushafLineHeight, mushafSpaceExtra, playingAyahKey, playingWordIdx,
   playingWordMistake, onAyahPress, onAyahLongPress, customLineSize,
-  wordTooltipEnabled, onWordPress,
+  wordTooltipEnabled, onWordPress, onLineTruncated,
 }) {
   // Justification: letterSpacing on the lone space char widens only the
   // inter-word gaps, leaving word glyphs and Arabic joining untouched.
@@ -80,12 +80,39 @@ export function MushafLine({
     ? Math.round(fontSize * 1.5)
     : mushafLineHeight * fontScale;
 
+  const fullTextLength = () => {
+    let len = 0;
+    groups.forEach((g, gi) => {
+      const a = Number(g.vk.split(':')[1]);
+      if (gi > 0) len += 1;
+      g.words.forEach((w, wi) => {
+        if (w.type === 'end' && !qcfActive) {
+          len += 1 + toArabicDigits(a).length;
+        } else {
+          len += (wi === 0 ? 0 : 1) + (qcfActive ? (w.code || arForHafs(w.ar)) : arForHafs(w.ar)).length;
+        }
+      });
+    });
+    return len;
+  };
+
+  // Deficit ≥ 2 skips the ambiguous case where the ellipsis char replaces a single glyph.
+  const handleTextLayout = (!customLineSize && onLineTruncated) ? (e) => {
+    const laidOut = e.nativeEvent.lines || [];
+    if (!laidOut.length) return;
+    let rendered = 0;
+    for (const l of laidOut) rendered += (l.text || '').length;
+    if (laidOut.length > 1 || rendered <= fullTextLength() - 2) onLineTruncated(fontSize);
+  } : undefined;
+
   return (
     <View style={{ paddingHorizontal: 8, marginVertical: 1 }}>
       <Text
+        testID="mushaf-line"
         allowFontScaling={false}
         numberOfLines={customLineSize ? undefined : 1}
         ellipsizeMode="tail"
+        onTextLayout={handleTextLayout}
         style={{
           fontFamily,
           fontSize,

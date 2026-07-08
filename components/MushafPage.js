@@ -21,7 +21,7 @@ import { BismillahLine, MushafLine } from './MushafLine';
 const { FONT_FAMILY } = QURAN_CONSTANTS;
 const ayahKey = (s, a) => `${s}:${a}`;
 
-function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, playingWordMistake, onAyahPress, onAyahLongPress, onWordPress, pageWidth: pageWidthProp }) {
+function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playingWordIdx, playingWordMistake, onAyahPress, onAyahLongPress, onWordPress, onLineOverflow, onQcfLoadError, pageWidth: pageWidthProp }) {
   const customLineSize = !!settings.customLineSize;
   const fontScale = customLineSize ? (settings.fontScale || 1) : 1;
   const { width: windowWidth } = useWindowDimensions();
@@ -38,7 +38,7 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
     let alive = true;
     QcfDownloader.loadPageFont(qcfVersion, page.page, darkQcf)
       .then(() => { if (alive) bumpFontTick(); })
-      .catch(() => {});
+      .catch(() => { if (alive && onQcfLoadError) onQcfLoadError(); });
     return () => { alive = false; };
   }, [qcfFamily, qcfActive, qcfVersion, page.page, darkQcf]);
   const fontFamily = qcfActive ? qcfFamily : FONT_FAMILY;
@@ -99,10 +99,14 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
   });
   const [probeAttempt, setProbeAttempt] = React.useState(0);
   const probeWidthsRef = React.useRef({ pass: 1, widths: {} });
+  const [fitAdjust, setFitAdjust] = React.useState({});
+  const overflowReportedRef = React.useRef(false);
 
   React.useEffect(() => {
     probeWidthsRef.current = { pass: 1, widths: {} };
     setProbeAttempt(0);
+    setFitAdjust({});
+    overflowReportedRef.current = false;
     const cached = getCachedMushafLineSizes(effectiveWidth, fontFamily, edition.layoutFile, pageIndex);
     setProbeState(cached ? { sizes: cached.sizes, emPx: cached.emPx, refined: true } : { sizes: null, emPx: null, refined: false });
   }, [effectiveWidth, fontFamily, edition.layoutFile, pageIndex]);
@@ -184,6 +188,24 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
     return justifiedSpaceExtrasForPage(
       edition.layoutFile, pageIndex, effectiveWidth - MUSHAF_HORIZONTAL_PADDING, lineSizes, qcfTable, measuredEmPx);
   }, [customLineSize, edition.layoutFile, pageIndex, effectiveWidth, lineSizes, qcfTable, measuredEmPx]);
+
+  // Only trust truncation reports once probing has settled (refined or given up),
+  // and only when they match the size we currently render, so stale layout events
+  // from a previous size can't trigger a false shrink.
+  const probeSettled = !probeStrings || probeState.refined || probeAttempt >= 4;
+  const handleLineTruncated = (i, sizeUsed) => {
+    if (!probeSettled || customLineSize) return;
+    const baseSize = lineSizes[i] || lineSizes[0];
+    const adj = fitAdjust[i];
+    if (Math.abs(sizeUsed - baseSize * (adj || 1)) > 0.5) return;
+    if (!overflowReportedRef.current) {
+      overflowReportedRef.current = true;
+      if (onLineOverflow) onLineOverflow({ hd: qcfActive });
+    }
+    if (adj != null && adj <= 0.55) return;
+    const hadJustify = adj == null && !!(spaceExtras && spaceExtras[i] > 0);
+    setFitAdjust((m) => ({ ...m, [i]: hadJustify ? 1 : Math.max(0.55, (adj || 1) * 0.92) }));
+  };
 
   // In customLineSize mode we want one continuous text block per run of
   // consecutive text lines, so words flow across line boundaries instead of
@@ -268,7 +290,8 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
         if (line.type === 'bismillah') {
           return <BismillahLine key={`l${i}`} colors={colors} fontScale={fontScale} />;
         }
-        const lineSize = lineSizes[i] || lineSizes[0];
+        const adj = fitAdjust[i];
+        const lineSize = (lineSizes[i] || lineSizes[0]) * (adj || 1);
         const lineHeight = mushafLineHeightFor(lineSize);
         return (
           <MushafLine
@@ -280,7 +303,8 @@ function PageContent({ page, colors, settings, qcfVersion, playingAyahKey, playi
             fontScale={fontScale}
             mushafFontSize={lineSize}
             mushafLineHeight={lineHeight}
-            mushafSpaceExtra={spaceExtras ? spaceExtras[i] : 0}
+            mushafSpaceExtra={adj != null ? 0 : (spaceExtras ? spaceExtras[i] : 0)}
+            onLineTruncated={(size) => handleLineTruncated(i, size)}
             playingAyahKey={playingAyahKey}
             playingWordIdx={playingWordIdx}
             playingWordMistake={playingWordMistake}

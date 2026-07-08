@@ -222,6 +222,42 @@ export default function QuranScreen({ navigation }) {
     }
   }, [hdPromptVersion]);
 
+  const hdFallbackRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!settings.customLineSize) hdFallbackRef.current = false;
+  }, [settings.customLineSize]);
+  const overflowWarnedRef = React.useRef(false);
+  const qcfErrorWarnedRef = React.useRef(false);
+
+  const handleLineOverflow = React.useCallback(({ hd }) => {
+    if (hd) {
+      if (hdFallbackRef.current || settingsRef.current.customLineSize) return;
+      hdFallbackRef.current = true;
+      setQuranSettings({ customLineSize: true });
+      Alert.alert(t('quran.overflowHdTitle'), t('quran.overflowHdBody'));
+      return;
+    }
+    if (overflowWarnedRef.current) return;
+    overflowWarnedRef.current = true;
+    AsyncStorage.getItem(STORAGE_KEYS.OVERFLOW_WARNED).then((flag) => {
+      if (flag === '1') return;
+      AsyncStorage.setItem(STORAGE_KEYS.OVERFLOW_WARNED, '1').catch(() => {});
+      Alert.alert(t('quran.overflowWarnTitle'), t('quran.overflowWarnBody'), [
+        { text: t('common.ok'), style: 'cancel' },
+        { text: t('quran.overflowOpenSettings'), onPress: () => setSettingsOpen(true) },
+      ]);
+    }).catch(() => {});
+  }, []);
+
+  const handleQcfLoadError = React.useCallback(() => {
+    if (qcfErrorWarnedRef.current) return;
+    qcfErrorWarnedRef.current = true;
+    Alert.alert(t('quran.qcfLoadFailedTitle'), t('quran.qcfLoadFailedBody'), [
+      { text: t('common.ok'), style: 'cancel' },
+      { text: t('quran.overflowOpenSettings'), onPress: () => setSettingsOpen(true) },
+    ]);
+  }, []);
+
   const persistLastPage = React.useCallback((page) => {
     AsyncStorage.setItem(STORAGE_KEYS.LAST_PAGE, String(page)).catch(() => {});
   }, []);
@@ -497,6 +533,8 @@ export default function QuranScreen({ navigation }) {
               onAyahPress: handleAyahPress,
               onAyahLongPress: handleAyahLongPress,
               onWordPress: handleWordPress,
+              onLineOverflow: handleLineOverflow,
+              onQcfLoadError: handleQcfLoadError,
             };
             const fitEnabled = settings.fitPageToHeight !== false;
             if (isPaired) {
