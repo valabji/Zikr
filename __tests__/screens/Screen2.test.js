@@ -49,6 +49,21 @@ describe('Screen2', () => {
     expect(azkarItems.length).toBeGreaterThan(0);
   });
 
+  it('opens the item sort sheet and reorders without losing items', () => {
+    const { getByTestId, getAllByTestId, queryByTestId } = renderWithProvider(<Screen2 route={mockRoute} />);
+    const before = getAllByTestId('azkar-item').length;
+
+    fireEvent.press(getByTestId('item-sort-toggle'));
+    expect(getByTestId('azkar-sort-sheet')).toBeTruthy();
+    expect(queryByTestId('sort-mode-alpha')).toBeNull();
+
+    fireEvent.press(getByTestId('sort-mode-manual'));
+    expect(getByTestId('sort-up-0')).toBeTruthy();
+
+    fireEvent.press(getByTestId('sort-down-0'));
+    expect(getAllByTestId('azkar-item')).toHaveLength(before);
+  });
+
   it('displays count information', () => {
     const { getAllByTestId } = renderWithProvider(<Screen2 route={mockRoute} />);
     const countButtons = getAllByTestId('count-button');

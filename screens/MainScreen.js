@@ -15,6 +15,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Hbg } from '../components/Hbg';
 import { useAzkarHistory } from '../utils/AzkarHistory';
 import DailyHadithCard from '../components/DailyHadithCard';
+import AzkarSortSheet from '../components/AzkarSortSheet';
+import { loadAzkarOrder, saveAzkarOrder, orderCategories } from '../utils/AzkarOrder';
+
+const normalizeArabic = (v) => ("" + v).replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -36,6 +40,29 @@ export default function HomeScreen({ navigation, route }) {
 
   const [showFavorites, setShowFavorites] = React.useState(route?.params?.showFavorites || false)
   const { stats: azkarStats } = useAzkarHistory()
+  const [order, setOrder] = React.useState({ mode: 'default', manual: [] })
+  const [sortVisible, setSortVisible] = React.useState(false)
+
+  React.useEffect(() => {
+    loadAzkarOrder().then(setOrder)
+  }, [])
+
+  const categories = React.useMemo(() => {
+    const seen = new Set()
+    const list = []
+    Azkar.forEach((item, index) => {
+      if (!seen.has(item.category)) {
+        seen.add(item.category)
+        list.push({ name: item.category, index, fav: item.fav == true })
+      }
+    })
+    return orderCategories(list, order)
+  }, [Azkar, order])
+
+  const changeOrder = (next) => {
+    setOrder(next)
+    saveAzkarOrder(next)
+  }
 
   React.useEffect(() => {
     if (route?.params?.showFavorites !== undefined) {
@@ -252,7 +279,6 @@ export default function HomeScreen({ navigation, route }) {
     </View>
   )
 
-  let p = ""
   return (
     <View style={{ flex: 1 }} testID="home-screen">
       {s ? (
@@ -264,6 +290,14 @@ export default function HomeScreen({ navigation, route }) {
           navigation={navigation}
           Left={() => {
             return <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingHorizontal: 12 }}>
+              <TouchableOpacity
+                testID="sort-toggle"
+                onPress={() => {
+                  setSortVisible(true)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Ionicons name="swap-vertical" color={colors.BYellow} size={32} />
+              </TouchableOpacity>
               <TouchableOpacity
                 testID="favorites-toggle"
                 onPress={() => {
@@ -322,54 +356,31 @@ export default function HomeScreen({ navigation, route }) {
           contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
           showsVerticalScrollIndicator={false}
         >
-          {showFavorites ? (
-            // Favorites view with search
-            Azkar.filter(i => i.fav).length === 0 ?
-              <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={[textStyles.body, { color: colors.BYellow, textAlign: 'center' }]}>
-                  {t('favorites.empty')}
-                </Text>
-              </View>
-              :
-              Azkar.map((i, index) => {
-                if (i.fav) {
-                  const cat = "" + i.category
-                  let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-                  let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-
-                  // Apply search filter to favorites too
-                  if (!s || st == "" || ccat.includes(cst)) {
-                    return <Item
-                      key={index}
-                      name={i.category}
-                      fav={i.fav == true}
-                      index={index}
-                      onPress={() => {
-                        navigation.navigate("Screen2", { name: i.category })
-                      }}
-                    />
-                  }
-                }
-              })
+          {showFavorites && !categories.some(c => c.fav) ? (
+            <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={[textStyles.body, { color: colors.BYellow, textAlign: 'center' }]}>
+                {t('favorites.empty')}
+              </Text>
+            </View>
           ) : (
-            // All items view with search functionality
-            Azkar.map((i, index) => {
-              const cat = "" + i.category
-              let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-              let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-              if (cat != p) {
-                p = cat
-                if (!s || st == "" || ccat.includes(cst)) {
-                  return <Item key={index} name={cat} fav={i.fav == true} index={index} onPress={() => {
-                    navigation.navigate("Screen2", { name: cat })
-                  }} />
-                }
+            (showFavorites ? categories.filter(c => c.fav) : categories).map(c => {
+              if (!s || st == "" || normalizeArabic(c.name).includes(normalizeArabic(st))) {
+                return <Item key={c.name} name={c.name} fav={c.fav} index={c.index} onPress={() => {
+                  navigation.navigate("Screen2", { name: c.name })
+                }} />
               }
             })
           )}
         </ScrollView>
 
       </ImageBackground>
+      <AzkarSortSheet
+        visible={sortVisible}
+        onClose={() => setSortVisible(false)}
+        order={order}
+        items={categories.map(c => ({ key: c.name, label: c.name }))}
+        onChange={changeOrder}
+      />
     </View>
   );
 }

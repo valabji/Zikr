@@ -5,8 +5,10 @@ import { StackActions } from '@react-navigation/native';
 import { useColors, useIsBrightTheme } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import Azkar from '../constants/Azkar.js';
+import AzkarSortSheet from '../components/AzkarSortSheet';
+import { loadAzkarItemOrder, saveAzkarItemOrder, orderAzkarItems } from '../utils/AzkarOrder';
 import AzkarSwiper from '../components/AzkarSwiper';
 import AzkarOnePageScroll from '../components/AzkarOnePageScroll';
 import AzkarOnePageScrollCompact from '../components/AzkarOnePageScrollCompact';
@@ -51,11 +53,30 @@ export default function Screen2({ route, navigation }) {
     }, [])
   );
 
-  const azkarList = Azkar.filter(i => i.category == name);
+  const [itemOrder, setItemOrder] = React.useState({ mode: 'default', manual: [] });
+  const [sortVisible, setSortVisible] = React.useState(false);
+  const [orderVersion, setOrderVersion] = React.useState(0);
 
-  // Contribution button component for header
-  const ContributionButton = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}>
+  React.useEffect(() => { loadAzkarItemOrder(name).then(setItemOrder) }, [name]);
+
+  const orderedItems = React.useMemo(
+    () => orderAzkarItems(Azkar.filter(i => i.category == name), itemOrder),
+    [name, itemOrder]
+  );
+  const azkarList = orderedItems.map(p => p.item);
+  const sheetItems = orderedItems.map(p => ({ key: p.key, label: p.item.zekr }));
+
+  const changeItemOrder = (next) => {
+    setItemOrder(next);
+    setOrderVersion(v => v + 1);
+    saveAzkarItemOrder(name, next);
+  };
+
+  const HeaderButtons = () => (
+    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+      <TouchableOpacity testID="item-sort-toggle" onPress={() => setSortVisible(true)} style={{ padding: 6 }}>
+        <Ionicons name="swap-vertical" size={22} color={colors.BYellow} />
+      </TouchableOpacity>
       <TouchableOpacity
         onPress={() => navigation.navigate('Contribute')}
         style={{
@@ -77,7 +98,7 @@ export default function Screen2({ route, navigation }) {
   return (
     <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
       <BackgroundSvg1 color={colors.BYellow} />
-      <CustomHeader title={name} isHome={false} navigation={navigation} Left={ContributionButton} />
+      <CustomHeader title={name} isHome={false} navigation={navigation} Left={HeaderButtons} />
       <View style={{
         flex: 1,
         alignItems: 'center',
@@ -97,13 +118,21 @@ export default function Screen2({ route, navigation }) {
             console.warn(err)
           }} /> */}
         {viewMode === 'swiper' ? (
-          <AzkarSwiper key={`swiper-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
+          <AzkarSwiper key={`swiper-${zikrFontSize}-${orderVersion}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         ) : viewMode === 'onePageScrollCompact' ? (
-          <AzkarOnePageScrollCompact key={`scroll-compact-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
+          <AzkarOnePageScrollCompact key={`scroll-compact-${zikrFontSize}-${orderVersion}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         ) : (
-          <AzkarOnePageScroll key={`scroll-${zikrFontSize}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
+          <AzkarOnePageScroll key={`scroll-${zikrFontSize}-${orderVersion}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         )}
       </View>
+      <AzkarSortSheet
+        visible={sortVisible}
+        onClose={() => setSortVisible(false)}
+        order={itemOrder}
+        items={sheetItems}
+        onChange={changeItemOrder}
+        modes={['default', 'manual']}
+      />
     </View>
   );
 }
