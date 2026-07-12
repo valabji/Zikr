@@ -1,7 +1,8 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView } from "react-native";
-import { useColors } from "../constants/Colors";
+import { useColors, getItemColors } from "../constants/Colors";
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import Screen3 from '../screens/Screen3'
 import MainScreen from '../screens/MainScreen';
@@ -124,6 +125,8 @@ export function DNav() {
       }}
       screenListeners={{ focus: loadMenuConfig }}
       drawerContent={({ navigation }) => {
+        const settingsG = getItemColors(colors, visibleItems.length);
+        const settingsFg = settingsG ? settingsG.fg : colors.BYellow;
         return (
           <View
             testID="drawer-container"
@@ -149,6 +152,8 @@ export function DNav() {
                 const def = ITEM_DEFS[item.id];
                 if (!def) return null;
                 const action = getItemAction(item.id, navigation, hasLocation);
+                const g = getItemColors(colors, idx);
+                const fg = g ? g.fg : colors.BYellow;
                 return (
                   <TouchableOpacity
                     key={item.id}
@@ -158,24 +163,28 @@ export function DNav() {
                       height: 64,
                       ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                       marginTop: idx === 0 ? 30 : 5,
-                      backgroundColor: colors.DGreen,
+                      backgroundColor: g ? 'transparent' : colors.DGreen,
+                      borderRadius: g ? 12 : 0,
+                      overflow: 'hidden',
                       flexDirection: "row",
                     }}>
+                    {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+                      style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
                     {isRTL() ? (
-                      <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                      <MuslimIconSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={64} height={64} />
                     ) : (
-                      <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                      <MuslimIconEnSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={64} height={64} />
                     )}
                     <Text style={[
                       textStyles.navigation,
                       {
-                        color: colors.BYellow,
+                        color: fg,
                         marginTop: 7,
                         textAlign: getRTLTextAlign('left'),
                       }
                     ]}>{t(def.labelKey)}</Text>
                     <View style={{ flex: 1 }} />
-                    <Feather name={def.icon} size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+                    <Feather name={def.icon} size={24} color={fg} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
                   </TouchableOpacity>
                 );
               })}
@@ -189,23 +198,27 @@ export function DNav() {
                   ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                   marginTop: visibleItems.length === 0 ? 30 : 5,
                   marginBottom: 40,
-                  backgroundColor: colors.DGreen,
+                  backgroundColor: settingsG ? 'transparent' : colors.DGreen,
+                  borderRadius: settingsG ? 12 : 0,
+                  overflow: 'hidden',
                   flexDirection: "row",
                 }}>
+                {settingsG && <LinearGradient colors={settingsG.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+                  style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
                 {isRTL() ? (
-                  <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                  <MuslimIconSvg color={settingsFg} backgroundColor={settingsG ? settingsG.gradient[0] : colors.DGreen} width={64} height={64} />
                 ) : (
-                  <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={64} height={64} />
+                  <MuslimIconEnSvg color={settingsFg} backgroundColor={settingsG ? settingsG.gradient[0] : colors.DGreen} width={64} height={64} />
                 )}
                 <Text style={[
                   textStyles.navigation,
                   {
-                    color: colors.BYellow,
+                    color: settingsFg,
                     marginTop: 7,
                   }
                 ]}>{t('navigation.settings')}</Text>
                 <View style={{ flex: 1 }} />
-                <Feather name="settings" size={24} color={colors.BYellow} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
+                <Feather name="settings" size={24} color={settingsFg} style={{ marginTop: 17, ...getDirectionalMixedSpacing({ marginLeft: 20, marginRight: 20 }) }} />
               </TouchableOpacity>
             </ScrollView>
           </View>)

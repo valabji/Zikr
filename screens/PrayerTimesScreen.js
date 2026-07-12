@@ -8,7 +8,8 @@ import {
   RefreshControl,
   Platform
 } from 'react-native';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign, formatArabicTime, formatArabicCountdown, formatArabicDate } from '../locales/i18n';
 import CHeader from '../components/CHeader';
@@ -29,6 +30,8 @@ import { usePrayerCheckIn, togglePrayerCheckIn, togglePrayerCheckInForDate, getC
 import { SettingsContainer, SettingsCallout, SettingsButton } from '../components/settings';
 import { SPACING, RADIUS, webCursor } from '../constants/settingsTokens';
 import { useRTL } from '../hooks/useRTL';
+
+const PRAYER_CARD_ORDER = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 export default function PrayerTimesScreen({ navigation }) {
   const colors = useColors();
@@ -209,15 +212,19 @@ export default function PrayerTimesScreen({ navigation }) {
   };
 
   const renderPrayerTimeCard = (prayerName, time, isNext = false, isCurrent = false) => {
+    const g = (!isCurrent && !isNext)
+      ? getItemColors(colors, PRAYER_CARD_ORDER.indexOf(prayerName))
+      : null;
+
     const cardColor = isCurrent
       ? colors.currentPrayer
       : isNext
         ? colors.nextPrayer
-        : colors.DGreen;
+        : g ? 'transparent' : colors.DGreen;
 
     const textColor = (isCurrent || isNext)
       ? colors.black
-      : colors.BYellow;
+      : g ? g.fg : colors.BYellow;
 
     const isMandatory = MANDATORY_PRAYERS.includes(prayerName);
     const isPrayed = !!checkInStats.today[prayerName];
@@ -234,9 +241,12 @@ export default function PrayerTimesScreen({ navigation }) {
           marginVertical: PRAYER_CONSTANTS.SPACING.TINY_PADDING,
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          overflow: 'hidden'
         }}
       >
+        {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
         <Text style={{
           color: textColor,
           ...PRAYER_CONSTANTS.FONT_STYLES.BODY,

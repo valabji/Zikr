@@ -2,7 +2,7 @@ import * as React from 'react';
 import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import { useColors } from "../constants/Colors";
+import { useColors, getItemColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
@@ -81,9 +81,11 @@ export default function HomeScreen({ navigation, route }) {
 
   const width = screenDimensions.width
 
-  const Item = ({ name, onPress, fav, index }) => {
+  const Item = ({ name, onPress, fav, index, position }) => {
     let size = 32
     const [fv, setFv] = React.useState(fav)
+    const g = getItemColors(colors, position)
+    const fg = g ? g.fg : colors.BYellow
     return <TouchableOpacity
       testID="zikr-item"
       onPress={onPress}
@@ -92,13 +94,17 @@ export default function HomeScreen({ navigation, route }) {
         height: 48,
         ...getDirectionalMixedSpacing({ marginLeft: 10, marginRight: 10 }),
         marginTop: 5,
-        backgroundColor: colors.DGreen,
+        backgroundColor: g ? 'transparent' : colors.DGreen,
+        borderRadius: g ? 12 : 0,
+        overflow: 'hidden',
         flexDirection: "row",
       }}>
+      {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
       {isRTL() ? (
-        <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+        <MuslimIconSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={48} height={48} />
       ) : (
-        <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+        <MuslimIconEnSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={48} height={48} />
       )}
       <View style={{
         justifyContent: "center",
@@ -108,7 +114,7 @@ export default function HomeScreen({ navigation, route }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={[
           textStyles.body,
           {
-            color: colors.BYellow,
+            color: fg,
             textAlign: getRTLTextAlign('left'),
           }
         ]}>{name}</Text>
@@ -144,7 +150,7 @@ export default function HomeScreen({ navigation, route }) {
           justifyContent: "center",
           ...getDirectionalMixedSpacing({ marginRight: 5 })
         }} >
-        <Ionicons name={fv ? "heart" : "heart-outline"} color={colors.BYellow} size={32} testID="fav-indicator" />
+        <Ionicons name={fv ? "heart" : "heart-outline"} color={fg} size={32} testID="fav-indicator" />
       </TouchableOpacity>
     </TouchableOpacity>
   }
@@ -173,8 +179,9 @@ export default function HomeScreen({ navigation, route }) {
   const SearchHeader = () => {
     return (
       <LinearGradient
-        colors={[colors.BGreen, colors.DGreen]}
-        locations={[0, 1]}
+        colors={colors.headerGradient || [colors.BGreen, colors.DGreen]}
+        start={colors.headerGradient ? { x: 0, y: 0 } : undefined}
+        end={colors.headerGradient ? { x: 1, y: 1 } : undefined}
         style={{
           flexDirection: "row",
           height: 64,
@@ -363,9 +370,9 @@ export default function HomeScreen({ navigation, route }) {
               </Text>
             </View>
           ) : (
-            (showFavorites ? categories.filter(c => c.fav) : categories).map(c => {
+            (showFavorites ? categories.filter(c => c.fav) : categories).map((c, i) => {
               if (!s || st == "" || normalizeArabic(c.name).includes(normalizeArabic(st))) {
-                return <Item key={c.name} name={c.name} fav={c.fav} index={c.index} onPress={() => {
+                return <Item key={c.name} name={c.name} fav={c.fav} index={c.index} position={i} onPress={() => {
                   navigation.navigate("Screen2", { name: c.name })
                 }} />
               }

@@ -102,8 +102,8 @@ describe('SettingsScreen', () => {
     // which the dropdown uses via Object.entries(themes).map()
     const { themes } = require('../../constants/themes');
     
-    // Check that all 8 themes exist
-    expect(Object.keys(themes)).toHaveLength(8);
+    // Check that all 10 themes exist
+    expect(Object.keys(themes)).toHaveLength(10);
     expect(themes.originalGreen).toBeDefined();
     expect(themes.goldOnWhite).toBeDefined();
     expect(themes.goldOnDark).toBeDefined();
@@ -112,7 +112,9 @@ describe('SettingsScreen', () => {
     expect(themes.lavender).toBeDefined();
     expect(themes.sky).toBeDefined();
     expect(themes.navy).toBeDefined();
-    
+    expect(themes.prism).toBeDefined();
+    expect(themes.pastel).toBeDefined();
+
     // Verify the themes have both English and Arabic names
     expect(themes.paige.name).toBe('Paige');
     expect(themes.paige.nameAr).toBe('بيج');
@@ -120,6 +122,10 @@ describe('SettingsScreen', () => {
     expect(themes.chocolate.nameAr).toBe('شوكولاتة');
     expect(themes.lavender.name).toBe('Lavender');
     expect(themes.lavender.nameAr).toBe('لافندر');
+    expect(themes.prism.name).toBe('Prism');
+    expect(themes.prism.nameAr).toBe('الطيف');
+    expect(themes.pastel.name).toBe('Pastel');
+    expect(themes.pastel.nameAr).toBe('الباستيل');
   });
 
   it('displays theme dropdown with Arabic names by default', async () => {

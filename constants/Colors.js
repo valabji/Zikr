@@ -42,9 +42,15 @@ export const useIsBrightTheme = () => {
   const { theme } = useTheme();
   
   return useMemo(() => {
-    const brightThemes = ['goldOnWhite', 'paige', 'sky'];
+    const brightThemes = ['goldOnWhite', 'paige', 'sky', 'pastel'];
     return brightThemes.includes(theme);
   }, [theme]);
+};
+
+export const getItemColors = (colors, index) => {
+  const grads = colors.itemGradients;
+  if (!grads || !grads.length) return null;
+  return { gradient: grads[index % grads.length], fg: colors.itemFg };
 };
 
 export const useColors = () => {
@@ -96,6 +102,10 @@ export const useColors = () => {
       BGreen: currentTheme.primary, // Maps to primary
       MGreen: currentTheme.primaryMedium, // Maps to primaryMedium
       DGreen: currentTheme.primaryDark, // Maps to primaryDark
+
+      itemGradients: currentTheme.itemGradients,
+      itemFg: currentTheme.itemFg,
+      headerGradient: currentTheme.headerGradient,
       
       // Original Green Theme (for direct access)
       originalGreen: '#003C34',

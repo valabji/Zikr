@@ -3,7 +3,8 @@ import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator, 
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, arabicContentStyle } from '../locales/i18n';
 import {
@@ -369,11 +370,12 @@ export default function BooksScreen({ navigation }) {
     return null;
   };
 
-  const renderBookCard = (item) => {
+  const renderBookCard = (item, index) => {
     const name = lang === 'ar' ? item.nameAr : item.nameEn;
     const author = lang === 'ar' ? item.authorAr : item.authorEn;
     const st = dlState[item.id];
     const ready = item.bundled || !!(st && st.installed);
+    const g = getItemColors(colors, index);
     return (
       <TouchableOpacity
         key={item.id}
@@ -381,27 +383,30 @@ export default function BooksScreen({ navigation }) {
         onPress={() => openInfo(item)}
         style={[{
           width: '48%',
-          backgroundColor: colors.surface,
+          backgroundColor: g ? 'transparent' : colors.surface,
           borderRadius: RADIUS.card,
           padding: SPACING.md,
           marginBottom: SPACING.md,
+          overflow: 'hidden',
         }, shadow(colors.shadowColor), webCursor]}
       >
+        {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <View style={{
             width: 40, height: 40, borderRadius: 20,
-            backgroundColor: withAlpha(colors.accent, 'hairline'),
+            backgroundColor: g ? 'rgba(255,255,255,0.18)' : withAlpha(colors.accent, 'hairline'),
             justifyContent: 'center', alignItems: 'center',
           }}>
-            <Feather name="book" size={20} color={colors.accent} />
+            <Feather name="book" size={20} color={g ? g.fg : colors.accent} />
           </View>
           {renderCardBadge(item, st, ready)}
         </View>
-        <Text numberOfLines={2} style={[textStyles.subtitle, { color: colors.text, fontSize: 15, marginTop: SPACING.sm, minHeight: 40 }, lang === 'ar' ? arabicContentStyle() : null]}>{name}</Text>
+        <Text numberOfLines={2} style={[textStyles.subtitle, { color: g ? g.fg : colors.text, fontSize: 15, marginTop: SPACING.sm, minHeight: 40 }, lang === 'ar' ? arabicContentStyle() : null]}>{name}</Text>
         {author ? (
-          <Text numberOfLines={1} style={[textStyles.caption, { color: colors.textSecondary, marginTop: 2 }, lang === 'ar' ? arabicContentStyle() : null]}>{author}</Text>
+          <Text numberOfLines={1} style={[textStyles.caption, { color: g ? g.fg : colors.textSecondary, marginTop: 2, opacity: g ? 0.85 : 1 }, lang === 'ar' ? arabicContentStyle() : null]}>{author}</Text>
         ) : null}
-        <Text style={[textStyles.caption, { color: colors.accent, marginTop: SPACING.xs }]}>{t('books.entryCount', { count: fmtNum(item.count) })}</Text>
+        <Text style={[textStyles.caption, { color: g ? g.fg : colors.accent, marginTop: SPACING.xs }]}>{t('books.entryCount', { count: fmtNum(item.count) })}</Text>
       </TouchableOpacity>
     );
   };

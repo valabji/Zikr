@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useColors } from "../constants/Colors";
+import { useColors, getItemColors } from "../constants/Colors";
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
@@ -20,16 +21,21 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
+    const g = getItemColors(colors, pn - 1);
+    const fg = g ? g.fg : colors.BYellow;
 
     return (
       <View style={{
         borderWidth: 1,
-        borderColor: colors.BYellow,
+        borderColor: g ? 'transparent' : colors.BYellow,
         margin: 7,
         borderStyle: "dashed",
         padding: 10,
         borderRadius: 10,
+        overflow: 'hidden'
       }}>
+        {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
@@ -50,7 +56,7 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
           <Text style={[
             textStyles.bodySmall,
             {
-              color: colors.BYellow,
+              color: fg,
               marginTop: 6,
               fontSize: zikrFontSize,
               textAlign: getRTLTextAlign('left'),
@@ -61,7 +67,7 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
             <Text style={[
               textStyles.bodySmall,
               {
-                color: colors.BYellow,
+                color: fg,
                 marginTop: 6,
                 fontSize: zikrFontSize,
                 fontFamily: 'Hafs',
@@ -82,7 +88,7 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 style={{ padding: 8 }}
               >
-                <Feather name="share-2" size={20} color={colors.BYellow} />
+                <Feather name="share-2" size={20} color={fg} />
               </TouchableOpacity>
             </View>
 
@@ -92,7 +98,7 @@ export default function AzkarOnePageScrollCompact({ azkarList, zikrFontSize }) {
                   textStyles.body,
                   {
                     textAlign: "center",
-                    color: colors.BYellow,
+                    color: fg,
                     fontSize: 14,
                   }
                 ]}

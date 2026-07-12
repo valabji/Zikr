@@ -42,6 +42,7 @@ jest.mock('../../constants/Colors', () => ({
     overlayBackground: '#00000088',
   }),
   useIsBrightTheme: () => false,
+  getItemColors: () => null,
 }));
 
 describe('BooksScreen', () => {

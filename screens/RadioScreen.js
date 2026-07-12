@@ -3,7 +3,8 @@ import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, P
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import {
@@ -85,11 +86,12 @@ export default function RadioScreen({ navigation }) {
     }
   }, [radio.activeStation]);
 
-  const renderStation = ({ item }) => {
+  const renderStation = ({ item, index }) => {
     const active = radio.activeStation && radio.activeStation.id === item.id;
     const isOffline = offline.has(item.id) && !(active && (radio.isPlaying || radio.isBuffering));
     const isFav = favorites.includes(item.id);
     const subtitle = getStationSubtitle(item.streamUrl, lang);
+    const g = (!active && !isOffline) ? getItemColors(colors, index) : null;
     return (
       <TouchableOpacity
         testID={`station-${item.id}`}
@@ -105,13 +107,15 @@ export default function RadioScreen({ navigation }) {
       >
         <View style={{
           width: 48, height: 48, borderRadius: 24,
-          backgroundColor: active ? colors.accent : withAlpha(colors.accent, 'hairline'),
-          justifyContent: 'center', alignItems: 'center',
+          backgroundColor: active ? colors.accent : g ? 'transparent' : withAlpha(colors.accent, 'hairline'),
+          justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
         }}>
+          {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+            style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
           <Feather
             name={isOffline ? 'wifi-off' : (active && radio.isPlaying ? 'volume-2' : 'radio')}
             size={22}
-            color={active ? colors.primaryDark : (isOffline ? colors.textSecondary : colors.accent)}
+            color={active ? colors.primaryDark : (isOffline ? colors.textSecondary : g ? g.fg : colors.accent)}
           />
         </View>
         <View style={{ flex: 1, marginHorizontal: 14 }}>

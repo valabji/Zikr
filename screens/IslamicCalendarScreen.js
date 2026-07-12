@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import CHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing } from '../locales/i18n';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
@@ -223,24 +224,30 @@ export default function IslamicCalendarScreen({ navigation }) {
           <Text style={{ ...textStyles.subtitle, color: colors.text, marginBottom: 10 }}>
             {t('islamicCalendar.upcomingEvents')}
           </Text>
-          {upcomingEvents.map((event) => (
-            <View
-              key={event.key}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                backgroundColor: colors.surface,
-                borderRadius: 10,
-                paddingVertical: 10,
-                paddingHorizontal: 14,
-                marginBottom: 8,
-              }}
-            >
-              <Text style={{ ...textStyles.body, color: colors.text }}>{t(`islamicCalendar.events.${event.key}`)}</Text>
-              <Text style={{ ...textStyles.bodySmall, color: colors.accent }}>{countdownLabel(event.daysRemaining)}</Text>
-            </View>
-          ))}
+          {upcomingEvents.map((event, i) => {
+            const g = getItemColors(colors, i);
+            return (
+              <View
+                key={event.key}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: g ? 'transparent' : colors.surface,
+                  borderRadius: 10,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  marginBottom: 8,
+                  overflow: 'hidden',
+                }}
+              >
+                {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+                  style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
+                <Text style={{ ...textStyles.body, color: g ? g.fg : colors.text }}>{t(`islamicCalendar.events.${event.key}`)}</Text>
+                <Text style={{ ...textStyles.bodySmall, color: g ? g.fg : colors.accent }}>{countdownLabel(event.daysRemaining)}</Text>
+              </View>
+            );
+          })}
         </View>
 
         <View style={{ marginTop: 20, backgroundColor: colors.surface, borderRadius: 12, padding: 16 }}>

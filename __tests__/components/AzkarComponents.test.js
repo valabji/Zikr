@@ -15,7 +15,8 @@ jest.mock('../../constants/Colors', () => ({
   useColors: () => ({
     BYellow: '#FFD700',
     primary: '#000000'
-  })
+  }),
+  getItemColors: () => null
 }));
 
 jest.mock('../../constants/Fonts', () => ({

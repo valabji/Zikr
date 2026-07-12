@@ -3,7 +3,8 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import CHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing } from '../locales/i18n';
 import { HIFZ_CONSTANTS } from '../constants/HifzConstants';
@@ -27,14 +28,15 @@ const NEXT_STATUS = {
 
 const FILTERS = ['all', 'memorized', 'inProgress', 'due'];
 
-function StatusIcon({ status, colors }) {
+function StatusIcon({ status, colors, fg }) {
   if (status === STATUS.MEMORIZED) return <Feather name="check-circle" size={22} color={colors.currentPrayer} />;
-  if (status === STATUS.IN_PROGRESS) return <Feather name="edit-3" size={22} color={colors.accent} />;
-  return <Feather name="circle" size={22} color={colors.textSecondary} />;
+  if (status === STATUS.IN_PROGRESS) return <Feather name="edit-3" size={22} color={fg || colors.accent} />;
+  return <Feather name="circle" size={22} color={fg || colors.textSecondary} />;
 }
 
 function SurahRow({ surah, entry, due, colors, lang }) {
   const name = lang === 'ar' ? surah.nameAr : surah.nameEn;
+  const g = getItemColors(colors, surah.id - 1);
 
   const onCycleStatus = useCallback(() => {
     setSurahStatus(surah.id, NEXT_STATUS[entry.status]);
@@ -48,21 +50,24 @@ function SurahRow({ surah, entry, due, colors, lang }) {
     <View
       testID={`hifz-row-${surah.id}`}
       style={{
-        backgroundColor: colors.surface,
+        backgroundColor: g ? 'transparent' : colors.surface,
         borderRadius: RADIUS.card,
         padding: SPACING.md + 2,
         marginBottom: SPACING.sm + 2,
         flexDirection: 'row',
         alignItems: 'center',
+        overflow: 'hidden',
       }}
     >
+      {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
       <TouchableOpacity testID={`hifz-status-${surah.id}`} onPress={onCycleStatus} accessibilityRole="button" accessibilityLabel={name} style={[{ padding: SPACING.xs }, webCursor]}>
-        <StatusIcon status={entry.status} colors={colors} />
+        <StatusIcon status={entry.status} colors={colors} fg={g ? g.fg : null} />
       </TouchableOpacity>
 
       <View style={{ flex: 1, ...getDirectionalMixedSpacing({ marginLeft: 12, marginRight: 12 }) }}>
-        <Text style={{ ...textStyles.body, color: colors.text }}>{name}</Text>
-        <Text style={{ ...textStyles.caption, color: colors.textSecondary, marginTop: 2 }}>
+        <Text style={{ ...textStyles.body, color: g ? g.fg : colors.text }}>{name}</Text>
+        <Text style={{ ...textStyles.caption, color: g ? g.fg : colors.textSecondary, marginTop: 2, opacity: g ? 0.85 : 1 }}>
           {t('hifz.ayahCount', { count: surah.ayahCount })}
         </Text>
       </View>

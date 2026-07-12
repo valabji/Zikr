@@ -16,8 +16,9 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
   return (
     <LinearGradient
       testID={testID || "header-container"}
-      colors={[colors.BGreen, colors.DGreen]}
-      locations={[0, 1]}
+      colors={colors.headerGradient || [colors.BGreen, colors.DGreen]}
+      start={colors.headerGradient ? { x: 0, y: 0 } : undefined}
+      end={colors.headerGradient ? { x: 1, y: 1 } : undefined}
       style={{
         flexDirection: "row",
         height: 64,

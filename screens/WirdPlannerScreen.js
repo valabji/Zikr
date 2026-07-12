@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import CHeader from '../components/CHeader';
-import { useColors } from '../constants/Colors';
+import { useColors, getItemColors } from '../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles, FONT_FAMILY } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing } from '../locales/i18n';
 import { WIRD_CONSTANTS } from '../constants/WirdConstants';
@@ -116,23 +117,29 @@ export default function WirdPlannerScreen({ navigation }) {
               </View>
 
               <View style={{ flexDirection: 'row', marginTop: 14 }}>
-                {WIRD_CONSTANTS.QUICK_LOG_AMOUNTS.map((amount) => (
-                  <TouchableOpacity
-                    key={amount}
-                    testID={`wird-log-${amount}`}
-                    onPress={() => onLogPages(amount)}
-                    style={{
-                      flex: 1,
-                      backgroundColor: colors.primaryMedium,
-                      borderRadius: 10,
-                      paddingVertical: 12,
-                      alignItems: 'center',
-                      marginHorizontal: 4,
-                    }}
-                  >
-                    <Text style={{ ...textStyles.body, color: colors.text }}>+{amount}</Text>
-                  </TouchableOpacity>
-                ))}
+                {WIRD_CONSTANTS.QUICK_LOG_AMOUNTS.map((amount, i) => {
+                  const g = getItemColors(colors, i);
+                  return (
+                    <TouchableOpacity
+                      key={amount}
+                      testID={`wird-log-${amount}`}
+                      onPress={() => onLogPages(amount)}
+                      style={{
+                        flex: 1,
+                        backgroundColor: g ? 'transparent' : colors.primaryMedium,
+                        borderRadius: 10,
+                        paddingVertical: 12,
+                        alignItems: 'center',
+                        marginHorizontal: 4,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+                        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
+                      <Text style={{ ...textStyles.body, color: g ? g.fg : colors.text }}>+{amount}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
               {stats.streak > 0 && (
