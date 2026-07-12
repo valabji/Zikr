@@ -271,7 +271,7 @@ export const themes = {
     warningBackground: '#FEF3C7',
     warningText: '#B45309',
     warningAccent: '#F59E0B',
-    headerGradient: ['#C4B5FD', '#93C5FD', '#99F6E4'],
+    headerGradient: ['#DDD6FE', '#C4B5FD', '#A78BFA'],
     itemGradients: [
       ['#DDD6FE', '#C4B5FD'],
       ['#BAE6FD', '#A5F3FC'],
