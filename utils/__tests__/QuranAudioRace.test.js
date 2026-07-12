@@ -8,6 +8,7 @@ jest.mock('expo-av', () => ({
     Sound: { createAsync: jest.fn() },
     setAudioModeAsync: jest.fn(() => Promise.resolve()),
   },
+  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
 }));
 
 jest.mock('../QuranSettings', () => ({

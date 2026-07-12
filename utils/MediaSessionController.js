@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import QuranAudio from './QuranAudio';
 import RadioService from './RadioService';
 import surahsData from '../assets/quran/data/surahs.json';
@@ -13,6 +14,17 @@ const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, 
 let initialized = false;
 let activeSource = null;
 let lastKey = null;
+let notifPermissionRequested = false;
+
+async function ensureAndroidNotificationPermission() {
+  if (notifPermissionRequested || Platform.OS !== 'android') return;
+  notifPermissionRequested = true;
+  try {
+    // Android 13+ hides the media notification without POST_NOTIFICATIONS
+    const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted' && canAskAgain) await Notifications.requestPermissionsAsync();
+  } catch {}
+}
 
 function quranMeta() {
   const a = QuranAudio.activeAyah;
@@ -83,6 +95,7 @@ function apply(meta) {
   if (Platform.OS === 'web') {
     applyWeb(meta);
   } else {
+    ensureAndroidNotificationPermission();
     MediaSession.updateMetadata({
       title: meta.title,
       artist: meta.artist,

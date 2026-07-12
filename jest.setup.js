@@ -151,6 +151,7 @@ jest.mock('expo-av', () => ({
     },
     setAudioModeAsync: jest.fn(() => Promise.resolve()),
   },
+  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
 }));
 
 jest.mock('expo-font', () => ({

@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeIOS } from 'expo-av';
 import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import { getSurahAudioManifest } from './QuranSurahAudio';
@@ -39,7 +39,6 @@ class QuranAudioService {
     this.playbackScope = 'ayah';
     this.loopEnabled = false;
     this.playbackRate = 1.0;
-    this.audioModeReady = false;
     this.listeners = new Set();
     this.unsubSettings = null;
     this.mode = 'ayah';
@@ -55,16 +54,16 @@ class QuranAudioService {
   }
 
   async _ensureAudioMode() {
-    if (this.audioModeReady) return;
     try {
+      // DoNotMix required for iOS Now Playing; re-applied each play since Sounds/MicTest overwrite the global mode
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
       });
-      this.audioModeReady = true;
     } catch (e) {
       console.warn('QuranAudio: setAudioModeAsync failed', e);
     }

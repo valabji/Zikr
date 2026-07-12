@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeIOS } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RADIO_CONSTANTS } from '../constants/RadioConstants';
 import QuranAudio from './QuranAudio';
@@ -13,7 +13,6 @@ class RadioService {
     this.isPlaying = false;
     this.isBuffering = false;
     this.failedStationId = null;
-    this.audioModeReady = false;
     this.listeners = new Set();
     this._opId = 0;
   }
@@ -23,16 +22,16 @@ class RadioService {
   }
 
   async _ensureAudioMode() {
-    if (this.audioModeReady) return;
     try {
+      // DoNotMix required for iOS Now Playing; re-applied each play since Sounds/MicTest overwrite the global mode
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
       });
-      this.audioModeReady = true;
     } catch (e) {
       console.warn('RadioService: setAudioModeAsync failed', e);
     }
