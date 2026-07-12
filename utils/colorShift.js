@@ -24,6 +24,11 @@ export const darken = (hex, amount) => {
   return rgbToHex({ r: r * (1 - amount), g: g * (1 - amount), b: b * (1 - amount) });
 };
 
+export const isBrightColor = (hex) => {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55;
+};
+
 export const mix = (hexA, hexB, ratio) => {
   const a = hexToRgb(hexA);
   const b = hexToRgb(hexB);

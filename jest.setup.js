@@ -175,10 +175,21 @@ jest.mock('expo-file-system/legacy', () => ({
   makeDirectoryAsync: jest.fn(() => Promise.resolve()),
   downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
   deleteAsync: jest.fn(() => Promise.resolve()),
+  copyAsync: jest.fn(() => Promise.resolve()),
+  EncodingType: { Base64: 'base64', UTF8: 'utf8' },
   readDirectoryAsync: jest.fn(() => Promise.resolve([])),
   readAsStringAsync: jest.fn(() => Promise.resolve('{"entries":[]}')),
   writeAsStringAsync: jest.fn(() => Promise.resolve()),
   createDownloadResumable: jest.fn(() => ({ downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })) })),
+}), { virtual: true });
+
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn(() => Promise.resolve({ canceled: true })),
+}), { virtual: true });
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest.fn(() => Promise.resolve({ canceled: true })),
+  MediaTypeOptions: { Images: 'Images' },
 }), { virtual: true });
 
 jest.mock('expo-notifications', () => ({

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dimensions, Text, View, I18nManager } from 'react-native';
+import { Dimensions, Image, Text, View, I18nManager } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { t, isRTL, getDirectionalSpacing } from '../locales/i18n';
@@ -34,10 +34,19 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
 
         elevation: 2,
       }}>
-      <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
-        <Hbg color={colors.DGreen + "55"} width={width} />
-        <Hbg color={colors.DGreen + "55"} width={width} />
-      </View>
+      {colors.hidePattern ? null : (
+        <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
+          <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+          <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+        </View>
+      )}
+      {colors.headerImage ? (
+        <Image
+          source={{ uri: colors.headerImage }}
+          style={{ position: "absolute", left: 0, top: 0, width, height: 64 }}
+          resizeMode="cover"
+        />
+      ) : null}
       {
         Right ?
           <Right /> :

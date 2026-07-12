@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useColors } from '../constants/Colors';
 
@@ -12,11 +13,14 @@ export const StarSvg = ({
   testID 
 }) => {
   const colors = useColors();
-  
-  // Default colors based on theme if not provided
+
+  if (colors.starImage) {
+    return <Image source={{ uri: colors.starImage }} style={[{ width, height }, style]} resizeMode="contain" testID={testID} />;
+  }
+
   const fill = fillColor || colors.accent;
   const stroke = strokeColor || colors.primary;
-  
+
   return (
     <Svg 
       width={width} 
@@ -44,9 +48,13 @@ export const StarSvgFilled = ({
   testID 
 }) => {
   const colors = useColors();
-  
+
+  if (colors.starImage) {
+    return <Image source={{ uri: colors.starImage }} style={[{ width, height }, style]} resizeMode="contain" testID={testID} />;
+  }
+
   const fill = fillColor || colors.accent;
-  
+
   return (
     <Svg 
       width={width} 

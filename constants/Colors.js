@@ -1,12 +1,19 @@
 import { useMemo, useContext, createContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { themes, getThemeVariant } from './themes';
+import { themes, applyThemeVariant } from './themes';
+import { isBrightColor } from '../utils/colorShift';
 
 // Theme Context
 export const ThemeContext = createContext({
   theme: 'goldOnDark',
   setTheme: () => {},
   themes: themes,
+  customThemes: {},
+  hiddenThemes: [],
+  saveCustomTheme: () => {},
+  deleteCustomTheme: () => {},
+  setThemeHidden: () => {},
+  reloadCustomThemes: () => {},
   isThemeLoaded: false,
   variant: null,
   autoVariant: true,
@@ -23,6 +30,12 @@ export const useTheme = () => {
       theme: 'goldOnDark',
       setTheme: () => {},
       themes: themes,
+      customThemes: {},
+      hiddenThemes: [],
+      saveCustomTheme: () => {},
+      deleteCustomTheme: () => {},
+      setThemeHidden: () => {},
+      reloadCustomThemes: () => {},
       isThemeLoaded: true, // Assume loaded if no provider
       variant: null,
       autoVariant: true,
@@ -39,12 +52,15 @@ export { themes };
 
 // Helper function to detect if current theme has a bright background
 export const useIsBrightTheme = () => {
-  const { theme } = useTheme();
-  
+  const { theme, themes: themeMap } = useTheme();
+
   return useMemo(() => {
     const brightThemes = ['goldOnWhite', 'paige', 'sky', 'pastel'];
-    return brightThemes.includes(theme);
-  }, [theme]);
+    if (brightThemes.includes(theme)) return true;
+    const current = themeMap[theme];
+    if (current && current.custom) return isBrightColor(current.background);
+    return false;
+  }, [theme, themeMap]);
 };
 
 export const getItemColors = (colors, index) => {
@@ -54,10 +70,10 @@ export const getItemColors = (colors, index) => {
 };
 
 export const useColors = () => {
-  const { theme, variant } = useTheme();
+  const { theme, variant, themes: themeMap } = useTheme();
 
   return useMemo(() => {
-    const currentTheme = getThemeVariant(theme, variant);
+    const currentTheme = applyThemeVariant(themeMap[theme] || themes.goldOnDark, variant);
 
     return {
       // Font configuration from theme
@@ -106,6 +122,8 @@ export const useColors = () => {
       itemGradients: currentTheme.itemGradients,
       itemFg: currentTheme.itemFg,
       headerGradient: currentTheme.headerGradient,
+      bgImage1: currentTheme.bgImage1,
+      bgImage2: currentTheme.bgImage2,
       
       // Original Green Theme (for direct access)
       originalGreen: '#003C34',
@@ -116,7 +134,7 @@ export const useColors = () => {
       goldOnWhite: '#D1955E',
       goldOnDark: '#FFE29D',
     };
-  }, [theme, variant]);
+  }, [theme, variant, themeMap]);
 };
 
 // For backward compatibility, export the colors object as well

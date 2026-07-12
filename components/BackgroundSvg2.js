@@ -11,7 +11,7 @@ export const BackgroundSvg2 = ({ color, style, testID }) => {
       testID={testID}
     >
       <ImageBackground
-        source={require('../assets/images/bg2.jpg')}
+        source={colors.bgImage2 ? { uri: colors.bgImage2 } : require('../assets/images/bg2.jpg')}
         style={{ flex: 1, width: '100%', height: '100%' }}
         resizeMode="cover"
       >

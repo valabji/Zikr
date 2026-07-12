@@ -1,9 +1,16 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from './Colors';
 import { themes } from './themes';
 import { getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '../utils/ThemeVariant';
 import { syncWidgetData } from '../utils/PrayerWidgetService';
+import {
+  loadCustomThemes,
+  persistCustomTheme,
+  removeCustomTheme,
+  loadHiddenThemes,
+  persistHiddenThemes,
+} from '../utils/ThemeManager';
 
 const VARIANT_AUTO_KEY = '@theme_variant_auto';
 const VARIANT_LOCKED_KEY = '@theme_variant_locked';
@@ -15,13 +22,21 @@ export const ThemeProvider = ({ children }) => {
   const [autoVariant, setAutoVariantState] = useState(true);
   const [lockedVariant, setLockedVariantState] = useState(null);
   const [computedVariant, setComputedVariant] = useState(null);
+  const [customThemes, setCustomThemes] = useState({});
+  const [hiddenThemes, setHiddenThemes] = useState([]);
 
   // Load theme from storage on app start
   useEffect(() => {
     const loadTheme = async () => {
       try {
-        const savedTheme = await AsyncStorage.getItem('@theme');
-        if (savedTheme) {
+        const [savedTheme, savedCustom, savedHidden] = await Promise.all([
+          AsyncStorage.getItem('@theme'),
+          loadCustomThemes(),
+          loadHiddenThemes(),
+        ]);
+        setCustomThemes(savedCustom);
+        setHiddenThemes(savedHidden);
+        if (savedTheme && (themes[savedTheme] || savedCustom[savedTheme])) {
           setCurrentTheme(savedTheme);
         }
       } catch (error) {
@@ -111,14 +126,51 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
+  const saveCustomTheme = async (id, theme) => {
+    await persistCustomTheme(id, theme);
+    setCustomThemes((prev) => ({ ...prev, [id]: theme }));
+  };
+
+  const deleteCustomTheme = async (id) => {
+    await removeCustomTheme(id);
+    setCustomThemes((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setHiddenThemes((prev) => prev.filter((key) => key !== id));
+    if (currentTheme === id) {
+      await setTheme('goldOnDark');
+    }
+  };
+
+  const setThemeHidden = async (key, hidden) => {
+    const next = hidden
+      ? [...new Set([...hiddenThemes, key])]
+      : hiddenThemes.filter((k) => k !== key);
+    setHiddenThemes(next);
+    await persistHiddenThemes(next);
+  };
+
+  const reloadCustomThemes = async () => {
+    setCustomThemes(await loadCustomThemes());
+  };
+
   const variant = autoVariant ? computedVariant : (lockedVariant || computedVariant);
+  const mergedThemes = useMemo(() => ({ ...themes, ...customThemes }), [customThemes]);
 
   return (
     <ThemeContext.Provider
       value={{
         theme: currentTheme,
         setTheme,
-        themes,
+        themes: mergedThemes,
+        customThemes,
+        hiddenThemes,
+        saveCustomTheme,
+        deleteCustomTheme,
+        setThemeHidden,
+        reloadCustomThemes,
         isThemeLoaded,
         variant,
         autoVariant,

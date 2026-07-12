@@ -1,6 +1,7 @@
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
+import { useColors } from '../constants/Colors';
 import AdhanDownloader from './AdhanDownloader';
 import { SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '../constants/AdhanCatalog';
 
@@ -305,31 +306,39 @@ export default SoundsService;
 
 // Keep the existing useAudio hook for backward compatibility
 export function useAudio() {
+    const colors = useColors();
     const [volume, setVolume] = useState(0.9);
     const [player, setPlayer] = useState(null);
 
     useEffect(() => {
         loadVolume();
-        initPlayer();
     }, []);
+
+    useEffect(() => {
+        let active = true;
+        let created = null;
+        (async () => {
+            try {
+                const source = colors.clickSound ? { uri: colors.clickSound } : audioSource;
+                const { sound } = await Audio.Sound.createAsync(source, { shouldPlay: false });
+                created = sound;
+                if (active) setPlayer(sound);
+                else sound.unloadAsync();
+            } catch (error) {
+                console.error('Error initializing audio player:', error);
+            }
+        })();
+        return () => {
+            active = false;
+            if (created) created.unloadAsync();
+        };
+    }, [colors.clickSound]);
 
     useEffect(() => {
         if (player) {
             player.setVolumeAsync(volume);
         }
     }, [volume, player]);
-
-    const initPlayer = async () => {
-        try {
-            const { sound } = await Audio.Sound.createAsync(
-                audioSource,
-                { shouldPlay: false }
-            );
-            setPlayer(sound);
-        } catch (error) {
-            console.error('Error initializing audio player:', error);
-        }
-    };
 
     const loadVolume = async () => {
         try {

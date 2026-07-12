@@ -33,6 +33,7 @@ jest.mock('../../constants/Colors', () => ({
     theme: 'originalGreen',
     setTheme: jest.fn(),
     themes: require('../../constants/themes').themes,
+    hiddenThemes: [],
     variant: 'duha',
     autoVariant: true,
     lockedVariant: null,

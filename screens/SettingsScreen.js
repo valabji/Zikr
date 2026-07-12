@@ -23,7 +23,7 @@ import {
 
 export default function SettingsScreen({ navigation }) {
   const colors = useColors();
-  const { theme, setTheme, themes, variant, autoVariant, lockedVariant, setAutoVariantEnabled, lockVariant } = useTheme();
+  const { theme, setTheme, themes, hiddenThemes, variant, autoVariant, lockedVariant, setAutoVariantEnabled, lockVariant } = useTheme();
   const { volume, setClickVolume, playClick } = useAudio();
   const { isRTL, getTextAlign, getDirectionalMixedSpacing } = useRTL();
 
@@ -103,7 +103,9 @@ export default function SettingsScreen({ navigation }) {
   ];
 
   const label = (opt) => (currentLang === 'ar' ? opt.labelAr : opt.labelEn);
-  const themeOptions = Object.entries(themes).map(([id, v]) => ({ id, label: currentLang === 'ar' ? v.nameAr : v.name }));
+  const themeOptions = Object.entries(themes)
+    .filter(([id]) => !hiddenThemes.includes(id) || id === theme)
+    .map(([id, v]) => ({ id, label: currentLang === 'ar' ? v.nameAr : v.name }));
   const screenOptions = screens.map((s) => ({ id: s.id, label: label(s) }));
   const viewModeOptions = viewModes.map((m) => ({ id: m.id, label: label(m) }));
   const azkarVibrationOptions = vibrationOptions.map((o) => ({ id: o.id, label: label(o) }));
@@ -806,6 +808,13 @@ export default function SettingsScreen({ navigation }) {
               value={tempTheme}
               options={themeOptions}
               onChange={handleThemeChange}
+            />
+            <SettingsRow
+              testID="theme-manager-entry"
+              icon="sliders"
+              label={t('themeManager.title')}
+              chevron
+              onPress={() => { playClick(); navigation.navigate('ThemeManager'); }}
             />
           </SettingsSection>
         )}

@@ -136,6 +136,12 @@ export default {
           "./node_modules/@expo-google-fonts/cairo/Cairo_700Bold.ttf"
         ]
       }],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "Used to pick a custom background image for your themes."
+        }
+      ],
       "expo-web-browser",
       "@react-native-firebase/app",
       [

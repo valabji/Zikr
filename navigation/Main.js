@@ -6,6 +6,8 @@ import ContributeScreen from '../screens/ContributeScreen';
 import AboutScreen from '../screens/AboutScreen';
 import CreditsScreen from '../screens/CreditsScreen';
 import UnifiedPrayerSettingsScreen from '../screens/UnifiedPrayerSettingsScreen';
+import ThemeManagerScreen from '../screens/ThemeManagerScreen';
+import ThemeEditorScreen from '../screens/ThemeEditorScreen';
 import { DNav } from './DrawerNavigation';
 import { TNav } from './TabNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
@@ -68,6 +70,8 @@ export const AppContainer = () => {
                 <Stack.Screen name="About" component={AboutScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Credits" component={CreditsScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="UnifiedPrayerSettings" component={UnifiedPrayerSettingsScreen} options={{ title: "Prayer Settings", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="ThemeManager" component={ThemeManagerScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="ThemeEditor" component={ThemeEditorScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
             </Stack.Navigator>
             <RadioMiniPlayer />
         </NavigationContainer>

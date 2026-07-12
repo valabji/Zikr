@@ -16,7 +16,11 @@ const DEFAULT_THEME_KEY = 'originalGreen';
 
 export const getWidgetThemeColors = async () => {
   const themeKey = (await AsyncStorage.getItem('@theme')) || DEFAULT_THEME_KEY;
-  const theme = themes[themeKey] || themes[DEFAULT_THEME_KEY];
+  let theme = themes[themeKey];
+  if (!theme) {
+    const { loadCustomThemes } = require('./ThemeManager');
+    theme = (await loadCustomThemes())[themeKey] || themes[DEFAULT_THEME_KEY];
+  }
   return { bg: theme.background, text: theme.text, textSecondary: theme.textSecondary };
 };
 

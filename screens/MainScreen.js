@@ -195,10 +195,12 @@ export default function HomeScreen({ navigation, route }) {
           shadowRadius: 1.41,
           elevation: 2,
         }}>
-        <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
-          <Hbg color={colors.DGreen + "55"} width={width} />
-          <Hbg color={colors.DGreen + "55"} width={width} />
-        </View>
+        {colors.hidePattern ? null : (
+          <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
+            <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+            <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+          </View>
+        )}
 
         {/* Back/Close button */}
         <View style={{ justifyContent: 'center' }}>

@@ -345,8 +345,7 @@ const shiftAccent = (hex, recipe) => {
 };
 
 // Applies a prayer-time variant recipe on top of a theme's base colors
-export const getThemeVariant = (themeKey, variantKey) => {
-  const base = themes[themeKey] || themes.goldOnDark;
+export const applyThemeVariant = (base, variantKey) => {
   const recipe = VARIANT_RECIPES[variantKey];
   if (!recipe) return base;
 
@@ -361,3 +360,6 @@ export const getThemeVariant = (themeKey, variantKey) => {
     accentDark: shiftAccent(base.accentDark, recipe),
   };
 };
+
+export const getThemeVariant = (themeKey, variantKey, themeMap = themes) =>
+  applyThemeVariant(themeMap[themeKey] || themes.goldOnDark, variantKey);
