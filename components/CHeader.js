@@ -45,12 +45,12 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <TouchableOpacity
                 testID="menu-button"
-                onPress={() => navigation.toggleDrawer()}
+                onPress={() => navigation.toggleDrawer ? navigation.toggleDrawer() : navigation.navigate('HomeGrid')}
                 style={{ flexDirection: "row" }}
               >
                 <Ionicons
-                  name="menu"
-                  size={30}
+                  name={navigation.toggleDrawer ? "menu" : "grid-outline"}
+                  size={navigation.toggleDrawer ? 30 : 26}
                   style={{ ...getDirectionalSpacing(20, 0) }}
                   color={colors.BYellow}
                 />

@@ -14,6 +14,7 @@ import { THEME_VARIANT_KEYS } from '../constants/themes';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 import { useTestedMode, setTestedMode } from '../utils/TestedMode';
 import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
+import { useNavMode } from '../utils/NavMode';
 import { useAudio } from '../utils/Sounds';
 import {
   SettingsContainer, SettingsSection, SettingsRow, SettingsField,
@@ -46,6 +47,7 @@ export default function SettingsScreen({ navigation }) {
   const [vibrationIntensity, setVibrationIntensity] = useState(VIBRATION_INTENSITY.LIGHT);
   const [vibrationSupported, setVibrationSupported] = useState(false);
   const testedMode = useTestedMode();
+  const { navMode, setNavMode } = useNavMode();
   const [menuConfig, setMenuConfig] = useState(DEFAULT_MENU_CONFIG);
   const [showDate, setShowDate] = useState(true);
 
@@ -595,6 +597,13 @@ export default function SettingsScreen({ navigation }) {
     await AsyncStorage.setItem('@menuShowDate', newVal ? 'true' : 'false');
   };
 
+  const handleNavStyleChange = async (mode) => {
+    if (mode === navMode) return;
+    playClick();
+    await AsyncStorage.setItem('@navMode', mode);
+    setNavMode(mode);
+  };
+
   const hasUnsavedChanges = useCallback(() => {
     if (tempScreen !== lastSavedScreen) return true;
     if (currentLang !== initialLang) return true;
@@ -965,6 +974,17 @@ export default function SettingsScreen({ navigation }) {
         )}
 
         <SettingsSection title={t('settings.menu')}>
+          <SettingsField label={t('settings.navStyle')}>
+            <SettingsSegmented
+              value={navMode}
+              options={[
+                { id: 'drawer', label: t('settings.navStyleDrawer'), icon: 'menu' },
+                { id: 'cards', label: t('settings.navStyleCards'), icon: 'grid' },
+              ]}
+              onChange={handleNavStyleChange}
+              getTestID={(opt) => `nav-style-${opt.id}`}
+            />
+          </SettingsField>
           <SettingsRow
             label={t('settings.menuShowDate')}
             trailing={(

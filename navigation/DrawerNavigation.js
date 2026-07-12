@@ -15,7 +15,7 @@ import RadioScreen from '../screens/RadioScreen';
 import IslamicCalendarScreen from '../screens/IslamicCalendarScreen';
 import WirdPlannerScreen from '../screens/WirdPlannerScreen';
 import HifzTrackerScreen from '../screens/HifzTrackerScreen';
-import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, setLanguage } from '../locales/i18n';
+import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -25,35 +25,9 @@ import { LogoSvg } from '../components/LogoSvg';
 import { PRAYER_CONSTANTS } from "../constants/PrayerConstants";
 import { formatHijriDate } from '../utils/HijriCalendar';
 import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
+import { getItemAction } from '../utils/menuActions';
 
 const Drawer = createDrawerNavigator();
-
-function getItemAction(id, navigation, hasLocation) {
-  switch (id) {
-    case 'quran': return () => navigation.navigate('Quran');
-    case 'books': return () => navigation.navigate('Books');
-    case 'radio': return () => navigation.navigate('Radio');
-    case 'tasbih': return () => navigation.navigate('Screen3');
-    case 'azkar': return () => navigation.navigate('Home', { showFavorites: false });
-    case 'prayerTimes': return () => {
-      if (!hasLocation) { navigation.toggleDrawer(); navigation.navigate('UnifiedPrayerSettings'); return; }
-      navigation.navigate('PrayerTimes');
-    };
-    case 'qibla': return () => {
-      if (!hasLocation) { navigation.toggleDrawer(); navigation.navigate('UnifiedPrayerSettings'); return; }
-      navigation.navigate('Qibla');
-    };
-    case 'islamicCalendar': return () => navigation.navigate('IslamicCalendar');
-    case 'wirdPlanner': return () => navigation.navigate('WirdPlanner');
-    case 'hifzTracker': return () => navigation.navigate('HifzTracker');
-    case 'about': return () => { navigation.toggleDrawer(); navigation.navigate('About'); };
-    case 'language': return async () => {
-      const currentLang = await AsyncStorage.getItem('@language') || 'ar';
-      await setLanguage(currentLang === 'ar' ? 'en' : 'ar');
-    };
-    default: return () => {};
-  }
-}
 
 function useInitialDrawerRoute() {
   const [resolved, setResolved] = useState(undefined);

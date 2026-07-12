@@ -22,6 +22,11 @@ jest.mock('expo-constants', () => ({
 }));
 
 jest.mock('../../navigation/DrawerNavigation', () => ({ DNav: () => null }));
+jest.mock('../../navigation/TabNavigation', () => ({ TNav: () => null }));
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve()),
+}));
 jest.mock('../../screens/Screen2', () => () => null);
 jest.mock('../../screens/ContributeScreen', () => () => null);
 jest.mock('../../screens/UnifiedPrayerSettingsScreen', () => () => null);
@@ -29,12 +34,12 @@ jest.mock('../../screens/SettingsScreen', () => () => null);
 jest.mock('../../utils/firebase/events', () => ({ __esModule: true, default: jest.fn() }));
 
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { AppContainer } from '../../navigation/Main';
 
 describe('navigation/Main', () => {
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     const tree = render(<AppContainer />);
-    expect(tree.toJSON()).toBeTruthy();
+    await waitFor(() => expect(tree.toJSON()).toBeTruthy());
   });
 });

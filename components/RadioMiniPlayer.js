@@ -6,25 +6,29 @@ import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t } from '../locales/i18n';
 import RadioService from '../utils/RadioService';
+import { useNavMode } from '../utils/NavMode';
 
 export default function RadioMiniPlayer() {
   const colors = useColors();
   const insets = React.useContext(SafeAreaInsetsContext) ?? { bottom: 0 };
+  const { navMode } = useNavMode();
   const [state, setState] = React.useState(RadioService._state());
 
   React.useEffect(() => RadioService.subscribe(setState), []);
 
   if (!state.activeStation) return null;
 
+  const tabBarOffset = navMode === 'cards' ? 49 + insets.bottom : 0;
+
   return (
     <View style={{
-      position: 'absolute', bottom: 0, left: 0, right: 0,
+      position: 'absolute', bottom: tabBarOffset, left: 0, right: 0,
       backgroundColor: colors.primaryDark,
       borderTopWidth: 1, borderTopColor: colors.accent + '44',
     }}>
       <View style={{
         flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 12, paddingTop: 10, paddingBottom: 10 + insets.bottom,
+        paddingHorizontal: 12, paddingTop: 10, paddingBottom: tabBarOffset ? 10 : 10 + insets.bottom,
       }}>
         <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent, marginRight: 8 }} />
         <View style={{ flex: 1 }}>
