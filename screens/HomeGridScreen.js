@@ -7,7 +7,7 @@ import { useColors, getItemColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t } from '../locales/i18n';
 import { LogoSvg } from '../components/LogoSvg';
-import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
+import { DEFAULT_MENU_CONFIG, ITEM_DEFS, splitMenuForTabs } from '../constants/MenuConfig';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 import { formatHijriDate } from '../utils/HijriCalendar';
 import { getItemAction } from '../utils/menuActions';
@@ -35,22 +35,13 @@ export default function HomeGridScreen({ navigation }) {
     return navigation.addListener('focus', loadConfig);
   }, [navigation, loadConfig]);
 
-  const cards = [
-    ...menuConfig.filter(i => i.visible && ITEM_DEFS[i.id]).map(i => ({
-      id: i.id,
-      icon: ITEM_DEFS[i.id].icon,
-      label: t(ITEM_DEFS[i.id].labelKey),
-      testID: ITEM_DEFS[i.id].testID,
-      onPress: getItemAction(i.id, navigation, hasLocation),
-    })),
-    {
-      id: 'settings',
-      icon: 'settings',
-      label: t('navigation.settings'),
-      testID: 'settings-screen',
-      onPress: () => navigation.navigate('Settings'),
-    },
-  ];
+  const cards = splitMenuForTabs(menuConfig).gridItems.map(i => ({
+    id: i.id,
+    icon: ITEM_DEFS[i.id].icon,
+    label: t(ITEM_DEFS[i.id].labelKey),
+    testID: ITEM_DEFS[i.id].testID,
+    onPress: getItemAction(i.id, navigation, hasLocation),
+  }));
 
   return (
     <View testID="home-grid-screen" style={{ flex: 1, backgroundColor: colors.BGreen }}>

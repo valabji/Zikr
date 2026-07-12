@@ -21,11 +21,14 @@ describe('HomeGridScreen', () => {
     navigation.navigate.mockClear();
   });
 
-  it('renders the grid with menu item cards', async () => {
-    const { getByTestId } = render(<HomeGridScreen navigation={navigation} />);
+  it('renders the grid without the tab bar items', async () => {
+    const { getByTestId, queryByTestId } = render(<HomeGridScreen navigation={navigation} />);
     expect(getByTestId('home-grid-screen')).toBeTruthy();
     await waitFor(() => expect(getByTestId('quran-screen')).toBeTruthy());
-    expect(getByTestId('settings-screen')).toBeTruthy();
+    expect(queryByTestId('settings-screen')).toBeNull();
+    expect(queryByTestId('islamic-calendar-screen-link')).toBeNull();
+    expect(queryByTestId('wird-planner-screen-link')).toBeNull();
+    expect(queryByTestId('hifz-tracker-screen-link')).toBeNull();
   });
 
   it('navigates when a card is pressed', async () => {
@@ -33,8 +36,6 @@ describe('HomeGridScreen', () => {
     await waitFor(() => expect(getByTestId('quran-screen')).toBeTruthy());
     fireEvent.press(getByTestId('quran-screen'));
     expect(navigation.navigate).toHaveBeenCalledWith('Quran');
-    fireEvent.press(getByTestId('settings-screen'));
-    expect(navigation.navigate).toHaveBeenCalledWith('Settings');
   });
 
   it('routes qibla to prayer settings when no location is set', async () => {

@@ -16,22 +16,24 @@ import RadioScreen from '../screens/RadioScreen';
 import IslamicCalendarScreen from '../screens/IslamicCalendarScreen';
 import WirdPlannerScreen from '../screens/WirdPlannerScreen';
 import HifzTrackerScreen from '../screens/HifzTrackerScreen';
-import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
+import { DEFAULT_MENU_CONFIG, ITEM_DEFS, ITEM_ROUTES, splitMenuForTabs } from '../constants/MenuConfig';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
 
 const Tab = createBottomTabNavigator();
 
-const ITEM_ROUTES = {
-  quran: 'Quran',
-  books: 'Books',
-  radio: 'Radio',
-  tasbih: 'Screen3',
-  azkar: 'Home',
-  prayerTimes: 'PrayerTimes',
-  qibla: 'Qibla',
-  islamicCalendar: 'IslamicCalendar',
-  wirdPlanner: 'WirdPlanner',
-  hifzTracker: 'HifzTracker',
+const SCREENS = {
+  HomeGrid: { component: HomeGridScreen },
+  Home: { component: MainScreen, initialParams: { showFavorites: false } },
+  Screen3: { component: Screen3 },
+  Quran: { component: QuranScreen },
+  Books: { component: BooksScreen },
+  Radio: { component: RadioScreen },
+  PrayerTimes: { component: PrayerTimesScreen, gated: true },
+  Qibla: { component: QiblaScreen, gated: true },
+  IslamicCalendar: { component: IslamicCalendarScreen },
+  WirdPlanner: { component: WirdPlannerScreen },
+  HifzTracker: { component: HifzTrackerScreen },
+  Settings: { component: SettingsScreen },
 };
 
 export function TNav() {
@@ -58,14 +60,15 @@ export function TNav() {
     return null;
   }
 
-  const tabItems = menuConfig.filter(i => i.visible && ITEM_ROUTES[i.id]).slice(0, 3);
+  const { tabItems } = splitMenuForTabs(menuConfig);
   const icons = { HomeGrid: 'grid', Settings: 'settings' };
   const labels = { HomeGrid: t('navigation.main'), Settings: t('navigation.settings') };
   tabItems.forEach(i => {
     icons[ITEM_ROUTES[i.id]] = ITEM_DEFS[i.id].icon;
     labels[ITEM_ROUTES[i.id]] = t(ITEM_DEFS[i.id].labelKey);
   });
-  const shownRoutes = new Set(['HomeGrid', 'Settings', ...tabItems.map(i => ITEM_ROUTES[i.id])]);
+  const shownRoutes = new Set(['HomeGrid', ...tabItems.map(i => ITEM_ROUTES[i.id]), 'Settings']);
+  const routeOrder = [...shownRoutes, ...Object.keys(SCREENS).filter(n => !shownRoutes.has(n))];
 
   const locationGate = ({ navigation }) => ({
     tabPress: (e) => {
@@ -90,18 +93,15 @@ export function TNav() {
         tabBarLabel: labels[route.name] || route.name,
       })}
     >
-      <Tab.Screen name="HomeGrid" component={HomeGridScreen} />
-      <Tab.Screen name="Home" component={MainScreen} initialParams={{ showFavorites: false }} />
-      <Tab.Screen name="Screen3" component={Screen3} />
-      <Tab.Screen name="Quran" component={QuranScreen} />
-      <Tab.Screen name="Books" component={BooksScreen} />
-      <Tab.Screen name="Radio" component={RadioScreen} />
-      <Tab.Screen name="PrayerTimes" component={PrayerTimesScreen} listeners={locationGate} />
-      <Tab.Screen name="Qibla" component={QiblaScreen} listeners={locationGate} />
-      <Tab.Screen name="IslamicCalendar" component={IslamicCalendarScreen} />
-      <Tab.Screen name="WirdPlanner" component={WirdPlannerScreen} />
-      <Tab.Screen name="HifzTracker" component={HifzTrackerScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      {routeOrder.map(name => (
+        <Tab.Screen
+          key={name}
+          name={name}
+          component={SCREENS[name].component}
+          initialParams={SCREENS[name].initialParams}
+          listeners={SCREENS[name].gated ? locationGate : undefined}
+        />
+      ))}
     </Tab.Navigator>
   );
 }

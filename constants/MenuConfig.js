@@ -13,6 +13,26 @@ export const DEFAULT_MENU_CONFIG = [
   { id: 'language', visible: true },
 ];
 
+export const ITEM_ROUTES = {
+  quran: 'Quran',
+  books: 'Books',
+  radio: 'Radio',
+  tasbih: 'Screen3',
+  azkar: 'Home',
+  prayerTimes: 'PrayerTimes',
+  qibla: 'Qibla',
+  islamicCalendar: 'IslamicCalendar',
+  wirdPlanner: 'WirdPlanner',
+  hifzTracker: 'HifzTracker',
+};
+
+export function splitMenuForTabs(menuConfig) {
+  const visible = menuConfig.filter(i => i.visible && ITEM_DEFS[i.id]);
+  const tabItems = visible.filter(i => ITEM_ROUTES[i.id]).slice(-3);
+  const tabIds = new Set(tabItems.map(i => i.id));
+  return { tabItems, gridItems: visible.filter(i => !tabIds.has(i.id)) };
+}
+
 export const ITEM_DEFS = {
   quran:           { labelKey: 'navigation.quran',           icon: 'book-open',  testID: 'quran-screen' },
   books:           { labelKey: 'navigation.books',           icon: 'book',       testID: 'books-screen' },

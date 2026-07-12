@@ -13,7 +13,7 @@ import Azkar from '../constants/Azkar';
 import { THEME_VARIANT_KEYS } from '../constants/themes';
 import vibrationManager, { VIBRATION_TYPES, VIBRATION_INTENSITY } from '../utils/Vibration';
 import { useTestedMode, setTestedMode } from '../utils/TestedMode';
-import { DEFAULT_MENU_CONFIG, ITEM_DEFS } from '../constants/MenuConfig';
+import { DEFAULT_MENU_CONFIG, ITEM_DEFS, splitMenuForTabs } from '../constants/MenuConfig';
 import { useNavMode } from '../utils/NavMode';
 import { useAudio } from '../utils/Sounds';
 import {
@@ -994,6 +994,7 @@ export default function SettingsScreen({ navigation }) {
           {menuConfig.map((item, idx) => {
             const def = ITEM_DEFS[item.id];
             if (!def) return null;
+            const inBar = navMode === 'cards' && splitMenuForTabs(menuConfig).tabItems.some(i => i.id === item.id);
             return (
               <View key={item.id} style={[{ flexDirection: 'row',
                 alignItems: 'center',
@@ -1021,6 +1022,19 @@ export default function SettingsScreen({ navigation }) {
                 <Text style={[textStyles.body, { color: colors.text, flex: 1, textAlign: getTextAlign('left') }]}>
                   {t(def.labelKey)}
                 </Text>
+                {inBar && (
+                  <View style={[{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: colors.accent + '22',
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                  }, getDirectionalMixedSpacing({ marginRight: SPACING.sm })]}>
+                    <Feather name="grid" size={11} color={colors.accent} style={getDirectionalMixedSpacing({ marginRight: 4 })} />
+                    <Text style={[textStyles.caption, { color: colors.accent }]}>{t('settings.menuBarBadge')}</Text>
+                  </View>
+                )}
                 <Pressable onPress={() => handleMenuItemToggle(idx)} style={[{ padding: 4 }, webCursor]}>
                   <Feather name={item.visible ? 'eye' : 'eye-off'} size={20} color={item.visible ? colors.accent : colors.textSecondary} />
                 </Pressable>

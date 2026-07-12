@@ -188,6 +188,7 @@
     "navStyle": "Navigation Style",
     "navStyleDrawer": "Side Menu",
     "navStyleCards": "Home Cards",
+    "menuBarBadge": "Bar",
     "testedModeDescription": "Enable test tools like the mic test in the Quran reader and the test adhan in prayer settings",
     "theme": "Theme",
     "themeVariant": "Time-of-Day Variant",
