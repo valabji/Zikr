@@ -6,7 +6,9 @@ import CustomHeader from '../components/CHeader';
 import { useColors } from '../constants/Colors';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
-import { getStations, getStationSubtitle, getOfflineStations } from '../utils/RadioStations';
+import {
+  getStations, getStationSubtitle, getOfflineStations, markStationOffline, markStationOnline,
+} from '../utils/RadioStations';
 import RadioService from '../utils/RadioService';
 import {
   loadRadioFavorites, toggleRadioFavorite, subscribeRadioFavorites,
@@ -47,6 +49,24 @@ export default function RadioScreen({ navigation }) {
     return () => { cancelled = true; unsubFav(); unsubRadio(); };
   }, [lang]);
 
+  React.useEffect(() => {
+    if (radio.failedStationId == null) return;
+    setOffline((prev) => new Set(prev).add(radio.failedStationId));
+    markStationOffline(lang, radio.failedStationId);
+  }, [radio.failedStationId, lang]);
+
+  React.useEffect(() => {
+    if (!radio.isPlaying || !radio.activeStation) return;
+    const id = radio.activeStation.id;
+    setOffline((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    markStationOnline(lang, id);
+  }, [radio.isPlaying, radio.activeStation, lang]);
+
   const filtered = React.useMemo(() => {
     if (!stations) return null;
     const q = query.trim().toLowerCase();
@@ -67,7 +87,7 @@ export default function RadioScreen({ navigation }) {
 
   const renderStation = ({ item }) => {
     const active = radio.activeStation && radio.activeStation.id === item.id;
-    const isOffline = !active && offline.has(item.id);
+    const isOffline = offline.has(item.id) && !(active && (radio.isPlaying || radio.isBuffering));
     const isFav = favorites.includes(item.id);
     const subtitle = getStationSubtitle(item.streamUrl, lang);
     return (

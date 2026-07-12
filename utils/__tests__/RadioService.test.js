@@ -56,6 +56,7 @@ describe('RadioService', () => {
     RadioService.activeStation = null;
     RadioService.isPlaying = false;
     RadioService.isBuffering = false;
+    RadioService.failedStationId = null;
     RadioService.audioModeReady = false;
     RadioService.listeners.clear();
   });
@@ -63,7 +64,7 @@ describe('RadioService', () => {
   it('subscribe immediately emits current state and returns an unsubscribe', () => {
     const fn = jest.fn();
     const unsub = RadioService.subscribe(fn);
-    expect(fn).toHaveBeenCalledWith({ activeStation: null, isPlaying: false, isBuffering: false });
+    expect(fn).toHaveBeenCalledWith({ activeStation: null, isPlaying: false, isBuffering: false, failedStationId: null });
     expect(RadioService.listeners.size).toBe(1);
     unsub();
     expect(RadioService.listeners.size).toBe(0);
@@ -109,7 +110,7 @@ describe('RadioService', () => {
     mockState.lastSound.cb({ isLoaded: true, isPlaying: false, isBuffering: true });
     expect(RadioService.isBuffering).toBe(true);
     expect(RadioService.isPlaying).toBe(false);
-    expect(fn).toHaveBeenCalledWith({ activeStation: station, isPlaying: false, isBuffering: true });
+    expect(fn).toHaveBeenCalledWith({ activeStation: station, isPlaying: false, isBuffering: true, failedStationId: null });
   });
 
   it('toggle pauses when playing and resumes when paused', async () => {
@@ -168,6 +169,39 @@ describe('RadioService', () => {
     expect(leaked.unloadAsync).toHaveBeenCalled();
     expect(RadioService.sound).toBeNull();
     expect(RadioService.activeStation).toBeNull();
+  });
+
+  it('flags the station as failed when createAsync rejects and clears on the next successful play', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    Audio.Sound.createAsync.mockImplementationOnce(() => Promise.reject(new Error('HTTP 500')));
+    await RadioService.playStation(station);
+    expect(RadioService.failedStationId).toBe(station.id);
+    expect(RadioService.isPlaying).toBe(false);
+    expect(RadioService.activeStation).toEqual(station);
+
+    await RadioService.playStation(station);
+    expect(RadioService.failedStationId).toBeNull();
+    expect(RadioService.isPlaying).toBe(true);
+    warn.mockRestore();
+  });
+
+  it('flags the station as failed on a mid-stream error', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    await RadioService.playStation(station);
+    mockState.lastSound.cb({ isLoaded: false, error: 'stream died' });
+    expect(RadioService.failedStationId).toBe(station.id);
+    expect(RadioService.isPlaying).toBe(false);
+    warn.mockRestore();
+  });
+
+  it('stop clears the failed station flag', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    Audio.Sound.createAsync.mockImplementationOnce(() => Promise.reject(new Error('boom')));
+    await RadioService.playStation(station);
+    expect(RadioService.failedStationId).toBe(station.id);
+    await RadioService.stop();
+    expect(RadioService.failedStationId).toBeNull();
+    warn.mockRestore();
   });
 
   it('stop unloads the sound and clears state', async () => {

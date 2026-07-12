@@ -101,8 +101,18 @@ export async function getStations(lang, { now } = {}) {
   return fetchStations(lang, { now: ts });
 }
 
-const OFFLINE_TTL_MS = 60 * 60 * 1000;
+const OFFLINE_TTL_MS = 15 * 60 * 1000;
 const offlineCache = {};
+
+export function markStationOffline(lang, id) {
+  const cached = offlineCache[apiLang(lang)];
+  if (cached) cached.offline.add(id);
+}
+
+export function markStationOnline(lang, id) {
+  const cached = offlineCache[apiLang(lang)];
+  if (cached) cached.offline.delete(id);
+}
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -159,12 +169,17 @@ export async function getOfflineStations(lang, stations, { now, onOffline, force
   await Promise.all(Array.from({ length: Math.min(concurrency, list.length) }, () => worker()));
 
   const offline = new Set();
-  for (const station of suspects) {
-    if (!(await checkStationOnline(station.streamUrl, { timeoutMs, retries, probe }))) {
-      offline.add(station.id);
-      if (onOffline) onOffline(station.id);
+  let confirmCursor = 0;
+  const confirmWorker = async () => {
+    while (confirmCursor < suspects.length) {
+      const station = suspects[confirmCursor++];
+      if (!(await checkStationOnline(station.streamUrl, { timeoutMs, retries, probe }))) {
+        offline.add(station.id);
+        if (onOffline) onOffline(station.id);
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, suspects.length) }, () => confirmWorker()));
   offlineCache[key] = { offline: new Set(offline), timestamp: ts };
   return offline;
 }

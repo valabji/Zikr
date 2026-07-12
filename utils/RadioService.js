@@ -12,6 +12,7 @@ class RadioService {
     this.activeStation = null;
     this.isPlaying = false;
     this.isBuffering = false;
+    this.failedStationId = null;
     this.audioModeReady = false;
     this.listeners = new Set();
     this._opId = 0;
@@ -38,7 +39,12 @@ class RadioService {
   }
 
   _state() {
-    return { activeStation: this.activeStation, isPlaying: this.isPlaying, isBuffering: this.isBuffering };
+    return {
+      activeStation: this.activeStation,
+      isPlaying: this.isPlaying,
+      isBuffering: this.isBuffering,
+      failedStationId: this.failedStationId,
+    };
   }
 
   subscribe(fn) {
@@ -73,6 +79,7 @@ class RadioService {
     this.activeStation = station;
     this.isPlaying = true;
     this.isBuffering = true;
+    this.failedStationId = null;
     this._emit();
     try {
       const { sound } = await Audio.Sound.createAsync(
@@ -90,6 +97,7 @@ class RadioService {
             console.warn('RadioService: stream error', status.error);
             this.isPlaying = false;
             this.isBuffering = false;
+            this.failedStationId = this.activeStation ? this.activeStation.id : null;
             this._emit();
           }
           return;
@@ -108,6 +116,7 @@ class RadioService {
       console.warn('RadioService: playStation failed', e);
       this.isPlaying = false;
       this.isBuffering = false;
+      this.failedStationId = station.id;
       this._emit();
     }
   }
@@ -145,6 +154,7 @@ class RadioService {
     this.activeStation = null;
     this.isPlaying = false;
     this.isBuffering = false;
+    this.failedStationId = null;
     this._emit();
   }
 }

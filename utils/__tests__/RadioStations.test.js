@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getBundledStations, fetchStations, getStations, isCacheFresh, getStationSubtitle,
-  checkStationOnline, getOfflineStations,
+  checkStationOnline, getOfflineStations, markStationOffline, markStationOnline,
 } from '../RadioStations';
 import { RADIO_CONSTANTS } from '../../constants/RadioConstants';
 
@@ -175,6 +175,16 @@ describe('RadioStations', () => {
     };
     const offline = await getOfflineStations('en', stations, { now: 9000, force: true, retries: 0, probe });
     expect([...offline]).toEqual([]);
+  });
+
+  it('markStationOffline and markStationOnline mutate the cached offline set', async () => {
+    const stations = [{ id: 1, streamUrl: 'https://s/1' }];
+    const probe = () => Promise.resolve(200);
+    await getOfflineStations('en', stations, { now: 50000, force: true, retries: 0, probe });
+    markStationOffline('en', 1);
+    expect([...await getOfflineStations('en', stations, { now: 50001 })]).toEqual([1]);
+    markStationOnline('en', 1);
+    expect([...await getOfflineStations('en', stations, { now: 50002 })]).toEqual([]);
   });
 
   it('isCacheFresh respects the TTL window', () => {
