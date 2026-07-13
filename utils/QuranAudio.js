@@ -1,4 +1,4 @@
-import { Audio, InterruptionModeIOS } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '../constants/QuranReciters';
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import { getSurahAudioManifest } from './QuranSurahAudio';
@@ -7,6 +7,11 @@ import { QURAN_CONSTANTS, getMushafEdition } from '../constants/QuranConstants';
 import { ayahPageForLayout, pageAyahsForLayout } from './mushafLayout';
 import pagesData from '../assets/quran/data/pages.json';
 import wordsData from '../assets/quran/data/words.json';
+
+const DEBUG = typeof __DEV__ !== 'undefined' && __DEV__ && !process.env.JEST_WORKER_ID;
+function dlog(...args) {
+  if (DEBUG) console.log('[QuranAudio]', ...args);
+}
 
 const flatVerses = [];
 const verseIndex = {};
@@ -31,7 +36,8 @@ function segWordIdx(segs, pos) {
 
 class QuranAudioService {
   constructor() {
-    this.sound = null;
+    this.player = null;
+    this._statusSub = null;
     this.activeAyah = null;
     this.isPlaying = false;
     this.playingWordIdx = null;
@@ -47,22 +53,25 @@ class QuranAudioService {
     this._timingPtr = 0;
     this.gaplessScope = null;
     this.gaplessPage = null;
+    this.gaplessReciterId = null;
     this.segEndAyah = null;
     this.segEndMs = null;
     this._advancing = false;
     this._opId = 0;
+    this._watchdog = null;
+    this._preload = null;
   }
 
   async _ensureAudioMode() {
     try {
-      // DoNotMix required for iOS Now Playing; re-applied each play since Sounds/MicTest overwrite the global mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
+      // doNotMix required for iOS Now Playing; re-applied each play since Sounds/MicTest overwrite the global mode
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: 'doNotMix',
+        interruptionModeAndroid: 'duckOthers',
+        shouldRouteThroughEarpiece: false,
       });
     } catch (e) {
       console.warn('QuranAudio: setAudioModeAsync failed', e);
@@ -93,8 +102,8 @@ class QuranAudioService {
         const newRate = typeof next.playbackRate === 'number' ? next.playbackRate : 1.0;
         if (newRate !== this.playbackRate) {
           this.playbackRate = newRate;
-          if (this.sound) {
-            this.sound.setRateAsync(this.playbackRate, true).catch(() => {});
+          if (this.player) {
+            try { this.player.setPlaybackRate(newRate, 'high'); } catch {}
           }
         }
       });
@@ -112,13 +121,73 @@ class QuranAudioService {
     this.listeners.forEach((fn) => { try { fn(state); } catch {} });
   }
 
+  _clearWatchdog() {
+    if (this._watchdog) {
+      clearInterval(this._watchdog);
+      this._watchdog = null;
+    }
+  }
+
+  // iOS emits no playbackStatusUpdate on a failed load, so poll until loaded or failed
+  _startLoadWatchdog(player) {
+    this._clearWatchdog();
+    let ticks = 0;
+    this._watchdog = setInterval(() => {
+      if (this.player !== player) return this._clearWatchdog();
+      const st = player.currentStatus;
+      if (!st || st.isLoaded || st.playing) return this._clearWatchdog();
+      if (st.playbackState === 'failed' || ++ticks >= 60) {
+        console.warn('QuranAudio: load failed', st.playbackState);
+        this._unload();
+        this.isPlaying = false;
+        this._emit();
+      }
+    }, 500);
+    this._watchdog.unref?.();
+  }
+
+  // remove() alone frees the native player only on JS GC; pause first so audio stops now
+  _disposePlayer(player) {
+    try { player.pause(); } catch {}
+    try { player.remove(); } catch {}
+  }
+
+  _discardPreload() {
+    if (this._preload) {
+      this._disposePlayer(this._preload.player);
+      this._preload = null;
+    }
+  }
+
+  _takePreload(surah, ayah) {
+    const p = this._preload;
+    if (!p) return null;
+    this._preload = null;
+    if (p.surah === surah && p.ayah === ayah) return p.player;
+    dlog('preload mismatch: had', `${p.surah}:${p.ayah}`, 'wanted', `${surah}:${ayah}`);
+    this._disposePlayer(p.player);
+    return null;
+  }
+
+  _preloadNextAyah() {
+    this._discardPreload();
+    const target = this._nextAyahTarget();
+    if (!target) return;
+    const uri = buildAyahAudioUrl(this.reciterId, target.surah, target.ayah);
+    dlog('preload', `${target.surah}:${target.ayah}`, uri);
+    try {
+      this._preload = { surah: target.surah, ayah: target.ayah, player: createAudioPlayer({ uri }, { updateInterval: 100 }) };
+    } catch {}
+  }
+
   async _unload() {
-    if (this.sound) {
-      try {
-        this.sound.setOnPlaybackStatusUpdate(null);
-        await this.sound.unloadAsync();
-      } catch {}
-      this.sound = null;
+    this._clearWatchdog();
+    this._discardPreload();
+    if (this.player) {
+      try { if (this._statusSub) this._statusSub.remove(); } catch {}
+      this._disposePlayer(this.player);
+      this.player = null;
+      this._statusSub = null;
     }
     this.playingWordIdx = null;
   }
@@ -128,10 +197,24 @@ class QuranAudioService {
     await this._ensureSettings();
     const scope = this.playbackScope;
     if (scope === 'page' || scope === 'surah' || scope === 'mushaf') {
-      if (scope === 'page') this.gaplessPage = this._pageOf(surah, ayah);
+      const page = scope === 'page' ? this._pageOf(surah, ayah) : null;
+      if (this._canSeekGapless(surah, ayah, scope, page)) return this._seekToAyah(ayah);
+      if (scope === 'page') this.gaplessPage = page;
       return this._playGapless(surah, ayah, scope);
     }
     return this._playAyahFile(surah, ayah);
+  }
+
+  // Seeking in the loaded file avoids the audible gap a player rebuild causes
+  _canSeekGapless(surah, ayah, scope, page) {
+    return this.mode === 'gapless'
+      && !!this.player
+      && this.gaplessScope === scope
+      && this.gaplessReciterId === this.reciterId
+      && (scope !== 'page' || page === this.gaplessPage)
+      && !!this.surahManifest
+      && this.surahManifest.surah === surah
+      && this.surahManifest.verseTimings.some((v) => v.ayah === ayah);
   }
 
   _layoutFile() {
@@ -142,12 +225,41 @@ class QuranAudioService {
     return ayahPageForLayout(this._layoutFile(), `${surah}:${ayah}`) || 1;
   }
 
+  _createPlayer(uri) {
+    return this._adoptPlayer(createAudioPlayer({ uri }, { updateInterval: 100 }));
+  }
+
+  _adoptPlayer(player) {
+    this.player = player;
+    this._loadStartAt = Date.now();
+    player.shouldCorrectPitch = true;
+    player.setPlaybackRate(this.playbackRate, 'high');
+    this._startLoadWatchdog(player);
+    return player;
+  }
+
+  _logAudible(status) {
+    if (this._loadStartAt && status.playing) {
+      dlog('audible after', Date.now() - this._loadStartAt, 'ms', 'state', status.playbackState);
+      this._loadStartAt = null;
+    }
+    if (DEBUG && status.playbackState !== this._lastState) {
+      this._lastState = status.playbackState;
+      dlog('state', status.playbackState, 'buffering', !!status.isBuffering, 't', status.currentTime);
+    }
+  }
+
   async _playAyahFile(surah, ayah) {
     const op = ++this._opId;
     await this._ensureAudioMode();
     await this._ensureSettings();
-    await this._unload();
     if (op !== this._opId) return;
+    const preloaded = this._takePreload(surah, ayah);
+    await this._unload();
+    if (op !== this._opId) {
+      if (preloaded) this._disposePlayer(preloaded);
+      return;
+    }
     this.mode = 'ayah';
     this.surahManifest = null;
     this._advancing = false;
@@ -164,45 +276,37 @@ class QuranAudioService {
         if (t && t.segments && t.segments.length) this.ayahSegments = t.segments;
       })
       .catch(() => {});
+    dlog('ayah play', `${surah}:${ayah}`, preloaded ? 'preloaded' : 'cold', uri);
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true, rate: this.playbackRate, shouldCorrectPitch: true, progressUpdateIntervalMillis: 100 }
-      );
-      if (op !== this._opId) {
-        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
-        return;
-      }
-      this.sound = sound;
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) {
-          if (status.error) {
-            console.warn('QuranAudio: load error', status.error);
-            this.isPlaying = false;
-            this._emit();
+      const player = preloaded ? this._adoptPlayer(preloaded) : this._createPlayer(uri);
+      player.play();
+      this._preloadNextAyah();
+      this._statusSub = player.addListener('playbackStatusUpdate', (status) => {
+        this._logAudible(status);
+        if (status.didJustFinish) {
+          dlog('finished', `${surah}:${ayah}`);
+          if (!this._advancing) {
+            this._advancing = true;
+            this._advance();
           }
           return;
         }
-        if (status.didJustFinish) {
-          this._advance();
-          return;
-        }
-        const next = status.isPlaying || status.isBuffering;
+        const next = status.playing || status.isBuffering;
         let changed = next !== this.isPlaying;
         if (changed) this.isPlaying = next;
 
-        if (this.activeAyah && status.isPlaying) {
+        if (this.activeAyah && status.playing) {
           const key = `${this.activeAyah.surah}:${this.activeAyah.ayah}`;
           const wordCount = (wordsData[key] || []).length || 1;
-          const dur = status.durationMillis || 1;
+          const dur = status.duration || 1;
           const segs = this.ayahSegments;
           let wordIdx;
           if (segs && segs.length) {
             const t0 = segs[0][1];
             const span = segs[segs.length - 1][2] - t0;
-            wordIdx = segWordIdx(segs, t0 + (status.positionMillis / dur) * span);
+            wordIdx = segWordIdx(segs, t0 + (status.currentTime / dur) * span);
           } else {
-            wordIdx = Math.floor((status.positionMillis / dur) * wordCount);
+            wordIdx = Math.floor((status.currentTime / dur) * wordCount);
           }
           wordIdx = Math.max(0, Math.min(wordCount - 1, wordIdx));
           if (wordIdx !== this.playingWordIdx) {
@@ -224,11 +328,13 @@ class QuranAudioService {
   async _playGapless(surah, fromAyah, scope) {
     const op = ++this._opId;
     const manifest = await getSurahAudioManifest(this.reciterId, surah);
+    if (op !== this._opId) return;
     if (!manifest) return this._playAyahFile(surah, fromAyah);
     await this._unload();
     if (op !== this._opId) return;
     this.mode = 'gapless';
     this.gaplessScope = scope;
+    this.gaplessReciterId = this.reciterId;
     this.surahManifest = manifest;
     this._timingPtr = 0;
     this._advancing = false;
@@ -245,26 +351,14 @@ class QuranAudioService {
     this.playingWordIdx = null;
     this._emit();
     const localUri = await QuranSurahDownloader.getLocalAudioUri(this.reciterId, surah);
+    if (op !== this._opId) return;
+    dlog('gapless play', `${surah}:${start.ayah}`, scope, localUri ? 'local' : 'stream', localUri || manifest.audioUrl, 'from', start.from, 'segEnd', this.segEndMs);
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: localUri || manifest.audioUrl },
-        {
-          shouldPlay: true,
-          rate: this.playbackRate,
-          shouldCorrectPitch: true,
-          positionMillis: start.from,
-          progressUpdateIntervalMillis: 100,
-          // iOS seeks with infinite tolerance unless these are set, landing far from the ayah start.
-          seekMillisToleranceBefore: 0,
-          seekMillisToleranceAfter: 0,
-        }
-      );
-      if (op !== this._opId) {
-        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
-        return;
-      }
-      this.sound = sound;
-      sound.setOnPlaybackStatusUpdate((status) => this._onGaplessStatus(status));
+      const player = this._createPlayer(localUri || manifest.audioUrl);
+      await player.seekTo(start.from / 1000, 0, 0);
+      if (op !== this._opId) return;
+      player.play();
+      this._statusSub = player.addListener('playbackStatusUpdate', (status) => this._onGaplessStatus(status));
     } catch (e) {
       if (op !== this._opId) return;
       console.warn('QuranAudio: playGapless failed', e);
@@ -303,13 +397,20 @@ class QuranAudioService {
       if (nextAyah) return this._playGapless(nextAyah.surah, nextAyah.ayah, 'page');
       if (this.loopEnabled) {
         const first = pageAyahsForLayout(this._layoutFile(), this.gaplessPage)[0];
-        if (first) return this._playGapless(first.surah, first.ayah, 'page');
+        if (first) {
+          if (this._canSeekGapless(first.surah, first.ayah, 'page', this.gaplessPage)) return this._seekToAyah(first.ayah);
+          return this._playGapless(first.surah, first.ayah, 'page');
+        }
       }
       return this.stop();
     }
 
     if (scope === 'surah') {
-      if (this.loopEnabled) return this._playGapless(curSurah, 1, 'surah');
+      if (this.loopEnabled) {
+        const firstAyah = this.surahManifest ? this.surahManifest.verseTimings[0].ayah : 1;
+        if (this._canSeekGapless(curSurah, firstAyah, 'surah', null)) return this._seekToAyah(firstAyah);
+        return this._playGapless(curSurah, 1, 'surah');
+      }
       return this.stop();
     }
 
@@ -318,27 +419,21 @@ class QuranAudioService {
   }
 
   _onGaplessStatus(status) {
-    if (!status.isLoaded) {
-      if (status.error) {
-        console.warn('QuranAudio: surah load error', status.error);
-        this.isPlaying = false;
-        this._emit();
-      }
-      return;
-    }
+    this._logAudible(status);
     if (status.didJustFinish) {
+      dlog('gapless finished, advancing');
       this._gaplessAdvance();
       return;
     }
     const m = this.surahManifest;
     if (!m) return;
-    const pos = status.positionMillis || 0;
+    const pos = (status.currentTime || 0) * 1000;
     if (!this._advancing && this.segEndMs != null && pos >= this.segEndMs) {
       this._gaplessAdvance();
       return;
     }
     let changed = false;
-    const next = status.isPlaying || status.isBuffering;
+    const next = status.playing || status.isBuffering;
     if (next !== this.isPlaying) { this.isPlaying = next; changed = true; }
 
     const timing = this._timingAt(pos);
@@ -372,25 +467,29 @@ class QuranAudioService {
 
   async _seekToAyah(targetAyah) {
     const m = this.surahManifest;
-    if (!m || !this.sound) return;
+    if (!m || !this.player) return;
+    // supersede any in-flight play so its continuation can't unload this player
+    this._opId++;
+    this._advancing = false;
     const t = m.verseTimings.find((v) => v.ayah === targetAyah);
     if (!t) {
       if (targetAyah < m.verseTimings[0].ayah) {
-        try { await this.sound.setPositionAsync(0); } catch {}
+        try { await this.player.seekTo(0, 0, 0); } catch {}
         return;
       }
       if (this.loopEnabled) {
         this._timingPtr = 0;
-        try { await this.sound.setPositionAsync(0); await this.sound.playAsync(); } catch {}
+        try { await this.player.seekTo(0, 0, 0); this.player.play(); } catch {}
       } else {
         await this.stop();
       }
       return;
     }
+    dlog('seek in place to', `${m.surah}:${targetAyah}`, 'at', t.from / 1000, 's');
     try {
-      await this.sound.setPositionAsync(t.from, { toleranceMillisBefore: 0, toleranceMillisAfter: 0 });
-      await this.sound.setRateAsync(this.playbackRate, true);
-      await this.sound.playAsync();
+      await this.player.seekTo(t.from / 1000, 0, 0);
+      this.player.setPlaybackRate(this.playbackRate, 'high');
+      this.player.play();
       this.activeAyah = { surah: m.surah, ayah: targetAyah };
       this.isPlaying = true;
       this.playingWordIdx = null;
@@ -406,47 +505,35 @@ class QuranAudioService {
     return current;
   }
 
-  async _advance() {
-    if (!this.activeAyah) return;
-    const key = `${this.activeAyah.surah}:${this.activeAyah.ayah}`;
-    const idx = verseIndex[key];
+  _nextAyahTarget() {
+    if (!this.activeAyah) return null;
+    const idx = verseIndex[`${this.activeAyah.surah}:${this.activeAyah.ayah}`];
     const current = flatVerses[idx];
     const scope = this.playbackScope || 'ayah';
     const loop = !!this.loopEnabled;
 
-    if (scope === 'ayah') {
-      if (loop) {
-        await this._playAyahFile(current.surah, current.ayah);
-      } else {
-        await this.stop();
-      }
-      return;
-    }
+    if (scope === 'ayah') return loop ? current : null;
 
     const nextIdx = idx + 1;
     const atEnd = nextIdx >= flatVerses.length;
     const next = atEnd ? null : flatVerses[nextIdx];
 
-    if (scope === 'mushaf') {
-      const target = atEnd ? flatVerses[0] : next;
-      await this._playAyahFile(target.surah, target.ayah);
-      return;
-    }
+    if (scope === 'mushaf') return atEnd ? flatVerses[0] : next;
 
     const boundary = atEnd
       || (scope === 'page' && next.page !== current.page)
       || (scope === 'surah' && next.surah !== current.surah);
 
-    if (boundary) {
-      if (loop) {
-        const restart = this._scopeStart(current, scope);
-        await this._playAyahFile(restart.surah, restart.ayah);
-      } else {
-        await this.stop();
-      }
-      return;
-    }
-    await this._playAyahFile(next.surah, next.ayah);
+    if (boundary) return loop ? this._scopeStart(current, scope) : null;
+    return next;
+  }
+
+  async _advance() {
+    if (!this.activeAyah) return;
+    const target = this._nextAyahTarget();
+    dlog('advance to', target ? `${target.surah}:${target.ayah}` : 'stop');
+    if (!target) return this.stop();
+    await this._playAyahFile(target.surah, target.ayah);
   }
 
   async next() {
@@ -476,15 +563,14 @@ class QuranAudioService {
   }
 
   async play() {
-    if (!this.sound) {
+    if (!this.player) {
       if (this.activeAyah) await this.playAyah(this.activeAyah.surah, this.activeAyah.ayah);
       return;
     }
     try {
-      const status = await this.sound.getStatusAsync();
-      if (!status.isLoaded || status.isPlaying) return;
-      await this.sound.setRateAsync(this.playbackRate, true);
-      await this.sound.playAsync();
+      if (this.player.playing) return;
+      this.player.setPlaybackRate(this.playbackRate, 'high');
+      this.player.play();
       this.isPlaying = true;
       this._emit();
     } catch (e) {
@@ -493,11 +579,10 @@ class QuranAudioService {
   }
 
   async pause() {
-    if (!this.sound) return;
+    if (!this.player) return;
     try {
-      const status = await this.sound.getStatusAsync();
-      if (!status.isLoaded || !status.isPlaying) return;
-      await this.sound.pauseAsync();
+      if (!this.player.playing) return;
+      this.player.pause();
       this.isPlaying = false;
       this._emit();
     } catch (e) {
@@ -506,30 +591,28 @@ class QuranAudioService {
   }
 
   async seekToMs(ms) {
-    if (!this.sound) return;
+    if (!this.player) return;
     try {
-      await this.sound.setPositionAsync(ms, { toleranceMillisBefore: 0, toleranceMillisAfter: 0 });
+      await this.player.seekTo(ms / 1000, 0, 0);
     } catch (e) {
       console.warn('QuranAudio: seekToMs failed', e);
     }
   }
 
   async toggle() {
-    if (!this.sound) {
+    if (!this.player) {
       if (this.activeAyah) {
         await this.playAyah(this.activeAyah.surah, this.activeAyah.ayah);
       }
       return;
     }
     try {
-      const status = await this.sound.getStatusAsync();
-      if (!status.isLoaded) return;
-      if (status.isPlaying) {
-        await this.sound.pauseAsync();
+      if (this.player.playing) {
+        this.player.pause();
         this.isPlaying = false;
       } else {
-        await this.sound.setRateAsync(this.playbackRate, true);
-        await this.sound.playAsync();
+        this.player.setPlaybackRate(this.playbackRate, 'high');
+        this.player.play();
         this.isPlaying = true;
       }
       this._emit();
@@ -540,8 +623,8 @@ class QuranAudioService {
 
   async setPlaybackRate(rate) {
     this.playbackRate = rate;
-    if (this.sound) {
-      try { await this.sound.setRateAsync(rate, true); } catch (e) { console.warn('QuranAudio: setRateAsync failed', e); }
+    if (this.player) {
+      try { this.player.setPlaybackRate(rate, 'high'); } catch (e) { console.warn('QuranAudio: setPlaybackRate failed', e); }
     }
   }
 

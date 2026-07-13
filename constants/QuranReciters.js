@@ -77,6 +77,7 @@ export const RECITERS = [
     nameAr: 'المنشاوي (مجود)',
     nameEn: 'Al-Minshawi (Mujawwad)',
     everyAyahSlug: 'Minshawy_Mujawwad_192kbps',
+    qdcId: 8,
   },
   {
     id: 'ajamy',

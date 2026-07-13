@@ -154,6 +154,22 @@ jest.mock('expo-av', () => ({
   InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
 }));
 
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => ({
+    play: jest.fn(),
+    pause: jest.fn(),
+    remove: jest.fn(),
+    seekTo: jest.fn(() => Promise.resolve()),
+    setPlaybackRate: jest.fn(),
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
+    playing: false,
+    currentTime: 0,
+    duration: 0,
+    currentStatus: { isLoaded: true, playing: false, playbackState: 'readyToPlay' },
+  })),
+  setAudioModeAsync: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock('expo-font', () => ({
   loadAsync: jest.fn(() => Promise.resolve()),
   isLoaded: jest.fn(() => true),
