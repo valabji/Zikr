@@ -3,9 +3,9 @@ node_modules
 .DS_Store
 dist/
 coverage/
-android/
+/android/
 android_backup/
-ios/
+/ios/
 
 # Ignore Yarn's cache & build state
 .yarn/cache
