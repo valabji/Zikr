@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  ActivityIndicator, Alert, useWindowDimensions,
+  ActivityIndicator, useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
@@ -11,7 +11,8 @@ import { useColors, useIsBrightTheme } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t, isRTL } from '@/locales/i18n';
 import { QURAN_CONSTANTS, getMushafEdition } from '@/constants/QuranConstants';
-import { maxPageHeightForWidth, ayahPageForLayout, pageAyahsForLayout } from '@/utils/mushafLayout';
+import { fitWidthForHeight } from '@/utils/mushafLayout';
+import { ayahPageForLayout, pageAyahsForLayout } from '@/utils/mushafIndex';
 import pagesData from '@assets/quran/data/pages.json';
 import surahsData from '@assets/quran/data/surahs.json';
 import ShareCardModal from '@/components/ShareCardModal';
@@ -21,10 +22,11 @@ import QuranAudio from '@/utils/QuranAudio';
 import QuranVoiceFollower from '@/utils/QuranVoiceFollower';
 import QcfDownloader from '@/utils/QcfDownloader';
 import { useHdPrompt } from '@/hooks/useHdPrompt';
+import { useQuranAlerts } from '@/hooks/useQuranAlerts';
 import { useQuranAudioState } from '@/hooks/useQuranAudioState';
 import { useQuranBookmarks } from '@/hooks/useQuranBookmarks';
 import { useQuranPaging } from '@/hooks/useQuranPaging';
-import { PageView, PageViewContinuous } from '@/components/MushafPage';
+import MushafListItem from '@/components/MushafListItem';
 import QuranMiniPlayer from '@/components/QuranMiniPlayer';
 import QuranVoiceFollowBar from '@/components/QuranVoiceFollowBar';
 import QuranIndexModal from './QuranIndexModal';
@@ -123,41 +125,11 @@ export default function QuranScreen({ navigation }) {
   const { hdPromptVersion, hdSizeLabel, handleHdPromptDownload, handleHdPromptDismiss } =
     useHdPrompt({ ready, settings, qcfState, onOpenSettings: openSettings });
 
-  const hdFallbackRef = React.useRef(false);
-  React.useEffect(() => {
-    if (!settings.customLineSize) hdFallbackRef.current = false;
-  }, [settings.customLineSize]);
-  const overflowWarnedRef = React.useRef(false);
-  const qcfErrorWarnedRef = React.useRef(false);
-
-  const handleLineOverflow = React.useCallback(({ hd }) => {
-    if (hd) {
-      if (hdFallbackRef.current || settingsRef.current.customLineSize) return;
-      hdFallbackRef.current = true;
-      setQuranSettings({ customLineSize: true });
-      Alert.alert(t('quran.overflowHdTitle'), t('quran.overflowHdBody'));
-      return;
-    }
-    if (overflowWarnedRef.current) return;
-    overflowWarnedRef.current = true;
-    AsyncStorage.getItem(STORAGE_KEYS.OVERFLOW_WARNED).then((flag) => {
-      if (flag === '1') return;
-      AsyncStorage.setItem(STORAGE_KEYS.OVERFLOW_WARNED, '1').catch(() => {});
-      Alert.alert(t('quran.overflowWarnTitle'), t('quran.overflowWarnBody'), [
-        { text: t('common.ok'), style: 'cancel' },
-        { text: t('quran.overflowOpenSettings'), onPress: () => setSettingsOpen(true) },
-      ]);
-    }).catch(() => {});
-  }, []);
-
-  const handleQcfLoadError = React.useCallback(() => {
-    if (qcfErrorWarnedRef.current) return;
-    qcfErrorWarnedRef.current = true;
-    Alert.alert(t('quran.qcfLoadFailedTitle'), t('quran.qcfLoadFailedBody'), [
-      { text: t('common.ok'), style: 'cancel' },
-      { text: t('quran.overflowOpenSettings'), onPress: () => setSettingsOpen(true) },
-    ]);
-  }, []);
+  const { handleLineOverflow, handleQcfLoadError } = useQuranAlerts({
+    settingsRef,
+    customLineSize: settings.customLineSize,
+    onOpenSettings: openSettings,
+  });
 
   const handleAyahPress = React.useCallback((ayah) => {
     const mode = settingsRef.current.ayahInteractionMode || 'menu';
@@ -195,20 +167,9 @@ export default function QuranScreen({ navigation }) {
 
   const availableHeight = windowHeight - insets.top - insets.bottom - 56;
   const effectiveBaseWidth = isPaired ? Math.floor(windowWidth / 2) : windowWidth;
-  const maxWidthForFit = React.useMemo(() => {
-    if (isContinuous) return effectiveBaseWidth;
-    if (maxPageHeightForWidth(activeLayoutFile, effectiveBaseWidth) <= availableHeight) return effectiveBaseWidth;
-    let lo = 50, hi = effectiveBaseWidth;
-    for (let i = 0; i < 15; i++) {
-      const mid = Math.floor((lo + hi) / 2);
-      if (maxPageHeightForWidth(activeLayoutFile, mid) <= availableHeight) {
-        lo = mid;
-      } else {
-        hi = mid - 1;
-      }
-    }
-    return Math.max(50, lo);
-  }, [isContinuous, activeLayoutFile, availableHeight, effectiveBaseWidth]);
+  const maxWidthForFit = React.useMemo(() => (
+    isContinuous ? effectiveBaseWidth : fitWidthForHeight(activeLayoutFile, effectiveBaseWidth, availableHeight)
+  ), [isContinuous, activeLayoutFile, availableHeight, effectiveBaseWidth]);
 
   const listData = React.useMemo(() => {
     if (!isPaired) return pagesData;
@@ -218,6 +179,20 @@ export default function QuranScreen({ navigation }) {
     }
     return pairs;
   }, [isPaired]);
+
+  const qcfReady = !!(qcfState[activeEdition.qcfVersion] && qcfState[activeEdition.qcfVersion].installed);
+  const pageProps = {
+    colors, settings,
+    qcfVersion: qcfReady ? activeEdition.qcfVersion : null,
+    playingAyahKey: effectiveAyahKey,
+    playingWordIdx: effectiveWordIdx,
+    playingWordMistake: effectiveWordMistake,
+    onAyahPress: handleAyahPress,
+    onAyahLongPress: handleAyahLongPress,
+    onWordPress: handleWordPress,
+    onLineOverflow: handleLineOverflow,
+    onQcfLoadError: handleQcfLoadError,
+  };
 
   const headerSurah = (() => {
     const first = pageAyahsForLayout(activeLayoutFile, currentPage)[0];
@@ -263,53 +238,17 @@ export default function QuranScreen({ navigation }) {
           maxToRenderPerBatch={2}
           initialNumToRender={1}
           removeClippedSubviews
-          renderItem={({ item }) => {
-            const edition = getMushafEdition(settings.mushafEdition);
-            const qcfReady = !!(qcfState[edition.qcfVersion] && qcfState[edition.qcfVersion].installed);
-            const qcfVersion = qcfReady ? edition.qcfVersion : null;
-            const sharedProps = {
-              colors, settings, qcfVersion,
-              playingAyahKey: effectiveAyahKey,
-              playingWordIdx: effectiveWordIdx,
-              playingWordMistake: effectiveWordMistake,
-              onAyahPress: handleAyahPress,
-              onAyahLongPress: handleAyahLongPress,
-              onWordPress: handleWordPress,
-              onLineOverflow: handleLineOverflow,
-              onQcfLoadError: handleQcfLoadError,
-            };
-            const fitEnabled = settings.fitPageToHeight !== false;
-            if (isPaired) {
-              const basePageWidth = windowWidth / 2;
-              const effectivePageWidth = fitEnabled
-                ? Math.min(basePageWidth, maxWidthForFit)
-                : basePageWidth;
-              const makeSlot = (pageData) => (
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  {pageData && <PageView page={pageData} pageWidth={effectivePageWidth} {...sharedProps} />}
-                </View>
-              );
-              const leftSlot = makeSlot(item.leftPage);
-              const rightSlot = makeSlot(item.rightPage);
-              return (
-                <View style={{ width: windowWidth, flex: 1, flexDirection: 'row' }}>
-                  {isRTL() ? rightSlot : leftSlot}
-                  {isRTL() ? leftSlot : rightSlot}
-                </View>
-              );
-            }
-            if (!isContinuous) {
-              const effectivePageWidth = fitEnabled
-                ? Math.min(windowWidth, maxWidthForFit)
-                : windowWidth;
-              return (
-                <View style={{ width: windowWidth, flex: 1, alignItems: 'center' }}>
-                  <PageView page={item} pageWidth={effectivePageWidth} {...sharedProps} />
-                </View>
-              );
-            }
-            return <PageViewContinuous page={item} {...sharedProps} />;
-          }}
+          renderItem={({ item }) => (
+            <MushafListItem
+              item={item}
+              isPaired={isPaired}
+              isContinuous={isContinuous}
+              fitEnabled={settings.fitPageToHeight !== false}
+              windowWidth={windowWidth}
+              maxWidthForFit={maxWidthForFit}
+              sharedProps={pageProps}
+            />
+          )}
         />
         {activeEdition.qcfVersion === 'v4' &&
           qcfState.v4.installed && !audioState.activeAyah &&

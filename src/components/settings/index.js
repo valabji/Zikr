@@ -11,3 +11,7 @@ export { default as SettingsSelect } from './SettingsSelect';
 export { default as SettingsModalHeader } from './SettingsModalHeader';
 export { default as SettingsModalShell } from './SettingsModalShell';
 export { default as MenuConfigEditor } from './MenuConfigEditor';
+export { default as TutorialTarget } from './TutorialTarget';
+export { default as SettingsFooter } from './SettingsFooter';
+export { default as SettingsSliderField } from './SettingsSliderField';
+export { default as FontSizePreview } from './FontSizePreview';

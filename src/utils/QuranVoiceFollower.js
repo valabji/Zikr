@@ -1,5 +1,5 @@
 import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
-import { flatVerses } from './mushafLayout';
+import { flatVerses } from './mushafIndex';
 import wordsData from '@assets/quran/data/words.json';
 import { normalizeArabic, tokenize, matchPosition, findResync } from './quranRecitationMatch';
 import { VOICE_FOLLOW_DEBUG as DEBUG } from './quranDebug';

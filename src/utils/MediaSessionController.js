@@ -5,8 +5,7 @@ import RadioService from './RadioService';
 import surahsData from '@assets/quran/data/surahs.json';
 import { getReciter } from '@/constants/QuranReciters';
 import { getStationSubtitle } from './RadioStations';
-import { isRTL } from '@/locales/i18n';
-import { toArabicDigits } from './mushafLayout';
+import { isRTL, toArabicDigits } from '@/locales/i18n';
 import * as MediaSession from '@modules/expo-media-session';
 
 const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});

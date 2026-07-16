@@ -1,4 +1,6 @@
-import { cleanForHafs, ayahLayoutWords, toArabicDigits } from '@/utils/mushafLayout';
+import { cleanForHafs } from '@/utils/mushafText';
+import { ayahLayoutWords } from '@/utils/mushafIndex';
+import { toArabicDigits } from '@/locales/i18n';
 
 describe('cleanForHafs', () => {
   it('converts (n) ayah markers to Arabic-Indic digits', () => {

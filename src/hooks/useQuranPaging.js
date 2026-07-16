@@ -1,7 +1,8 @@
 import * as React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
-import { getLayoutOffsets, ayahPageForLayout } from '@/utils/mushafLayout';
+import { getLayoutOffsets } from '@/utils/mushafLayout';
+import { ayahPageForLayout } from '@/utils/mushafIndex';
 import { trackPage } from '@/utils/ReadingProgress';
 
 const { TOTAL_PAGES, STORAGE_KEYS } = QURAN_CONSTANTS;

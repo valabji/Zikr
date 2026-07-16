@@ -1,7 +1,7 @@
 import * as React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
-import { pageAyahsForLayout } from '@/utils/mushafLayout';
+import { pageAyahsForLayout } from '@/utils/mushafIndex';
 
 const { STORAGE_KEYS } = QURAN_CONSTANTS;
 

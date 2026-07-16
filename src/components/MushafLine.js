@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { QURAN_CONSTANTS, CUSTOM_LINE_BASE_FONT_SIZE } from '@/constants/QuranConstants';
-import { toArabicDigits, arForHafs } from '@/utils/mushafLayout';
+import { toArabicDigits } from '@/locales/i18n';
+import { arForHafs } from '@/utils/mushafText';
 import wordsData from '@assets/quran/data/words.json';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;

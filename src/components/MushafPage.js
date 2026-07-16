@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { View, Text, ScrollView, useWindowDimensions, Platform } from 'react-native';
-import { isRTL } from '@/locales/i18n';
+import { isRTL, toArabicDigits } from '@/locales/i18n';
 import { textStyles } from '@/constants/Fonts';
 import { useIsBrightTheme } from '@/constants/Colors';
 import { QURAN_CONSTANTS, getMushafEdition } from '@/constants/QuranConstants';
 import * as Font from 'expo-font';
 import {
   SCREEN_WIDTH, mushafFontSizeForWidth, mushafLineHeightFor,
-  getLayout, toArabicDigits, arForHafs, getPageProbeLen,
+  getLayout, getPageProbeLen,
   perLineFontSizesForPage, computeMushafLineSizes, refineMushafLineSizes,
   estimatedLineSizesForPage, justifiedSpaceExtrasForPage,
   PROBE_FONT_SIZE, MUSHAF_HORIZONTAL_PADDING,
   getCachedMushafLineSizes, setCachedMushafLineSizes,
 } from '@/utils/mushafLayout';
+import { arForHafs } from '@/utils/mushafText';
 import QcfDownloader, { qcfFontFamilyForPage } from '@/utils/QcfDownloader';
 import translationEn from '@assets/quran/data/translation_en.json';
 import SurahCartouche from './SurahCartouche';

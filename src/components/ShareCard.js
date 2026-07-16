@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Text } from 'react-native';
 import { useColors } from '@/constants/Colors';
 import { textStyles, FONT_FAMILY } from '@/constants/Fonts';
-import { cleanForHafs } from '@/utils/mushafLayout';
+import { cleanForHafs } from '@/utils/mushafText';
 import { t } from '@/locales/i18n';
 
 const ShareCard = React.forwardRef(function ShareCard({ content }, ref) {

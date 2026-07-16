@@ -8,7 +8,7 @@ import { textStyles } from '@/constants/Fonts';
 import { t, isRTL, toArabicDigits } from '@/locales/i18n';
 import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '@/constants/QuranConstants';
 import { setQuranSettings } from '@/utils/QuranSettings';
-import { arForHafs } from '@/utils/mushafLayout';
+import { arForHafs } from '@/utils/mushafText';
 import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '@/utils/tafsirLoader';
 import TafsirDropdown from '@/components/TafsirDropdown';
 import pagesData from '@assets/quran/data/pages.json';

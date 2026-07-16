@@ -1,7 +1,7 @@
 import { getSurahAudioManifest } from './QuranSurahAudio';
 import QuranSurahDownloader from './QuranSurahDownloader';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
-import { pageAyahsForLayout, verseIndex } from './mushafLayout';
+import { pageAyahsForLayout, verseIndex } from './mushafIndex';
 import { dlog, gaplessWordIdx } from './quranWordTiming';
 
 export const gaplessMethods = {

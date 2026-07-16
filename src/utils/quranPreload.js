@@ -1,6 +1,6 @@
 import { createAudioPlayer } from 'expo-audio';
 import { buildAyahAudioUrl } from '@/constants/QuranReciters';
-import { flatVerses, verseIndex } from './mushafLayout';
+import { flatVerses, verseIndex } from './mushafIndex';
 import { dlog } from './quranWordTiming';
 
 export const preloadMethods = {

@@ -8,7 +8,8 @@ import {
   SURA_BORDER_VIEWBOX_MIN_Y,
 } from '@/constants/SuraBorderSvg';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
-import { SCREEN_WIDTH, toArabicDigits } from '@/utils/mushafLayout';
+import { SCREEN_WIDTH } from '@/utils/mushafLayout';
+import { toArabicDigits } from '@/locales/i18n';
 import surahsData from '@assets/quran/data/surahs.json';
 
 const { FONT_FAMILY } = QURAN_CONSTANTS;

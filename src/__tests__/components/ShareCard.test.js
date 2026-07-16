@@ -14,6 +14,7 @@ jest.mock('@/constants/Colors', () => ({
 
 jest.mock('@/locales/i18n', () => ({
   t: (key) => key,
+  toArabicDigits: (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]),
 }));
 
 const fontOf = (node) => {

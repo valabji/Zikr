@@ -5,7 +5,7 @@ import { useColors } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t, isRTL, toArabicDigits } from '@/locales/i18n';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
-import { arForHafs } from '@/utils/mushafLayout';
+import { arForHafs } from '@/utils/mushafText';
 import pagesData from '@assets/quran/data/pages.json';
 import surahsData from '@assets/quran/data/surahs.json';
 

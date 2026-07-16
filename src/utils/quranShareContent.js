@@ -1,7 +1,9 @@
 import * as Font from 'expo-font';
 import { getMushafEdition } from '@/constants/QuranConstants';
 import { qcfFontFamilyForPage } from './QcfDownloader';
-import { ayahLayoutWords, arForHafs, toArabicDigits } from './mushafLayout';
+import { ayahLayoutWords } from './mushafIndex';
+import { arForHafs } from './mushafText';
+import { toArabicDigits } from '@/locales/i18n';
 import pagesData from '@assets/quran/data/pages.json';
 import surahsData from '@assets/quran/data/surahs.json';
 import translationEn from '@assets/quran/data/translation_en.json';

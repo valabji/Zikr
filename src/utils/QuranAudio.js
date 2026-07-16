@@ -3,7 +3,7 @@ import { buildAyahAudioUrl, DEFAULT_RECITER_ID } from '@/constants/QuranReciters
 import { loadQuranSettings, subscribeQuranSettings } from './QuranSettings';
 import { getSurahAudioManifest } from './QuranSurahAudio';
 import { getMushafEdition } from '@/constants/QuranConstants';
-import { ayahPageForLayout, flatVerses, verseIndex } from './mushafLayout';
+import { ayahPageForLayout, flatVerses, verseIndex } from './mushafIndex';
 import { DEBUG, dlog, fileWordIdx } from './quranWordTiming';
 import { gaplessMethods } from './quranGapless';
 import { preloadMethods } from './quranPreload';

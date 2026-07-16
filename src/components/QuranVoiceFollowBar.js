@@ -3,8 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textStyles } from '@/constants/Fonts';
-import { isRTL, t } from '@/locales/i18n';
-import { toArabicDigits } from '@/utils/mushafLayout';
+import { isRTL, t, toArabicDigits } from '@/locales/i18n';
 import QuranVoiceFollower from '@/utils/QuranVoiceFollower';
 import surahsData from '@assets/quran/data/surahs.json';
 
