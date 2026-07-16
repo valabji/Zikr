@@ -193,8 +193,8 @@ export default {
       "@bacons/apple-targets"
     ],
     locales: {
-      "ar": "./locales/native/ar.json",
-      "en": "./locales/native/en.json"
+      "ar": "./src/locales/native/ar.json",
+      "en": "./src/locales/native/en.json"
     }
   },
 };

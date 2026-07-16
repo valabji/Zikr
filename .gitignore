@@ -18,6 +18,8 @@ android_backup/
 targets/widget/generated.entitlements
 
 local_plans/
+web-build/
+.VSCodeCounter/
 
 # Ignore Yarn's cache & build state
 .yarn/cache
