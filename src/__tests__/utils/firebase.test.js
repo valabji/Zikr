@@ -7,6 +7,7 @@ process.env.EXPO_PUBLIC_FIREBASE_CONFIG = JSON.stringify({
 jest.mock('@react-native-firebase/analytics', () => ({
   logEvent: jest.fn(() => Promise.resolve()),
   getAnalytics: jest.fn(() => ({ __isAnalytics: true })),
+  setAnalyticsCollectionEnabled: jest.fn(),
 }));
 
 jest.mock('@react-native-firebase/app', () => ({
@@ -24,6 +25,7 @@ const { logEvent, getAnalytics } = require('@react-native-firebase/analytics');
 const firebase = require('@react-native-firebase/app').default;
 import LogEvent from '@/utils/firebase/events';
 import loadFirebaseAnalytics from '@/utils/firebase/load';
+import { setTelemetryCategory, setTelemetryEnabled } from '@/utils/firebase/telemetry';
 
 describe('firebase/events.LogEvent', () => {
   beforeEach(() => {
@@ -69,6 +71,50 @@ describe('firebase/events.LogEvent', () => {
     await new Promise((r) => setImmediate(r));
     expect(errSpy).toHaveBeenCalled();
     errSpy.mockRestore();
+  });
+
+  it('skips custom events when the events category is disabled', async () => {
+    await setTelemetryCategory('events', false);
+    try {
+      await LogEvent('some_event', {});
+      expect(logEvent).not.toHaveBeenCalled();
+      await LogEvent('screen_view', { screen_name: 'Home' });
+      expect(logEvent).toHaveBeenCalledTimes(1);
+    } finally {
+      await setTelemetryCategory('events', true);
+    }
+  });
+
+  it('skips screen views when the screens category is disabled', async () => {
+    await setTelemetryCategory('screens', false);
+    try {
+      await LogEvent('screen_view', { screen_name: 'Home' });
+      expect(logEvent).not.toHaveBeenCalled();
+    } finally {
+      await setTelemetryCategory('screens', true);
+    }
+  });
+
+  it('omits device params when the device category is disabled', async () => {
+    await setTelemetryCategory('device', false);
+    try {
+      await LogEvent('some_event', { extra: 'yes' });
+      const params = logEvent.mock.calls[0][2];
+      expect(params).toEqual({ extra: 'yes' });
+    } finally {
+      await setTelemetryCategory('device', true);
+    }
+  });
+
+  it('skips everything when telemetry is disabled', async () => {
+    await setTelemetryEnabled(false);
+    try {
+      await LogEvent('screen_view', {});
+      await LogEvent('some_event', {});
+      expect(logEvent).not.toHaveBeenCalled();
+    } finally {
+      await setTelemetryEnabled(true);
+    }
   });
 });
 

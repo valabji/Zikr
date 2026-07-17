@@ -122,6 +122,14 @@ export default function AboutScreen({ navigation }) {
             chevron
             onPress={() => navigation.navigate('Credits')}
           />
+          <SettingsRow
+            testID="about-telemetry-link"
+            icon="bar-chart-2"
+            label={t('about.telemetryLink')}
+            description={t('about.telemetryLinkDesc')}
+            chevron
+            onPress={() => navigation.navigate('Telemetry')}
+          />
         </SettingsSection>
 
         <Text style={{

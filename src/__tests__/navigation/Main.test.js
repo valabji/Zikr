@@ -31,6 +31,7 @@ jest.mock('@/screens/azkar/AzkarDetailScreen', () => () => null);
 jest.mock('@/screens/ContributeScreen', () => () => null);
 jest.mock('@/screens/prayer/UnifiedPrayerSettingsScreen', () => () => null);
 jest.mock('@/screens/SettingsScreen', () => () => null);
+jest.mock('@/screens/TelemetryScreen', () => () => null);
 jest.mock('@/utils/firebase/events', () => ({ __esModule: true, default: jest.fn() }));
 
 import React from 'react';

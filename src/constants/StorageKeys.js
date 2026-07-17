@@ -9,4 +9,6 @@ export const APP_KEYS = {
   NAV_MODE: '@navMode',
   FIRST_TIME_SETTINGS: '@firstTimeSettings',
   ZIKR: '@zikr',
+  TELEMETRY_ENABLED: '@telemetryEnabled',
+  TELEMETRY_CATEGORIES: '@telemetryCategories',
 };

@@ -5,6 +5,7 @@ import AzkarDetailScreen from '@/screens/azkar/AzkarDetailScreen';
 import ContributeScreen from '@/screens/ContributeScreen';
 import AboutScreen from '@/screens/AboutScreen';
 import CreditsScreen from '@/screens/CreditsScreen';
+import TelemetryScreen from '@/screens/TelemetryScreen';
 import UnifiedPrayerSettingsScreen from '@/screens/prayer/UnifiedPrayerSettingsScreen';
 import ThemeManagerScreen from '@/screens/theme/ThemeManagerScreen';
 import ThemeEditorScreen from '@/screens/theme/ThemeEditorScreen';
@@ -70,6 +71,7 @@ export const AppContainer = () => {
                 <Stack.Screen name="Contribute" component={ContributeScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="About" component={AboutScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Credits" component={CreditsScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="Telemetry" component={TelemetryScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="UnifiedPrayerSettings" component={UnifiedPrayerSettingsScreen} options={{ title: "Prayer Settings", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="ThemeManager" component={ThemeManagerScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="ThemeEditor" component={ThemeEditorScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
