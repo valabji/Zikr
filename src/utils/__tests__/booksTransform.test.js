@@ -1,4 +1,4 @@
-const { transformRawBook, joinEnglish } = require('@/utils/booksTransform');
+const { transformRawBook, joinEnglish } = require('@/utils/books/booksTransform');
 
 describe('booksTransform', () => {
   it('joins narrator and text for object english', () => {

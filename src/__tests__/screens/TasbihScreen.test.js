@@ -45,7 +45,7 @@ jest.mock('@/utils/TasbihStore', () => ({
 }));
 
 // Mock Sound utils
-jest.mock('@/utils/Sounds', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   useAudio: () => ({
     playClick: jest.fn(),
     volume: 0.9,

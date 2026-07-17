@@ -14,27 +14,27 @@ jest.mock('@/utils/firebase/load', () => ({
   default: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('@/utils/Sounds', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   __esModule: true,
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
-jest.mock('@/utils/PrayerCountdownService', () => ({
+jest.mock('@/utils/prayer/PrayerCountdownService', () => ({
   __esModule: true,
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
-jest.mock('@/utils/PrayerNotificationScheduler', () => ({
+jest.mock('@/utils/prayer/PrayerNotificationScheduler', () => ({
   __esModule: true,
   default: { initialize: jest.fn(() => Promise.resolve()) },
 }));
 
-jest.mock('@/utils/PrayerWidgetService', () => ({
+jest.mock('@/utils/prayer/PrayerWidgetService', () => ({
   syncWidgetData: jest.fn(() => Promise.resolve()),
 }));
 
@@ -45,11 +45,11 @@ jest.mock('@/locales/i18n', () => ({
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import loadFirebaseAnalytics from '@/utils/firebase/load';
-import Sounds from '@/utils/Sounds';
-import PrayerCountdownService from '@/utils/PrayerCountdownService';
-import { syncWidgetData } from '@/utils/PrayerWidgetService';
+import Sounds from '@/utils/audio/Sounds';
+import PrayerCountdownService from '@/utils/prayer/PrayerCountdownService';
+import { syncWidgetData } from '@/utils/prayer/PrayerWidgetService';
 import { initializeLanguage } from '@/locales/i18n';
-import { loadAzkar } from '@/utils/AzkarStore';
+import { loadAzkar } from '@/utils/azkar/AzkarStore';
 import { loadResourcesAndDataAsync } from '@/utils/load';
 
 describe('loadResourcesAndDataAsync', () => {

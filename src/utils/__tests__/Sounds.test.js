@@ -1,5 +1,5 @@
 // The global jest.setup.js mocks the entire ./utils/Sounds module — undo that for these tests.
-jest.unmock('@/utils/Sounds');
+jest.unmock('@/utils/audio/Sounds');
 
 // Provide a richer expo-av mock than the global one (which is missing several APIs).
 jest.mock('expo-av', () => {
@@ -31,8 +31,8 @@ jest.mock('expo-av', () => {
 
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Sounds from '@/utils/Sounds';
-import AdhanDownloader from '@/utils/AdhanDownloader';
+import Sounds from '@/utils/audio/Sounds';
+import AdhanDownloader from '@/utils/prayer/AdhanDownloader';
 
 const flush = () => new Promise((r) => setImmediate(r));
 

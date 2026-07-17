@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import HomeScreen from '@/screens/MainScreen';
-import { getAzkar } from '@/utils/AzkarStore';
+import HomeScreen from '@/screens/azkar/MainScreen';
+import { getAzkar } from '@/utils/azkar/AzkarStore';
 
 // Mock the required dependencies
 jest.mock('@react-native-async-storage/async-storage', () => ({

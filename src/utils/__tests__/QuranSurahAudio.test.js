@@ -1,4 +1,4 @@
-import { getSurahAudioManifest, getReciterQdcId } from '@/utils/QuranSurahAudio';
+import { getSurahAudioManifest, getReciterQdcId } from '@/utils/quran/QuranSurahAudio';
 
 describe('QuranSurahAudio', () => {
   const realFetch = global.fetch;

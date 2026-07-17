@@ -1,5 +1,5 @@
-import { cleanForHafs } from '@/utils/mushafText';
-import { ayahLayoutWords } from '@/utils/mushafIndex';
+import { cleanForHafs } from '@/utils/quran/mushafText';
+import { ayahLayoutWords } from '@/utils/quran/mushafIndex';
 import { toArabicDigits } from '@/locales/i18n';
 
 describe('cleanForHafs', () => {

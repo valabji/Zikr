@@ -5,7 +5,7 @@ const load = () => {
   let FileSystem;
   jest.isolateModules(() => {
     FileSystem = require('expo-file-system/legacy');
-    mod = require('@/utils/AdhanDownloader').default;
+    mod = require('@/utils/prayer/AdhanDownloader').default;
   });
   return { downloader: mod, FileSystem };
 };

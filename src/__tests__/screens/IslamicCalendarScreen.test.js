@@ -7,7 +7,7 @@ jest.mock('@/locales/i18n', () => ({
 
 jest.mock('@/components/CustomHeader', () => () => null);
 
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: {
     scheduleExactNotification: jest.fn().mockResolvedValue('id'),
@@ -15,7 +15,7 @@ jest.mock('@/utils/NotificationService', () => ({
   },
 }));
 
-jest.mock('@/utils/PrayerUtils', () => ({
+jest.mock('@/utils/prayer/PrayerUtils', () => ({
   calculatePrayerTimes: jest.fn(),
 }));
 
@@ -23,7 +23,7 @@ import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IslamicCalendarScreen from '@/screens/IslamicCalendarScreen';
-import { _resetForTests } from '@/utils/FastingTracker';
+import { _resetForTests } from '@/utils/calendar/FastingTracker';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { ISLAMIC_CALENDAR_CONSTANTS } from '@/constants/IslamicCalendarConstants';
 

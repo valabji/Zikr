@@ -8,7 +8,7 @@ jest.mock('@/locales/i18n', () => ({
 jest.mock('@/components/CustomHeader', () => () => null);
 jest.mock('@/components/CustomToggle', () => () => null);
 
-jest.mock('@/utils/PrayerUtils', () => ({
+jest.mock('@/utils/prayer/PrayerUtils', () => ({
   searchLocations: jest.fn().mockResolvedValue([]),
   getLocationFromIP: jest.fn(),
   getBrowserLocation: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('@/utils/PrayerUtils', () => ({
 
 jest.mock('@/utils/restart', () => ({ Restart: jest.fn() }));
 
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: {
     requestPermissions: jest.fn().mockResolvedValue({ granted: true, exactAlarmGranted: true }),
@@ -30,7 +30,7 @@ jest.mock('@/utils/NotificationService', () => ({
   },
 }));
 
-jest.mock('@/utils/PrayerCountdownService', () => ({
+jest.mock('@/utils/prayer/PrayerCountdownService', () => ({
   __esModule: true,
   default: {
     start: jest.fn().mockResolvedValue(),
@@ -48,7 +48,7 @@ jest.mock('expo-location', () => ({
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import UnifiedPrayerSettingsScreen from '@/screens/UnifiedPrayerSettingsScreen';
+import UnifiedPrayerSettingsScreen from '@/screens/prayer/UnifiedPrayerSettingsScreen';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 
 const buildNav = () => ({ navigate: jest.fn(), goBack: jest.fn(), addListener: jest.fn(() => jest.fn()) });

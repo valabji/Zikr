@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BooksDownloader, { bookFileUri } from '@/utils/BooksDownloader';
+import BooksDownloader, { bookFileUri } from '@/utils/books/BooksDownloader';
 import { BOOKS_CONSTANTS } from '@/constants/BooksConstants';
 
 const VERSION_TAG = String(BOOKS_CONSTANTS.DATA_VERSION);

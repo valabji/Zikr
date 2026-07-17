@@ -5,7 +5,7 @@ import {
   searchArabicIndex,
   buildEnglishIndex,
   searchEnglishIndex,
-} from '@/utils/quranSearch';
+} from '@/utils/quran/quranSearch';
 
 describe('normalizeArabicQuery', () => {
   it('strips tashkeel and tatweel', () => {

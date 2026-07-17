@@ -9,9 +9,9 @@ jest.mock('@/hooks/useQiblaCompass', () => ({
   useQiblaCompass: jest.fn(),
 }));
 
-jest.mock('@/components/QiblaCompass', () => () => null);
-jest.mock('@/components/LocationInfo', () => () => null);
-jest.mock('@/components/QiblaInstructions', () => () => null);
+jest.mock('@/components/qibla/QiblaCompass', () => () => null);
+jest.mock('@/components/qibla/LocationInfo', () => () => null);
+jest.mock('@/components/qibla/QiblaInstructions', () => () => null);
 jest.mock('@/components/CustomHeader', () => () => null);
 
 import React from 'react';

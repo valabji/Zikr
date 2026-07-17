@@ -16,7 +16,7 @@ import {
   importThemeFromData,
   CUSTOM_THEMES_KEY,
   HIDDEN_THEMES_KEY,
-} from '@/utils/ThemeManager';
+} from '@/utils/theme/ThemeManager';
 
 const makeTheme = (overrides = {}) => {
   const theme = { name: 'Test Theme', nameAr: 'سمة' };

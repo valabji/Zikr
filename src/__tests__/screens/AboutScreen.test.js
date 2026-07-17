@@ -15,7 +15,7 @@ jest.mock('@/constants/Colors', () => ({
   })),
 }));
 
-jest.mock('@/components/LogoSvg', () => ({ LogoSvg: 'LogoSvg' }));
+jest.mock('@/components/svg/LogoSvg', () => ({ LogoSvg: 'LogoSvg' }));
 
 jest.mock('@/locales/i18n', () => ({
   getCurrentLanguage: jest.fn(() => 'en'),

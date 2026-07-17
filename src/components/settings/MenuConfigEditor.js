@@ -9,7 +9,7 @@ import { SPACING, webCursor } from '@/constants/settingsTokens';
 import { t } from '@/locales/i18n';
 import { DEFAULT_MENU_CONFIG, ITEM_DEFS, splitMenuForTabs } from '@/constants/MenuConfig';
 import { useNavMode } from '@/utils/NavMode';
-import { useAudio } from '@/utils/Sounds';
+import { useAudio } from '@/utils/audio/Sounds';
 import { APP_KEYS } from '@/constants/StorageKeys';
 import SettingsSection from './SettingsSection';
 import SettingsField from './SettingsField';

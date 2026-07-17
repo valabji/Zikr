@@ -237,7 +237,7 @@ jest.mock('expo-intent-launcher', () => ({
 }), { virtual: true });
 
 // Mock Sound functionality and utils
-jest.mock('./src/utils/Sounds', () => ({
+jest.mock('./src/utils/audio/Sounds', () => ({
   useAudio: jest.fn(() => ({
     playSound: jest.fn(),
     stopSound: jest.fn(),
@@ -502,7 +502,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   getAllKeys: jest.fn(),
 }));
 
-jest.mock('./src/utils/AzkarStore', () => {
+jest.mock('./src/utils/azkar/AzkarStore', () => {
   let azkar = [{
     id: 1,
     name: 'Test Zikr',

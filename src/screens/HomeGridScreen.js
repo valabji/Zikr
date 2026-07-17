@@ -6,10 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t } from '@/locales/i18n';
-import { LogoSvg } from '@/components/LogoSvg';
+import { LogoSvg } from '@/components/svg/LogoSvg';
 import { DEFAULT_MENU_CONFIG, ITEM_DEFS, splitMenuForTabs } from '@/constants/MenuConfig';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
-import { formatHijriDate } from '@/utils/HijriCalendar';
+import { formatHijriDate } from '@/utils/calendar/HijriCalendar';
 import { getItemAction } from '@/utils/menuActions';
 import { APP_KEYS } from '@/constants/StorageKeys';
 

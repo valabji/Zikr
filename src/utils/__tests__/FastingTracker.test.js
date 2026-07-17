@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { dateKey } from '@/utils/HijriCalendar';
+import { dateKey } from '@/utils/calendar/HijriCalendar';
 
 const loadStore = async () => {
   let mod;
   await jest.isolateModulesAsync(async () => {
-    mod = require('@/utils/FastingTracker');
+    mod = require('@/utils/calendar/FastingTracker');
   });
   await new Promise((r) => setImmediate(r));
   return mod;

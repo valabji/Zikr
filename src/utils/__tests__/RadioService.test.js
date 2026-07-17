@@ -1,8 +1,8 @@
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RadioService from '@/utils/RadioService';
-import QuranAudio from '@/utils/QuranAudio';
-import Sounds from '@/utils/Sounds';
+import RadioService from '@/utils/radio/RadioService';
+import QuranAudio from '@/utils/quran/QuranAudio';
+import Sounds from '@/utils/audio/Sounds';
 import { RADIO_CONSTANTS } from '@/constants/RadioConstants';
 
 const { STORAGE_KEYS } = RADIO_CONSTANTS;
@@ -32,12 +32,12 @@ jest.mock('expo-av', () => ({
   InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
 }));
 
-jest.mock('@/utils/QuranAudio', () => ({
+jest.mock('@/utils/quran/QuranAudio', () => ({
   __esModule: true,
   default: { stop: jest.fn(() => Promise.resolve()) },
 }));
 
-jest.mock('@/utils/Sounds', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   __esModule: true,
   default: { stopFullAdhan: jest.fn(() => Promise.resolve()) },
 }));

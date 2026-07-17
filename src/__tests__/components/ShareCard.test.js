@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import ShareCard from '@/components/ShareCard';
+import ShareCard from '@/components/share/ShareCard';
 import { FONT_FAMILY } from '@/constants/Fonts';
 
 jest.mock('@/constants/Colors', () => ({

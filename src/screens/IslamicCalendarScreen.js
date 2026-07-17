@@ -16,9 +16,9 @@ import {
   addHijriMonths,
   getUpcomingEvents,
   dateKey,
-} from '@/utils/HijriCalendar';
-import { useFastingTracker, toggleFastDay } from '@/utils/FastingTracker';
-import { scheduleFastDayNotifications, cancelFastDayNotifications } from '@/utils/IftarSuhoorNotifications';
+} from '@/utils/calendar/HijriCalendar';
+import { useFastingTracker, toggleFastDay } from '@/utils/calendar/FastingTracker';
+import { scheduleFastDayNotifications, cancelFastDayNotifications } from '@/utils/calendar/IftarSuhoorNotifications';
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 

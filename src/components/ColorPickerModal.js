@@ -5,8 +5,8 @@ import { useColors } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t } from '@/locales/i18n';
 import { SPACING, RADIUS, withAlpha } from '@/constants/settingsTokens';
-import { SettingsModalShell, SettingsButton } from './settings';
-import { isValidHex } from '@/utils/ThemeManager';
+import { SettingsModalShell, SettingsButton } from '@/components/settings';
+import { isValidHex } from '@/utils/theme/ThemeManager';
 
 const hexToHsl = (hex) => {
   const h = hex.replace('#', '');

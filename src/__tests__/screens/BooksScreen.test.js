@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BooksScreen from '@/screens/BooksScreen';
-import { _resetForTests as resetBooksSettings } from '@/utils/BooksSettings';
+import BooksScreen from '@/screens/books/BooksScreen';
+import { _resetForTests as resetBooksSettings } from '@/utils/books/BooksSettings';
 
 const mockNavigation = {
   goBack: jest.fn(),

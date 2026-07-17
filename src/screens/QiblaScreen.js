@@ -8,15 +8,15 @@ import {
 import { useColors } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
 import CustomHeader from '@/components/CustomHeader';
-import QiblaCompass from '@/components/QiblaCompass';
-import LocationInfo from '@/components/LocationInfo';
-import QiblaInstructions from '@/components/QiblaInstructions';
+import QiblaCompass from '@/components/qibla/QiblaCompass';
+import LocationInfo from '@/components/qibla/LocationInfo';
+import QiblaInstructions from '@/components/qibla/QiblaInstructions';
 import { useQiblaCompass } from '@/hooks/useQiblaCompass';
-import { useAudio } from '@/utils/Sounds';
+import { useAudio } from '@/utils/audio/Sounds';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
-import { calculateQiblaDirection } from '@/utils/PrayerUtils';
+import { calculateQiblaDirection } from '@/utils/prayer/PrayerUtils';
 import { CONTENT_MAX_WIDTH } from '@/constants/settingsTokens';
 
 export default function QiblaScreen({ navigation }) {

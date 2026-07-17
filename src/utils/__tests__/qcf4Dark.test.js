@@ -1,4 +1,4 @@
-import { base64ToBytes, bytesToBase64, patchQcf4Dark } from '@/utils/qcf4Dark';
+import { base64ToBytes, bytesToBase64, patchQcf4Dark } from '@/utils/quran/qcf4Dark';
 
 const ascii = (s) => Array.from(s, (c) => c.charCodeAt(0));
 const utf16be = (s) => ascii(s).flatMap((c) => [0, c]);

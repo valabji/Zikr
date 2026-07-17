@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { Animated } from 'react-native';
-import QiblaCompass from '@/components/QiblaCompass';
+import QiblaCompass from '@/components/qibla/QiblaCompass';
 
 const makeRotation = (val = 0) => new Animated.Value(val);
 

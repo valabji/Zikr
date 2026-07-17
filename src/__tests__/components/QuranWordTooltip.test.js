@@ -15,7 +15,7 @@ jest.mock('@/constants/Fonts', () => ({
 
 import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import QuranWordTooltip from '@/components/QuranWordTooltip';
+import QuranWordTooltip from '@/components/quran/QuranWordTooltip';
 
 const colors = {
   surface: '#fff',

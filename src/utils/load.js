@@ -4,16 +4,16 @@ import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { initializeLanguage, } from '@/locales/i18n';
 
-import { loadAzkar } from './AzkarStore';
-import loadFirebaseAnalytics from './firebase/load';
-import PrayerCountdownService from './PrayerCountdownService';
-import { syncWidgetData } from './PrayerWidgetService';
-import NotificationService from './NotificationService';
-import PrayerNotificationScheduler from './PrayerNotificationScheduler';
-import QcfDownloader from './QcfDownloader';
-import { loadTasbih } from './TasbihStore';
-import RadioService from './RadioService';
-import MediaSessionController from './MediaSessionController';
+import { loadAzkar } from '@/utils/azkar/AzkarStore';
+import loadFirebaseAnalytics from '@/utils/firebase/load';
+import PrayerCountdownService from '@/utils/prayer/PrayerCountdownService';
+import { syncWidgetData } from '@/utils/prayer/PrayerWidgetService';
+import NotificationService from '@/utils/notifications/NotificationService';
+import PrayerNotificationScheduler from '@/utils/prayer/PrayerNotificationScheduler';
+import QcfDownloader from '@/utils/quran/QcfDownloader';
+import { loadTasbih } from '@/utils/TasbihStore';
+import RadioService from '@/utils/radio/RadioService';
+import MediaSessionController from '@/utils/audio/MediaSessionController';
 
 
 export async function loadResourcesAndDataAsync() {

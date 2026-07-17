@@ -5,7 +5,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { useColors } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t } from '@/locales/i18n';
-import RadioService from '@/utils/RadioService';
+import RadioService from '@/utils/radio/RadioService';
 import { useNavMode } from '@/utils/NavMode';
 
 export default function RadioMiniPlayer() {

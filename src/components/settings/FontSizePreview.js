@@ -5,7 +5,7 @@ import { useRTL } from '@/hooks/useRTL';
 import { textStyles } from '@/constants/Fonts';
 import { SPACING, RADIUS, withAlpha } from '@/constants/settingsTokens';
 import { t } from '@/locales/i18n';
-import { getAzkar } from '@/utils/AzkarStore';
+import { getAzkar } from '@/utils/azkar/AzkarStore';
 
 export default function FontSizePreview({ size }) {
   const colors = useColors();

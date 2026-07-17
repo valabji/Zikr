@@ -30,7 +30,7 @@ jest.mock('expo-intent-launcher', () => ({
 }));
 
 // Replace the global ./utils/Sounds mock with one matching the new API
-jest.mock('@/utils/Sounds', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   __esModule: true,
   default: {
     playNotificationSound: jest.fn().mockResolvedValue(undefined),
@@ -42,8 +42,8 @@ import * as Notifications from 'expo-notifications';
 import * as IntentLauncher from 'expo-intent-launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
-import Sounds from '@/utils/Sounds';
-import service from '@/utils/NotificationService';
+import Sounds from '@/utils/audio/Sounds';
+import service from '@/utils/notifications/NotificationService';
 
 // Helper to swap Platform.OS + Version for a single test
 const setPlatform = (os, version) => {

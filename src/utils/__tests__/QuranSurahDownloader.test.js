@@ -1,15 +1,15 @@
-jest.mock('@/utils/QuranSurahAudio', () => ({
+jest.mock('@/utils/quran/QuranSurahAudio', () => ({
   getSurahAudioManifest: jest.fn(() => Promise.resolve({ surah: 108, audioUrl: 'https://cdn/108.mp3', verseTimings: [] })),
 }));
 
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: {
     ensurePermission: jest.fn(() => Promise.resolve(true)),
   },
 }));
 
-jest.mock('@/utils/quranDownloadNotifications', () => ({
+jest.mock('@/utils/quran/quranDownloadNotifications', () => ({
   showDownloadProgress: jest.fn(() => Promise.resolve()),
   hideDownloadProgress: jest.fn(() => Promise.resolve()),
 }));
@@ -21,9 +21,9 @@ const load = () => {
   let notifications;
   jest.isolateModules(() => {
     FileSystem = require('expo-file-system/legacy');
-    manifest = require('@/utils/QuranSurahAudio');
-    notifications = require('@/utils/quranDownloadNotifications');
-    mod = require('@/utils/QuranSurahDownloader').default;
+    manifest = require('@/utils/quran/QuranSurahAudio');
+    notifications = require('@/utils/quran/quranDownloadNotifications');
+    mod = require('@/utils/quran/QuranSurahDownloader').default;
   });
   return { downloader: mod, FileSystem, manifest, notifications };
 };

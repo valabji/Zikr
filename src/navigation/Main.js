@@ -1,13 +1,13 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import linkingOptions from './useLinking';
-import AzkarDetailScreen from '@/screens/AzkarDetailScreen';
+import AzkarDetailScreen from '@/screens/azkar/AzkarDetailScreen';
 import ContributeScreen from '@/screens/ContributeScreen';
 import AboutScreen from '@/screens/AboutScreen';
 import CreditsScreen from '@/screens/CreditsScreen';
-import UnifiedPrayerSettingsScreen from '@/screens/UnifiedPrayerSettingsScreen';
-import ThemeManagerScreen from '@/screens/ThemeManagerScreen';
-import ThemeEditorScreen from '@/screens/ThemeEditorScreen';
+import UnifiedPrayerSettingsScreen from '@/screens/prayer/UnifiedPrayerSettingsScreen';
+import ThemeManagerScreen from '@/screens/theme/ThemeManagerScreen';
+import ThemeEditorScreen from '@/screens/theme/ThemeEditorScreen';
 import { DrawerNavigation } from './DrawerNavigation';
 import { TabNavigation } from './TabNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';

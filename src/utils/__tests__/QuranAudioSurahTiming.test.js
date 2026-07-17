@@ -1,4 +1,4 @@
-import QuranAudio from '@/utils/QuranAudio';
+import QuranAudio from '@/utils/quran/QuranAudio';
 
 const manifest = {
   surah: 1,

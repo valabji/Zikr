@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getBundledStations, fetchStations, getStations, isCacheFresh, getStationSubtitle,
   checkStationOnline, getOfflineStations, markStationOffline, markStationOnline,
-} from '@/utils/RadioStations';
+} from '@/utils/radio/RadioStations';
 import { RADIO_CONSTANTS } from '@/constants/RadioConstants';
 
 const { STORAGE_KEYS, CACHE_TTL_MS } = RADIO_CONSTANTS;

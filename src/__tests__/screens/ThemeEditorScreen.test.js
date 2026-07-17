@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import ThemeEditorScreen from '@/screens/ThemeEditorScreen';
+import ThemeEditorScreen from '@/screens/theme/ThemeEditorScreen';
 import { ThemeContext } from '@/constants/Colors';
 import { themes } from '@/constants/themes';
-import { THEME_COLOR_KEYS } from '@/utils/ThemeManager';
+import { THEME_COLOR_KEYS } from '@/utils/theme/ThemeManager';
 
 jest.mock('@/components/CustomHeader', () => {
   const React = require('react');

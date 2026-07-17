@@ -1,4 +1,4 @@
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: {
     showPersistentCountdown: jest.fn().mockResolvedValue(undefined),
@@ -6,7 +6,7 @@ jest.mock('@/utils/NotificationService', () => ({
   },
 }));
 
-jest.mock('@/utils/PrayerUtils', () => {
+jest.mock('@/utils/prayer/PrayerUtils', () => {
   const moment = require('moment-timezone');
   return {
     calculatePrayerTimes: jest.fn(),
@@ -18,9 +18,9 @@ jest.mock('@/utils/PrayerUtils', () => {
 });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NotificationService from '@/utils/NotificationService';
-import * as PrayerUtils from '@/utils/PrayerUtils';
-import service from '@/utils/PrayerCountdownService';
+import NotificationService from '@/utils/notifications/NotificationService';
+import * as PrayerUtils from '@/utils/prayer/PrayerUtils';
+import service from '@/utils/prayer/PrayerCountdownService';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { setLanguage } from '@/locales/i18n';
 import moment from 'moment-timezone';

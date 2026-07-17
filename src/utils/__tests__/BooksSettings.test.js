@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const loadModule = async () => {
   let mod;
   await jest.isolateModulesAsync(async () => {
-    mod = require('@/utils/BooksSettings');
+    mod = require('@/utils/books/BooksSettings');
   });
   mod._resetForTests();
   return mod;

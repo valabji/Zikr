@@ -5,11 +5,11 @@ import { t } from '@/locales/i18n';
 import CustomHeader from '@/components/CustomHeader';
 import { THEME_VARIANT_KEYS } from '@/constants/themes';
 import { useTestedMode, setTestedMode } from '@/utils/TestedMode';
-import { useAudio } from '@/utils/Sounds';
-import { useSettingsForm } from '@/hooks/useSettingsForm';
-import { useVibrationSettings } from '@/hooks/useVibrationSettings';
-import { useSettingsTutorial } from '@/hooks/useSettingsTutorial';
-import { useSettingsActions } from '@/hooks/useSettingsActions';
+import { useAudio } from '@/utils/audio/Sounds';
+import { useSettingsForm } from '@/hooks/settings/useSettingsForm';
+import { useVibrationSettings } from '@/hooks/settings/useVibrationSettings';
+import { useSettingsTutorial } from '@/hooks/settings/useSettingsTutorial';
+import { useSettingsActions } from '@/hooks/settings/useSettingsActions';
 import {
   SettingsContainer, SettingsSection, SettingsRow, SettingsField,
   SettingsToggle, SettingsSegmented, SettingsSelect,

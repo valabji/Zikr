@@ -1,28 +1,28 @@
 import { createAudioPlayer } from 'expo-audio';
-import QuranAudio from '@/utils/QuranAudio';
-import { loadQuranSettings } from '@/utils/QuranSettings';
-import { getSurahAudioManifest } from '@/utils/QuranSurahAudio';
+import QuranAudio from '@/utils/quran/QuranAudio';
+import { loadQuranSettings } from '@/utils/quran/QuranSettings';
+import { getSurahAudioManifest } from '@/utils/quran/QuranSurahAudio';
 
 jest.mock('expo-audio', () => ({
   createAudioPlayer: jest.fn(),
   setAudioModeAsync: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('@/utils/QuranSettings', () => ({
+jest.mock('@/utils/quran/QuranSettings', () => ({
   loadQuranSettings: jest.fn(() => Promise.resolve({
     reciterId: 'r1', audioPlaybackScope: 'ayah', loopEnabled: false, playbackRate: 1,
   })),
   subscribeQuranSettings: jest.fn(() => () => {}),
 }));
 
-jest.mock('@/utils/QuranSurahAudio', () => ({ getSurahAudioManifest: jest.fn() }));
+jest.mock('@/utils/quran/QuranSurahAudio', () => ({ getSurahAudioManifest: jest.fn() }));
 
-jest.mock('@/utils/QuranSurahDownloader', () => ({
+jest.mock('@/utils/quran/QuranSurahDownloader', () => ({
   __esModule: true,
   default: { getLocalAudioUri: jest.fn(() => Promise.resolve(null)) },
 }));
 
-jest.mock('@/utils/RadioService', () => ({ __esModule: true, default: { stop: jest.fn() } }));
+jest.mock('@/utils/radio/RadioService', () => ({ __esModule: true, default: { stop: jest.fn() } }));
 
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 

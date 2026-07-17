@@ -7,7 +7,7 @@ jest.mock('@/locales/i18n', () => ({
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import CompassMethodModal from '@/components/CompassMethodModal';
+import CompassMethodModal from '@/components/qibla/CompassMethodModal';
 
 const baseProps = {
   visible: true,

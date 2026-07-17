@@ -5,7 +5,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 const AsyncStorage = require('@react-native-async-storage/async-storage');
 const { QURAN_CONSTANTS } = require('@/constants/QuranConstants');
-const { loadQuranSettings, setQuranSettings, subscribeQuranSettings } = require('@/utils/QuranSettings');
+const { loadQuranSettings, setQuranSettings, subscribeQuranSettings } = require('@/utils/quran/QuranSettings');
 
 const KEY = QURAN_CONSTANTS.STORAGE_KEYS.SETTINGS;
 const DEFAULTS = QURAN_CONSTANTS.DEFAULT_SETTINGS;

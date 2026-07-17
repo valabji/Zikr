@@ -1,8 +1,8 @@
-jest.unmock('@/utils/AzkarStore');
+jest.unmock('@/utils/azkar/AzkarStore');
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import AzkarDetailScreen from '@/screens/AzkarDetailScreen';
+import AzkarDetailScreen from '@/screens/azkar/AzkarDetailScreen';
 
 // Mock navigation
 const mockNavigation = {
@@ -17,7 +17,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Mock Sound utils
-jest.mock('@/utils/Sounds');
+jest.mock('@/utils/audio/Sounds');
 
 describe('AzkarDetailScreen', () => {
   const mockRoute = {

@@ -6,7 +6,7 @@ jest.mock('@/locales/i18n', () => ({
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import QiblaInstructions from '@/components/QiblaInstructions';
+import QiblaInstructions from '@/components/qibla/QiblaInstructions';
 
 const baseProps = {
   compassEnabled: true,

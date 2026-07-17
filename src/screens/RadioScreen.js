@@ -9,11 +9,11 @@ import { textStyles } from '@/constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '@/locales/i18n';
 import {
   getStations, getStationSubtitle, getOfflineStations, markStationOffline, markStationOnline,
-} from '@/utils/RadioStations';
-import RadioService from '@/utils/RadioService';
+} from '@/utils/radio/RadioStations';
+import RadioService from '@/utils/radio/RadioService';
 import {
   loadRadioFavorites, toggleRadioFavorite, subscribeRadioFavorites,
-} from '@/utils/RadioFavorites';
+} from '@/utils/radio/RadioFavorites';
 import { SettingsSegmented } from '@/components/settings';
 import {
   SPACING, RADIUS, CONTENT_MAX_WIDTH, withAlpha, webCursor,

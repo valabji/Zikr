@@ -1,7 +1,7 @@
 // Single source of truth for all theme definitions
 import { FONT_FAMILY } from './Fonts';
-import { lighten, darken, mix } from '@/utils/colorShift';
-import { THEME_VARIANT_KEYS } from '@/utils/ThemeVariant';
+import { lighten, darken, mix } from '@/utils/theme/colorShift';
+import { THEME_VARIANT_KEYS } from '@/utils/theme/ThemeVariant';
 
 export { THEME_VARIANT_KEYS };
 

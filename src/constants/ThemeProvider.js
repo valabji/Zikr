@@ -2,15 +2,15 @@ import React, { createContext, useState, useEffect, useContext, useMemo } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from './Colors';
 import { themes } from './themes';
-import { getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '@/utils/ThemeVariant';
-import { syncWidgetData } from '@/utils/PrayerWidgetService';
+import { getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '@/utils/theme/ThemeVariant';
+import { syncWidgetData } from '@/utils/prayer/PrayerWidgetService';
 import {
   loadCustomThemes,
   persistCustomTheme,
   removeCustomTheme,
   loadHiddenThemes,
   persistHiddenThemes,
-} from '@/utils/ThemeManager';
+} from '@/utils/theme/ThemeManager';
 
 const VARIANT_AUTO_KEY = '@theme_variant_auto';
 const VARIANT_LOCKED_KEY = '@theme_variant_locked';

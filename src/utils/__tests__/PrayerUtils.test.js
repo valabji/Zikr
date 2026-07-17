@@ -10,7 +10,7 @@ import {
   searchLocations,
   getBrowserLocation,
   getCompassDirection,
-} from '@/utils/PrayerUtils';
+} from '@/utils/prayer/PrayerUtils';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { CalculationMethod, Madhab } from 'adhan';
 import moment from 'moment-timezone';
@@ -126,7 +126,7 @@ describe('PrayerUtils', () => {
         }));
         const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
         // eslint-disable-next-line global-require
-        const { calculatePrayerTimes: calc } = require('@/utils/PrayerUtils');
+        const { calculatePrayerTimes: calc } = require('@/utils/prayer/PrayerUtils');
         const times = calc(40, -74, 'UTC');
         expect(times).toBeNull();
         spy.mockRestore();

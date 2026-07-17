@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import BooksDownloader from '@/utils/BooksDownloader';
+import BooksDownloader from '@/utils/books/BooksDownloader';
 
 export function useBookDownloads(catalog) {
   const [dlState, setDlState] = useState({});

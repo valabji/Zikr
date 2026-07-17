@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { MushafLine } from '@/components/MushafLine';
+import { MushafLine } from '@/components/quran/MushafLine';
 
 jest.mock('@assets/quran/data/words.json', () => ({}));
 

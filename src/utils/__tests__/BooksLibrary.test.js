@@ -4,7 +4,7 @@ import {
   normalizeArabic, searchBook,
   getLastRead, setLastRead,
   getBookmarks, setBookmarks,
-} from '@/utils/BooksLibrary';
+} from '@/utils/books/BooksLibrary';
 
 describe('BooksLibrary', () => {
   beforeEach(() => {

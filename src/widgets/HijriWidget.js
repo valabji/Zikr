@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
-import { toHijri } from '@/utils/HijriCalendar';
+import { toHijri } from '@/utils/calendar/HijriCalendar';
 
 const DEFAULT_THEME = { bg: '#003C34', text: '#FFE29D', textSecondary: '#D1955E' };
 

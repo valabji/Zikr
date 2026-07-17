@@ -1,4 +1,4 @@
-import QuranAudio from '@/utils/QuranAudio';
+import QuranAudio from '@/utils/quran/QuranAudio';
 import pagesData from '@assets/quran/data/pages.json';
 
 const surahManifest = (surah, ayahCount) => ({

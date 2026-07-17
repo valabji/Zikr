@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   loadRadioFavorites, getCachedRadioFavorites, isRadioFavorite,
   toggleRadioFavorite, subscribeRadioFavorites, _resetForTests,
-} from '@/utils/RadioFavorites';
+} from '@/utils/radio/RadioFavorites';
 import { RADIO_CONSTANTS } from '@/constants/RadioConstants';
 
 const { STORAGE_KEYS } = RADIO_CONSTANTS;

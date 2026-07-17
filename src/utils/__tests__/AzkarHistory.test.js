@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const loadStore = async () => {
   let mod;
   await jest.isolateModulesAsync(async () => {
-    mod = require('@/utils/AzkarHistory');
+    mod = require('@/utils/azkar/AzkarHistory');
   });
   await new Promise((r) => setImmediate(r));
   return mod;

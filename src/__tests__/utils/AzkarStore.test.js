@@ -1,7 +1,7 @@
-jest.unmock('@/utils/AzkarStore');
+jest.unmock('@/utils/azkar/AzkarStore');
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loadAzkar, getAzkar, setAzkar, subscribeAzkar } from '@/utils/AzkarStore';
+import { loadAzkar, getAzkar, setAzkar, subscribeAzkar } from '@/utils/azkar/AzkarStore';
 
 describe('AzkarStore', () => {
   beforeEach(() => {

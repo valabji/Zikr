@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { PatternSvg } from '@/components/PatternSvg';
+import { PatternSvg } from '@/components/svg/PatternSvg';
 
 describe('PatternSvg', () => {
   it('renders correctly with provided props', () => {

@@ -1,7 +1,7 @@
 import { useMemo, useContext, createContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { themes, applyThemeVariant } from './themes';
-import { isBrightColor } from '@/utils/colorShift';
+import { isBrightColor } from '@/utils/theme/colorShift';
 
 // Theme Context
 export const ThemeContext = createContext({

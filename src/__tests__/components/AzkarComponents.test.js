@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import AzkarSwiper from '@/components/AzkarSwiper';
-import AzkarOnePageScroll from '@/components/AzkarOnePageScroll';
-import AzkarOnePageScrollCompact from '@/components/AzkarOnePageScrollCompact';
+import AzkarSwiper from '@/components/azkar/AzkarSwiper';
+import AzkarOnePageScroll from '@/components/azkar/AzkarOnePageScroll';
+import AzkarOnePageScrollCompact from '@/components/azkar/AzkarOnePageScrollCompact';
 
 // Mock required modules
-jest.mock('@/utils/Sounds.js', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   useAudio: () => ({
     playClick: jest.fn()
   })
@@ -38,7 +38,7 @@ jest.mock('@/locales/i18n', () => ({
   getDirectionalMixedSpacing: (v) => v
 }));
 
-jest.mock('@/components/StarSvg', () => ({
+jest.mock('@/components/svg/StarSvg', () => ({
   StarSvgFilled: ({ width, height }) => 'StarSvgFilled'
 }));
 

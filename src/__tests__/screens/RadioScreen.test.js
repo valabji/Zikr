@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import RadioScreen from '@/screens/RadioScreen';
-import RadioService from '@/utils/RadioService';
+import RadioService from '@/utils/radio/RadioService';
 import {
   getStations, getOfflineStations, markStationOffline, markStationOnline,
-} from '@/utils/RadioStations';
-import { loadRadioFavorites, toggleRadioFavorite } from '@/utils/RadioFavorites';
+} from '@/utils/radio/RadioStations';
+import { loadRadioFavorites, toggleRadioFavorite } from '@/utils/radio/RadioFavorites';
 
 const mockNavigation = { goBack: jest.fn(), toggleDrawer: jest.fn(), navigate: jest.fn() };
 
@@ -29,7 +29,7 @@ jest.mock('@/constants/Colors', () => ({
   getItemColors: () => null,
 }));
 
-jest.mock('@/utils/RadioService', () => {
+jest.mock('@/utils/radio/RadioService', () => {
   const state = { activeStation: null, isPlaying: false, isBuffering: false, failedStationId: null };
   const listeners = new Set();
   return {
@@ -46,7 +46,7 @@ jest.mock('@/utils/RadioService', () => {
   };
 });
 
-jest.mock('@/utils/RadioStations', () => ({
+jest.mock('@/utils/radio/RadioStations', () => ({
   getStations: jest.fn(() => Promise.resolve([
     { id: 1, name: 'Alpha', streamUrl: 'https://s/1' },
     { id: 2, name: 'Beta', streamUrl: 'https://s/2' },
@@ -57,7 +57,7 @@ jest.mock('@/utils/RadioStations', () => ({
   markStationOnline: jest.fn(),
 }));
 
-jest.mock('@/utils/RadioFavorites', () => ({
+jest.mock('@/utils/radio/RadioFavorites', () => ({
   loadRadioFavorites: jest.fn(() => Promise.resolve([])),
   toggleRadioFavorite: jest.fn(() => Promise.resolve([])),
   subscribeRadioFavorites: jest.fn(() => () => {}),

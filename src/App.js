@@ -8,8 +8,8 @@ import { AppContainer } from './navigation/Main';
 import { ThemeProvider } from './constants/ThemeProvider';
 import { useTheme } from './constants/Colors';
 import RTLStyleLoader from './components/RTLStyleLoader';
-import PrayerNotificationScheduler from './utils/PrayerNotificationScheduler';
-import NotificationService from './utils/NotificationService';
+import PrayerNotificationScheduler from '@/utils/prayer/PrayerNotificationScheduler';
+import NotificationService from '@/utils/notifications/NotificationService';
 
 // Inner component that has access to theme context
 function AppContent() {

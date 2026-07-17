@@ -3,11 +3,11 @@ jest.mock('@/locales/i18n', () => ({
   getDirectionalMixedSpacing: jest.fn(() => ({})),
 }));
 
-jest.mock('@/components/CompassMethodModal', () => () => null);
+jest.mock('@/components/qibla/CompassMethodModal', () => () => null);
 
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import LocationInfo from '@/components/LocationInfo';
+import LocationInfo from '@/components/qibla/LocationInfo';
 
 const BASE_PROPS = {
   location: { city: 'Cairo', country: 'Egypt' },

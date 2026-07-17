@@ -1,6 +1,6 @@
 jest.mock('@/locales/i18n', () => ({ t: (k) => k }));
 
-jest.mock('@/utils/NotificationService', () => ({
+jest.mock('@/utils/notifications/NotificationService', () => ({
   __esModule: true,
   default: {
     scheduleExactNotification: jest.fn().mockResolvedValue('id'),
@@ -8,16 +8,16 @@ jest.mock('@/utils/NotificationService', () => ({
   },
 }));
 
-jest.mock('@/utils/PrayerUtils', () => ({
+jest.mock('@/utils/prayer/PrayerUtils', () => ({
   calculatePrayerTimes: jest.fn(),
 }));
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment-timezone';
-import notificationService from '@/utils/NotificationService';
-import { calculatePrayerTimes } from '@/utils/PrayerUtils';
+import notificationService from '@/utils/notifications/NotificationService';
+import { calculatePrayerTimes } from '@/utils/prayer/PrayerUtils';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
-import { scheduleFastDayNotifications, cancelFastDayNotifications } from '@/utils/IftarSuhoorNotifications';
+import { scheduleFastDayNotifications, cancelFastDayNotifications } from '@/utils/calendar/IftarSuhoorNotifications';
 
 describe('IftarSuhoorNotifications', () => {
   beforeEach(() => {

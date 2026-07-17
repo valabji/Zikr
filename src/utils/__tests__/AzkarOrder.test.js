@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   loadAzkarOrder, saveAzkarOrder, orderCategories,
   azkarItemKeys, orderAzkarItems, loadAzkarItemOrder, saveAzkarItemOrder,
-} from '@/utils/AzkarOrder';
+} from '@/utils/azkar/AzkarOrder';
 
 const cat = (name, index) => ({ name, index, fav: false });
 

@@ -20,7 +20,7 @@ jest.mock('expo-location', () => ({
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PrayerTimesScreen from '@/screens/PrayerTimesScreen';
+import PrayerTimesScreen from '@/screens/prayer/PrayerTimesScreen';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 
 const LOC = JSON.stringify({

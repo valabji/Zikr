@@ -17,13 +17,13 @@ jest.mock('@/locales/i18n', () => ({
 }));
 
 jest.mock('@/screens/HomeGridScreen', () => 'HomeGridScreen');
-jest.mock('@/screens/MainScreen', () => 'MainScreen');
+jest.mock('@/screens/azkar/MainScreen', () => 'MainScreen');
 jest.mock('@/screens/TasbihScreen', () => 'TasbihScreen');
 jest.mock('@/screens/SettingsScreen', () => 'SettingsScreen');
-jest.mock('@/screens/PrayerTimesScreen', () => 'PrayerTimesScreen');
+jest.mock('@/screens/prayer/PrayerTimesScreen', () => 'PrayerTimesScreen');
 jest.mock('@/screens/QiblaScreen', () => 'QiblaScreen');
-jest.mock('@/screens/QuranScreen', () => 'QuranScreen');
-jest.mock('@/screens/BooksScreen', () => 'BooksScreen');
+jest.mock('@/screens/quran/QuranScreen', () => 'QuranScreen');
+jest.mock('@/screens/books/BooksScreen', () => 'BooksScreen');
 jest.mock('@/screens/RadioScreen', () => 'RadioScreen');
 jest.mock('@/screens/IslamicCalendarScreen', () => 'IslamicCalendarScreen');
 jest.mock('@/screens/WirdPlannerScreen', () => 'WirdPlannerScreen');

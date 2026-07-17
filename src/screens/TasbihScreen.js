@@ -5,13 +5,13 @@ import { useColors, useIsBrightTheme } from "@/constants/Colors";
 import { textStyles } from '@/constants/Fonts';
 import { t, getDirectionalMixedSpacing } from '@/locales/i18n';
 import { Feather } from '@expo/vector-icons';
-import { useAudio } from '@/utils/Sounds';
+import { useAudio } from '@/utils/audio/Sounds';
 import { ThemedBackground } from '@/components/ThemedBackground';
-import { StarSvgFilled } from '@/components/StarSvg';
+import { StarSvgFilled } from '@/components/svg/StarSvg';
 import vibrationManager from '@/utils/Vibration';
 import { useTasbih, getCounterDisplayName } from '@/utils/TasbihStore';
-import TasbihCountersSheet from '@/components/TasbihCountersSheet';
-import TasbihStatsSheet from '@/components/TasbihStatsSheet';
+import TasbihCountersSheet from '@/components/tasbih/TasbihCountersSheet';
+import TasbihStatsSheet from '@/components/tasbih/TasbihStatsSheet';
 
 export default function TasbihScreen({ route, navigation }) {
   const colors = useColors();

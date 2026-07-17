@@ -1,4 +1,4 @@
-import { paginateBook, estimateEntryHeight } from '@/utils/booksPaginate';
+import { paginateBook, estimateEntryHeight } from '@/utils/books/booksPaginate';
 
 describe('estimateEntryHeight', () => {
   it('grows with translation and longer text', () => {

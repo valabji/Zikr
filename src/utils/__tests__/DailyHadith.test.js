@@ -1,4 +1,4 @@
-import { getDailyHadith, _resetForTests } from '@/utils/DailyHadith';
+import { getDailyHadith, _resetForTests } from '@/utils/books/DailyHadith';
 
 describe('DailyHadith', () => {
   beforeEach(() => {

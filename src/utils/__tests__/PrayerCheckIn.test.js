@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const loadStore = async () => {
   let mod;
   await jest.isolateModulesAsync(async () => {
-    mod = require('@/utils/PrayerCheckIn');
+    mod = require('@/utils/prayer/PrayerCheckIn');
   });
   await new Promise((r) => setImmediate(r));
   return mod;

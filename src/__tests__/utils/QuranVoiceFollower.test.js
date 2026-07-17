@@ -9,7 +9,7 @@ jest.mock('@assets/quran/data/words.json', () => ({
   '2:3': [{ ar: 'ٱلَّذِينَ' }, { ar: 'يُؤْمِنُونَ' }, { ar: 'بِٱلْغَيْبِ' }, { type: 'end', ar: '۝' }],
 }));
 
-jest.mock('@/utils/QuranAudio', () => ({
+jest.mock('@/utils/quran/QuranAudio', () => ({
   flatVerses: [
     { surah: 1, ayah: 1, page: 1 },
     { surah: 1, ayah: 2, page: 1 },
@@ -20,7 +20,7 @@ jest.mock('@/utils/QuranAudio', () => ({
 }));
 
 const { ExpoSpeechRecognitionModule } = require('expo-speech-recognition');
-const service = require('@/utils/QuranVoiceFollower').default;
+const service = require('@/utils/quran/QuranVoiceFollower').default;
 
 const emitResult = (transcript, isFinal = false) =>
   ExpoSpeechRecognitionModule.__emit('result', { isFinal, results: [{ transcript }] });

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { dateKey } from '@/utils/HijriCalendar';
+import { dateKey } from '@/utils/calendar/HijriCalendar';
 import { HIFZ_CONSTANTS } from '@/constants/HifzConstants';
 
 const loadStore = async () => {

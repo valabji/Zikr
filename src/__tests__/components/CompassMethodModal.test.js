@@ -20,7 +20,7 @@ jest.mock('@/locales/i18n', () => ({
 }));
 
 // Mock the component itself before any imports
-jest.mock('@/components/CompassMethodModal', () => {
+jest.mock('@/components/qibla/CompassMethodModal', () => {
   const React = require('react');
   const { View, Text, TouchableOpacity } = require('react-native');
   const { t } = require('@/locales/i18n');
@@ -54,7 +54,7 @@ jest.mock('@/components/CompassMethodModal', () => {
 
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import CompassMethodModal from '@/components/CompassMethodModal';
+import CompassMethodModal from '@/components/qibla/CompassMethodModal';
 import { t } from '@/locales/i18n';
 
 describe('CompassMethodModal', () => {

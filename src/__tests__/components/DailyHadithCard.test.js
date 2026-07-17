@@ -5,7 +5,7 @@ jest.mock('@/locales/i18n', () => ({
   arabicContentStyle: () => ({}),
 }));
 
-jest.mock('@/utils/DailyHadith', () => ({
+jest.mock('@/utils/books/DailyHadith', () => ({
   getDailyHadith: jest.fn(() => ({
     bookId: 'nawawi40',
     bookNameAr: 'الأربعون النووية',
@@ -18,8 +18,8 @@ jest.mock('@/utils/DailyHadith', () => ({
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
-import DailyHadithCard from '@/components/DailyHadithCard';
-import { getDailyHadith } from '@/utils/DailyHadith';
+import DailyHadithCard from '@/components/azkar/DailyHadithCard';
+import { getDailyHadith } from '@/utils/books/DailyHadith';
 
 describe('DailyHadithCard', () => {
   beforeEach(() => {

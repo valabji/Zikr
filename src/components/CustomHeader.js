@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from "@/constants/Colors";
 import { textStyles } from '@/constants/Fonts';
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
-import { PatternSvg } from './PatternSvg';
+import { PatternSvg } from '@/components/svg/PatternSvg';
 const width = Dimensions.get("window").width
 
 export default function CustomHeader({ title, isHome, Left, Right, navigation, testID, onBackPress=null }) {

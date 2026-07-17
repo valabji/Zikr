@@ -10,7 +10,7 @@ import {
   getUpcomingEvents,
   isWithinRamadan,
   getRamadanRange,
-} from '@/utils/HijriCalendar';
+} from '@/utils/calendar/HijriCalendar';
 
 describe('HijriCalendar', () => {
   it('dateKey formats a date as YYYY-MM-DD', () => {

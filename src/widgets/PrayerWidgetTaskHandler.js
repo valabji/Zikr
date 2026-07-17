@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getWidgetPrayerData, getWidgetThemeColors } from '@/utils/PrayerWidgetService';
+import { getWidgetPrayerData, getWidgetThemeColors } from '@/utils/prayer/PrayerWidgetService';
 import { renderPrayerWidget } from './PrayerWidget';
 import { renderHijriWidget } from './HijriWidget';
 import { APP_KEYS } from '@/constants/StorageKeys';

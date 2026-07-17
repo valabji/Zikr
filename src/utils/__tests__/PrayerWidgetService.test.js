@@ -1,4 +1,4 @@
-jest.mock('@/utils/PrayerUtils', () => ({
+jest.mock('@/utils/prayer/PrayerUtils', () => ({
   calculatePrayerTimes: jest.fn(),
 }));
 
@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import SharedGroupPreferences from 'react-native-shared-group-preferences';
 import { requestWidgetUpdate } from 'react-native-android-widget';
-import * as PrayerUtils from '@/utils/PrayerUtils';
+import * as PrayerUtils from '@/utils/prayer/PrayerUtils';
 import {
   buildWidgetSchedule,
   getWidgetPrayerData,
@@ -15,7 +15,7 @@ import {
   WIDGET_DATA_KEY,
   WIDGET_THEME_KEY,
   WIDGET_LANGUAGE_KEY,
-} from '@/utils/PrayerWidgetService';
+} from '@/utils/prayer/PrayerWidgetService';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 
 const LOCATION = {

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
 import { useState, useEffect } from 'react';
 import { HIFZ_CONSTANTS } from '@/constants/HifzConstants';
-import { dateKey } from './HijriCalendar';
+import { dateKey } from '@/utils/calendar/HijriCalendar';
 import surahsData from '@assets/quran/data/surahs.json';
 
 const STORAGE_KEY = HIFZ_CONSTANTS.STORAGE_KEYS.PROGRESS;

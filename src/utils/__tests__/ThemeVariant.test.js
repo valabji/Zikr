@@ -1,6 +1,6 @@
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { resolvePrayerPeriod, getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '@/utils/ThemeVariant';
+import { resolvePrayerPeriod, getCurrentPrayerVariant, THEME_VARIANT_KEYS } from '@/utils/theme/ThemeVariant';
 
 const makeTimes = (base) => ({
   fajr: moment(base).set({ hour: 5, minute: 0 }),

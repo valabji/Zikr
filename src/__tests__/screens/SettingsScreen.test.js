@@ -43,7 +43,7 @@ jest.mock('@/constants/Colors', () => ({
 }));
 
 // Mock other dependencies
-jest.mock('@/utils/Sounds', () => ({
+jest.mock('@/utils/audio/Sounds', () => ({
   useAudio: () => ({
     volume: 0.5,
     setClickVolume: jest.fn(),

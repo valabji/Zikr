@@ -27,9 +27,9 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),
 }));
-jest.mock('@/screens/AzkarDetailScreen', () => () => null);
+jest.mock('@/screens/azkar/AzkarDetailScreen', () => () => null);
 jest.mock('@/screens/ContributeScreen', () => () => null);
-jest.mock('@/screens/UnifiedPrayerSettingsScreen', () => () => null);
+jest.mock('@/screens/prayer/UnifiedPrayerSettingsScreen', () => () => null);
 jest.mock('@/screens/SettingsScreen', () => () => null);
 jest.mock('@/utils/firebase/events', () => ({ __esModule: true, default: jest.fn() }));
 

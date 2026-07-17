@@ -1,4 +1,4 @@
-import { normalizeArabic, tokenize, matchPosition, findResync } from '@/utils/quranRecitationMatch';
+import { normalizeArabic, tokenize, matchPosition, findResync } from '@/utils/quran/quranRecitationMatch';
 
 const flat = (...norms) => norms.map((norm) => ({ norm }));
 
