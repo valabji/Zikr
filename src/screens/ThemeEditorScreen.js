@@ -3,7 +3,7 @@ import { View, Text, TextInput, Image, Alert, Platform } from 'react-native';
 import { useColors, useTheme } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
 import { useRTL } from '@/hooks/useRTL';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import ColorPickerModal from '@/components/ColorPickerModal';
 import {
   SettingsContainer,
@@ -107,14 +107,14 @@ export default function ThemeEditorScreen({ navigation, route }) {
   if (!customThemes[themeId]) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <CHeader title={t('themeManager.editTheme')} navigation={navigation} />
+        <CustomHeader title={t('themeManager.editTheme')} navigation={navigation} />
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <CHeader title={t('themeManager.editTheme')} navigation={navigation} testID="theme-editor-header" />
+      <CustomHeader title={t('themeManager.editTheme')} navigation={navigation} testID="theme-editor-header" />
       <SettingsContainer
         testID="theme-editor-screen"
         footer={(

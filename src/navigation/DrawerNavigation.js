@@ -4,7 +4,7 @@ import { ScrollView } from "react-native";
 import { useColors, getItemColors } from "@/constants/Colors";
 import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '@/constants/Fonts';
-import Screen3 from '@/screens/Screen3'
+import TasbihScreen from '@/screens/TasbihScreen'
 import MainScreen from '@/screens/MainScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 import PrayerTimesScreen from '@/screens/PrayerTimesScreen';
@@ -33,8 +33,8 @@ const Drawer = createDrawerNavigator();
 function useInitialDrawerRoute() {
   const [resolved, setResolved] = useState(undefined);
   useEffect(() => {
-    AsyncStorage.getItem(APP_KEYS.FIRST_TIME_SETTINGS).then(ft => {
-      if (ft === null) {
+    AsyncStorage.getItem(APP_KEYS.FIRST_TIME_SETTINGS).then(firstTime => {
+      if (firstTime === null) {
         setResolved({ route: 'Settings' });
         return;
       }
@@ -42,7 +42,7 @@ function useInitialDrawerRoute() {
         const map = {
           All: { route: 'Home', params: { showFavorites: false } },
           Fav: { route: 'Home', params: { showFavorites: true } },
-          Tasbih: { route: 'Screen3' },
+          Tasbih: { route: 'Tasbih' },
           PrayerTimes: { route: 'PrayerTimes' },
           Qibla: { route: 'Qibla' },
           Quran: { route: 'Quran' },
@@ -59,7 +59,7 @@ function useInitialDrawerRoute() {
   return resolved;
 }
 
-export function DNav() {
+export function DrawerNavigation() {
   const colors = useColors();
   const [hasLocation, setHasLocation] = useState(false);
   const initial = useInitialDrawerRoute();
@@ -127,8 +127,8 @@ export function DNav() {
                 const def = ITEM_DEFS[item.id];
                 if (!def) return null;
                 const action = getItemAction(item.id, navigation, hasLocation);
-                const g = getItemColors(colors, idx);
-                const fg = g ? g.fg : colors.BYellow;
+                const itemColors = getItemColors(colors, idx);
+                const fg = itemColors ? itemColors.fg : colors.BYellow;
                 return (
                   <TouchableOpacity
                     key={item.id}
@@ -138,17 +138,17 @@ export function DNav() {
                       height: 64,
                       ...getDirectionalMixedSpacing({ marginLeft: 5, marginRight: 5 }),
                       marginTop: idx === 0 ? 30 : 5,
-                      backgroundColor: g ? 'transparent' : colors.DGreen,
-                      borderRadius: g ? 12 : 0,
+                      backgroundColor: itemColors ? 'transparent' : colors.DGreen,
+                      borderRadius: itemColors ? 12 : 0,
                       overflow: 'hidden',
                       flexDirection: "row",
                     }}>
-                    {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+                    {itemColors && <LinearGradient colors={itemColors.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
                       style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
                     {isRTL() ? (
-                      <MuslimIconSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={64} height={64} />
+                      <MuslimIconSvg color={fg} backgroundColor={itemColors ? itemColors.gradient[0] : colors.DGreen} width={64} height={64} />
                     ) : (
-                      <MuslimIconEnSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={64} height={64} />
+                      <MuslimIconEnSvg color={fg} backgroundColor={itemColors ? itemColors.gradient[0] : colors.DGreen} width={64} height={64} />
                     )}
                     <Text style={[
                       textStyles.navigation,
@@ -199,7 +199,7 @@ export function DNav() {
           </View>)
       }}
     >
-      <Drawer.Screen name="Screen3" component={Screen3} />
+      <Drawer.Screen name="Tasbih" component={TasbihScreen} />
       <Drawer.Screen name="Home" component={MainScreen} initialParams={homeInitialParams} />
       <Drawer.Screen name="Quran" component={QuranScreen} />
       <Drawer.Screen name="Books" component={BooksScreen} />

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, Text, Linking, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors } from '@/constants/Colors';
 import { textStyles, FONT_FAMILY } from '@/constants/Fonts';
 import { useRTL } from '@/hooks/useRTL';
@@ -63,7 +63,7 @@ export default function BookInfoScreen({ book, dlState, navigation, onBack, onRe
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="book-info">
-      <CHeader title={name} navigation={navigation} onBackPress={onBack} />
+      <CustomHeader title={name} navigation={navigation} onBackPress={onBack} />
       <SettingsContainer>
         <View style={{ alignItems: 'center', paddingVertical: SPACING.xl }}>
           <View style={{

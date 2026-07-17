@@ -1,15 +1,15 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import linkingOptions from './useLinking';
-import Screen2 from '@/screens/Screen2';
+import AzkarDetailScreen from '@/screens/AzkarDetailScreen';
 import ContributeScreen from '@/screens/ContributeScreen';
 import AboutScreen from '@/screens/AboutScreen';
 import CreditsScreen from '@/screens/CreditsScreen';
 import UnifiedPrayerSettingsScreen from '@/screens/UnifiedPrayerSettingsScreen';
 import ThemeManagerScreen from '@/screens/ThemeManagerScreen';
 import ThemeEditorScreen from '@/screens/ThemeEditorScreen';
-import { DNav } from './DrawerNavigation';
-import { TNav } from './TabNavigation';
+import { DrawerNavigation } from './DrawerNavigation';
+import { TabNavigation } from './TabNavigation';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { useColors, useIsBrightTheme } from '@/constants/Colors';
 import Constants from 'expo-constants';
@@ -65,8 +65,8 @@ export const AppContainer = () => {
                     }
                 }}
             >
-                <Stack.Screen name="Home" component={navMode === 'cards' ? TNav : DNav} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
-                <Stack.Screen name="Screen2" component={Screen2} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="Home" component={navMode === 'cards' ? TabNavigation : DrawerNavigation} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
+                <Stack.Screen name="AzkarDetail" component={AzkarDetailScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Contribute" component={ContributeScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="About" component={AboutScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />
                 <Stack.Screen name="Credits" component={CreditsScreen} options={{ title: "Zikr", headerShown: false, headerStyle: { backgroundColor: colors.headerBackground } }} />

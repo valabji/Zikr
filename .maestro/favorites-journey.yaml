@@ -1,7 +1,7 @@
 appId: com.valabji.zikr
-name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contribute
+name: Favorites journey — landing, search, azkar-detail, drawer, fav-toggle, contribute
 # Covers: first-time-to-home, favorites-default-shows-seeded, menu-button-on-favorites,
-# search-from-favorites, screen2-from-favorites, screen2-back-to-favorites,
+# search-from-favorites, azkar-detail-from-favorites, azkar-detail-back-to-favorites,
 # drawer-opens, drawer-open-close, fav-toggle-then-untoggle,
 # drawer-favorites-to-contribute, contribute-screen, contribute-back-to-home,
 # contribute-from-favorites-back.
@@ -37,13 +37,13 @@ name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contri
     visible:
       id: "search-toggle"
     timeout: 5000
-# screen2-from-favorites + screen2-back-to-favorites — tap a fav zikr, then back.
+# azkar-detail-from-favorites + azkar-detail-back-to-favorites — tap a fav zikr, then back.
 - tapOn:
     id: "zikr-item"
     index: 0
 - extendedWaitUntil:
     visible:
-      id: "screen2-container"
+      id: "azkar-detail-container"
     timeout: 10000
 - tapOn:
     id: "back-button"
@@ -61,7 +61,7 @@ name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contri
       id: "drawer-container"
     timeout: 5000
 - assertVisible:
-    id: "screen3"
+    id: "tasbih-screen"
 - assertVisible:
     id: "main-screen"
 - assertVisible:

@@ -1,6 +1,6 @@
 import Svg, { Path } from "react-native-svg"
 
- export const Hbg = ({ color,width, testID }) => {
+ export const PatternSvg = ({ color,width, testID }) => {
     return <Svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"

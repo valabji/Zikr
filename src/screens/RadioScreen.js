@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '@/constants/Fonts';

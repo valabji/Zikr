@@ -5,7 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
 import { useRTL } from '@/hooks/useRTL';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { LogoSvg } from '@/components/LogoSvg';
 import { ABOUT_LINKS } from '@/constants/AboutConstants';
 import { SettingsContainer, SettingsSection, SettingsRow } from '@/components/settings';
@@ -29,7 +29,7 @@ export default function AboutScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="about-screen-root">
-      <CHeader navigation={navigation} title={t('about.title')} />
+      <CustomHeader navigation={navigation} title={t('about.title')} />
 
       <SettingsContainer>
         <SettingsSection>

@@ -44,10 +44,10 @@ jest.mock('@/locales/i18n', () => ({
   getRTLTextAlign: jest.fn((align) => align),
 }));
 
-jest.mock('@/components/CHeader', () => {
+jest.mock('@/components/CustomHeader', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return function CHeader({ title }) {
+  return function CustomHeader({ title }) {
     return <Text testID="header-title">{title}</Text>;
   };
 });

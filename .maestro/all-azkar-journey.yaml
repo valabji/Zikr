@@ -1,11 +1,11 @@
 appId: com.valabji.zikr
-name: All Azkar journey — list, search variations, screen2 roundtrip, fav toggle, drawer
+name: All Azkar journey — list, search variations, azkar-detail roundtrip, fav toggle, drawer
 # Covers: drawer-allazkar-from-favorites, azkar-list-shows-items, azkar-search,
 # search-clear-button-hides, search-cleared-on-reopen, search-clears-on-close,
 # search-close-returns-to-list, search-close-without-input, search-no-results,
-# search-reopen-after-close, azkar-fav-toggle-stays-on-list, azkar-item-opens-screen2,
-# screen2-count-button-visible, screen2-back-to-home, azkar-list-tap-second-item,
-# screen2-roundtrip, fav-toggle-adds-favorite, drawer-allazkar-to-contribute,
+# search-reopen-after-close, azkar-fav-toggle-stays-on-list, azkar-item-opens-detail,
+# azkar-detail-count-button-visible, azkar-detail-back-to-home, azkar-list-tap-second-item,
+# azkar-detail-roundtrip, fav-toggle-adds-favorite, drawer-allazkar-to-contribute,
 # drawer-allazkar-to-settings.
 ---
 - launchApp:
@@ -106,13 +106,13 @@ name: All Azkar journey — list, search variations, screen2 roundtrip, fav togg
     id: "zikr-item"
 - assertVisible:
     id: "search-toggle"
-# azkar-item-opens-screen2 + screen2-count-button-visible — open item 0, see count star.
+# azkar-item-opens-detail + azkar-detail-count-button-visible — open item 0, see count star.
 - tapOn:
     id: "zikr-item"
     index: 0
 - extendedWaitUntil:
     visible:
-      id: "screen2-container"
+      id: "azkar-detail-container"
     timeout: 10000
 - assertVisible:
     id: "back-button"
@@ -122,7 +122,7 @@ name: All Azkar journey — list, search variations, screen2 roundtrip, fav togg
       id: "count-button"
     direction: DOWN
     timeout: 10000
-# screen2-back-to-home — back returns to the All Azkar list.
+# azkar-detail-back-to-home — back returns to the All Azkar list.
 - tapOn:
     id: "back-button"
 - extendedWaitUntil:
@@ -137,9 +137,9 @@ name: All Azkar journey — list, search variations, screen2 roundtrip, fav togg
     index: 1
 - extendedWaitUntil:
     visible:
-      id: "screen2-container"
+      id: "azkar-detail-container"
     timeout: 10000
-# screen2-roundtrip — back, then open item 0 again.
+# azkar-detail-roundtrip — back, then open item 0 again.
 - tapOn:
     id: "back-button"
 - extendedWaitUntil:
@@ -151,7 +151,7 @@ name: All Azkar journey — list, search variations, screen2 roundtrip, fav togg
     index: 0
 - extendedWaitUntil:
     visible:
-      id: "screen2-container"
+      id: "azkar-detail-container"
     timeout: 10000
 - tapOn:
     id: "back-button"

@@ -31,7 +31,7 @@ jest.mock('expo-location', () => ({
 }));
 
 // IMPORT AFTER MOCKS
-import { DNav as DrawerNavigation } from '@/navigation/DrawerNavigation';
+import { DrawerNavigation } from '@/navigation/DrawerNavigation';
 
 // Mock navigation container and drawer
 jest.mock('@react-navigation/native', () => ({
@@ -58,7 +58,7 @@ jest.mock('@/locales/i18n', () => ({
 
 // Mock screens
 jest.mock('@/screens/MainScreen', () => 'MainScreen');
-jest.mock('@/screens/Screen3', () => 'Screen3');
+jest.mock('@/screens/TasbihScreen', () => 'TasbihScreen');
 jest.mock('@/screens/SettingsScreen', () => 'SettingsScreen');
 jest.mock('@/screens/ContributeScreen', () => 'ContributeScreen');
 jest.mock('@/screens/IslamicCalendarScreen', () => 'IslamicCalendarScreen');

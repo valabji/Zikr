@@ -9,10 +9,10 @@ name: Tasbih counter does not persist across launches
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "screen3"
+      id: "tasbih-screen"
     timeout: 5000
 - tapOn:
-    id: "screen3"
+    id: "tasbih-screen"
 - extendedWaitUntil:
     visible:
       id: "tasbih-screen"
@@ -37,10 +37,10 @@ name: Tasbih counter does not persist across launches
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "screen3"
+      id: "tasbih-screen"
     timeout: 5000
 - tapOn:
-    id: "screen3"
+    id: "tasbih-screen"
 - extendedWaitUntil:
     visible:
       id: "tasbih-counter-value"

@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from "@/constants/Colors";
 import { textStyles } from '@/constants/Fonts';
 import Svg, { Defs, Path, ClipPath, Use } from "react-native-svg"
-import { Hbg } from './Hbg';
+import { PatternSvg } from './PatternSvg';
 const width = Dimensions.get("window").width
 
 export default function CustomHeader({ title, isHome, Left, Right, navigation, testID, onBackPress=null }) {
@@ -36,8 +36,8 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
       }}>
       {colors.hidePattern ? null : (
         <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
-          <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
-          <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+          <PatternSvg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+          <PatternSvg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
         </View>
       )}
       {colors.headerImage ? (

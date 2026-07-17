@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '@/constants/Fonts';
@@ -121,7 +121,7 @@ export default function HifzTrackerScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="hifz-tracker-screen">
-      <CHeader navigation={navigation} isHome={true} title={t('hifz.title')} />
+      <CustomHeader navigation={navigation} isHome={true} title={t('hifz.title')} />
 
       <View style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.md }}>
         <View style={{ width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>

@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'rea
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import CustomHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t, isRTL, arabicContentStyle, toArabicDigits } from '@/locales/i18n';

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Linking, Alert, Clipboard } from 'react-native';
 import { useColors } from '@/constants/Colors';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '@/locales/i18n';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { Feather } from '@expo/vector-icons';
 import { CONTRIBUTE_CONSTANTS } from '@/constants/ContributeConstants';
 import { webCursor, CONTENT_MAX_WIDTH } from '@/constants/settingsTokens';
@@ -203,7 +203,7 @@ export default function ContributeScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="contribute-screen-root">
-      <CHeader navigation={navigation} title={t('navigation.contribute')} />
+      <CustomHeader navigation={navigation} title={t('navigation.contribute')} />
 
       <ScrollView
         style={{ flex: 1 }}

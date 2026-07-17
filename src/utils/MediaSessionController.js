@@ -8,7 +8,7 @@ import { getStationSubtitle } from './RadioStations';
 import { isRTL, toArabicDigits } from '@/locales/i18n';
 import * as MediaSession from '@modules/expo-media-session';
 
-const surahById = surahsData.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+const surahById = surahsData.reduce((acc, surah) => { acc[surah.id] = surah; return acc; }, {});
 
 let initialized = false;
 let activeSource = null;
@@ -26,18 +26,18 @@ async function ensureAndroidNotificationPermission() {
 }
 
 function quranMeta() {
-  const a = QuranAudio.activeAyah;
-  if (!a) return null;
-  const ar = isRTL();
-  const surah = surahById[a.surah];
-  const surahName = surah ? (ar ? surah.nameAr : surah.nameEn) : '';
-  const ayahNum = ar ? toArabicDigits(a.ayah) : String(a.ayah);
+  const ayah = QuranAudio.activeAyah;
+  if (!ayah) return null;
+  const isArabic = isRTL();
+  const surah = surahById[ayah.surah];
+  const surahName = surah ? (isArabic ? surah.nameAr : surah.nameEn) : '';
+  const ayahNum = isArabic ? toArabicDigits(ayah.ayah) : String(ayah.ayah);
   const reciter = getReciter(QuranAudio.reciterId);
   return {
     source: 'quran',
     title: `${surahName} · ${ayahNum}`,
-    artist: ar ? reciter.nameAr : reciter.nameEn,
-    album: ar ? 'القرآن الكريم' : 'Holy Quran',
+    artist: isArabic ? reciter.nameAr : reciter.nameEn,
+    album: isArabic ? 'القرآن الكريم' : 'Holy Quran',
     isPlaying: QuranAudio.isPlaying,
     canNext: true,
     canPrevious: true,
@@ -45,14 +45,14 @@ function quranMeta() {
 }
 
 function radioMeta() {
-  const s = RadioService.activeStation;
-  if (!s) return null;
-  const ar = isRTL();
-  const subtitle = getStationSubtitle(s.streamUrl, ar ? 'ar' : 'en');
-  const channel = ar ? 'إذاعة القرآن الكريم' : 'Quran Radio';
+  const station = RadioService.activeStation;
+  if (!station) return null;
+  const isArabic = isRTL();
+  const subtitle = getStationSubtitle(station.streamUrl, isArabic ? 'ar' : 'en');
+  const channel = isArabic ? 'إذاعة القرآن الكريم' : 'Quran Radio';
   return {
     source: 'radio',
-    title: s.name || channel,
+    title: station.name || channel,
     artist: subtitle || channel,
     album: channel,
     isPlaying: RadioService.isPlaying,
@@ -63,25 +63,25 @@ function radioMeta() {
 
 function applyWeb(meta) {
   if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-  const ms = navigator.mediaSession;
+  const mediaSession = navigator.mediaSession;
   try {
-    ms.metadata = new window.MediaMetadata({ title: meta.title, artist: meta.artist, album: meta.album });
+    mediaSession.metadata = new window.MediaMetadata({ title: meta.title, artist: meta.artist, album: meta.album });
   } catch {}
-  ms.playbackState = meta.isPlaying ? 'playing' : 'paused';
-  ms.setActionHandler('play', () => handleCommand('togglePlayPause'));
-  ms.setActionHandler('pause', () => handleCommand('togglePlayPause'));
-  ms.setActionHandler('stop', () => handleCommand('stop'));
-  ms.setActionHandler('previoustrack', meta.canPrevious ? () => handleCommand('previous') : null);
-  ms.setActionHandler('nexttrack', meta.canNext ? () => handleCommand('next') : null);
+  mediaSession.playbackState = meta.isPlaying ? 'playing' : 'paused';
+  mediaSession.setActionHandler('play', () => handleCommand('togglePlayPause'));
+  mediaSession.setActionHandler('pause', () => handleCommand('togglePlayPause'));
+  mediaSession.setActionHandler('stop', () => handleCommand('stop'));
+  mediaSession.setActionHandler('previoustrack', meta.canPrevious ? () => handleCommand('previous') : null);
+  mediaSession.setActionHandler('nexttrack', meta.canNext ? () => handleCommand('next') : null);
 }
 
 function clearWeb() {
   if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-  const ms = navigator.mediaSession;
-  ms.metadata = null;
-  ms.playbackState = 'none';
-  ['play', 'pause', 'stop', 'previoustrack', 'nexttrack'].forEach((a) => {
-    try { ms.setActionHandler(a, null); } catch {}
+  const mediaSession = navigator.mediaSession;
+  mediaSession.metadata = null;
+  mediaSession.playbackState = 'none';
+  ['play', 'pause', 'stop', 'previoustrack', 'nexttrack'].forEach((action) => {
+    try { mediaSession.setActionHandler(action, null); } catch {}
   });
 }
 

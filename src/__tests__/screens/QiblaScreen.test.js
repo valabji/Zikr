@@ -12,7 +12,7 @@ jest.mock('@/hooks/useQiblaCompass', () => ({
 jest.mock('@/components/QiblaCompass', () => () => null);
 jest.mock('@/components/LocationInfo', () => () => null);
 jest.mock('@/components/QiblaInstructions', () => () => null);
-jest.mock('@/components/CHeader', () => () => null);
+jest.mock('@/components/CustomHeader', () => () => null);
 
 import React from 'react';
 import { Animated } from 'react-native';

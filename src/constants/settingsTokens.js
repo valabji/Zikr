@@ -21,11 +21,11 @@ const toHex2 = (n) => Math.round(Math.max(0, Math.min(1, n)) * 255).toString(16)
 
 export const withAlpha = (color, amount) => {
   if (typeof color !== 'string') return color;
-  const a = typeof amount === 'number' ? amount : (ALPHA[amount] ?? 1);
-  if (color.length === 7 && color[0] === '#') return color + toHex2(a);
+  const alpha = typeof amount === 'number' ? amount : (ALPHA[amount] ?? 1);
+  if (color.length === 7 && color[0] === '#') return color + toHex2(alpha);
   if (color.length === 4 && color[0] === '#') {
     const r = color[1], g = color[2], b = color[3];
-    return `#${r}${r}${g}${g}${b}${b}${toHex2(a)}`;
+    return `#${r}${r}${g}${g}${b}${b}${toHex2(alpha)}`;
   }
   return color;
 };

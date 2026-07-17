@@ -66,11 +66,11 @@ class QuranSurahDownloaderService {
 
   countDownloaded(reciterId) {
     const prefix = `${reciterId}:`;
-    let n = 0;
+    let count = 0;
     Object.keys(this.state).forEach((k) => {
-      if (k.startsWith(prefix) && this.state[k].downloaded) n += 1;
+      if (k.startsWith(prefix) && this.state[k].downloaded) count += 1;
     });
-    return n;
+    return count;
   }
 
   isBulkActive(reciterId) {
@@ -97,15 +97,15 @@ class QuranSurahDownloaderService {
   }
 
   _reciterName(reciterId) {
-    const r = getReciter(reciterId);
-    if (!r) return '';
-    return isRTL() ? r.nameAr : r.nameEn;
+    const reciter = getReciter(reciterId);
+    if (!reciter) return '';
+    return isRTL() ? reciter.nameAr : reciter.nameEn;
   }
 
   _surahName(surah) {
-    const s = surahsData.find((x) => x.id === surah);
-    if (!s) return String(surah);
-    return isRTL() ? s.nameAr : s.nameEn;
+    const info = surahsData.find((x) => x.id === surah);
+    if (!info) return String(surah);
+    return isRTL() ? info.nameAr : info.nameEn;
   }
 
   _notifId(reciterId, surah) {
@@ -145,9 +145,9 @@ class QuranSurahDownloaderService {
       if (!m) continue;
       const surah = parseInt(m[1], 10);
       try {
-        const fi = await FileSystem.getInfoAsync(this._dir(reciterId) + name);
-        if (fi.exists && fi.size > MIN_SIZE) {
-          this.state[this.key(reciterId, surah)] = { downloaded: true, downloading: false, progress: 1, error: null, size: fi.size };
+        const fileInfo = await FileSystem.getInfoAsync(this._dir(reciterId) + name);
+        if (fileInfo.exists && fileInfo.size > MIN_SIZE) {
+          this.state[this.key(reciterId, surah)] = { downloaded: true, downloading: false, progress: 1, error: null, size: fileInfo.size };
         }
       } catch {}
     }
@@ -182,7 +182,7 @@ class QuranSurahDownloaderService {
       if (!manifest || !manifest.audioUrl) throw new Error('No audio source');
       if (this.cancelled[k]) { this.state[k] = blankState(); this._emit(); hideDownloadProgress(this._notifId(reciterId, surah)); return; }
 
-      const dl = FileSystem.createDownloadResumable(
+      const download = FileSystem.createDownloadResumable(
         manifest.audioUrl,
         this._localUri(reciterId, surah),
         {},
@@ -199,7 +199,7 @@ class QuranSurahDownloaderService {
           }
         }
       );
-      const result = await dl.downloadAsync();
+      const result = await download.downloadAsync();
 
       if (this.cancelled[k]) {
         try { await FileSystem.deleteAsync(this._localUri(reciterId, surah), { idempotent: true }); } catch {}

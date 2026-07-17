@@ -7,7 +7,7 @@ export function getItemAction(id, navigation, hasLocation) {
     case 'quran': return () => navigation.navigate('Quran');
     case 'books': return () => navigation.navigate('Books');
     case 'radio': return () => navigation.navigate('Radio');
-    case 'tasbih': return () => navigation.navigate('Screen3');
+    case 'tasbih': return () => navigation.navigate('Tasbih');
     case 'azkar': return () => navigation.navigate('Home', { showFavorites: false });
     case 'prayerTimes': return () => {
       if (!hasLocation) { navigation.toggleDrawer?.(); navigation.navigate('UnifiedPrayerSettings'); return; }

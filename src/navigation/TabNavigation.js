@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColors } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
 import HomeGridScreen from '@/screens/HomeGridScreen';
-import Screen3 from '@/screens/Screen3';
+import TasbihScreen from '@/screens/TasbihScreen';
 import MainScreen from '@/screens/MainScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 import PrayerTimesScreen from '@/screens/PrayerTimesScreen';
@@ -25,7 +25,7 @@ const Tab = createBottomTabNavigator();
 const SCREENS = {
   HomeGrid: { component: HomeGridScreen },
   Home: { component: MainScreen, initialParams: { showFavorites: false } },
-  Screen3: { component: Screen3 },
+  Tasbih: { component: TasbihScreen },
   Quran: { component: QuranScreen },
   Books: { component: BooksScreen },
   Radio: { component: RadioScreen },
@@ -37,7 +37,7 @@ const SCREENS = {
   Settings: { component: SettingsScreen },
 };
 
-export function TNav() {
+export function TabNavigation() {
   const colors = useColors();
   const [firstTime, setFirstTime] = useState(undefined);
   const [menuConfig, setMenuConfig] = useState(DEFAULT_MENU_CONFIG);

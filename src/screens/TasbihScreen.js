@@ -1,19 +1,19 @@
 import * as React from 'react';
-import CustomHeader from '@/components/CHeader'
+import CustomHeader from '@/components/CustomHeader'
 import { Text, View, TouchableOpacity, Modal, TouchableHighlight } from 'react-native'
 import { useColors, useIsBrightTheme } from "@/constants/Colors";
 import { textStyles } from '@/constants/Fonts';
 import { t, getDirectionalMixedSpacing } from '@/locales/i18n';
 import { Feather } from '@expo/vector-icons';
 import { useAudio } from '@/utils/Sounds';
-import { BackgroundSvg2 } from '@/components/BackgroundSvg2';
+import { ThemedBackground } from '@/components/ThemedBackground';
 import { StarSvgFilled } from '@/components/StarSvg';
 import vibrationManager from '@/utils/Vibration';
 import { useTasbih, getCounterDisplayName } from '@/utils/TasbihStore';
 import TasbihCountersSheet from '@/components/TasbihCountersSheet';
 import TasbihStatsSheet from '@/components/TasbihStatsSheet';
 
-export default function Screen3({ route, navigation }) {
+export default function TasbihScreen({ route, navigation }) {
   const colors = useColors();
   const { active, increment, resetActive, stats, setDailyGoal } = useTasbih();
   const player = useAudio();
@@ -24,7 +24,7 @@ export default function Screen3({ route, navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="tasbih-screen">
-      <BackgroundSvg2 color={colors.BYellow} />
+      <ThemedBackground variant={2} />
       <Modal
         animationType="slide"
         transparent={true}

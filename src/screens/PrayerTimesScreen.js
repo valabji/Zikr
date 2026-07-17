@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useColors } from '@/constants/Colors';
 import { t, getDirectionalMixedSpacing, getRTLTextAlign, formatArabicCountdown, formatArabicDate } from '@/locales/i18n';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { Feather } from '@expo/vector-icons';
 import moment from 'moment-timezone';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
@@ -56,7 +56,7 @@ export default function PrayerTimesScreen({ navigation }) {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="prayer-times-loading">
-        <CHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
+        <CustomHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Feather name="clock" size={48} color={colors.BYellow} />
           <Text style={{
@@ -75,7 +75,7 @@ export default function PrayerTimesScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="prayer-times-content">
-      <CHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
+      <CustomHeader navigation={navigation} isHome={true} title={t('navigation.prayerTimes')} />
 
       <ScrollView
         style={{ flex: 1 }}

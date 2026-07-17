@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, TouchableOpacity, ActivityIndicator, FlatList, Dimensions, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors } from '@/constants/Colors';
 import { t, isRTL, toArabicDigits } from '@/locales/i18n';
 import { setLastRead } from '@/utils/BooksLibrary';

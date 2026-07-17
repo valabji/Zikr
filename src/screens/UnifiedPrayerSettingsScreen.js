@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ActivityIndicator, Platform } from 'react-native';
 import { useColors } from '@/constants/Colors';
 import { t, isRTL } from '@/locales/i18n';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { SPACING, CONTENT_MAX_WIDTH } from '@/constants/settingsTokens';
 import { getPrayerIcon } from '@/utils/PrayerUtils';
@@ -75,7 +75,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
 
   return (
     <View testID="unified-prayer-settings-screen" style={{ flex: 1, backgroundColor: colors.background }}>
-      <CHeader navigation={navigation} title={t('prayerSettings.title')} />
+      <CustomHeader navigation={navigation} title={t('prayerSettings.title')} />
 
       <SettingsContainer footer={footer}>
         <PrayerLocationSection

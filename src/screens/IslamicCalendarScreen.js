@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '@/constants/Fonts';
@@ -107,7 +107,7 @@ export default function IslamicCalendarScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="islamic-calendar-screen">
-      <CHeader navigation={navigation} isHome={true} title={t('islamicCalendar.title')} />
+      <CustomHeader navigation={navigation} isHome={true} title={t('islamicCalendar.title')} />
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text style={{ ...textStyles.bodySmall, color: colors.textSecondary, textAlign: 'center', marginBottom: 12 }}>

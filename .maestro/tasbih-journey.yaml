@@ -27,10 +27,10 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "screen3"
+      id: "tasbih-screen"
     timeout: 5000
 - tapOn:
-    id: "screen3"
+    id: "tasbih-screen"
 - extendedWaitUntil:
     visible:
       id: "tasbih-screen"
@@ -77,7 +77,7 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
       id: "drawer-container"
     timeout: 5000
 - assertVisible:
-    id: "screen3"
+    id: "tasbih-screen"
 - assertVisible:
     id: "main-screen"
 - assertVisible:

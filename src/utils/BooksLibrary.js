@@ -56,12 +56,12 @@ const TATWEEL_RE = /ـ/g;
 const NONLETTER_RE = /[^ء-يٱ-ە\s]/g;
 
 export function normalizeArabic(text) {
-  let t = (text || '').replace(TASHKEEL_RE, '').replace(TATWEEL_RE, '');
-  t = t.replace(/[ٱآأإ]/g, 'ا');
-  t = t.replace(/ى/g, 'ي');
-  t = t.replace(/ة/g, 'ه');
-  t = t.replace(NONLETTER_RE, ' ');
-  return t.replace(/\s+/g, ' ').trim();
+  let normalized = (text || '').replace(TASHKEEL_RE, '').replace(TATWEEL_RE, '');
+  normalized = normalized.replace(/[ٱآأإ]/g, 'ا');
+  normalized = normalized.replace(/ى/g, 'ي');
+  normalized = normalized.replace(/ة/g, 'ه');
+  normalized = normalized.replace(NONLETTER_RE, ' ');
+  return normalized.replace(/\s+/g, ' ').trim();
 }
 
 const HAS_ARABIC_RE = /[ء-ي]/;

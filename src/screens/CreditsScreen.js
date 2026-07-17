@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
 import { useRTL } from '@/hooks/useRTL';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { DATA_SOURCES, LICENSES } from '@/constants/AboutConstants';
 import { SettingsContainer, SettingsSection, SettingsRow } from '@/components/settings';
 import { SPACING, RADIUS } from '@/constants/settingsTokens';
@@ -22,7 +22,7 @@ export default function CreditsScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="credits-screen-root">
-      <CHeader navigation={navigation} title={t('credits.title')} />
+      <CustomHeader navigation={navigation} title={t('credits.title')} />
 
       <SettingsContainer>
         <SettingsSection>

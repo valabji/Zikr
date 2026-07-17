@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useColors } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import QiblaCompass from '@/components/QiblaCompass';
 import LocationInfo from '@/components/LocationInfo';
 import QiblaInstructions from '@/components/QiblaInstructions';
@@ -183,7 +183,7 @@ export default function QiblaScreen({ navigation }) {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="qibla-loading">
-        <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
+        <CustomHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
         <View style={{
           flex: 1,
           justifyContent: 'center',
@@ -207,7 +207,7 @@ export default function QiblaScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="qibla-content">
-      <CHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
+      <CustomHeader navigation={navigation} isHome={true} title={t('navigation.qibla')} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{

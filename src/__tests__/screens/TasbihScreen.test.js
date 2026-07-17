@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import Screen3 from '@/screens/Screen3';
+import TasbihScreen from '@/screens/TasbihScreen';
 
 // Mock navigation
 const mockNavigation = {
@@ -80,7 +80,7 @@ jest.mock('@/constants/Colors', () => ({
   useIsBrightTheme: () => false,
 }));
 
-describe('Screen3', () => {
+describe('TasbihScreen', () => {
   beforeEach(() => {
     // Clear navigation mocks before each test
     mockNavigation.goBack.mockClear();
@@ -89,14 +89,14 @@ describe('Screen3', () => {
 
   it('renders correctly', () => {
     const { root } = render(
-      <Screen3 navigation={mockNavigation} />
+      <TasbihScreen navigation={mockNavigation} />
     );
     expect(root).toBeTruthy();
   });
 
   it('shows the active counter value', () => {
     const { getByTestId } = render(
-      <Screen3 navigation={mockNavigation} />
+      <TasbihScreen navigation={mockNavigation} />
     );
     expect(String(getByTestId('tasbih-counter-value').props.children)).toBe('5');
   });

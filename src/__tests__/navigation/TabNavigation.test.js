@@ -18,7 +18,7 @@ jest.mock('@/locales/i18n', () => ({
 
 jest.mock('@/screens/HomeGridScreen', () => 'HomeGridScreen');
 jest.mock('@/screens/MainScreen', () => 'MainScreen');
-jest.mock('@/screens/Screen3', () => 'Screen3');
+jest.mock('@/screens/TasbihScreen', () => 'TasbihScreen');
 jest.mock('@/screens/SettingsScreen', () => 'SettingsScreen');
 jest.mock('@/screens/PrayerTimesScreen', () => 'PrayerTimesScreen');
 jest.mock('@/screens/QiblaScreen', () => 'QiblaScreen');
@@ -31,11 +31,11 @@ jest.mock('@/screens/HifzTrackerScreen', () => 'HifzTrackerScreen');
 
 import React from 'react';
 import { render, act } from '@testing-library/react-native';
-import { TNav } from '@/navigation/TabNavigation';
+import { TabNavigation } from '@/navigation/TabNavigation';
 
 describe('TabNavigation', () => {
   it('renders without crashing', async () => {
-    expect(() => render(<TNav />)).not.toThrow();
+    expect(() => render(<TabNavigation />)).not.toThrow();
     await act(async () => {});
   });
 });

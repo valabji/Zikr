@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View } from 'react-native';
 import { useColors, useTheme } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
-import CustomHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { THEME_VARIANT_KEYS } from '@/constants/themes';
 import { useTestedMode, setTestedMode } from '@/utils/TestedMode';
 import { useAudio } from '@/utils/Sounds';

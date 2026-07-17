@@ -32,7 +32,7 @@ export const INTENSITY_OPTIONS = [
 export const ROUTE_MAP = {
   All: { route: 'Home', params: { showFavorites: false } },
   Fav: { route: 'Home', params: { showFavorites: true } },
-  Tasbih: { route: 'Screen3' },
+  Tasbih: { route: 'Tasbih' },
   PrayerTimes: { route: 'PrayerTimes' },
   Qibla: { route: 'Qibla' },
   Quran: { route: 'Quran' },

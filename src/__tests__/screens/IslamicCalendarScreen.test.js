@@ -5,7 +5,7 @@ jest.mock('@/locales/i18n', () => ({
   isRTL: () => false,
 }));
 
-jest.mock('@/components/CHeader', () => () => null);
+jest.mock('@/components/CustomHeader', () => () => null);
 
 jest.mock('@/utils/NotificationService', () => ({
   __esModule: true,

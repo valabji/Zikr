@@ -29,7 +29,7 @@ const PAGE_DATA = (() => {
   const out = {};
   for (const file of ['pages_lines_v1', 'pages_lines_v2']) {
     const pages = getLayout(file);
-    const arr = new Array(pages.length);
+    const pageMetrics = new Array(pages.length);
     for (let p = 0; p < pages.length; p++) {
       const lineLens = new Array(pages[p].lines.length);
       const lineSpaces = new Array(pages[p].lines.length).fill(0);
@@ -43,24 +43,24 @@ const PAGE_DATA = (() => {
         for (const w of line.words) {
           total += visibleArabicLen(w.ar) + 1;
           // Rub-el-hizb words carry a space inside their QCF code ("ﱨ ﱩ").
-          const c = w.code || '';
-          for (let ci = 0; ci < c.length; ci++) if (c[ci] === ' ') codeSpaces += 1;
+          const code = w.code || '';
+          for (let ci = 0; ci < code.length; ci++) if (code[ci] === ' ') codeSpaces += 1;
         }
         lineLens[li] = total;
         lineSpaces[li] = Math.max(0, line.words.length - 1);
         lineCodeSpaces[li] = codeSpaces;
         if (total > bestLen) bestLen = total;
       }
-      arr[p] = { visibleLen: bestLen, lineLens, lineSpaces, lineCodeSpaces };
+      pageMetrics[p] = { visibleLen: bestLen, lineLens, lineSpaces, lineCodeSpaces };
     }
-    out[file] = arr;
+    out[file] = pageMetrics;
   }
   return out;
 })();
 
 export function getPageProbeLen(layoutFile, pageIndex) {
-  const arr = PAGE_DATA[layoutFile];
-  const entry = arr && arr[pageIndex];
+  const pageMetrics = PAGE_DATA[layoutFile];
+  const entry = pageMetrics && pageMetrics[pageIndex];
   return entry ? entry.visibleLen : 0;
 }
 

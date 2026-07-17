@@ -21,13 +21,13 @@ jest.mock('expo-constants', () => ({
   default: { statusBarHeight: 20 },
 }));
 
-jest.mock('@/navigation/DrawerNavigation', () => ({ DNav: () => null }));
-jest.mock('@/navigation/TabNavigation', () => ({ TNav: () => null }));
+jest.mock('@/navigation/DrawerNavigation', () => ({ DrawerNavigation: () => null }));
+jest.mock('@/navigation/TabNavigation', () => ({ TabNavigation: () => null }));
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),
 }));
-jest.mock('@/screens/Screen2', () => () => null);
+jest.mock('@/screens/AzkarDetailScreen', () => () => null);
 jest.mock('@/screens/ContributeScreen', () => () => null);
 jest.mock('@/screens/UnifiedPrayerSettingsScreen', () => () => null);
 jest.mock('@/screens/SettingsScreen', () => () => null);

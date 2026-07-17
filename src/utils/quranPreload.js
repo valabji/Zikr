@@ -18,12 +18,12 @@ export const preloadMethods = {
   },
 
   _takePreload(surah, ayah) {
-    const p = this._preload;
-    if (!p) return null;
+    const preload = this._preload;
+    if (!preload) return null;
     this._preload = null;
-    if (p.surah === surah && p.ayah === ayah) return p.player;
-    dlog('preload mismatch: had', `${p.surah}:${p.ayah}`, 'wanted', `${surah}:${ayah}`);
-    this._disposePlayer(p.player);
+    if (preload.surah === surah && preload.ayah === ayah) return preload.player;
+    dlog('preload mismatch: had', `${preload.surah}:${preload.ayah}`, 'wanted', `${surah}:${ayah}`);
+    this._disposePlayer(preload.player);
     return null;
   },
 

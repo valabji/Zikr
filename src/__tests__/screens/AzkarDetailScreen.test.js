@@ -2,7 +2,7 @@ jest.unmock('@/utils/AzkarStore');
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import Screen2 from '@/screens/Screen2';
+import AzkarDetailScreen from '@/screens/AzkarDetailScreen';
 
 // Mock navigation
 const mockNavigation = {
@@ -19,7 +19,7 @@ jest.mock('@react-navigation/native', () => ({
 // Mock Sound utils
 jest.mock('@/utils/Sounds');
 
-describe('Screen2', () => {
+describe('AzkarDetailScreen', () => {
   const mockRoute = {
     params: { name: 'أذكار الصباح' } // Use a valid category from Azkar data
   };
@@ -29,18 +29,18 @@ describe('Screen2', () => {
   });
 
   it('renders correctly', () => {
-    const { getByTestId } = render(<Screen2 route={mockRoute} />);
-    expect(getByTestId('screen2-container')).toBeTruthy();
+    const { getByTestId } = render(<AzkarDetailScreen route={mockRoute} />);
+    expect(getByTestId('azkar-detail-container')).toBeTruthy();
   });
 
   it('displays Azkar items', () => {
-    const { getAllByTestId } = render(<Screen2 route={mockRoute} />);
+    const { getAllByTestId } = render(<AzkarDetailScreen route={mockRoute} />);
     const azkarItems = getAllByTestId('azkar-item');
     expect(azkarItems.length).toBeGreaterThan(0);
   });
 
   it('opens the item sort sheet and reorders without losing items', () => {
-    const { getByTestId, getAllByTestId, queryByTestId } = render(<Screen2 route={mockRoute} />);
+    const { getByTestId, getAllByTestId, queryByTestId } = render(<AzkarDetailScreen route={mockRoute} />);
     const before = getAllByTestId('azkar-item').length;
 
     fireEvent.press(getByTestId('item-sort-toggle'));
@@ -55,7 +55,7 @@ describe('Screen2', () => {
   });
 
   it('displays count information', () => {
-    const { getAllByTestId } = render(<Screen2 route={mockRoute} />);
+    const { getAllByTestId } = render(<AzkarDetailScreen route={mockRoute} />);
     const countButtons = getAllByTestId('count-button');
     
     if (countButtons.length > 0) {

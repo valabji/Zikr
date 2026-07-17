@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Alert, Platform } from 'react-native';
 import { useColors, useTheme } from '@/constants/Colors';
 import { t, getCurrentLanguage } from '@/locales/i18n';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import {
   SettingsContainer,
   SettingsSection,
@@ -121,7 +121,7 @@ export default function ThemeManagerScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <CHeader title={t('themeManager.title')} navigation={navigation} testID="theme-manager-header" />
+      <CustomHeader title={t('themeManager.title')} navigation={navigation} testID="theme-manager-header" />
       <SettingsContainer testID="theme-manager-screen">
         <SettingsSection title={t('themeManager.actions')}>
           <SettingsRow

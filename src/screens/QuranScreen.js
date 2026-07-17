@@ -6,7 +6,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CustomHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, useIsBrightTheme } from '@/constants/Colors';
 import { textStyles } from '@/constants/Fonts';
 import { t, isRTL } from '@/locales/i18n';

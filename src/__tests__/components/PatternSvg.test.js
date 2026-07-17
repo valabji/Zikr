@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { Hbg } from '@/components/Hbg';
+import { PatternSvg } from '@/components/PatternSvg';
 
-describe('Hbg', () => {
+describe('PatternSvg', () => {
   it('renders correctly with provided props', () => {
     const { getByTestId } = render(
-      <Hbg 
+      <PatternSvg 
         color="#000000" 
         width={100}
         testID="hbg-component"
@@ -18,7 +18,7 @@ describe('Hbg', () => {
 
   it('renders without crashing with different widths', () => {
     expect(() => render(
-      <Hbg 
+      <PatternSvg 
         color="#000000" 
         width={200}
         testID="hbg-component"

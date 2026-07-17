@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import CHeader from '@/components/CHeader';
+import CustomHeader from '@/components/CustomHeader';
 import { useColors, getItemColors } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles, FONT_FAMILY } from '@/constants/Fonts';
@@ -42,7 +42,7 @@ export default function WirdPlannerScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }} testID="wird-planner-screen">
-      <CHeader navigation={navigation} isHome={true} title={t('wirdPlanner.title')} />
+      <CustomHeader navigation={navigation} isHome={true} title={t('wirdPlanner.title')} />
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16 }}>

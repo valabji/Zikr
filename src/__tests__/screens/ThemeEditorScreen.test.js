@@ -5,10 +5,10 @@ import { ThemeContext } from '@/constants/Colors';
 import { themes } from '@/constants/themes';
 import { THEME_COLOR_KEYS } from '@/utils/ThemeManager';
 
-jest.mock('@/components/CHeader', () => {
+jest.mock('@/components/CustomHeader', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return function CHeader({ title }) {
+  return function CustomHeader({ title }) {
     return <Text testID="header-title">{title}</Text>;
   };
 });

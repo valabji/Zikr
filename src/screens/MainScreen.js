@@ -1,5 +1,5 @@
 import * as React from 'react';
-import CustomHeader from '@/components/CHeader'
+import CustomHeader from '@/components/CustomHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import { useColors, getItemColors } from "@/constants/Colors";
@@ -10,7 +10,7 @@ import { getAzkar, setAzkar as saveAzkar, subscribeAzkar } from '@/utils/AzkarSt
 import { MuslimIconSvg } from '@/components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '@/components/MuslimIconEnSvg';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Hbg } from '@/components/Hbg';
+import { PatternSvg } from '@/components/PatternSvg';
 import { useAzkarHistory } from '@/utils/AzkarHistory';
 import DailyHadithCard from '@/components/DailyHadithCard';
 import AzkarSortSheet from '@/components/AzkarSortSheet';
@@ -20,8 +20,8 @@ const normalizeArabic = (v) => ("" + v).replace("ة", "ه").replace("أ", "ا").
 
 export default function HomeScreen({ navigation, route }) {
   const colors = useColors();
-  const [s, setS] = React.useState(false)
-  const [st, setSt] = React.useState("")
+  const [searchOpen, setSearchOpen] = React.useState(false)
+  const [searchText, setSearchText] = React.useState("")
   const [Azkar, setAzkar] = React.useState(getAzkar())
   const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'))
 
@@ -160,8 +160,8 @@ export default function HomeScreen({ navigation, route }) {
         }}>
         {colors.hidePattern ? null : (
           <View style={{ flexDirection: "row", position: "absolute", left: 0, top: 0, width, height: 64 }}>
-            <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
-            <Hbg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+            <PatternSvg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
+            <PatternSvg color={(colors.patternColor || colors.DGreen) + "55"} width={width} />
           </View>
         )}
 
@@ -170,8 +170,8 @@ export default function HomeScreen({ navigation, route }) {
           <TouchableOpacity
             testID="close-search"
             onPress={() => {
-              setS(false);
-              setSt("");
+              setSearchOpen(false);
+              setSearchText("");
             }}
             style={{ padding: 8 }}
           >
@@ -191,9 +191,9 @@ export default function HomeScreen({ navigation, route }) {
             placeholder={t('search.placeholder')}
             placeholderTextColor={colors.BGreen}
             onChangeText={v => {
-              setSt(v)
+              setSearchText(v)
             }}
-            value={st}
+            value={searchText}
             autoFocus={true}
             style={[
               textStyles.withFont({
@@ -212,10 +212,10 @@ export default function HomeScreen({ navigation, route }) {
 
         {/* Clear button */}
         <View style={{ position: 'absolute', right: 10, top: 12, justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 }}>
-          {st.length > 0 && (
+          {searchText.length > 0 && (
             <TouchableOpacity
               testID="clear-search"
-              onPress={() => setSt("")}
+              onPress={() => setSearchText("")}
               style={{ padding: 8 }}
             >
               <Feather
@@ -253,7 +253,7 @@ export default function HomeScreen({ navigation, route }) {
 
   return (
     <View style={{ flex: 1 }} testID="home-screen">
-      {s ? (
+      {searchOpen ? (
         <SearchHeader />
       ) : (
         <CustomHeader
@@ -281,7 +281,7 @@ export default function HomeScreen({ navigation, route }) {
               <TouchableOpacity
                 testID="search-toggle"
                 onPress={() => {
-                  setS(!s)
+                  setSearchOpen(!searchOpen)
                 }}
                 style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
                 <Feather name="search" color={colors.BYellow} size={32} />
@@ -305,13 +305,13 @@ export default function HomeScreen({ navigation, route }) {
         // source={require("@/assets/images/bg.png")}
         style={{ flex: 1, resizeMode: "cover", alignItems: 'center', justifyContent: 'center', backgroundColor: colors.BGreen }}
       >
-        {!s && !showFavorites && (azkarStats.morningStreak > 0 || azkarStats.eveningStreak > 0 || azkarStats.morningDoneToday || azkarStats.eveningDoneToday) ? (
+        {!searchOpen && !showFavorites && (azkarStats.morningStreak > 0 || azkarStats.eveningStreak > 0 || azkarStats.morningDoneToday || azkarStats.eveningDoneToday) ? (
           <View testID="azkar-streak-banner" style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
             <StreakBadge icon="sunrise" label={t('zikr.morningAzkar')} streak={azkarStats.morningStreak} doneToday={azkarStats.morningDoneToday} />
             <StreakBadge icon="moon" label={t('zikr.eveningAzkar')} streak={azkarStats.eveningStreak} doneToday={azkarStats.eveningDoneToday} />
           </View>
         ) : null}
-        {!s && !showFavorites ? (
+        {!searchOpen && !showFavorites ? (
           <View style={{ alignItems: 'center', width: '100%' }}>
             <DailyHadithCard />
           </View>
@@ -328,10 +328,10 @@ export default function HomeScreen({ navigation, route }) {
               </Text>
             </View>
           ) : (
-            (showFavorites ? categories.filter(c => c.fav) : categories).map((c, i) => {
-              if (!s || st == "" || normalizeArabic(c.name).includes(normalizeArabic(st))) {
-                return <Item key={c.name} name={c.name} fav={c.fav} index={c.index} position={i} onPress={() => {
-                  navigation.navigate("Screen2", { name: c.name })
+            (showFavorites ? categories.filter(c => c.fav) : categories).map((category, i) => {
+              if (!searchOpen || searchText == "" || normalizeArabic(category.name).includes(normalizeArabic(searchText))) {
+                return <Item key={category.name} name={category.name} fav={category.fav} index={category.index} position={i} onPress={() => {
+                  navigation.navigate("AzkarDetail", { name: category.name })
                 }} />
               }
             })

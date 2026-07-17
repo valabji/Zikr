@@ -1,10 +1,8 @@
 import * as React from 'react';
-import CustomHeader from '@/components/CHeader'
-import { Text, View, SafeAreaView, Dimensions, ScrollView, I18nManager, Alert, BackHandler, Image, ImageBackground, TouchableOpacity, Platform } from 'react-native'
-import { StackActions } from '@react-navigation/native';
-import { useColors, useIsBrightTheme } from "@/constants/Colors";
-import { textStyles } from '@/constants/Fonts';
-import { t, isRTL, getRTLTextAlign, getDirectionalSpacing } from '@/locales/i18n';
+import CustomHeader from '@/components/CustomHeader'
+import { View, TouchableOpacity, Platform } from 'react-native'
+import { useColors } from "@/constants/Colors";
+import { isRTL, getDirectionalSpacing } from '@/locales/i18n';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { getAzkar } from '@/utils/AzkarStore';
 import AzkarSortSheet from '@/components/AzkarSortSheet';
@@ -12,34 +10,18 @@ import { loadAzkarItemOrder, saveAzkarItemOrder, orderAzkarItems } from '@/utils
 import AzkarSwiper from '@/components/AzkarSwiper';
 import AzkarOnePageScroll from '@/components/AzkarOnePageScroll';
 import AzkarOnePageScrollCompact from '@/components/AzkarOnePageScrollCompact';
-import { useAudio } from '@/utils/Sounds.js';
-import { BackgroundSvg1 } from '@/components/BackgroundSvg1';
+import { ThemedBackground } from '@/components/ThemedBackground';
 import { getFontSize } from '@/utils/FontSize';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_KEYS } from '@/constants/StorageKeys';
 
-// import {
-//   AdMobBanner,
-//   AdMobInterstitial,
-//   PublisherBanner,
-//   AdMobRewarded,
-//   setTestDeviceIDAsync,
-// } from 'expo-ads-admob';
-
-const Banner = "ca-app-pub-1740754568229700/6853520443"
-const Interstatel = "ca-app-pub-1740754568229700/7975030420"
-
-
-export default function Screen2({ route, navigation }) {
+export default function AzkarDetailScreen({ route, navigation }) {
   const colors = useColors();
   const name = route?.params?.name || "Azkar";
-  const player = useAudio();
-  const reverse = isRTL();
   const [zikrFontSize, setZikrFontSize] = React.useState(18);
   const [viewMode, setViewMode] = React.useState('swiper');
 
-  // Load font size and view mode when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       const loadSettings = async () => {
@@ -97,8 +79,8 @@ export default function Screen2({ route, navigation }) {
   );
 
   return (
-    <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="screen2-container">
-      <BackgroundSvg1 color={colors.BYellow} />
+    <View style={{ flex: 1, flexGrow: 1, backgroundColor: colors.BGreen }} testID="azkar-detail-container">
+      <ThemedBackground />
       <CustomHeader title={name} isHome={false} navigation={navigation} Left={HeaderButtons} />
       <View style={{
         flex: 1,
@@ -111,13 +93,6 @@ export default function Screen2({ route, navigation }) {
           maxHeight: '100vh'
         })
       }}>
-        {/* <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID={Banner} // Test ID, Replace with your-admob-unit-id
-          servePersonalizedAds={true} // true or false
-          onDidFailToReceiveAdWithError={err => {
-            console.warn(err)
-          }} /> */}
         {viewMode === 'swiper' ? (
           <AzkarSwiper key={`swiper-${zikrFontSize}-${orderVersion}`} azkarList={azkarList} zikrFontSize={zikrFontSize} />
         ) : viewMode === 'onePageScrollCompact' ? (
