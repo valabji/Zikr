@@ -1,0 +1,134 @@
+name: E2E (Android)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+
+# Cancel in-progress runs when a new commit lands on the same PR/branch.
+concurrency:
+  group: e2e-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Maestro on Android emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      # app.config.js reads these. Without them Expo passes `undefined` for the
+      # googleServicesFile, which would skip Firebase wiring in the Android build.
+      GOOGLE_SERVICES_JSON: ${{ github.workspace }}/google-services.json
+      GOOGLE_SERVICES_PLIST: ${{ github.workspace }}/GoogleService-Info.plist
+      # AdMob is referenced in app.config.js; a dummy value is fine for E2E.
+      ADMOB_APPID: ca-app-pub-0000000000000000~0000000000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: yarn
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install JS dependencies
+        run: yarn install --immutable
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/yarn.lock', 'app.config.js') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Expo prebuild (Android)
+        run: npx expo prebuild --platform android --clean --non-interactive
+
+      - name: Build release APK
+        # Release is signed with the debug keystore (see android/app/build.gradle).
+        # Release-mode is required: debug mode triggers Metro/dev-server lookups
+        # and the dev support manager can reload the React instance mid-boot,
+        # which crashes through an expo-av ExoPlayer teardown race.
+        # Lint tasks are skipped — they fail on harmless translation keys.
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon \
+            -x lint -x lintVitalRelease -x lintVitalAnalyzeRelease
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run Maestro on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: >-
+            -no-snapshot-save -no-window -gpu swiftshader_indirect
+            -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb wait-for-device
+            adb install -r android/app/build/outputs/apk/release/app-release.apk
+            # Run every top-level flow under .maestro/. The subflows/ directory
+            # holds reusable fragments (e.g. complete-first-time.yaml) invoked
+            # via `runFlow:`, so we glob *.yaml at the top level instead of
+            # passing the directory.
+            # Maestro has no native retry flag, so each flow gets up to 2
+            # retries (3 total attempts) to absorb emulator-level flakes (slow
+            # boots, ANRs).
+            overall=0
+            max_attempts=3
+            for flow in .maestro/*.yaml; do
+              passed=0
+              for attempt in $(seq 1 $max_attempts); do
+                echo "::group::maestro $flow (attempt $attempt/$max_attempts)"
+                if maestro test "$flow"; then
+                  echo "::endgroup::"
+                  passed=1
+                  break
+                fi
+                echo "::endgroup::"
+                if [ "$attempt" -lt "$max_attempts" ]; then
+                  echo "::warning::$flow failed on attempt $attempt — retrying"
+                fi
+              done
+              if [ "$passed" -ne 1 ]; then
+                echo "::error::$flow failed after $max_attempts attempts"
+                overall=1
+              fi
+            done
+            exit $overall
+
+      - name: Upload Maestro artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-${{ github.run_id }}
+          path: |
+            ~/.maestro/tests/**
+            /tmp/maestro-screenshots
+          if-no-files-found: ignore
+          retention-days: 7

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import AzkarSwiper from '../../components/AzkarSwiper';
 import AzkarOnePageScroll from '../../components/AzkarOnePageScroll';
+import AzkarOnePageScrollCompact from '../../components/AzkarOnePageScrollCompact';
 
 // Mock required modules
 jest.mock('../../utils/Sounds.js', () => ({
@@ -14,7 +15,8 @@ jest.mock('../../constants/Colors', () => ({
   useColors: () => ({
     BYellow: '#FFD700',
     primary: '#000000'
-  })
+  }),
+  getItemColors: () => null
 }));
 
 jest.mock('../../constants/Fonts', () => ({
@@ -32,7 +34,8 @@ jest.mock('../../locales/i18n', () => ({
     return key;
   },
   isRTL: () => false,
-  getRTLTextAlign: (align) => align
+  getRTLTextAlign: (align) => align,
+  getDirectionalMixedSpacing: (v) => v
 }));
 
 jest.mock('../../components/StarSvg', () => ({
@@ -46,13 +49,15 @@ const mockAzkarList = [
     zekr: 'Test Zikr 1',
     count: 3,
     reference: 'Test Reference 1',
-    description: 'Test Description 1'
+    description: 'Test Description 1',
+    category: 'Morning'
   },
   {
     zekr: 'Test Zikr 2',
     count: 1,
     reference: 'Test Reference 2',
-    description: 'Test Description 2'
+    description: 'Test Description 2',
+    category: 'Morning'
   }
 ];
 

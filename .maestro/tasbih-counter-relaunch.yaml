@@ -1,0 +1,50 @@
+appId: com.valabji.zikr
+name: Tasbih counter does not persist across launches
+# Standalone because it relaunches the app to verify the counter resets.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen3"
+    timeout: 5000
+- tapOn:
+    id: "screen3"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-screen"
+    timeout: 10000
+- tapOn:
+    id: "tasbih-counter-button"
+- tapOn:
+    id: "tasbih-counter-button"
+- tapOn:
+    id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "3"
+# Counter lives in local React state; relaunch without clearing should reset it.
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 30000
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen3"
+    timeout: 5000
+- tapOn:
+    id: "screen3"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-counter-value"
+    timeout: 10000
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "0"

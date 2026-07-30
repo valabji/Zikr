@@ -17,6 +17,9 @@ module.exports = {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/__mocks__/fileMock.js',
     '^react-native-svg$': '<rootDir>/__mocks__/svgMock.js',
     '^@react-native-community/slider$': '<rootDir>/__mocks__/Slider.js',
+    '^expo-speech-recognition$': '<rootDir>/__mocks__/expo-speech-recognition.js',
+    'modules/expo-media-session$': '<rootDir>/__mocks__/expo-media-session.js',
+    'modules/expo-strong-vibration$': '<rootDir>/__mocks__/expo-strong-vibration.js',
   },
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',

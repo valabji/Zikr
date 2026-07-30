@@ -1,0 +1,153 @@
+appId: com.valabji.zikr
+name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screens
+# Covers: drawer-allazkar-to-tasbih, tasbih-menu-button-visible, tasbih-counter,
+# tasbih-counter-five, tasbih-counter-many-taps, drawer-shows-all-items-from-tasbih,
+# tasbih-drawer-close-stays, drawer-tasbih-to-contribute, drawer-tasbih-to-settings,
+# settings-from-tasbih-back, drawer-tasbih-then-favorites, drawer-favorites-from-tasbih.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+# Land on All Azkar first so the tasbih entry exercises the drawer-allazkar-to-tasbih path.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "main-screen"
+    timeout: 5000
+- tapOn:
+    id: "main-screen"
+- extendedWaitUntil:
+    visible:
+      id: "zikr-item"
+    timeout: 10000
+# drawer-allazkar-to-tasbih + tasbih-menu-button-visible — counter starts at 0,
+# header uses the menu (home) button rather than back.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen3"
+    timeout: 5000
+- tapOn:
+    id: "screen3"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-screen"
+    timeout: 10000
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "0"
+- assertVisible:
+    id: "menu-button"
+- assertNotVisible:
+    id: "back-button"
+# tasbih-counter — 3 taps reach 3.
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "3"
+# tasbih-counter-five — two more taps reach 5.
+- repeat:
+    times: 2
+    commands:
+      - tapOn:
+          id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "5"
+# tasbih-counter-many-taps — five more taps reach 10.
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "10"
+# drawer-shows-all-items-from-tasbih — drawer from Tasbih still has all 6 entries.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- assertVisible:
+    id: "screen3"
+- assertVisible:
+    id: "main-screen"
+- assertVisible:
+    id: "fav-screen"
+- assertVisible:
+    id: "prayer-times-screen"
+- assertVisible:
+    id: "qibla-screen"
+- assertVisible:
+    id: "contribute-screen"
+# tasbih-drawer-close-stays — closing the drawer keeps Tasbih mounted with counter intact.
+- back
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-counter-value"
+    timeout: 5000
+- assertVisible:
+    id: "menu-button"
+# drawer-tasbih-to-contribute — drawer → contribute → back to tasbih.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen"
+    timeout: 5000
+- tapOn:
+    id: "contribute-screen"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen-root"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-screen"
+    timeout: 10000
+# drawer-tasbih-to-settings + settings-from-tasbih-back — drawer → settings,
+# then back returns to Tasbih.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- tapOn:
+    id: "settings-screen"
+- extendedWaitUntil:
+    visible:
+      id: "language-toggle"
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-screen"
+    timeout: 10000
+# drawer-tasbih-then-favorites + drawer-favorites-from-tasbih — drawer → favorites
+# shows seeded items.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "fav-screen"
+    timeout: 5000
+- tapOn:
+    id: "fav-screen"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 10000
+- assertVisible:
+    id: "zikr-item"

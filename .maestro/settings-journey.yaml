@@ -1,0 +1,54 @@
+appId: com.valabji.zikr
+name: Settings journey — drawer entry, back button, auto-save cycle, language tap
+# Covers: drawer-favorites-to-settings, settings-from-drawer,
+# settings-back-button-visible, settings-auto-save-cycle, settings-tap-language-en.
+---
+- launchApp:
+    clearState: true
+- runFlow: subflows/complete-first-time.yaml
+# drawer-favorites-to-settings + settings-from-drawer — drawer → settings.
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- tapOn:
+    id: "settings-screen"
+- extendedWaitUntil:
+    visible:
+      id: "language-toggle"
+    timeout: 10000
+- assertVisible:
+    id: "auto-save-toggle"
+# settings-back-button-visible — header shows back button, not the menu button.
+- assertVisible:
+    id: "back-button"
+- assertNotVisible:
+    id: "menu-button"
+# settings-auto-save-cycle — subflow left auto-save OFF so save-settings is visible;
+# toggling ON hides it, toggling OFF brings it back.
+- assertVisible:
+    id: "save-settings"
+- tapOn:
+    id: "auto-save-toggle"
+- extendedWaitUntil:
+    notVisible:
+      id: "save-settings"
+    timeout: 5000
+- tapOn:
+    id: "auto-save-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "save-settings"
+    timeout: 5000
+# settings-tap-language-en — tapping the English language side keeps all controls mounted.
+# Do not save — that would trigger setLanguage + Restart.
+- tapOn:
+    id: "language-toggle"
+- assertVisible:
+    id: "language-toggle"
+- assertVisible:
+    id: "language-toggle-ar"
+- assertVisible:
+    id: "auto-save-toggle"

@@ -70,10 +70,34 @@ describe('HomeScreen', () => {
     const { getAllByTestId, getByTestId } = render(
       <HomeScreen navigation={mockNavigation} />
     );
-    
+
     const favToggles = getAllByTestId('fav-toggle');
     fireEvent.press(favToggles[0]); // Press the first one
     // Just verify the fav indicator exists after toggle
     expect(getAllByTestId('fav-indicator')[0]).toBeTruthy();
+  });
+
+  it('opens the sort sheet and switches to manual order', () => {
+    const mockAzkar = [
+      { category: 'B', fav: false },
+      { category: 'A', fav: false }
+    ];
+    jest.spyOn(mystore, 'getState').mockImplementation(() => ({
+      obj: { Azkar: mockAzkar }
+    }));
+
+    const { getByTestId, getAllByTestId } = render(
+      <HomeScreen navigation={mockNavigation} />
+    );
+
+    fireEvent.press(getByTestId('sort-toggle'));
+    expect(getByTestId('azkar-sort-sheet')).toBeTruthy();
+
+    fireEvent.press(getByTestId('sort-mode-manual'));
+    expect(getByTestId('sort-up-0')).toBeTruthy();
+
+    fireEvent.press(getByTestId('sort-down-0'));
+    const items = getAllByTestId('zikr-item');
+    expect(items).toHaveLength(2);
   });
 });

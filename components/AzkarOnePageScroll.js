@@ -1,32 +1,42 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useColors } from "../constants/Colors";
+import { Feather } from '@expo/vector-icons';
+import { useColors, getItemColors } from "../constants/Colors";
+import { LinearGradient } from 'expo-linear-gradient';
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getRTLTextAlign } from '../locales/i18n';
 import { useAudio } from '../utils/Sounds.js';
 import { StarSvgFilled } from '../components/StarSvg';
 import vibrationManager from '../utils/Vibration';
+import { logAzkarCompletion } from '../utils/AzkarHistory';
+import ShareCardModal from './ShareCardModal';
 
 export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
   const colors = useColors();
   const player = useAudio();
+  const [shareItem, setShareItem] = React.useState(null);
 
   const Item = ({ z, pn, totalCount }) => {
     if (z.count == 0 || z.count == "" || z.count == null || z.count == undefined) {
       z.count = 1;
     }
     const [i, setI] = React.useState(0);
+    const g = getItemColors(colors, pn - 1);
+    const fg = g ? g.fg : colors.BYellow;
 
     return (
       <View style={{
         borderWidth: 1,
-        borderColor: colors.BYellow,
+        borderColor: g ? 'transparent' : colors.BYellow,
         margin: 7,
         borderStyle: "dashed",
         padding: 10,
         borderRadius: 10,
-        minHeight: 200
+        minHeight: 200,
+        overflow: 'hidden'
       }}>
+        {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => {
@@ -36,6 +46,9 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
               vibrationManager.vibrateForAzkarCount();
               if (i == z.count - 1) {
                 vibrationManager.vibrateForNextZikr();
+                if (pn === totalCount) {
+                  logAzkarCompletion(z.category);
+                }
               }
             }
           }}
@@ -44,7 +57,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           <Text style={[
             textStyles.bodySmall,
             {
-              color: colors.BYellow,
+              color: fg,
               marginTop: 6,
               fontSize: zikrFontSize,
               textAlign: getRTLTextAlign('left'),
@@ -54,7 +67,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           <Text style={[
             textStyles.bodySmall,
             {
-              color: colors.BYellow,
+              color: fg,
               marginTop: 6,
               fontSize: zikrFontSize,
               fontFamily: 'Hafs',
@@ -67,7 +80,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
             marginTop: 20,
             height: 1,
             width: "100%",
-            borderColor: colors.BYellow,
+            borderColor: fg,
             borderStyle: "solid"
           }} />
 
@@ -75,7 +88,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
             <Text style={[
               textStyles.bodySmall,
               {
-                color: colors.BYellow,
+                color: fg,
                 marginTop: 26,
               }
             ]}>{t('zikr.reference', { text: z.reference })}</Text>
@@ -84,7 +97,7 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           <Text style={[
             textStyles.bodySmall,
             {
-              color: colors.BYellow,
+              color: fg,
               marginTop: 6,
             }
           ]}>{z.description}</Text>
@@ -94,9 +107,18 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
           <View style={{
             height: 96,
             flexDirection: "row-reverse",
-            alignItems: 'center',
-            justifyContent: 'space-between'
+            alignItems: 'center'
           }}>
+            <View style={{ width: 96, justifyContent: "center", alignItems: "flex-end" }}>
+              <TouchableOpacity
+                onPress={(e) => { e?.stopPropagation?.(); setShareItem(z); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={{ padding: 10 }}
+              >
+                <Feather name="share-2" size={22} color={fg} />
+              </TouchableOpacity>
+            </View>
+
             <View style={{
               flex: 1,
               justifyContent: "center",
@@ -106,8 +128,8 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
                 style={[
                   textStyles.body,
                   {
-                    textAlign: "right",
-                    color: colors.BYellow,
+                    textAlign: "center",
+                    color: fg,
                     fontSize: 18,
                   }
                 ]}
@@ -141,22 +163,34 @@ export default function AzkarOnePageScroll({ azkarList, zikrFontSize }) {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1, width: '100%' }}
-      contentContainerStyle={{
-        paddingBottom: 80,
-        flexGrow: 1
-      }}
-      showsVerticalScrollIndicator={true}
-    >
-      {azkarList.map((item, index) => (
-        <Item
-          key={index}
-          z={item}
-          pn={index + 1}
-          totalCount={azkarList.length}
-        />
-      ))}
-    </ScrollView>
+    <>
+      <ScrollView
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{
+          paddingBottom: 80,
+          flexGrow: 1
+        }}
+        showsVerticalScrollIndicator={true}
+      >
+        {azkarList.map((item, index) => (
+          <Item
+            key={index}
+            z={item}
+            pn={index + 1}
+            totalCount={azkarList.length}
+          />
+        ))}
+      </ScrollView>
+      <ShareCardModal
+        visible={!!shareItem}
+        content={shareItem ? {
+          arabic: shareItem.zekr,
+          quran: shareItem.quran,
+          reference: shareItem.reference,
+          description: shareItem.description,
+        } : null}
+        onClose={() => setShareItem(null)}
+      />
+    </>
   );
 }

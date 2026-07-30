@@ -16,8 +16,9 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
   return (
     <LinearGradient
       testID={testID || "header-container"}
-      colors={[colors.BGreen, colors.DGreen]}
-      locations={[0, 1]}
+      colors={colors.headerGradient || [colors.BGreen, colors.DGreen]}
+      start={colors.headerGradient ? { x: 0, y: 0 } : undefined}
+      end={colors.headerGradient ? { x: 1, y: 1 } : undefined}
       style={{
         flexDirection: "row",
         height: 64,
@@ -44,12 +45,12 @@ export default function CustomHeader({ title, isHome, Left, Right, navigation, t
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <TouchableOpacity
                 testID="menu-button"
-                onPress={() => navigation.toggleDrawer()}
+                onPress={() => navigation.toggleDrawer ? navigation.toggleDrawer() : navigation.navigate('HomeGrid')}
                 style={{ flexDirection: "row" }}
               >
                 <Ionicons
-                  name="menu"
-                  size={30}
+                  name={navigation.toggleDrawer ? "menu" : "grid-outline"}
+                  size={navigation.toggleDrawer ? 30 : 26}
                   style={{ ...getDirectionalSpacing(20, 0) }}
                   color={colors.BYellow}
                 />

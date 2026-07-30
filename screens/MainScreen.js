@@ -2,7 +2,7 @@ import * as React from 'react';
 import CustomHeader from '../components/CHeader'
 import { Text, View, SafeAreaView, Dimensions, Image, ImageBackground, ScrollView, TouchableOpacity, TextInput, I18nManager, Platform } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import { useColors } from "../constants/Colors";
+import { useColors, getItemColors } from "../constants/Colors";
 import { textStyles } from '../constants/Fonts';
 import { t, isRTL, getDirectionalMixedSpacing, getRTLTextAlign, getDirectionalSpacing } from '../locales/i18n';
 // import Azkar from '../constants/Azkar.js';
@@ -13,6 +13,12 @@ import { MuslimIconSvg } from '../components/MuslimIconSvg';
 import { MuslimIconEnSvg } from '../components/MuslimIconEnSvg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Hbg } from '../components/Hbg';
+import { useAzkarHistory } from '../utils/AzkarHistory';
+import DailyHadithCard from '../components/DailyHadithCard';
+import AzkarSortSheet from '../components/AzkarSortSheet';
+import { loadAzkarOrder, saveAzkarOrder, orderCategories } from '../utils/AzkarOrder';
+
+const normalizeArabic = (v) => ("" + v).replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
 // import {
 //   AdMobBanner,
 //   AdMobInterstitial,
@@ -32,8 +38,37 @@ export default function HomeScreen({ navigation, route }) {
   const [Azkar, setAzkar] = React.useState(mystore.getState().obj.Azkar)
   const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'))
 
-  // Get showFavorites parameter from route params, default to false (show all)
-  const showFavorites = route?.params?.showFavorites || false
+  const [showFavorites, setShowFavorites] = React.useState(route?.params?.showFavorites || false)
+  const { stats: azkarStats } = useAzkarHistory()
+  const [order, setOrder] = React.useState({ mode: 'default', manual: [] })
+  const [sortVisible, setSortVisible] = React.useState(false)
+
+  React.useEffect(() => {
+    loadAzkarOrder().then(setOrder)
+  }, [])
+
+  const categories = React.useMemo(() => {
+    const seen = new Set()
+    const list = []
+    Azkar.forEach((item, index) => {
+      if (!seen.has(item.category)) {
+        seen.add(item.category)
+        list.push({ name: item.category, index, fav: item.fav == true })
+      }
+    })
+    return orderCategories(list, order)
+  }, [Azkar, order])
+
+  const changeOrder = (next) => {
+    setOrder(next)
+    saveAzkarOrder(next)
+  }
+
+  React.useEffect(() => {
+    if (route?.params?.showFavorites !== undefined) {
+      setShowFavorites(route.params.showFavorites)
+    }
+  }, [route?.params?.showFavorites])
 
   // Listen for dimension changes
   React.useEffect(() => {
@@ -46,9 +81,11 @@ export default function HomeScreen({ navigation, route }) {
 
   const width = screenDimensions.width
 
-  const Item = ({ name, onPress, fav, index }) => {
+  const Item = ({ name, onPress, fav, index, position }) => {
     let size = 32
     const [fv, setFv] = React.useState(fav)
+    const g = getItemColors(colors, position)
+    const fg = g ? g.fg : colors.BYellow
     return <TouchableOpacity
       testID="zikr-item"
       onPress={onPress}
@@ -57,13 +94,17 @@ export default function HomeScreen({ navigation, route }) {
         height: 48,
         ...getDirectionalMixedSpacing({ marginLeft: 10, marginRight: 10 }),
         marginTop: 5,
-        backgroundColor: colors.DGreen,
+        backgroundColor: g ? 'transparent' : colors.DGreen,
+        borderRadius: g ? 12 : 0,
+        overflow: 'hidden',
         flexDirection: "row",
       }}>
+      {g && <LinearGradient colors={g.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
       {isRTL() ? (
-        <MuslimIconSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+        <MuslimIconSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={48} height={48} />
       ) : (
-        <MuslimIconEnSvg color={colors.BYellow} backgroundColor={colors.DGreen} width={48} height={48} />
+        <MuslimIconEnSvg color={fg} backgroundColor={g ? g.gradient[0] : colors.DGreen} width={48} height={48} />
       )}
       <View style={{
         justifyContent: "center",
@@ -73,7 +114,7 @@ export default function HomeScreen({ navigation, route }) {
         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={[
           textStyles.body,
           {
-            color: colors.BYellow,
+            color: fg,
             textAlign: getRTLTextAlign('left'),
           }
         ]}>{name}</Text>
@@ -81,6 +122,7 @@ export default function HomeScreen({ navigation, route }) {
       <TouchableOpacity
         testID="fav-toggle"
         onPress={() => {
+          setFv(!fv)
           var Azkar2 = []
           for (let i = 0; i < Azkar.length; i++) {
             if (i == index) {
@@ -97,7 +139,6 @@ export default function HomeScreen({ navigation, route }) {
           }
           // Azkar2[index].fav = !fv
           Azkar2 = JSON.parse(JSON.stringify(Azkar2))
-          setFv(!fv)
           global.zikr = JSON.stringify(Azkar2)
           mystore.dispatch({ type: 'change', "obj": { "Azkar": Azkar2 } })
           AsyncStorage.setItem("@zikr", JSON.stringify(Azkar2))
@@ -109,7 +150,7 @@ export default function HomeScreen({ navigation, route }) {
           justifyContent: "center",
           ...getDirectionalMixedSpacing({ marginRight: 5 })
         }} >
-        <AntDesign name={fv ? "heart" : "hearto"} color={colors.BYellow} size={32} testID="fav-indicator" />
+        <Ionicons name={fv ? "heart" : "heart-outline"} color={fg} size={32} testID="fav-indicator" />
       </TouchableOpacity>
     </TouchableOpacity>
   }
@@ -138,8 +179,9 @@ export default function HomeScreen({ navigation, route }) {
   const SearchHeader = () => {
     return (
       <LinearGradient
-        colors={[colors.BGreen, colors.DGreen]}
-        locations={[0, 1]}
+        colors={colors.headerGradient || [colors.BGreen, colors.DGreen]}
+        start={colors.headerGradient ? { x: 0, y: 0 } : undefined}
+        end={colors.headerGradient ? { x: 1, y: 1 } : undefined}
         style={{
           flexDirection: "row",
           height: 64,
@@ -223,7 +265,27 @@ export default function HomeScreen({ navigation, route }) {
     );
   };
 
-  let p = ""
+  const StreakBadge = ({ icon, label, streak, doneToday }) => (
+    <View style={{
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.DGreen,
+      borderRadius: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      ...getDirectionalMixedSpacing({ marginRight: 8, marginLeft: 8 }),
+    }}>
+      <Feather name={icon} color={colors.BYellow} size={18} />
+      <View style={getDirectionalMixedSpacing({ marginLeft: 8 })}>
+        <Text style={[textStyles.body, { color: colors.BYellow, fontSize: 13 }]} numberOfLines={1}>{label}</Text>
+        <Text style={[textStyles.bodySmall, { color: colors.BYellow, opacity: 0.85, fontSize: 11 }]}>
+          {streak + ' ' + t('zikr.dayStreak')}
+        </Text>
+      </View>
+      {doneToday ? <Feather name="check-circle" color={colors.BYellow} size={16} style={getDirectionalMixedSpacing({ marginLeft: 6 })} /> : null}
+    </View>
+  )
+
   return (
     <View style={{ flex: 1 }} testID="home-screen">
       {s ? (
@@ -234,14 +296,32 @@ export default function HomeScreen({ navigation, route }) {
           isHome={true}
           navigation={navigation}
           Left={() => {
-            return <TouchableOpacity
-              testID="search-toggle"
-              onPress={() => {
-                setS(!s)
-              }}
-              style={{ flex: 1, justifyContent: "center", alignItems: "flex-end", paddingHorizontal: 20 }}>
-              <Feather name="search" color={colors.BYellow} size={32} />
-            </TouchableOpacity>
+            return <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingHorizontal: 12 }}>
+              <TouchableOpacity
+                testID="sort-toggle"
+                onPress={() => {
+                  setSortVisible(true)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Ionicons name="swap-vertical" color={colors.BYellow} size={32} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="favorites-toggle"
+                onPress={() => {
+                  setShowFavorites(!showFavorites)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Ionicons name={showFavorites ? "heart" : "heart-outline"} color={colors.BYellow} size={32} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="search-toggle"
+                onPress={() => {
+                  setS(!s)
+                }}
+                style={{ justifyContent: "center", alignItems: "center", paddingHorizontal: 8 }}>
+                <Feather name="search" color={colors.BYellow} size={32} />
+              </TouchableOpacity>
+            </View>
           }}
         />
       )}
@@ -267,59 +347,47 @@ export default function HomeScreen({ navigation, route }) {
           onDidFailToReceiveAdWithError={err=>{
             console.warn(err)
           }} /> */}
+        {!s && !showFavorites && (azkarStats.morningStreak > 0 || azkarStats.eveningStreak > 0 || azkarStats.morningDoneToday || azkarStats.eveningDoneToday) ? (
+          <View testID="azkar-streak-banner" style={{ flexDirection: "row", justifyContent: "center", marginTop: 10 }}>
+            <StreakBadge icon="sunrise" label={t('zikr.morningAzkar')} streak={azkarStats.morningStreak} doneToday={azkarStats.morningDoneToday} />
+            <StreakBadge icon="moon" label={t('zikr.eveningAzkar')} streak={azkarStats.eveningStreak} doneToday={azkarStats.eveningDoneToday} />
+          </View>
+        ) : null}
+        {!s && !showFavorites ? (
+          <View style={{ alignItems: 'center', width: '100%' }}>
+            <DailyHadithCard />
+          </View>
+        ) : null}
         <ScrollView
           style={{ flex: 1, width: "100%" }}
           contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
           showsVerticalScrollIndicator={false}
         >
-          {showFavorites ? (
-            // Favorites view with search
-            Azkar.filter(i => i.fav).length === 0 ?
-              <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={[textStyles.body, { color: colors.BYellow, textAlign: 'center' }]}>
-                  {t('favorites.empty')}
-                </Text>
-              </View>
-              :
-              Azkar.map((i, index) => {
-                if (i.fav) {
-                  const cat = "" + i.category
-                  let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-                  let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-
-                  // Apply search filter to favorites too
-                  if (!s || st == "" || ccat.includes(cst)) {
-                    return <Item
-                      key={index}
-                      name={i.category}
-                      fav={i.fav == true}
-                      index={index}
-                      onPress={() => {
-                        navigation.navigate("Screen2", { name: i.category })
-                      }}
-                    />
-                  }
-                }
-              })
+          {showFavorites && !categories.some(c => c.fav) ? (
+            <View testID="empty-favorites" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={[textStyles.body, { color: colors.BYellow, textAlign: 'center' }]}>
+                {t('favorites.empty')}
+              </Text>
+            </View>
           ) : (
-            // All items view with search functionality
-            Azkar.map((i, index) => {
-              const cat = "" + i.category
-              let ccat = cat.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-              let cst = st.replace("ة", "ه").replace("أ", "ا").replace("آ", "ا").replace("إ", "ا").replace("ى", "ي")
-              if (cat != p) {
-                p = cat
-                if (!s || st == "" || ccat.includes(cst)) {
-                  return <Item key={index} name={cat} fav={i.fav == true} index={index} onPress={() => {
-                    navigation.navigate("Screen2", { name: cat })
-                  }} />
-                }
+            (showFavorites ? categories.filter(c => c.fav) : categories).map((c, i) => {
+              if (!s || st == "" || normalizeArabic(c.name).includes(normalizeArabic(st))) {
+                return <Item key={c.name} name={c.name} fav={c.fav} index={c.index} position={i} onPress={() => {
+                  navigation.navigate("Screen2", { name: c.name })
+                }} />
               }
             })
           )}
         </ScrollView>
 
       </ImageBackground>
+      <AzkarSortSheet
+        visible={sortVisible}
+        onClose={() => setSortVisible(false)}
+        order={order}
+        items={categories.map(c => ({ key: c.name, label: c.name }))}
+        onChange={changeOrder}
+      />
     </View>
   );
 }

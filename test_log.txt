@@ -1,0 +1,281 @@
+PASS __tests__/test.js
+PASS utils/__tests__/PrayerUtils.test.js
+  ● Console
+
+    console.log
+      Qibla from New York: 58.5°
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:10:13)
+
+    console.log
+      Qibla from London: 119°
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:17:13)
+
+    console.log
+      Qibla from Cairo: 136.1°
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:22:13)
+
+    console.log
+      Testing Prayer Times calculation...
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:28:13)
+
+    console.log
+      Prayer Times for New York:
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:41:15)
+
+    console.log
+      Fajr: 5:24 AM
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:42:15)
+
+    console.log
+      Dhuhr: 12:46 PM
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:43:15)
+
+    console.log
+      Asr: 4:00 PM
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:44:15)
+
+    console.log
+      Maghrib: 6:34 PM
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:45:15)
+
+    console.log
+      Isha: 8:00 PM
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:46:15)
+
+    console.log
+      Testing IP location...
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:60:13)
+
+    console.log
+      IP Location: {
+        latitude: 31.2018,
+        longitude: 29.9158,
+        city: 'Alexandria',
+        region: 'Alexandria',
+        country: 'EG',
+        timezone: 'Africa/Cairo'
+      }
+
+      at Object.log (utils/__tests__/PrayerUtils.test.js:63:15)
+
+PASS __tests__/screens/Screen3.test.js (8.751 s)
+PASS __tests__/screens/Screen2.test.js (7.96 s)
+PASS __tests__/screens/MainScreen.test.js
+PASS __tests__/screens/ContributeScreen.test.js
+PASS __tests__/rtl/RTLSupport.test.js
+PASS __tests__/components/TabBarIcon.test.js
+PASS __tests__/components/Hbg.test.js
+PASS __tests__/components/CompassMethodModal.test.js
+FAIL __tests__/components/CHeader.test.js
+  ● CustomHeader › applies correct background colors in gradient
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   "#003C34",
+    -   "#002520",
+    +   "#1A1A1A",
+    +   "#0A0A0A",
+      ]
+
+    [0m [90m 89 |[39m     
+     [90m 90 |[39m     [36mconst[39m gradient [33m=[39m [33mUNSAFE_getByType[39m([32m'LinearGradient'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 91 |[39m     expect(gradient[33m.[39mprops[33m.[39mcolors)[33m.[39mtoEqual([[32m'#003C34'[39m[33m,[39m [32m'#002520'[39m])[33m;[39m
+     [90m    |[39m                                   [31m[1m^[22m[39m
+     [90m 92 |[39m   })[33m;[39m
+     [90m 93 |[39m })[33m;[39m
+     [90m 94 |[39m[0m
+
+      at Object.toEqual (__tests__/components/CHeader.test.js:91:35)
+
+PASS __tests__/components/AzkarComponents.test.js
+PASS __tests__/navigation/DrawerNavigation.test.js
+  ● Console
+
+    console.error
+      An update to DNav inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 29 |[39m       [33mAsyncStorage[39m[33m.[39mgetItem([32m'@firstTimeSettings'[39m)[33m.[39mthen(ft [33m=>[39m {
+     [90m 30 |[39m         [36mif[39m (ft [33m===[39m [36mnull[39m) {
+    [31m[1m>[22m[39m[90m 31 |[39m           setInitialScreen([32m'Settings'[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 32 |[39m         } [36melse[39m {
+     [90m 33 |[39m           setInitialScreen(screen)[33m;[39m
+     [90m 34 |[39m         }[0m
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setInitialScreen (navigation/DrawerNavigation.js:31:11)
+
+    console.error
+      An update to DNav inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 29 |[39m       [33mAsyncStorage[39m[33m.[39mgetItem([32m'@firstTimeSettings'[39m)[33m.[39mthen(ft [33m=>[39m {
+     [90m 30 |[39m         [36mif[39m (ft [33m===[39m [36mnull[39m) {
+    [31m[1m>[22m[39m[90m 31 |[39m           setInitialScreen([32m'Settings'[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 32 |[39m         } [36melse[39m {
+     [90m 33 |[39m           setInitialScreen(screen)[33m;[39m
+     [90m 34 |[39m         }[0m
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setInitialScreen (navigation/DrawerNavigation.js:31:11)
+
+    console.error
+      An update to DNav inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 29 |[39m       [33mAsyncStorage[39m[33m.[39mgetItem([32m'@firstTimeSettings'[39m)[33m.[39mthen(ft [33m=>[39m {
+     [90m 30 |[39m         [36mif[39m (ft [33m===[39m [36mnull[39m) {
+    [31m[1m>[22m[39m[90m 31 |[39m           setInitialScreen([32m'Settings'[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 32 |[39m         } [36melse[39m {
+     [90m 33 |[39m           setInitialScreen(screen)[33m;[39m
+     [90m 34 |[39m         }[0m
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setInitialScreen (navigation/DrawerNavigation.js:31:11)
+
+    console.error
+      An update to DNav inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 29 |[39m       [33mAsyncStorage[39m[33m.[39mgetItem([32m'@firstTimeSettings'[39m)[33m.[39mthen(ft [33m=>[39m {
+     [90m 30 |[39m         [36mif[39m (ft [33m===[39m [36mnull[39m) {
+    [31m[1m>[22m[39m[90m 31 |[39m           setInitialScreen([32m'Settings'[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 32 |[39m         } [36melse[39m {
+     [90m 33 |[39m           setInitialScreen(screen)[33m;[39m
+     [90m 34 |[39m         }[0m
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setInitialScreen (navigation/DrawerNavigation.js:31:11)
+
+    console.error
+      An update to DNav inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 29 |[39m       [33mAsyncStorage[39m[33m.[39mgetItem([32m'@firstTimeSettings'[39m)[33m.[39mthen(ft [33m=>[39m {
+     [90m 30 |[39m         [36mif[39m (ft [33m===[39m [36mnull[39m) {
+    [31m[1m>[22m[39m[90m 31 |[39m           setInitialScreen([32m'Settings'[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 32 |[39m         } [36melse[39m {
+     [90m 33 |[39m           setInitialScreen(screen)[33m;[39m
+     [90m 34 |[39m         }[0m
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setInitialScreen (navigation/DrawerNavigation.js:31:11)
+
+FAIL __tests__/screens/SettingsScreen.test.js
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'get')
+
+    [0m [90m 14 |[39m [36mimport[39m [33mAzkar[39m [36mfrom[39m [32m'../constants/Azkar'[39m[33m;[39m
+     [90m 15 |[39m [36mimport[39m vibrationManager[33m,[39m { [33mVIBRATION_TYPES[39m[33m,[39m [33mVIBRATION_INTENSITY[39m } [36mfrom[39m [32m'../utils/Vibration'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 16 |[39m [36mimport[39m [33mAnimated[39m[33m,[39m { useSharedValue[33m,[39m useAnimatedStyle[33m,[39m withTiming[33m,[39m withSequence[33m,[39m withDelay[33m,[39m runOnJS } [36mfrom[39m [32m'react-native-reanimated'[39m[33m;[39m
+     [90m    |[39m [31m[1m^[22m[39m
+     [90m 17 |[39m
+     [90m 18 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSettingsScreen[39m({ navigation }) {
+     [90m 19 |[39m   [36mconst[39m colors [33m=[39m useColors()[33m;[39m[0m
+
+      at Object.get (node_modules/react-native-worklets/src/specs/NativeWorkletsModule.ts:9:36)
+      at Object.require (node_modules/react-native-worklets/src/specs/index.ts:5:1)
+      at Object.require (node_modules/react-native-worklets/src/WorkletsModule/NativeWorklets.ts:4:1)
+      at Object.require (node_modules/react-native-worklets/src/WorkletsModule/workletsModuleInstance.ts:5:1)
+      at Object.require (node_modules/react-native-worklets/src/WorkletsModule/index.ts:3:1)
+      at Object.require (node_modules/react-native-worklets/src/serializable.ts:14:1)
+      at Object.require (node_modules/react-native-worklets/src/threads.ts:4:1)
+      at Object.require (node_modules/react-native-worklets/src/runLoop/uiRuntime/requestAnimationFrame.ts:3:1)
+      at Object.require (node_modules/react-native-worklets/src/initializers.ts:10:1)
+      at Object.require (node_modules/react-native-worklets/src/index.ts:5:1)
+      at Object.require (node_modules/react-native-reanimated/src/initializers.ts:2:1)
+      at Object.require (node_modules/react-native-reanimated/src/index.ts:5:1)
+      at Object.require (screens/SettingsScreen.js:16:1)
+      at Object.require (__tests__/screens/SettingsScreen.test.js:3:1)
+
+Test Suites: 2 failed, 12 passed, 14 total
+Tests:       1 failed, 45 passed, 46 total
+Snapshots:   0 total
+Time:        15.973 s
+Ran all test suites.

@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { t, getDirectionalMixedSpacing } from '../locales/i18n';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
+import { webCursor } from '../constants/settingsTokens';
 import CompassMethodModal from './CompassMethodModal';
 
 const LocationInfo = ({
@@ -98,7 +99,7 @@ const LocationInfo = ({
                     <Text style={[
                         PRAYER_CONSTANTS.FONT_STYLES.BODY,
                         {
-                            color: colors.secondaryText || colors.text,
+                            color: colors.textSecondary || colors.text,
                             textAlign: 'center',
                             fontSize: 12,
                             opacity: 0.8,
@@ -205,7 +206,9 @@ const LocationInfo = ({
                     {/* Method Swap Button */}
                     <TouchableOpacity
                         onPress={handleMethodSwap}
-                        style={{
+                        accessibilityRole="button"
+                        accessibilityLabel={t('qibla.compassMethod')}
+                        style={[{
                             backgroundColor: compassEnabled ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 107, 53, 0.15)',
                             borderRadius: 20,
                             padding: 10,
@@ -216,7 +219,7 @@ const LocationInfo = ({
                             shadowOpacity: 0.1,
                             shadowRadius: 4,
                             elevation: 2
-                        }}
+                        }, webCursor]}
                     >
                         <Feather name="refresh-cw" size={18} color={compassEnabled ? colors.BYellow : '#FF6B35'} />
                     </TouchableOpacity>
@@ -224,8 +227,7 @@ const LocationInfo = ({
 
                 {/* Accuracy section - only show when compass is enabled */}
                 {compassEnabled && (
-                    <View style={{
-                    }}>
+                    <View>
                     <View style={{
                         flexDirection: 'row',
                         alignItems: 'center',

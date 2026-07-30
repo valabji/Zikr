@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { Platform, Vibration as RNVibration } from 'react-native';
+import * as StrongVibration from '../modules/expo-strong-vibration';
 
 // Vibration types
 export const VIBRATION_TYPES = {
@@ -14,6 +15,23 @@ export const VIBRATION_INTENSITY = {
   LIGHT: 'light',
   MEDIUM: 'medium',
   HEAVY: 'heavy'
+};
+
+// Android prefers the local StrongVibration module (max amplitude, notification usage) — RN Vibration's USAGE_UNKNOWN one-shots get muted by OEM touch-feedback sliders.
+const ANDROID_DURATIONS = {
+  light: 40,
+  medium: 70,
+  heavy: 100
+};
+
+const androidVibrate = (durationMs) => {
+  if (StrongVibration.isAvailable()) StrongVibration.vibrate(durationMs);
+  else RNVibration.vibrate(durationMs);
+};
+
+const androidVibratePattern = (pattern) => {
+  if (StrongVibration.isAvailable()) StrongVibration.vibratePattern(pattern);
+  else RNVibration.vibrate(pattern);
 };
 
 class VibrationManager {
@@ -95,6 +113,18 @@ class VibrationManager {
     }
   }
 
+  vibrateForTasbihComplete() {
+    if (!this.isInitialized) return;
+    if (this.tasbihEnabled) {
+      if (Platform.OS === 'web') return;
+      if (Platform.OS === 'android') {
+        androidVibratePattern([0, 30, 40, 30]);
+        return;
+      }
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (error) { console.warn('Vibration failed:', error); }
+    }
+  }
+
   // Vibrate for azkar count
   vibrateForAzkarCount() {
     if (!this.isInitialized) {
@@ -121,23 +151,20 @@ class VibrationManager {
 
   // Check if vibration is supported
   async isVibrationSupported() {
-    // Skip vibration on web
-    if (Platform.OS === 'web') {
-      return false;
-    }
-
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    if (Platform.OS === 'web') return false;
+    if (Platform.OS === 'android' && StrongVibration.isAvailable()) return StrongVibration.hasVibrator();
+    return true;
   }
 
   // Perform the actual vibration
   performVibration(intensity = 'light') {
     // Skip vibration on web
     if (Platform.OS === 'web') {
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      androidVibrate(ANDROID_DURATIONS[intensity] ?? ANDROID_DURATIONS.light);
       return;
     }
 

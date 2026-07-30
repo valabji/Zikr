@@ -88,6 +88,6 @@ describe('CustomHeader', () => {
     );
     
     const gradient = UNSAFE_getByType('LinearGradient');
-    expect(gradient.props.colors).toEqual(['#003C34', '#002520']);
+    expect(gradient.props.colors).toEqual(['#1A1A1A', '#0A0A0A']);
   });
 });

@@ -4,10 +4,11 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.12",
-    orientation: "portrait",
+    version: "1.1.26",
+    orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
+    backgroundColor: "#ffffff",
     splash: {
       image: "./assets/images/splash.png",
       resizeMode: "contain",
@@ -19,19 +20,31 @@ export default {
     assetBundlePatterns: ["**/*"],
     ios: {
       bundleIdentifier: "com.valabji.zikr",
+      appleTeamId: "VB895DBGS7",
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST,
       supportsTablet: true,
+      buildNumber: "15",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/splash_noname.png",
+      },
       config: {
         googleMobileAdsAppId: process.env.ADMOB_APPID
       },
       infoPlist: {
-        CFBundleAllowMixedLocalizations: true
+        CFBundleAllowMixedLocalizations: true,
+        NSUserNotificationsUsageDescription: "Zikr needs notification permission to remind you of prayer times. You can customize which prayers to be notified about in the app settings.",
+        NSMicrophoneUsageDescription: "Used to follow your Quran recitation.",
+        NSSpeechRecognitionUsageDescription: "Used to follow along with your Quran recitation and highlight the words you read.",
+        UIBackgroundModes: ["audio"]  // Required for playing adhan audio in notifications
+      },
+      entitlements: {
+        "com.apple.security.application-groups": ["group.com.valabji.zikr.widget"]
       }
     },
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 15,
+      versionCode: 29,
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
@@ -55,10 +68,17 @@ export default {
 
         // Device permissions - useful for user feedback and background tasks
         "android.permission.VIBRATE",
+
+        // Notification permissions - needed for adhan notifications
+        "android.permission.POST_NOTIFICATIONS",              // Required for Android 13+
+        // SCHEDULE_EXACT_ALARM requires user grant in system settings on Android 12+; app routes there via expo-intent-launcher.
+        // USE_EXACT_ALARM is intentionally NOT requested — Play Store restricts it to calendar/alarm-clock apps.
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.RECEIVE_BOOT_COMPLETED",          // Reschedule notifications after device reboot
+        "android.permission.RECORD_AUDIO",
       ],
       blockedPermissions: [
         // Audio permissions - not needed (app only plays simple sounds)
-        "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
 
         // Storage permissions - not needed (app uses internal storage only)
@@ -92,13 +112,38 @@ export default {
       }
     },
     plugins: [
+      "./plugins/withNonModularHeaderFix",
+      "./plugins/withSplashForceDarkOff",
+      [
+        "expo-speech-recognition",
+        {
+          microphonePermission: "Used to follow your Quran recitation.",
+          speechRecognitionPermission: "Used to follow along with your Quran recitation and highlight the words you read.",
+          androidSpeechServicePackages: ["com.google.android.googlequicksearchbox"]
+        }
+      ],
       "expo-audio",
+      [
+        "expo-notifications",
+        {
+          sounds: ["./assets/sound/adhan_alert.wav"]
+        }
+      ],
+      "expo-asset",
+      ["expo-font", {
+        fonts: [
+          "./node_modules/@expo-google-fonts/cairo/Cairo_400Regular.ttf",
+          "./node_modules/@expo-google-fonts/cairo/Cairo_700Bold.ttf"
+        ]
+      }],
+      "expo-web-browser",
       "@react-native-firebase/app",
       [
         "expo-build-properties",
         {
           ios: {
-            useFrameworks: "static"
+            useFrameworks: "static",
+            deploymentTarget: "16.4"
           }
         }
       ],
@@ -113,11 +158,37 @@ export default {
           },
           "resizeMode": "contain",
           "imageWidth": 200
-        }]
+        }],
+      [
+        "react-native-android-widget",
+        {
+          widgets: [
+            {
+              name: "PrayerTimes",
+              label: "Zikr Prayer Times",
+              description: "Shows the current and next prayer time.",
+              minWidth: "40dp",
+              minHeight: "40dp",
+              resizeMode: "horizontal|vertical",
+              updatePeriodMillis: 1800000
+            },
+            {
+              name: "HijriCalendar",
+              label: "Zikr Hijri Calendar",
+              description: "Shows today's Hijri (Islamic) date.",
+              minWidth: "40dp",
+              minHeight: "40dp",
+              resizeMode: "horizontal|vertical",
+              updatePeriodMillis: 1800000
+            }
+          ]
+        }
+      ],
+      "@bacons/apple-targets"
     ],
     locales: {
-      "ar": "./locales/ar.json",
-      "en": "./locales/en.json"
+      "ar": "./locales/native/ar.json",
+      "en": "./locales/native/en.json"
     }
   },
 };

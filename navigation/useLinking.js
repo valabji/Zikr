@@ -1,7 +1,7 @@
 import * as Linking from 'expo-linking';
 
 
-export default linkingOptions = {
+export default {
     prefixes: [Linking.createURL('/')],
     config: {
         path: 'root',

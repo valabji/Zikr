@@ -121,6 +121,23 @@ jest.mock('react-native-gesture-handler', () => ({
   ScrollView: 'ScrollView',
 }));
 
+// Mock Safe Area Context (no native module in tests)
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const inset = { top: 0, right: 0, bottom: 0, left: 0 };
+  const frame = { x: 0, y: 0, width: 0, height: 0 };
+  return {
+    SafeAreaProvider: ({ children }) => children,
+    SafeAreaConsumer: ({ children }) => children(inset),
+    SafeAreaView: ({ children, ...props }) => React.createElement('View', props, children),
+    SafeAreaInsetsContext: React.createContext(inset),
+    SafeAreaFrameContext: React.createContext(frame),
+    useSafeAreaInsets: () => inset,
+    useSafeAreaFrame: () => frame,
+    initialWindowMetrics: { insets: inset, frame },
+  };
+});
+
 // Mock Audio and Sound
 jest.mock('expo-av', () => ({
   Audio: {
@@ -132,8 +149,65 @@ jest.mock('expo-av', () => ({
         },
       })),
     },
+    setAudioModeAsync: jest.fn(() => Promise.resolve()),
   },
+  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
 }));
+
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn(() => Promise.resolve()),
+  isLoaded: jest.fn(() => true),
+}), { virtual: true });
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}), { virtual: true });
+
+jest.mock('react-native-view-shot', () => ({
+  captureRef: jest.fn(() => Promise.resolve('file:///mock/share-card.png')),
+}), { virtual: true });
+
+jest.mock('expo-file-system/legacy', () => ({
+  documentDirectory: '/mock/document/',
+  cacheDirectory: '/mock/cache/',
+  getInfoAsync: jest.fn(() => Promise.resolve({ exists: false })),
+  makeDirectoryAsync: jest.fn(() => Promise.resolve()),
+  downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
+  deleteAsync: jest.fn(() => Promise.resolve()),
+  readDirectoryAsync: jest.fn(() => Promise.resolve([])),
+  readAsStringAsync: jest.fn(() => Promise.resolve('{"entries":[]}')),
+  writeAsStringAsync: jest.fn(() => Promise.resolve()),
+  createDownloadResumable: jest.fn(() => ({ downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })) })),
+}), { virtual: true });
+
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  addNotificationReceivedListener: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(),
+  getPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted', granted: true })),
+  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted', granted: true })),
+  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
+  deleteNotificationChannelAsync: jest.fn(() => Promise.resolve()),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('scheduled-id')),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
+  cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
+  getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  getPresentedNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  dismissNotificationAsync: jest.fn(() => Promise.resolve()),
+  AndroidNotificationPriority: { HIGH: 'high', LOW: 'low' },
+  AndroidImportance: { MAX: 5, LOW: 2 },
+  AndroidNotificationVisibility: { PUBLIC: 1 },
+  SchedulableTriggerInputTypes: { DATE: 'date' },
+}), { virtual: true });
+
+jest.mock('expo-intent-launcher', () => ({
+  startActivityAsync: jest.fn(() => Promise.resolve()),
+  ActivityAction: {
+    APPLICATION_DETAILS_SETTINGS: 'app_details_settings',
+    IGNORE_BATTERY_OPTIMIZATION_SETTINGS: 'ignore_battery_opt',
+  },
+}), { virtual: true });
 
 // Mock Sound functionality and utils
 jest.mock('./utils/Sounds', () => ({
@@ -207,7 +281,29 @@ jest.mock('react-native', () => {
     
     return React.createElement(name, { ...accessibilityProps, ref }, props.children);
   });
-  
+
+  const createMockList = (name) => React.forwardRef((props, ref) => {
+    const { data, renderItem, keyExtractor, ListEmptyComponent, ListHeaderComponent, ListFooterComponent, ...rest } = props;
+    React.useImperativeHandle(ref, () => ({
+      scrollToIndex: () => {}, scrollToOffset: () => {}, scrollToEnd: () => {}, scrollToItem: () => {},
+    }));
+    const slot = (C) => (!C ? null : React.isValidElement(C) ? C : React.createElement(C));
+    const items = Array.isArray(data) ? data : [];
+    const rows = items.length === 0
+      ? [slot(ListEmptyComponent)]
+      : items.map((item, index) => React.createElement(
+          React.Fragment,
+          { key: keyExtractor ? keyExtractor(item, index) : String(index) },
+          renderItem ? renderItem({ item, index }) : null,
+        ));
+    return React.createElement(name, {
+      accessible: true,
+      accessibilityLabel: props.accessibilityLabel || '',
+      accessibilityRole: props.accessibilityRole || 'none',
+      ...rest,
+    }, slot(ListHeaderComponent), rows, slot(ListFooterComponent));
+  });
+
   const ReactNative = {
     Platform: global.Platform,
     StyleSheet: {
@@ -230,9 +326,16 @@ jest.mock('react-native', () => {
     ScrollView: createMockComponent('ScrollView'),
     Image: createMockComponent('Image'),
     ImageBackground: createMockComponent('ImageBackground'),
-    FlatList: createMockComponent('FlatList'),
+    FlatList: createMockList('FlatList'),
     TextInput: createMockComponent('TextInput'),
     TouchableHighlight: createMockComponent('TouchableHighlight'),
+    TouchableWithoutFeedback: createMockComponent('TouchableWithoutFeedback'),
+    Pressable: createMockComponent('Pressable'),
+    KeyboardAvoidingView: createMockComponent('KeyboardAvoidingView'),
+    ActivityIndicator: createMockComponent('ActivityIndicator'),
+    Switch: createMockComponent('Switch'),
+    StatusBar: createMockComponent('StatusBar'),
+    SectionList: createMockComponent('SectionList'),
     I18nManager: {
       isRTL: false,
       forceRTL: jest.fn(),
@@ -241,11 +344,16 @@ jest.mock('react-native', () => {
     Share: {
       share: jest.fn(),
     },
+    Vibration: {
+      vibrate: jest.fn(),
+      cancel: jest.fn(),
+    },
     Dimensions: {
       get: jest.fn(() => ({ width: 375, height: 667 })),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     },
+    useWindowDimensions: jest.fn(() => ({ width: 375, height: 667 })),
     AsyncStorage: {
       getItem: jest.fn().mockResolvedValue(null),
       setItem: jest.fn().mockResolvedValue(undefined),
@@ -253,17 +361,71 @@ jest.mock('react-native', () => {
     Alert: {
       alert: jest.fn(),
     },
+    Linking: {
+      openURL: jest.fn().mockResolvedValue(true),
+      canOpenURL: jest.fn().mockResolvedValue(true),
+      getInitialURL: jest.fn().mockResolvedValue(null),
+    },
     BackHandler: {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     },
+    DevSettings: {
+      reload: jest.fn(),
+      addMenuItem: jest.fn(),
+    },
+    Animated: {
+      Value: jest.fn(function (val) {
+        this._value = val;
+        this.setValue = jest.fn((v) => { this._value = v; });
+        this.interpolate = jest.fn(() => ({ _value: val }));
+        return this;
+      }),
+      timing: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      spring: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      parallel: jest.fn((animations) => ({
+        start: jest.fn((cb) => {
+          animations.forEach((a) => a && a.start && a.start());
+          if (cb) cb();
+        }),
+      })),
+      sequence: jest.fn(() => ({ start: jest.fn((cb) => cb && cb()) })),
+      loop: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
+      View: createMockComponent('Animated.View'),
+      Text: createMockComponent('Animated.Text'),
+      Image: createMockComponent('Animated.Image'),
+      ScrollView: createMockComponent('Animated.ScrollView'),
+      createAnimatedComponent: (C) => C,
+    },
   };
-  
+
   return ReactNative;
 });
 
 // Mock react-native-community/slider
 jest.mock('@react-native-community/slider', () => 'Slider');
+
+jest.mock('react-native-android-widget', () => ({
+  registerWidgetTaskHandler: jest.fn(),
+  registerWidgetConfigurationScreen: jest.fn(),
+  requestWidgetUpdate: jest.fn(() => Promise.resolve()),
+  FlexWidget: 'FlexWidget',
+  TextWidget: 'TextWidget',
+  IconWidget: 'IconWidget',
+  ImageWidget: 'ImageWidget',
+  ListWidget: 'ListWidget',
+  OverlapWidget: 'OverlapWidget',
+  SvgWidget: 'SvgWidget',
+}));
+
+jest.mock('react-native-shared-group-preferences', () => ({
+  __esModule: true,
+  default: {
+    isAppInstalledAndroid: jest.fn(() => Promise.resolve()),
+    getItem: jest.fn(() => Promise.resolve(null)),
+    setItem: jest.fn(() => Promise.resolve()),
+  },
+}));
 
 // Mock problematic React Native components
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter');

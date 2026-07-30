@@ -69,7 +69,8 @@ export const PRAYER_CONSTANTS = {
     CALCULATION_METHOD: '@prayer_calculation_method',
     MADHAB: '@prayer_madhab',
     NOTIFICATIONS_ENABLED: '@prayer_notifications_enabled',
-    NOTIFICATION_TIMES: '@prayer_notification_times'
+    NOTIFICATION_TIMES: '@prayer_notification_times',
+    CHECKIN: '@prayer_checkin'
   },
 
   // Styling constants

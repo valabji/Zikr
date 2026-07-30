@@ -6,7 +6,6 @@ import {
   ScrollView,
   Linking,
   Alert,
-  I18nManager,
   Clipboard
 } from 'react-native';
 import { useColors } from '../constants/Colors';
@@ -15,6 +14,7 @@ import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n'
 import CHeader from '../components/CHeader';
 import { Feather } from '@expo/vector-icons';
 import { CONTRIBUTE_CONSTANTS } from '../constants/ContributeConstants';
+import { webCursor, CONTENT_MAX_WIDTH } from '../constants/settingsTokens';
 
 export default function ContributeScreen({ navigation }) {
   const colors = useColors();
@@ -58,12 +58,17 @@ export default function ContributeScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.BGreen }}>
+    <View style={{ flex: 1, backgroundColor: colors.BGreen }} testID="contribute-screen-root">
       <CHeader navigation={navigation} title={t('navigation.contribute')} />
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: CONTRIBUTE_CONSTANTS.SPACING.CONTAINER_PADDING }}
+        contentContainerStyle={{
+          padding: CONTRIBUTE_CONSTANTS.SPACING.CONTAINER_PADDING,
+          width: '100%',
+          maxWidth: CONTENT_MAX_WIDTH,
+          alignSelf: 'center',
+        }}
         showsVerticalScrollIndicator={false}
       >
         <View style={{
@@ -132,7 +137,9 @@ export default function ContributeScreen({ navigation }) {
 
           <TouchableOpacity
             onPress={openExcelSheet}
-            style={{
+            accessibilityRole="button"
+            accessibilityLabel={t('contribute.downloadExcel')}
+            style={[{
               backgroundColor: colors.BGreen,
               borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.MEDIUM,
               padding: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
@@ -140,7 +147,7 @@ export default function ContributeScreen({ navigation }) {
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: CONTRIBUTE_CONSTANTS.SPACING.CARD_MARGIN_BOTTOM
-            }}
+            }, webCursor]}
           >
             <Feather name="download" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_MEDIUM} color={colors.BYellow} />
             <Text style={{
@@ -189,7 +196,7 @@ export default function ContributeScreen({ navigation }) {
               }}>
                 {CONTRIBUTE_CONSTANTS.EMAIL_ADDRESS}
               </Text>
-              <TouchableOpacity onPress={copyEmail} testID="copy-email">
+              <TouchableOpacity onPress={copyEmail} testID="copy-email" accessibilityRole="button" accessibilityLabel={CONTRIBUTE_CONSTANTS.EMAIL_ADDRESS} style={webCursor}>
                 <Feather name="copy" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
               </TouchableOpacity>
             </View>
@@ -204,7 +211,9 @@ export default function ContributeScreen({ navigation }) {
               }}>
                 <TouchableOpacity
                   onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.SUGGESTIONS)}
-                  style={{
+                  accessibilityRole="button"
+                  accessibilityLabel={t('contribute.suggestions')}
+                  style={[{
                     backgroundColor: colors.DGreen,
                     borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
                     padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
@@ -213,7 +222,7 @@ export default function ContributeScreen({ navigation }) {
                     justifyContent: 'center',
                     width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
                     minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                  }}
+                  }, webCursor]}
                 >
                   <Feather name="message-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                   <Text style={{
@@ -231,7 +240,9 @@ export default function ContributeScreen({ navigation }) {
 
                 <TouchableOpacity
                   onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.TRANSLATION)}
-                  style={{
+                  accessibilityRole="button"
+                  accessibilityLabel={t('contribute.translation')}
+                  style={[{
                     backgroundColor: colors.DGreen,
                     borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
                     padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING,
@@ -240,7 +251,7 @@ export default function ContributeScreen({ navigation }) {
                     justifyContent: 'center',
                     width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
                     minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT
-                  }}
+                  }, webCursor]}
                 >
                   <Feather name="globe" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_TINY} color={colors.BYellow} />
                   <Text style={{
@@ -264,7 +275,9 @@ export default function ContributeScreen({ navigation }) {
               }}>
                 <TouchableOpacity
                   onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.REFERENCE_CHECKING)}
-                  style={{
+                  accessibilityRole="button"
+                  accessibilityLabel={t('contribute.referenceChecking')}
+                  style={[{
                     backgroundColor: colors.DGreen,
                     borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
                     padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING + 2,
@@ -273,7 +286,7 @@ export default function ContributeScreen({ navigation }) {
                     justifyContent: 'center',
                     width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
                     minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT + 10
-                  }}
+                  }, webCursor]}
                 >
                   <Feather name="check-circle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
                   <Text style={{
@@ -291,7 +304,9 @@ export default function ContributeScreen({ navigation }) {
 
                 <TouchableOpacity
                   onPress={() => openEmail(CONTRIBUTE_CONSTANTS.EMAIL_SUBJECTS.BUG_REPORT)}
-                  style={{
+                  accessibilityRole="button"
+                  accessibilityLabel={t('contribute.bugReports')}
+                  style={[{
                     backgroundColor: colors.DGreen,
                     borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.SMALL,
                     padding: CONTRIBUTE_CONSTANTS.SPACING.SMALL_PADDING + 2,
@@ -300,7 +315,7 @@ export default function ContributeScreen({ navigation }) {
                     justifyContent: 'center',
                     width: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_WIDTH,
                     minHeight: CONTRIBUTE_CONSTANTS.BUTTON_DIMENSIONS.EMAIL_OPTION_HEIGHT + 10
-                  }}
+                  }, webCursor]}
                 >
                   <Feather name="alert-triangle" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_SMALL} color={colors.BYellow} />
                   <Text style={{
@@ -356,14 +371,16 @@ export default function ContributeScreen({ navigation }) {
 
           <TouchableOpacity
             onPress={openGitHub}
-            style={{
+            accessibilityRole="button"
+            accessibilityLabel={t('contribute.openGitHub')}
+            style={[{
               backgroundColor: colors.BGreen,
               borderRadius: CONTRIBUTE_CONSTANTS.BORDER_RADIUS.MEDIUM,
               padding: CONTRIBUTE_CONSTANTS.SPACING.BUTTON_PADDING,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center'
-            }}
+            }, webCursor]}
           >
             <Feather name="github" size={CONTRIBUTE_CONSTANTS.FONT_SIZES.ICON_MEDIUM} color={colors.BYellow} />
             <Text style={{
@@ -388,8 +405,7 @@ export default function ContributeScreen({ navigation }) {
             fontSize: CONTRIBUTE_CONSTANTS.FONT_SIZES.SMALL_BODY,
             fontFamily: "Cairo_400Regular",
             textAlign: 'center',
-            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL,
-            fontStyle: 'italic'
+            lineHeight: CONTRIBUTE_CONSTANTS.LINE_HEIGHTS.SMALL
           }}>
             {t('contribute.thankYou')}
           </Text>

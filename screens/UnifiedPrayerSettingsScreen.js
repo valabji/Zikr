@@ -13,7 +13,7 @@ import {
     Modal
 } from 'react-native';
 import { useColors } from '../constants/Colors';
-import { t, getDirectionalMixedSpacing, getRTLTextAlign } from '../locales/i18n';
+import { t, getDirectionalMixedSpacing, getRTLTextAlign, isRTL } from '../locales/i18n';
 import CHeader from '../components/CHeader';
 import CustomToggle from '../components/CustomToggle';
 import { Feather, AntDesign } from '@expo/vector-icons';
@@ -21,11 +21,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import moment from 'moment-timezone';
 import { PRAYER_CONSTANTS } from '../constants/PrayerConstants';
+import { CONTENT_MAX_WIDTH, withAlpha, webCursor } from '../constants/settingsTokens';
 import { searchLocations, getLocationFromIP, getBrowserLocation } from '../utils/PrayerUtils';
-import { Restart } from '../utils/restart';
+import NotificationService from '../utils/NotificationService';
+import PrayerCountdownService from '../utils/PrayerCountdownService';
+import PrayerNotificationScheduler from '../utils/PrayerNotificationScheduler';
+import AdhanDownloader from '../utils/AdhanDownloader';
+import { ADHAN_CATALOG, getAdhanById, SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '../constants/AdhanCatalog';
+import { useTestedMode } from '../utils/TestedMode';
 
 export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const colors = useColors();
+    const testedMode = useTestedMode();
 
     // Location states
     const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +47,9 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     const [calculationMethod, setCalculationMethod] = useState(PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD);
     const [madhab, setMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [audioMode, setAudioMode] = useState('short');
+    const [selectedAdhan, setSelectedAdhan] = useState(DEFAULT_ADHAN_ID);
+    const [adhanState, setAdhanState] = useState({});
     const [notificationTimes, setNotificationTimes] = useState({
         fajr: true,
         dhuhr: true,
@@ -47,16 +57,22 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         maghrib: true,
         isha: true
     });
+    const [hasExactAlarm, setHasExactAlarm] = useState(true);
+    const [showPersistentCountdown, setShowPersistentCountdown] = useState(false);
 
     // UI states
     const [isCalculationMethodModalVisible, setCalculationMethodModalVisible] = useState(false);
     const [isMadhabModalVisible, setMadhabModalVisible] = useState(false);
+    const [isAudioModeModalVisible, setAudioModeModalVisible] = useState(false);
+    const [isAdhanModalVisible, setAdhanModalVisible] = useState(false);
 
     // Initial values for change detection
     const [initialLocation, setInitialLocation] = useState(null);
     const [initialCalculationMethod, setInitialCalculationMethod] = useState(PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD);
     const [initialMadhab, setInitialMadhab] = useState(PRAYER_CONSTANTS.DEFAULT_MADHAB);
     const [initialNotificationsEnabled, setInitialNotificationsEnabled] = useState(false);
+    const [initialAudioMode, setInitialAudioMode] = useState('short');
+    const [initialSelectedAdhan, setInitialSelectedAdhan] = useState(DEFAULT_ADHAN_ID);
     const [initialNotificationTimes, setInitialNotificationTimes] = useState({
         fajr: true,
         dhuhr: true,
@@ -64,6 +80,11 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         maghrib: true,
         isha: true
     });
+    const [initialShowPersistentCountdown, setInitialShowPersistentCountdown] = useState(false);
+
+    // Set once a save (or explicit discard) has resolved so the beforeRemove
+    // guard lets the navigation through without re-prompting.
+    const skipUnsavedGuardRef = useRef(false);
     const [initialValuesSet, setInitialValuesSet] = useState(false);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
@@ -81,8 +102,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             // Load prayer settings
             const savedMethod = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD);
             const savedMadhab = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB);
-            const savedNotifications = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED);
-            const savedNotificationTimes = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATION_TIMES);
+            
+            // Load new notification settings (using new storage keys)
+            const savedNotifications = await AsyncStorage.getItem('@notifications_enabled');
+            const savedAudioMode = await AsyncStorage.getItem('@audio_mode');
+            const savedAdhan = await AsyncStorage.getItem(SELECTED_ADHAN_KEY);
+            const savedNotificationTimes = await AsyncStorage.getItem('@enabled_prayers');
+            const savedPersistentCountdown = await AsyncStorage.getItem('@persistent_countdown');
 
             if (savedMethod) {
                 setCalculationMethod(savedMethod);
@@ -91,10 +117,25 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 setMadhab(savedMadhab);
             }
             if (savedNotifications) {
-                setNotificationsEnabled(JSON.parse(savedNotifications));
+                setNotificationsEnabled(savedNotifications === 'true');
+            }
+            if (savedAudioMode) {
+                setAudioMode(savedAudioMode);
+            }
+            if (savedAdhan) {
+                setSelectedAdhan(savedAdhan);
             }
             if (savedNotificationTimes) {
                 setNotificationTimes(JSON.parse(savedNotificationTimes));
+            }
+            if (savedPersistentCountdown !== null) {
+                setShowPersistentCountdown(savedPersistentCountdown === 'true');
+            }
+
+            // Check exact alarm permission on Android
+            if (Platform.OS === 'android') {
+                const hasExactAlarmPerm = await NotificationService.checkExactAlarmPermission();
+                setHasExactAlarm(hasExactAlarmPerm);
             }
         } catch (error) {
             console.error('Error loading settings:', error);
@@ -109,10 +150,19 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             setInitialCalculationMethod(calculationMethod);
             setInitialMadhab(madhab);
             setInitialNotificationsEnabled(notificationsEnabled);
+            setInitialAudioMode(audioMode);
+            setInitialSelectedAdhan(selectedAdhan);
             setInitialNotificationTimes({ ...notificationTimes });
+            setInitialShowPersistentCountdown(showPersistentCountdown);
             setInitialValuesSet(true);
         }
-    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, notificationTimes]);
+    }, [settingsLoaded, initialValuesSet, currentLocation, calculationMethod, madhab, notificationsEnabled, audioMode, selectedAdhan, notificationTimes, showPersistentCountdown]);
+
+    useEffect(() => {
+        AdhanDownloader.checkInstalled();
+        const unsubscribe = AdhanDownloader.subscribe(setAdhanState);
+        return unsubscribe;
+    }, []);
 
     // Location search with debouncing
     const handleSearch = async (query) => {
@@ -231,12 +281,12 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         }
     };
 
-    // Save all settings (location + prayer settings)
+    // Save all settings (location + prayer settings). Returns true on success.
     const saveAllSettings = async () => {
         // Allow saving if we have either selectedLocation or currentLocation
         if (!selectedLocation && !currentLocation) {
             Alert.alert(t('locationSettings.error'), t('locationSettings.noLocationSelected'));
-            return;
+            return false;
         }
 
         try {
@@ -249,15 +299,41 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             // Save prayer settings
             await AsyncStorage.setItem(PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD, calculationMethod);
             await AsyncStorage.setItem(PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB, madhab);
-            await AsyncStorage.setItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED, JSON.stringify(notificationsEnabled));
-            await AsyncStorage.setItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATION_TIMES, JSON.stringify(notificationTimes));
+            
+            // Save new notification settings (using new storage keys)
+            await AsyncStorage.setItem('@notifications_enabled', notificationsEnabled.toString());
+            await AsyncStorage.setItem('@audio_mode', audioMode);
+            await AsyncStorage.setItem(SELECTED_ADHAN_KEY, selectedAdhan);
+            await AsyncStorage.setItem('@enabled_prayers', JSON.stringify(notificationTimes));
+            await AsyncStorage.setItem('@persistent_countdown', showPersistentCountdown.toString());
 
-            setTimeout(() => {
-                Restart();
-            }, 100);
+            // Restart countdown service with new settings
+            if (showPersistentCountdown) {
+                await PrayerCountdownService.stop();
+                await PrayerCountdownService.start();
+            } else {
+                await PrayerCountdownService.stop();
+            }
+
+            // Reschedule adhan notifications so the new settings take effect
+            // immediately — no app restart required.
+            await PrayerNotificationScheduler.refresh();
+
+            // Sync the change-detection baselines so the unsaved-changes guard clears.
+            if (selectedLocation) setInitialLocation(selectedLocation);
+            setInitialCalculationMethod(calculationMethod);
+            setInitialMadhab(madhab);
+            setInitialNotificationsEnabled(notificationsEnabled);
+            setInitialAudioMode(audioMode);
+            setInitialSelectedAdhan(selectedAdhan);
+            setInitialNotificationTimes({ ...notificationTimes });
+            setInitialShowPersistentCountdown(showPersistentCountdown);
+
+            return true;
         } catch (error) {
             console.error('Error saving settings:', error);
             Alert.alert(t('common.error'), t('prayerSettings.saveError'));
+            return false;
         }
     };
 
@@ -291,6 +367,116 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         setMadhabModalVisible(false);
     };
 
+    // Handle audio mode selection
+    const handleAudioModeSelection = (mode) => {
+        setAudioMode(mode);
+        setAudioModeModalVisible(false);
+    };
+
+    // Pick a recitation; download it first if it isn't on the device yet.
+    const handleAdhanSelection = (id) => {
+        const entry = getAdhanById(id);
+        setSelectedAdhan(id);
+        if (!entry.bundled && !AdhanDownloader.isDownloaded(id)) {
+            AdhanDownloader.start(id);
+        }
+        setAdhanModalVisible(false);
+    };
+
+    // Handle notifications toggle
+    const handleNotificationsToggle = async (value) => {
+        if (value) {
+            // Request permissions when enabling
+            const result = await NotificationService.requestPermissions();
+            if (!result.granted) {
+                Alert.alert(
+                    t('notifications.permissionRequired') || 'Permission Required',
+                    t('notifications.permissionMessage') || 'Please enable notification permissions in your device settings.',
+                    [{ text: t('common.ok') || 'OK' }]
+                );
+                return;
+            }
+            
+            if (result.needsExactAlarm && Platform.OS === 'android') {
+                Alert.alert(
+                    t('notifications.exactAlarmRequired') || 'Exact Alarm Required',
+                    t('notifications.exactAlarmMessage') || 'For precise prayer time notifications, please enable exact alarms in the next screen.',
+                    [
+                        { text: t('common.cancel') || 'Cancel', style: 'cancel' },
+                        { text: t('notifications.openSettings') || 'Open Settings', onPress: () => NotificationService.openExactAlarmSettings() },
+                    ]
+                );
+            }
+        }
+        setNotificationsEnabled(value);
+    };
+
+    // Handle opening exact alarm settings
+    const handleOpenExactAlarmSettings = async () => {
+        await NotificationService.openExactAlarmSettings();
+        // Re-check permission after user returns
+        setTimeout(async () => {
+            const hasPermission = await NotificationService.checkExactAlarmPermission();
+            setHasExactAlarm(hasPermission);
+        }, 1000);
+    };
+
+    // Handle opening battery settings
+    const handleOpenBatterySettings = async () => {
+        await NotificationService.openBatterySettings();
+    };
+
+    // Dev-only: fire a test adhan notification 60 seconds from now using the
+    // currently-selected audio mode. Useful for verifying the full pipeline
+    // (permission → schedule → fire → audio playback → tap) on a real device
+    // without waiting for an actual prayer time.
+    const handleTestNotification = async () => {
+        try {
+            // Make sure permissions are granted first
+            const perm = await NotificationService.requestPermissions();
+            if (!perm.granted) {
+                Alert.alert(
+                    'Test notification',
+                    'Notification permission is not granted. Enable it and try again.',
+                );
+                return;
+            }
+            if (perm.needsExactAlarm && Platform.OS === 'android') {
+                Alert.alert(
+                    'Exact alarm needed',
+                    'Grant the exact-alarm permission so the test notification fires on time.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Open settings', onPress: () => NotificationService.openExactAlarmSettings() },
+                    ],
+                );
+                return;
+            }
+
+            const trigger = new Date(Date.now() + 60_000);
+            const id = `prayer-test-${Date.now()}`;
+            const result = await NotificationService.scheduleExactNotification(
+                id,
+                '🕌 Test adhan',
+                `Scheduled to fire at ${trigger.toLocaleTimeString()}`,
+                trigger,
+                audioMode,
+            );
+
+            if (result) {
+                Alert.alert(
+                    'Test scheduled',
+                    `A test notification (audio mode: ${audioMode}) will fire in 60 seconds. Background the app or wait — if foreground and audio mode is "short", you should hear the short alert. Tap it to play the full adhan.`,
+                );
+            } else {
+                Alert.alert('Test failed', 'Could not schedule the test notification. Check the console for details.');
+            }
+        } catch (error) {
+            console.error('Test notification error:', error);
+            Alert.alert('Test failed', error?.message || 'Unknown error');
+        }
+    };
+
     // Check for unsaved changes
     const hasUnsavedChanges = useCallback(() => {
         // Location changes
@@ -303,10 +489,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         if (calculationMethod !== initialCalculationMethod) return true;
         if (madhab !== initialMadhab) return true;
         if (notificationsEnabled !== initialNotificationsEnabled) return true;
+        if (audioMode !== initialAudioMode) return true;
+        if (selectedAdhan !== initialSelectedAdhan) return true;
         if (JSON.stringify(notificationTimes) !== JSON.stringify(initialNotificationTimes)) return true;
+        if (showPersistentCountdown !== initialShowPersistentCountdown) return true;
 
         return false;
-    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, notificationTimes, initialNotificationTimes]);
+    }, [selectedLocation, initialLocation, calculationMethod, initialCalculationMethod, madhab, initialMadhab, notificationsEnabled, initialNotificationsEnabled, audioMode, initialAudioMode, selectedAdhan, initialSelectedAdhan, notificationTimes, initialNotificationTimes, showPersistentCountdown, initialShowPersistentCountdown]);
 
     useEffect(() => {
         loadSettings();
@@ -327,21 +516,25 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     // Handle back navigation with unsaved changes warning
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (hasUnsavedChanges()) {
-                e.preventDefault();
-                Alert.alert(
-                    t('common.unsavedChanges'),
-                    t('common.unsavedChangesMessage'),
-                    [
-                        { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
-                        { text: t('common.discard'), style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
-                        { text: t('common.save'), style: 'default', onPress: async () => {
-                            await saveAllSettings();
-                            navigation.dispatch(e.data.action);
-                        } }
-                    ]
-                );
+            if (skipUnsavedGuardRef.current || !hasUnsavedChanges()) {
+                return;
             }
+            e.preventDefault();
+            Alert.alert(
+                t('common.unsavedChanges'),
+                t('common.unsavedChangesMessage'),
+                [
+                    { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
+                    { text: t('common.discard'), style: 'destructive', onPress: () => { skipUnsavedGuardRef.current = true; navigation.dispatch(e.data.action); } },
+                    { text: t('common.save'), style: 'default', onPress: async () => {
+                        const ok = await saveAllSettings();
+                        if (ok) {
+                            skipUnsavedGuardRef.current = true;
+                            navigation.dispatch(e.data.action);
+                        }
+                    } }
+                ]
+            );
         });
 
         return unsubscribe;
@@ -365,17 +558,24 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
         }
     };
 
+    // Audio mode options
+    const audioModeOptions = [
+        { id: 'none', labelEn: 'Silent (No Sound)', labelAr: 'صامت (بدون صوت)', descriptionEn: 'Show the reminder with no sound', descriptionAr: 'يعرض التذكير بدون صوت' },
+        { id: 'short', labelEn: 'Short Alert', labelAr: 'تنبيه قصير', descriptionEn: 'Plays a short takbir when the prayer time arrives', descriptionAr: 'يشغّل تكبيرًا قصيرًا عند دخول وقت الصلاة' },
+        { id: 'full', labelEn: 'Full Adhan', labelAr: 'أذان كامل', descriptionEn: 'Short takbir on arrival; tap the notification for the full adhan', descriptionAr: 'تكبير قصير عند الوصول، اضغط على الإشعار لسماع الأذان كاملاً' },
+    ];
+
     const renderLocationItem = ({ item }) => (
         <TouchableOpacity
             onPress={() => setSelectedLocation(item)}
-            style={{
-                backgroundColor: selectedLocation?.name === item.name ? colors.nextPrayer : colors.DGreen,
+            style={[{
+                backgroundColor: selectedLocation?.name === item.name ? withAlpha(colors.accent, 'activeRow') : colors.DGreen,
                 borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                 marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
                 borderWidth: 1,
                 borderColor: selectedLocation?.name === item.name ? colors.BYellow : 'transparent'
-            }}
+            }, webCursor]}
         >
             <Text style={{
                 color: colors.BYellow,
@@ -423,10 +623,10 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
     );
 
     return (
-        <View style={{ 
-            flex: 1, 
+        <View testID="unified-prayer-settings-screen" style={{
+            flex: 1,
             backgroundColor: colors.BGreen,
-            ...(Platform.OS === 'web' && { 
+            ...(Platform.OS === 'web' && {
                 height: '100vh',
                 display: 'flex',
                 flexDirection: 'column'
@@ -442,10 +642,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         overflowY: 'auto'
                     })
                 }}
-                contentContainerStyle={{ 
+                contentContainerStyle={{
                     padding: PRAYER_CONSTANTS.SPACING.CONTAINER_PADDING,
-                    ...(Platform.OS === 'web' && { 
-                        paddingBottom: 50 
+                    width: '100%',
+                    maxWidth: CONTENT_MAX_WIDTH,
+                    alignSelf: 'center',
+                    ...(Platform.OS === 'web' && {
+                        paddingBottom: 50
                     })
                 }}
                 showsVerticalScrollIndicator={false}
@@ -542,14 +745,14 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                                 <TouchableOpacity
                                                     key={`search-${index}`}
                                                     onPress={() => setSelectedLocation(item)}
-                                                    style={{
-                                                        backgroundColor: selectedLocation?.name === item.name ? colors.nextPrayer : colors.DGreen,
+                                                    style={[{
+                                                        backgroundColor: selectedLocation?.name === item.name ? withAlpha(colors.accent, 'activeRow') : colors.DGreen,
                                                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
                                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                                         marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
                                                         borderWidth: 1,
                                                         borderColor: selectedLocation?.name === item.name ? colors.BYellow : 'transparent'
-                                                    }}
+                                                    }, webCursor]}
                                                 >
                                                     <Text style={{
                                                         color: colors.BYellow,
@@ -623,7 +826,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <TouchableOpacity
                                         onPress={getCurrentLocation}
                                         disabled={isGettingLocation}
-                                        style={{
+                                        style={[{
                                             backgroundColor: colors.BGreen,
                                             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -639,7 +842,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             shadowRadius: 3.84,
                                             elevation: 5,
                                             minHeight: 50
-                                        }}
+                                        }, webCursor]}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
@@ -660,7 +863,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     <TouchableOpacity
                                         onPress={getIPLocation}
                                         disabled={isGettingLocation}
-                                        style={{
+                                        style={[{
                                             backgroundColor: colors.BGreen,
                                             borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                                             padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
@@ -676,7 +879,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                             shadowRadius: 3.84,
                                             elevation: 5,
                                             minHeight: 50
-                                        }}
+                                        }, webCursor]}
                                     >
                                         {isGettingLocation ? (
                                             <ActivityIndicator size="small" color={colors.BYellow} />
@@ -708,7 +911,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {/* Calculation Method */}
                             <TouchableOpacity
                                 onPress={showCalculationMethodPicker}
-                                style={{
+                                style={[{
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
@@ -723,7 +926,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     shadowOpacity: 0.25,
                                     shadowRadius: 3.84,
                                     elevation: 5,
-                                }}
+                                }, webCursor]}
                             >
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
@@ -749,7 +952,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {/* Madhab */}
                             <TouchableOpacity
                                 onPress={showMadhabPicker}
-                                style={{
+                                style={[{
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
@@ -764,7 +967,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                     shadowOpacity: 0.25,
                                     shadowRadius: 3.84,
                                     elevation: 5,
-                                }}
+                                }, webCursor]}
                             >
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
@@ -790,12 +993,85 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                     )
                 )}
 
-                {/* Notification Settings Section - Hidden until notification logic is implemented */}
-                {false && renderSection(
-                    t('prayerSettings.prayerNotificationsSection'),
+                {/* Notification Settings Section */}
+                {renderSection(
+                    t('settings.notifications.title') || '🔔 Prayer Notifications',
                     'bell',
                     (
                         <>
+                            {/* Android Warnings */}
+                            {Platform.OS === 'android' && Platform.Version >= 31 && !hasExactAlarm && (
+                                <TouchableOpacity
+                                    onPress={handleOpenExactAlarmSettings}
+                                    style={[{
+                                        backgroundColor: colors.BYellow + '20',
+                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                        marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        borderLeftWidth: 4,
+                                        borderLeftColor: colors.BYellow,
+                                    }, webCursor]}
+                                >
+                                    <AntDesign name="exclamationcircle" size={20} color={colors.BYellow} />
+                                    <View style={{ flex: 1, marginLeft: 10 }}>
+                                        <Text style={{
+                                            color: colors.BYellow,
+                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                            fontFamily: "Cairo_400Regular",
+                                            fontWeight: 'bold',
+                                        }}>
+                                            {t('settings.notifications.exactAlarmRequired') || 'Exact Alarms Required'}
+                                        </Text>
+                                        <Text style={{
+                                            color: colors.BYellow,
+                                            fontSize: 12,
+                                            fontFamily: "Cairo_400Regular",
+                                            opacity: 0.8,
+                                        }}>
+                                            {t('settings.notifications.exactAlarmMessage') || 'Enable for precise timing'}
+                                        </Text>
+                                    </View>
+                                    <AntDesign name="right" size={16} color={colors.BYellow} />
+                                </TouchableOpacity>
+                            )}
+
+                            {Platform.OS === 'android' && (
+                                <TouchableOpacity
+                                    onPress={handleOpenBatterySettings}
+                                    style={[{
+                                        backgroundColor: colors.BYellow + '15',
+                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                        marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }, webCursor]}
+                                >
+                                    <Feather name="battery" size={20} color={colors.BYellow} />
+                                    <View style={{ flex: 1, marginLeft: 10 }}>
+                                        <Text style={{
+                                            color: colors.BYellow,
+                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                            fontFamily: "Cairo_400Regular",
+                                            fontWeight: 'bold',
+                                        }}>
+                                            {t('settings.notifications.batteryOptimization') || 'Battery Optimization'}
+                                        </Text>
+                                        <Text style={{
+                                            color: colors.BYellow,
+                                            fontSize: 12,
+                                            fontFamily: "Cairo_400Regular",
+                                            opacity: 0.8,
+                                        }}>
+                                            {t('settings.notifications.batteryMessage') || 'Disable for reliable notifications'}
+                                        </Text>
+                                    </View>
+                                    <AntDesign name="right" size={16} color={colors.BYellow} />
+                                </TouchableOpacity>
+                            )}
+
                             {/* Main Toggle */}
                             <View style={{
                                 backgroundColor: colors.BGreen,
@@ -806,16 +1082,28 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 alignItems: 'center',
                                 justifyContent: 'space-between'
                             }}>
-                                <Text style={{
-                                    color: colors.BYellow,
-                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                    fontFamily: "Cairo_400Regular"
-                                }}>
-                                    {t('prayerSettings.notifications')}
-                                </Text>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{
+                                        color: colors.BYellow,
+                                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                        fontFamily: "Cairo_400Regular",
+                                        fontWeight: 'bold',
+                                    }}>
+                                        {t('settings.notifications.enabled') || 'Enable Notifications'}
+                                    </Text>
+                                    <Text style={{
+                                        color: colors.BYellow,
+                                        fontSize: 12,
+                                        fontFamily: "Cairo_400Regular",
+                                        opacity: 0.7,
+                                        marginTop: 2,
+                                    }}>
+                                        {t('settings.notifications.enabledDescription') || 'Receive prayer time reminders'}
+                                    </Text>
+                                </View>
                                 <CustomToggle
                                     value={notificationsEnabled}
-                                    onValueChange={setNotificationsEnabled}
+                                    onValueChange={handleNotificationsToggle}
                                     activeColor={colors.BYellow}
                                     inactiveColor={colors.pastPrayer}
                                     icon="bell"
@@ -823,47 +1111,211 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 />
                             </View>
 
-                            {/* Individual Prayer Notifications */}
+                            {/* Audio Mode Selection */}
                             {notificationsEnabled && (
-                                <View style={{
-                                    backgroundColor: colors.BGreen,
-                                    borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
-                                    padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
-                                }}>
-                                    <Text style={{
-                                        color: colors.BYellow,
-                                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: "Cairo_400Regular",
-                                        marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
-                                    }}>
-                                        {t('prayerSettings.notifyFor')}
-                                    </Text>
-
-                                    {Object.keys(notificationTimes).map((prayer) => (
-                                        <View key={prayer} style={{
+                                <>
+                                    <TouchableOpacity
+                                        onPress={() => setAudioModeModalVisible(true)}
+                                        style={[{
+                                            backgroundColor: colors.BGreen,
+                                            borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                            marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            paddingVertical: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
-                                        }}>
+                                            justifyContent: 'space-between'
+                                        }, webCursor]}
+                                    >
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                fontFamily: "Cairo_400Regular",
+                                                fontWeight: 'bold',
+                                                marginBottom: 4,
+                                            }}>
+                                                {t('settings.notifications.audioMode') || 'Audio Mode'}
+                                            </Text>
                                             <Text style={{
                                                 color: colors.BYellow,
                                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                                fontFamily: "Cairo_400Regular"
+                                                fontFamily: "Cairo_400Regular",
                                             }}>
-                                                {t(`prayerTimes.${prayer}`)}
+                                                {audioModeOptions.find(m => m.id === audioMode)?.[isRTL() ? 'labelAr' : 'labelEn'] || 'Short Alert'}
                                             </Text>
-                                            <CustomToggle
-                                                value={notificationTimes[prayer]}
-                                                onValueChange={(enabled) => handlePrayerNotificationToggle(prayer, enabled)}
-                                                activeColor={colors.BYellow}
-                                                inactiveColor={colors.pastPrayer}
-                                                icon={getPrayerIcon(prayer)}
-                                                size={20}
-                                            />
                                         </View>
-                                    ))}
-                                </View>
+                                        <AntDesign name="right" size={20} color={colors.BYellow} />
+                                    </TouchableOpacity>
+
+                                    {/* Adhan Recitation Selection (played when the notification is tapped) */}
+                                    {audioMode !== 'none' && (
+                                        <TouchableOpacity
+                                            onPress={() => setAdhanModalVisible(true)}
+                                            style={[{
+                                                backgroundColor: colors.BGreen,
+                                                borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                                padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                                marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between'
+                                            }, webCursor]}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                    fontWeight: 'bold',
+                                                    marginBottom: 4,
+                                                }}>
+                                                    {t('settings.notifications.adhanRecitation') || 'Adhan Recitation'}
+                                                </Text>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                }}>
+                                                    {isRTL() ? getAdhanById(selectedAdhan).nameAr : getAdhanById(selectedAdhan).nameEn}
+                                                </Text>
+                                                {adhanState[selectedAdhan]?.downloading && (
+                                                    <Text style={{
+                                                        color: colors.BYellow,
+                                                        fontSize: 12,
+                                                        fontFamily: "Cairo_400Regular",
+                                                        opacity: 0.7,
+                                                        marginTop: 2,
+                                                    }}>
+                                                        {(t('settings.notifications.downloading') || 'Downloading') + ` ${Math.round((adhanState[selectedAdhan]?.progress || 0) * 100)}%`}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                            {adhanState[selectedAdhan]?.downloading
+                                                ? <ActivityIndicator size="small" color={colors.BYellow} />
+                                                : <AntDesign name="right" size={20} color={colors.BYellow} />}
+                                        </TouchableOpacity>
+                                    )}
+
+                                    {/* Tested mode: fire a test adhan in 60 seconds */}
+                                    {testedMode && (
+                                        <TouchableOpacity
+                                            onPress={handleTestNotification}
+                                            style={[{
+                                                backgroundColor: colors.BGreen,
+                                                borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                                padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                                marginBottom: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                borderWidth: 1,
+                                                borderColor: colors.BYellow,
+                                                borderStyle: 'dashed',
+                                            }, webCursor]}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                                    fontFamily: "Cairo_400Regular",
+                                                    fontWeight: 'bold',
+                                                    marginBottom: 4,
+                                                }}>
+                                                    🧪 Test notification
+                                                </Text>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+                                                    fontFamily: "Cairo_400Regular",
+                                                }}>
+                                                    Fire a test adhan in 60 seconds
+                                                </Text>
+                                            </View>
+                                            <Feather name="play-circle" size={22} color={colors.BYellow} />
+                                        </TouchableOpacity>
+                                    )}
+
+                                    {/* Individual Prayer Notifications */}
+                                    <View style={{
+                                        backgroundColor: colors.BGreen,
+                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                    }}>
+                                        <Text style={{
+                                            color: colors.BYellow,
+                                            fontSize: PRAYER_CONSTANTS.FONT_SIZES.SMALL_BODY,
+                                            fontFamily: "Cairo_400Regular",
+                                            fontWeight: 'bold',
+                                            marginBottom: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
+                                        }}>
+                                            {t('settings.notifications.selectPrayers') || 'Select Prayers'}
+                                        </Text>
+
+                                        {Object.keys(notificationTimes).map((prayer) => (
+                                            <View key={prayer} style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                paddingVertical: PRAYER_CONSTANTS.SPACING.SMALL_PADDING
+                                            }}>
+                                                <Text style={{
+                                                    color: colors.BYellow,
+                                                    fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                    fontFamily: "Cairo_400Regular"
+                                                }}>
+                                                    {t(`prayerTimes.${prayer}`)}
+                                                </Text>
+                                                <CustomToggle
+                                                    value={notificationTimes[prayer]}
+                                                    onValueChange={(enabled) => handlePrayerNotificationToggle(prayer, enabled)}
+                                                    activeColor={colors.BYellow}
+                                                    inactiveColor={colors.pastPrayer}
+                                                    icon={getPrayerIcon(prayer)}
+                                                    size={20}
+                                                />
+                                            </View>
+                                        ))}
+                                    </View>
+
+                                    {/* Persistent Countdown Notification Toggle */}
+                                    <View style={{
+                                        backgroundColor: colors.BGreen,
+                                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.MEDIUM,
+                                        padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                        marginTop: PRAYER_CONSTANTS.SPACING.CARD_MARGIN,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between'
+                                    }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                fontFamily: "Cairo_400Regular",
+                                                fontWeight: 'bold',
+                                                marginBottom: 4,
+                                            }}>
+                                                {t('prayerTimes.persistentNotification') || 'Show Countdown Notification'}
+                                            </Text>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.CAPTION,
+                                                fontFamily: "Cairo_400Regular",
+                                                opacity: 0.7,
+                                            }}>
+                                                {t('prayerTimes.persistentNotificationDesc') || 'Keep countdown in notification tray'}
+                                            </Text>
+                                        </View>
+                                        <CustomToggle
+                                            value={showPersistentCountdown}
+                                            onValueChange={setShowPersistentCountdown}
+                                            activeColor={colors.BYellow}
+                                            inactiveColor={colors.pastPrayer}
+                                            icon="bell"
+                                            size={24}
+                                        />
+                                    </View>
+                                </>
                             )}
                         </>
                     )
@@ -910,7 +1362,17 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
 
             {/* Floating Save Button */}
             <TouchableOpacity
-                onPress={saveAllSettings}
+                onPress={async () => {
+                    const ok = await saveAllSettings();
+                    if (ok) {
+                        skipUnsavedGuardRef.current = true;
+                        Alert.alert(
+                            t('common.success'),
+                            t('prayerSettings.saveSuccess'),
+                            [{ text: t('common.ok'), onPress: () => navigation.goBack() }]
+                        );
+                    }
+                }}
                 disabled={!selectedLocation && !currentLocation}
                 style={{
                     position: Platform.OS === 'web' ? 'fixed' : 'absolute',
@@ -952,7 +1414,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -961,6 +1423,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         maxHeight: '70%',
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
@@ -995,7 +1458,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                             {Object.values(PRAYER_CONSTANTS.CALCULATION_METHODS).map((method) => (
                                 <TouchableOpacity
                                     key={method}
-                                    style={{
+                                    style={[{
                                         padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                         borderBottomWidth: 1,
                                         borderBottomColor: colors.BYellow + '20',
@@ -1003,13 +1466,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         backgroundColor: calculationMethod === method ? colors.BYellow : 'transparent'
-                                    }}
+                                    }, webCursor]}
                                     onPress={() => handleCalculationMethodSelection(method)}
                                 >
                                     <Text style={{
                                         color: calculationMethod === method ? colors.DGreen : colors.BYellow,
                                         fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                        fontFamily: calculationMethod === method ? "Cairo_400Regular" : "Cairo_400Regular",
+                                        fontFamily: "Cairo_400Regular",
                                         textAlign: 'center',
                                         flex: 1
                                     }}>
@@ -1032,7 +1495,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 <TouchableOpacity
                     style={{
                         flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: colors.overlayBackground,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -1041,6 +1504,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                 >
                     <View style={{
                         width: '85%',
+                        maxWidth: 480,
                         backgroundColor: colors.DGreen,
                         borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
                         borderWidth: 1,
@@ -1069,7 +1533,7 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         </View>
 
                         <TouchableOpacity
-                            style={{
+                            style={[{
                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                 borderBottomWidth: 1,
                                 borderBottomColor: colors.BYellow + '20',
@@ -1077,13 +1541,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 backgroundColor: madhab === 'Shafi' ? colors.BYellow : 'transparent'
-                            }}
+                            }, webCursor]}
                             onPress={() => handleMadhabSelection('Shafi')}
                         >
                             <Text style={{
                                 color: madhab === 'Shafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Shafi' ? "Cairo_400Regular" : "Cairo_400Regular",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>
@@ -1092,25 +1556,226 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={{
+                            style={[{
                                 padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 backgroundColor: madhab === 'Hanafi' ? colors.BYellow : 'transparent'
-                            }}
+                            }, webCursor]}
                             onPress={() => handleMadhabSelection('Hanafi')}
                         >
                             <Text style={{
                                 color: madhab === 'Hanafi' ? colors.DGreen : colors.BYellow,
                                 fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
-                                fontFamily: madhab === 'Hanafi' ? "Cairo_400Regular" : "Cairo_400Regular",
+                                fontFamily: "Cairo_400Regular",
                                 textAlign: 'center',
                                 flex: 1
                             }}>
                                 {t('prayerSettings.hanafiMadhab')}
                             </Text>
                         </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Audio Mode Modal */}
+            <Modal
+                visible={isAudioModeModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setAudioModeModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={{
+                        flex: 1,
+                        backgroundColor: colors.overlayBackground,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    activeOpacity={1}
+                    onPress={() => setAudioModeModalVisible(false)}
+                >
+                    <View style={{
+                        width: '85%',
+                        maxWidth: 480,
+                        backgroundColor: colors.DGreen,
+                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+                        borderWidth: 1,
+                        borderColor: colors.BYellow,
+                        overflow: 'hidden',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4.65,
+                        elevation: 8,
+                    }}>
+                        <View style={{
+                            backgroundColor: colors.BGreen,
+                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.BYellow + '33'
+                        }}>
+                            <Text style={{
+                                color: colors.BYellow,
+                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
+                                fontFamily: "Cairo_400Regular",
+                                textAlign: 'center'
+                            }}>
+                                {t('settings.notifications.audioMode') || 'Audio Mode'}
+                            </Text>
+                        </View>
+
+                        {audioModeOptions.map((option) => (
+                            <TouchableOpacity
+                                key={option.id}
+                                style={[{
+                                    padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                    borderBottomWidth: 1,
+                                    borderBottomColor: colors.BYellow + '1A',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    backgroundColor: audioMode === option.id ? colors.BYellow + '20' : 'transparent'
+                                }, webCursor]}
+                                onPress={() => handleAudioModeSelection(option.id)}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{
+                                        color: colors.BYellow,
+                                        fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                        fontFamily: "Cairo_400Regular",
+                                        fontWeight: audioMode === option.id ? 'bold' : 'normal',
+                                    }}>
+                                        {isRTL() ? option.labelAr : option.labelEn}
+                                    </Text>
+                                    <Text style={{
+                                        color: colors.BYellow,
+                                        fontSize: 12,
+                                        fontFamily: "Cairo_400Regular",
+                                        opacity: 0.7,
+                                        marginTop: 2,
+                                    }}>
+                                        {isRTL() ? option.descriptionAr : option.descriptionEn}
+                                    </Text>
+                                </View>
+                                {audioMode === option.id && (
+                                    <AntDesign name="checkcircle" size={20} color={colors.BYellow} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Adhan Recitation Modal */}
+            <Modal
+                visible={isAdhanModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setAdhanModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={{
+                        flex: 1,
+                        backgroundColor: colors.overlayBackground,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    activeOpacity={1}
+                    onPress={() => setAdhanModalVisible(false)}
+                >
+                    <View style={{
+                        width: '85%',
+                        maxWidth: 480,
+                        maxHeight: '80%',
+                        backgroundColor: colors.DGreen,
+                        borderRadius: PRAYER_CONSTANTS.BORDER_RADIUS.LARGE,
+                        borderWidth: 1,
+                        borderColor: colors.BYellow,
+                        overflow: 'hidden',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4.65,
+                        elevation: 8,
+                    }}>
+                        <View style={{
+                            backgroundColor: colors.BGreen,
+                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.BYellow + '33'
+                        }}>
+                            <Text style={{
+                                color: colors.BYellow,
+                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.SUBTITLE,
+                                fontFamily: "Cairo_400Regular",
+                                textAlign: 'center'
+                            }}>
+                                {t('settings.notifications.adhanRecitation') || 'Adhan Recitation'}
+                            </Text>
+                        </View>
+
+                        <ScrollView>
+                            {ADHAN_CATALOG.map((option) => {
+                                const st = adhanState[option.id];
+                                const isDownloaded = option.bundled || st?.downloaded;
+                                const isDownloading = st?.downloading;
+                                let status;
+                                if (option.bundled) status = isRTL() ? option.reciterAr : option.reciterEn;
+                                else if (isDownloading) status = (t('settings.notifications.downloading') || 'Downloading') + ` ${Math.round((st?.progress || 0) * 100)}%`;
+                                else if (st?.downloaded) status = t('settings.notifications.downloaded') || 'Downloaded';
+                                else status = `${(option.bytes / 1048576).toFixed(1)} MB · ${t('settings.notifications.tapToDownload') || 'tap to download'}`;
+                                return (
+                                    <TouchableOpacity
+                                        key={option.id}
+                                        style={[{
+                                            padding: PRAYER_CONSTANTS.SPACING.CARD_PADDING,
+                                            borderBottomWidth: 1,
+                                            borderBottomColor: colors.BYellow + '1A',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            backgroundColor: selectedAdhan === option.id ? colors.BYellow + '20' : 'transparent'
+                                        }, webCursor]}
+                                        onPress={() => handleAdhanSelection(option.id)}
+                                    >
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: PRAYER_CONSTANTS.FONT_SIZES.BODY,
+                                                fontFamily: "Cairo_400Regular",
+                                                fontWeight: selectedAdhan === option.id ? 'bold' : 'normal',
+                                            }}>
+                                                {isRTL() ? option.nameAr : option.nameEn}
+                                            </Text>
+                                            <Text style={{
+                                                color: colors.BYellow,
+                                                fontSize: 12,
+                                                fontFamily: "Cairo_400Regular",
+                                                opacity: 0.7,
+                                                marginTop: 2,
+                                            }}>
+                                                {status}
+                                            </Text>
+                                        </View>
+                                        {!option.bundled && st?.downloaded && (
+                                            <TouchableOpacity
+                                                onPress={() => AdhanDownloader.remove(option.id)}
+                                                style={[{ paddingHorizontal: 8 }, webCursor]}
+                                            >
+                                                <Feather name="trash-2" size={18} color={colors.BYellow} />
+                                            </TouchableOpacity>
+                                        )}
+                                        {isDownloading
+                                            ? <ActivityIndicator size="small" color={colors.BYellow} />
+                                            : selectedAdhan === option.id
+                                                ? <AntDesign name="checkcircle" size={20} color={colors.BYellow} />
+                                                : (!isDownloaded && <Feather name="download" size={20} color={colors.BYellow} />)}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </ScrollView>
                     </View>
                 </TouchableOpacity>
             </Modal>

@@ -1,14 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, Platform } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
-import { useRTL } from '../hooks/useRTL';
 
-/**
- * Custom Toggle Component with notification icon
- * Changes from gray to colored based on state
- */
-const CustomToggle = ({ 
+const CustomToggle = ({
   value, 
   onValueChange, 
   size = 24,
@@ -19,9 +14,7 @@ const CustomToggle = ({
   icon = 'bell'
 }) => {
   const colors = useColors();
-  const { isRTL, getFlexDirection } = useRTL();
-  
-  // Use provided colors or fall back to defaults
+
   const activeIconColor = activeColor || colors.BYellow;
   const inactiveIconColor = inactiveColor || colors.BYellow + '40';
   const bgColor = backgroundColor || colors.BGreen;
@@ -41,9 +34,9 @@ const CustomToggle = ({
           backgroundColor: value ? activeIconColor + '30' : inactiveIconColor + '20',
           borderWidth: 1,
           borderColor: value ? activeIconColor : inactiveIconColor,
-          flexDirection: getFlexDirection('row'),
+          flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: value ? (isRTL ? 'flex-start' : 'flex-end') : (isRTL ? 'flex-end' : 'flex-start'),
+          justifyContent: value ? 'flex-end' : 'flex-start',
           paddingHorizontal: 4,
         },
         style

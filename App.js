@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { AppState } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
 import { loadResourcesAndDataAsync } from './utils/load';
@@ -6,6 +8,8 @@ import { AppContainer } from './navigation/Main';
 import { ThemeProvider } from './constants/ThemeProvider';
 import { useTheme } from './constants/Colors';
 import RTLStyleLoader from './components/RTLStyleLoader';
+import PrayerNotificationScheduler from './utils/PrayerNotificationScheduler';
+import NotificationService from './utils/NotificationService';
 
 // Inner component that has access to theme context
 function AppContent() {
@@ -17,9 +21,25 @@ function AppContent() {
   });
   
   React.useEffect(() => {
-    loadResourcesAndDataAsync().then(() => {
-      setResourcesLoaded(true);
+    loadResourcesAndDataAsync()
+      .catch((e) => { console.error('Resource load failed:', e); })
+      .finally(() => { setResourcesLoaded(true); });
+  }, []);
+
+  // Refresh the prayer notification schedule when the app comes back to
+  // foreground so the rolling horizon (today + next 2 days) stays ahead.
+  React.useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        PrayerNotificationScheduler.refresh().catch((e) =>
+          console.error('Scheduler foreground refresh failed:', e)
+        );
+        NotificationService.consolidatePrayerAlarms().catch((e) =>
+          console.error('Alarm consolidation failed:', e)
+        );
+      }
     });
+    return () => sub.remove();
   }, []);
 
   // Hide splash screen when both theme and resources are loaded
@@ -54,8 +74,10 @@ function AppContent() {
 
 export default function App(props) {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
