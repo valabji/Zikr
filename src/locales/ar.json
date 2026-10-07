@@ -829,5 +829,10 @@
       "location": "ipinfo.io",
       "artwork": "Hadysylmy · ويكيبيديا"
     }
+  },
+  "errorBoundary": {
+    "title": "حدث خطأ ما",
+    "message": "حدث خطأ غير متوقع.",
+    "restart": "إعادة تشغيل التطبيق"
   }
 }

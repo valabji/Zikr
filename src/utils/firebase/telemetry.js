@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAnalytics, setAnalyticsCollectionEnabled } from '@react-native-firebase/analytics';
+import { setCrashCollection } from './crashlytics';
 import { APP_KEYS } from '@/constants/StorageKeys';
 
 let enabled = true;
@@ -45,4 +46,5 @@ function applyCollectionState() {
     } catch (error) {
         console.warn('Failed to toggle analytics collection:', error);
     }
+    setCrashCollection(enabled);
 }

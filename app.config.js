@@ -144,6 +144,7 @@ export default {
       ],
       "expo-web-browser",
       "@react-native-firebase/app",
+      "@react-native-firebase/crashlytics",
       [
         "expo-build-properties",
         {

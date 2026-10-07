@@ -8,6 +8,8 @@ import { AppContainer } from './navigation/Main';
 import { ThemeProvider } from './constants/ThemeProvider';
 import { useTheme } from './constants/Colors';
 import RTLStyleLoader from './components/RTLStyleLoader';
+import ErrorBoundary from './components/ErrorBoundary';
+import { recordAppError } from '@/utils/firebase/crashlytics';
 import PrayerNotificationScheduler from '@/utils/prayer/PrayerNotificationScheduler';
 import NotificationService from '@/utils/notifications/NotificationService';
 
@@ -74,10 +76,12 @@ function AppContent() {
 
 export default function App(props) {
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary onError={(error, info) => recordAppError(error, info?.componentStack)}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

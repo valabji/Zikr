@@ -15,6 +15,7 @@ module.exports = {
     '^react-native-svg$': '<rootDir>/__mocks__/svgMock.js',
     '^@react-native-community/slider$': '<rootDir>/__mocks__/Slider.js',
     '^expo-speech-recognition$': '<rootDir>/__mocks__/expo-speech-recognition.js',
+    '^@react-native-firebase/crashlytics$': '<rootDir>/__mocks__/firebase-crashlytics.js',
     'modules/expo-media-session$': '<rootDir>/__mocks__/expo-media-session.js',
     'modules/expo-strong-vibration$': '<rootDir>/__mocks__/expo-strong-vibration.js',
     '^@/(.*)$': '<rootDir>/src/$1',
