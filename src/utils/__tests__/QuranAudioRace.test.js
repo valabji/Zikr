@@ -1,6 +1,6 @@
 import { createAudioPlayer } from 'expo-audio';
 import QuranAudio from '@/utils/quran/QuranAudio';
-import { loadQuranSettings } from '@/utils/quran/QuranSettings';
+import { loadQuranSettings, subscribeQuranSettings } from '@/utils/quran/QuranSettings';
 import { getSurahAudioManifest } from '@/utils/quran/QuranSurahAudio';
 
 jest.mock('expo-audio', () => ({
@@ -171,6 +171,24 @@ describe('QuranAudio play race conditions', () => {
     expect(preloaded.play).toHaveBeenCalled();
     expect(QuranAudio.activeAyah).toEqual({ surah: 1, ayah: 2 });
     expect(createAudioPlayer).toHaveBeenCalledTimes(3);
+  });
+
+  it('changing reciter while looping discards the old reciter preload', async () => {
+    const settings = { reciterId: 'r1', audioPlaybackScope: 'ayah', loopEnabled: true, playbackRate: 1 };
+    loadQuranSettings.mockResolvedValue(settings);
+    await QuranAudio.playAyah(1, 1);
+    const oldPreload = QuranAudio._preload.player;
+    const updateSettings = subscribeQuranSettings.mock.calls[0][0];
+
+    updateSettings({ ...settings, reciterId: 'r2' });
+    await flush();
+
+    expect(oldPreload.play).not.toHaveBeenCalled();
+    expect(oldPreload.pause.mock.invocationCallOrder[0]).toBeLessThan(oldPreload.remove.mock.invocationCallOrder[0]);
+    expect(QuranAudio.player).not.toBe(oldPreload);
+    expect(QuranAudio._preload.reciterId).toBe('r2');
+    expect(QuranAudio.player.play).toHaveBeenCalled();
+    await QuranAudio.stop();
   });
 
   it('stop supersedes an in-flight gapless play so its player never starts', async () => {

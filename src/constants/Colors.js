@@ -124,6 +124,11 @@ export const useColors = () => {
       headerGradient: currentTheme.headerGradient,
       bgImage1: currentTheme.bgImage1,
       bgImage2: currentTheme.bgImage2,
+      headerImage: currentTheme.headerImage,
+      starImage: currentTheme.starImage,
+      patternColor: currentTheme.patternColor,
+      hidePattern: currentTheme.hidePattern,
+      clickSound: currentTheme.clickSound,
       
       // Original Green Theme (for direct access)
       originalGreen: '#003C34',

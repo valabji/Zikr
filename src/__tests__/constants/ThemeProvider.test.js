@@ -65,6 +65,25 @@ describe('ThemeProvider', () => {
   });
 
   describe('useColors', () => {
+    it('exposes saved custom images, pattern preferences, and click sound to consumers', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      AsyncStorage.setItem.mockResolvedValue(undefined);
+      const { result } = renderHook(() => ({ theme: useTheme(), colors: useColors() }), { wrapper });
+      await waitFor(() => expect(result.current.theme.isThemeLoaded).toBe(true));
+      const assets = {
+        headerImage: 'file:///header.png', starImage: 'file:///star.png',
+        bgImage1: 'file:///bg.png', bgImage2: 'file:///bg2.png',
+        patternColor: '#123456', hidePattern: true, clickSound: 'file:///click.mp3',
+      };
+      await act(async () => {
+        await result.current.theme.saveCustomTheme('custom_test', {
+          ...result.current.theme.themes.goldOnDark, ...assets, custom: true,
+        });
+        await result.current.theme.setTheme('custom_test');
+      });
+      expect(result.current.colors).toEqual(expect.objectContaining(assets));
+    });
+
     it('returns the active theme palette plus legacy aliases', async () => {
       AsyncStorage.getItem.mockResolvedValue('goldOnDark');
       const { result } = renderHook(() => useColors(), { wrapper });

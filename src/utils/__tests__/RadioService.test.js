@@ -93,6 +93,7 @@ describe('RadioService', () => {
     await RadioService.playStation({ id: 4, name: 'Second', streamUrl: 'https://stream.example/4' });
     expect(first.subscription.remove).toHaveBeenCalled();
     expect(first.remove).toHaveBeenCalled();
+    expect(first.pause.mock.invocationCallOrder[0]).toBeLessThan(first.remove.mock.invocationCallOrder[0]);
     expect(RadioService.activeStation.id).toBe(4);
   });
 
@@ -193,6 +194,7 @@ describe('RadioService', () => {
     const sound = mockState.lastSound;
     await RadioService.stop();
     expect(sound.remove).toHaveBeenCalled();
+    expect(sound.pause.mock.invocationCallOrder[0]).toBeLessThan(sound.remove.mock.invocationCallOrder[0]);
     expect(RadioService.sound).toBeNull();
     expect(RadioService.activeStation).toBeNull();
     expect(RadioService.isPlaying).toBe(false);

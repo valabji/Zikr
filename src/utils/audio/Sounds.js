@@ -30,6 +30,7 @@ class Sounds {
     if (this.fullAdhanSound) {
       try { this.fullAdhanSubscription?.remove(); } catch {}
       this.fullAdhanSubscription = null;
+      try { this.fullAdhanSound.pause(); } catch {}
       try { this.fullAdhanSound.remove(); } catch {}
       this.fullAdhanSound = null;
     }
@@ -179,11 +180,13 @@ class Sounds {
       }
 
       if (this.shortAlertSound) {
+        try { this.shortAlertSound.pause(); } catch {}
         this.shortAlertSound.remove();
         this.shortAlertSound = null;
       }
 
       if (this.fullAdhanSound) {
+        try { this.fullAdhanSound.pause(); } catch {}
         this.fullAdhanSound.remove();
         this.fullAdhanSound = null;
       }

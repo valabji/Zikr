@@ -145,6 +145,7 @@ describe('Sounds (singleton audio service)', () => {
   describe('selected recitation source', () => {
     it('reloads the full adhan from the selected downloaded recitation', async () => {
       await Sounds.initialize();
+      const previous = Sounds.fullAdhanSound;
       createAudioPlayer.mockClear();
       AsyncStorage.getItem.mockResolvedValueOnce('alafasy');
       const spy = jest
@@ -154,6 +155,7 @@ describe('Sounds (singleton audio service)', () => {
       expect(createAudioPlayer).toHaveBeenCalledWith(
         { uri: '/mock/document/adhans/alafasy.mp3' }
       );
+      expect(previous.pause.mock.invocationCallOrder[0]).toBeLessThan(previous.remove.mock.invocationCallOrder[0]);
       spy.mockRestore();
     });
 
@@ -255,6 +257,8 @@ describe('Sounds (singleton audio service)', () => {
       await Sounds.cleanup();
       expect(shortSound.remove).toHaveBeenCalled();
       expect(fullSound.remove).toHaveBeenCalled();
+      expect(shortSound.pause.mock.invocationCallOrder[0]).toBeLessThan(shortSound.remove.mock.invocationCallOrder[0]);
+      expect(fullSound.pause.mock.invocationCallOrder[0]).toBeLessThan(fullSound.remove.mock.invocationCallOrder[0]);
       expect(Sounds.shortAlertSound).toBeNull();
       expect(Sounds.fullAdhanSound).toBeNull();
     });

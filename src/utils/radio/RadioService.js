@@ -62,6 +62,8 @@ class RadioService {
       try {
         this._statusSub?.remove();
         this._statusSub = null;
+        // Stop immediately; remove() can defer native disposal until JS GC on iOS.
+        try { this.sound.pause(); } catch {}
         this.sound.remove();
       } catch {}
       this.sound = null;

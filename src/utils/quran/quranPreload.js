@@ -21,7 +21,7 @@ export const preloadMethods = {
     const preload = this._preload;
     if (!preload) return null;
     this._preload = null;
-    if (preload.surah === surah && preload.ayah === ayah) return preload.player;
+    if (preload.reciterId === this.reciterId && preload.surah === surah && preload.ayah === ayah) return preload.player;
     dlog('preload mismatch: had', `${preload.surah}:${preload.ayah}`, 'wanted', `${surah}:${ayah}`);
     this._disposePlayer(preload.player);
     return null;
@@ -34,7 +34,7 @@ export const preloadMethods = {
     const uri = buildAyahAudioUrl(this.reciterId, target.surah, target.ayah);
     dlog('preload', `${target.surah}:${target.ayah}`, uri);
     try {
-      this._preload = { surah: target.surah, ayah: target.ayah, player: createAudioPlayer({ uri }, { updateInterval: 100 }) };
+      this._preload = { reciterId: this.reciterId, surah: target.surah, ayah: target.ayah, player: createAudioPlayer({ uri }, { updateInterval: 100 }) };
     } catch {}
   },
 
