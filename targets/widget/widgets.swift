@@ -1,6 +1,17 @@
 import WidgetKit
 import SwiftUI
 
+private extension View {
+    @ViewBuilder
+    func widgetBackground(_ color: Color) -> some View {
+        if #available(iOS 17.0, *) {
+            containerBackground(for: .widget) { color }
+        } else {
+            background(color)
+        }
+    }
+}
+
 let widgetAppGroup = "group.com.valabji.zikr.widget"
 let widgetDataKey = "prayerWidgetData"
 let widgetThemeKey = "widgetThemeData"
@@ -187,7 +198,7 @@ struct PrayerWidgetEntryView: View {
                 mediumBody
             }
         }
-        .containerBackground(for: .widget) { c.bg }
+        .widgetBackground(c.bg)
     }
 
     @ViewBuilder var smallBody: some View {
@@ -355,7 +366,7 @@ struct HijriWidgetEntryView: View {
                 mediumBody
             }
         }
-        .containerBackground(for: .widget) { c.bg }
+        .widgetBackground(c.bg)
     }
 
     @ViewBuilder var smallBody: some View {

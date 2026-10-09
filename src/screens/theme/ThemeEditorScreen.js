@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAudioPlayer } from 'expo-audio';
 import { View, Text, TextInput, Image, Alert, Platform } from 'react-native';
 import { useColors, useTheme } from '@/constants/Colors';
 import { t } from '@/locales/i18n';
@@ -28,6 +29,7 @@ export default function ThemeEditorScreen({ navigation, route }) {
   const themeId = route.params?.themeId;
   const [draft, setDraft] = useState(() => ({ ...(customThemes[themeId] || {}) }));
   const [picker, setPicker] = useState(null);
+  const previewPlayer = useAudioPlayer(draft.clickSound ? { uri: draft.clickSound } : null);
 
   const border = withAlpha(colors.accent, 'border');
 
@@ -76,9 +78,8 @@ export default function ThemeEditorScreen({ navigation, route }) {
   };
 
   const previewClickSound = async () => {
-    const { Audio } = require('expo-av');
-    const { sound } = await Audio.Sound.createAsync({ uri: draft.clickSound }, { shouldPlay: true });
-    sound.setOnPlaybackStatusUpdate((status) => { if (status.didJustFinish) sound.unloadAsync(); });
+    await previewPlayer.seekTo(0);
+    previewPlayer.play();
   };
 
   const handleSave = async () => {

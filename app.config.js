@@ -143,6 +143,7 @@ export default {
         }
       ],
       "expo-web-browser",
+      "expo-sharing",
       "@react-native-firebase/app",
       "@react-native-firebase/crashlytics",
       [

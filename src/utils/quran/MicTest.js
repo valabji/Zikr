@@ -1,48 +1,59 @@
-import { Audio } from 'expo-av';
+import { Platform } from 'react-native';
+import { AudioModule, RecordingPresets, createAudioPlayer, requestRecordingPermissionsAsync, setAudioModeAsync } from 'expo-audio';
 import { VOICE_FOLLOW_DEBUG as DEBUG } from '@/utils/quran/quranDebug';
 
 const log = (...args) => { if (DEBUG) console.log('[MicTest]', ...args); };
-
 const RECORD_MS = 3000;
-
-let _recording = null;
-let _sound = null;
+let running = false;
 
 export async function runMicTest(onState) {
-  const notify = (s) => { log('state', s); if (onState) onState(s); };
+  if (running) return;
+  running = true;
+  const notify = (state) => { log('state', state); onState?.(state); };
+  let recorder;
+  let player;
+  let subscription;
+  let recordingMode = false;
   try {
-    const perm = await Audio.requestPermissionsAsync();
-    log('permission', perm);
-    if (!perm.granted) { notify('denied'); return; }
+    const permission = await requestRecordingPermissionsAsync();
+    if (!permission.granted) { notify('denied'); return; }
 
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    recordingMode = true;
+    const options = RecordingPresets.HIGH_QUALITY;
+    const Recorder = Platform.OS === 'web' ? AudioModule.AudioRecorderWeb : AudioModule.AudioRecorder;
+    recorder = new Recorder({ ...options, ...options[Platform.OS] });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
     notify('recording');
-    const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-    _recording = recording;
+    await new Promise((resolve) => setTimeout(resolve, RECORD_MS));
+    await recorder.stop();
+    const uri = recorder.uri;
+    if (!uri) throw new Error('Recording did not produce an audio file');
 
-    await new Promise((r) => setTimeout(r, RECORD_MS));
-
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    _recording = null;
-    log('recorded', uri);
-
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    recordingMode = false;
     notify('playing');
-    const { sound } = await Audio.Sound.createAsync({ uri });
-    _sound = sound;
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
-        sound.unloadAsync();
-        if (_sound === sound) _sound = null;
-        notify('idle');
-      }
+    player = createAudioPlayer({ uri });
+    await new Promise((resolve, reject) => {
+      subscription = player.addListener('playbackStatusUpdate', (status) => {
+        if (status.error) reject(new Error(status.error));
+        else if (status.didJustFinish) resolve();
+      });
+      player.play();
     });
-    await sound.playAsync();
-  } catch (err) {
-    log('error', err);
-    try { if (_recording) await _recording.stopAndUnloadAsync(); } catch {}
-    _recording = null;
+    notify('idle');
+  } catch (error) {
+    log('error', error);
     notify('error');
+  } finally {
+    subscription?.remove();
+    player?.remove();
+    try { if (recorder?.isRecording) await recorder.stop(); } catch {}
+    recorder?.release();
+    if (recordingMode) {
+      try { await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }); } catch {}
+    }
+    running = false;
   }
 }

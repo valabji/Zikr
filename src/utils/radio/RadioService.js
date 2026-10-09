@@ -1,4 +1,4 @@
-import { Audio, InterruptionModeIOS } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RADIO_CONSTANTS } from '@/constants/RadioConstants';
 import QuranAudio from '@/utils/quran/QuranAudio';
@@ -9,6 +9,7 @@ const { STORAGE_KEYS } = RADIO_CONSTANTS;
 class RadioService {
   constructor() {
     this.sound = null;
+    this._statusSub = null;
     this.activeStation = null;
     this.isPlaying = false;
     this.isBuffering = false;
@@ -24,13 +25,12 @@ class RadioService {
   async _ensureAudioMode() {
     try {
       // DoNotMix required for iOS Now Playing; re-applied each play since Sounds/MicTest overwrite the global mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: 'doNotMix',
+        shouldRouteThroughEarpiece: false,
       });
     } catch (e) {
       console.warn('RadioService: setAudioModeAsync failed', e);
@@ -60,8 +60,9 @@ class RadioService {
   async _unload() {
     if (this.sound) {
       try {
-        this.sound.setOnPlaybackStatusUpdate(null);
-        await this.sound.unloadAsync();
+        this._statusSub?.remove();
+        this._statusSub = null;
+        this.sound.remove();
       } catch {}
       this.sound = null;
     }
@@ -71,8 +72,11 @@ class RadioService {
     if (!station || !station.streamUrl) return;
     const op = ++this._opId;
     await this._ensureAudioMode();
+    if (op !== this._opId) return;
     try { await QuranAudio.stop(); } catch {}
+    if (op !== this._opId) return;
     try { await Sounds.stopFullAdhan(); } catch {}
+    if (op !== this._opId) return;
     await this._unload();
     if (op !== this._opId) return;
     this.activeStation = station;
@@ -81,17 +85,11 @@ class RadioService {
     this.failedStationId = null;
     this._emit();
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: station.streamUrl },
-        { shouldPlay: true }
-      );
-      if (op !== this._opId) {
-        try { sound.setOnPlaybackStatusUpdate(null); await sound.unloadAsync(); } catch {}
-        return;
-      }
+      const sound = createAudioPlayer({ uri: station.streamUrl });
       this.sound = sound;
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) {
+      this._statusSub = sound.addListener('playbackStatusUpdate', (status) => {
+        if (op !== this._opId) return;
+        if (!status.isLoaded || status.error) {
           if (status.error) {
             console.warn('RadioService: stream error', status.error);
             this.isPlaying = false;
@@ -101,17 +99,19 @@ class RadioService {
           }
           return;
         }
-        const playing = !!status.isPlaying;
-        const buffering = !!status.isBuffering && !status.isPlaying;
+        const playing = !!status.playing;
+        const buffering = !!status.isBuffering && !status.playing;
         if (playing !== this.isPlaying || buffering !== this.isBuffering) {
           this.isPlaying = playing;
           this.isBuffering = buffering;
           this._emit();
         }
       });
+      sound.play();
       this._persistLastPlayed(station);
     } catch (e) {
       if (op !== this._opId) return;
+      await this._unload();
       console.warn('RadioService: playStation failed', e);
       this.isPlaying = false;
       this.isBuffering = false;
@@ -132,13 +132,13 @@ class RadioService {
       return;
     }
     try {
-      const status = await this.sound.getStatusAsync();
+      const status = this.sound.currentStatus;
       if (!status.isLoaded) return;
-      if (status.isPlaying) {
-        await this.sound.pauseAsync();
+      if (status.playing) {
+        this.sound.pause();
         this.isPlaying = false;
       } else {
-        await this.sound.playAsync();
+        this.sound.play();
         this.isPlaying = true;
       }
       this._emit();

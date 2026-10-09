@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RadioService from '@/utils/radio/RadioService';
 import QuranAudio from '@/utils/quran/QuranAudio';
@@ -11,25 +11,20 @@ const mockState = { lastSound: null };
 const mockMakeSound = () => {
   const sound = {
     cb: null,
-    playAsync: jest.fn(() => Promise.resolve()),
-    pauseAsync: jest.fn(() => Promise.resolve()),
-    stopAsync: jest.fn(() => Promise.resolve()),
-    unloadAsync: jest.fn(() => Promise.resolve()),
-    getStatusAsync: jest.fn(() => Promise.resolve({ isLoaded: true, isPlaying: true })),
-    setOnPlaybackStatusUpdate: jest.fn((cb) => { sound.cb = cb; }),
+    currentStatus: { isLoaded: true, playing: true },
+    play: jest.fn(),
+    pause: jest.fn(),
+    remove: jest.fn(),
+    subscription: { remove: jest.fn() },
+    addListener: jest.fn((event, cb) => { sound.cb = cb; return sound.subscription; }),
   };
   mockState.lastSound = sound;
   return sound;
 };
 
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn(() => Promise.resolve({ sound: mockMakeSound() })),
-    },
-    setAudioModeAsync: jest.fn(() => Promise.resolve()),
-  },
-  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => mockMakeSound()),
+  setAudioModeAsync: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('@/utils/quran/QuranAudio', () => ({
@@ -43,13 +38,12 @@ jest.mock('@/utils/audio/Sounds', () => ({
 }));
 
 const station = { id: 3, name: 'Test Radio', streamUrl: 'https://stream.example/3' };
-const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('RadioService', () => {
   let store;
   beforeEach(() => {
     jest.clearAllMocks();
-    Audio.Sound.createAsync.mockImplementation(() => Promise.resolve({ sound: mockMakeSound() }));
+    createAudioPlayer.mockImplementation(() => mockMakeSound());
     mockState.lastSound = null;
     store = {};
     AsyncStorage.setItem.mockImplementation((k, v) => { store[k] = v; return Promise.resolve(); });
@@ -73,15 +67,14 @@ describe('RadioService', () => {
 
   it('playStation sets the audio mode, stops Quran, plays, and persists last played', async () => {
     await RadioService.playStation(station);
-    expect(Audio.setAudioModeAsync).toHaveBeenCalledWith(expect.objectContaining({
-      staysActiveInBackground: true,
-      playsInSilentModeIOS: true,
+    expect(setAudioModeAsync).toHaveBeenCalledWith(expect.objectContaining({
+      shouldPlayInBackground: true,
+      playsInSilentMode: true,
     }));
     expect(QuranAudio.stop).toHaveBeenCalled();
     expect(Sounds.stopFullAdhan).toHaveBeenCalled();
-    expect(Audio.Sound.createAsync).toHaveBeenCalledWith(
+    expect(createAudioPlayer).toHaveBeenCalledWith(
       { uri: station.streamUrl },
-      { shouldPlay: true },
     );
     expect(RadioService.activeStation).toEqual(station);
     expect(RadioService.isPlaying).toBe(true);
@@ -90,7 +83,7 @@ describe('RadioService', () => {
 
   it('ignores a station with no stream url', async () => {
     await RadioService.playStation({ id: 1, name: 'No URL' });
-    expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+    expect(createAudioPlayer).not.toHaveBeenCalled();
     expect(RadioService.activeStation).toBeNull();
   });
 
@@ -98,8 +91,8 @@ describe('RadioService', () => {
     await RadioService.playStation(station);
     const first = mockState.lastSound;
     await RadioService.playStation({ id: 4, name: 'Second', streamUrl: 'https://stream.example/4' });
-    expect(first.setOnPlaybackStatusUpdate).toHaveBeenCalledWith(null);
-    expect(first.unloadAsync).toHaveBeenCalled();
+    expect(first.subscription.remove).toHaveBeenCalled();
+    expect(first.remove).toHaveBeenCalled();
     expect(RadioService.activeStation.id).toBe(4);
   });
 
@@ -108,7 +101,7 @@ describe('RadioService', () => {
     const fn = jest.fn();
     RadioService.subscribe(fn);
     fn.mockClear();
-    mockState.lastSound.cb({ isLoaded: true, isPlaying: false, isBuffering: true });
+    mockState.lastSound.cb({ isLoaded: true, playing: false, isBuffering: true });
     expect(RadioService.isBuffering).toBe(true);
     expect(RadioService.isPlaying).toBe(false);
     expect(fn).toHaveBeenCalledWith({ activeStation: station, isPlaying: false, isBuffering: true, failedStationId: null });
@@ -117,64 +110,54 @@ describe('RadioService', () => {
   it('toggle pauses when playing and resumes when paused', async () => {
     await RadioService.playStation(station);
     const sound = mockState.lastSound;
-    sound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: true });
+    sound.currentStatus = { isLoaded: true, playing: true };
     await RadioService.toggle();
-    expect(sound.pauseAsync).toHaveBeenCalled();
+    expect(sound.pause).toHaveBeenCalled();
     expect(RadioService.isPlaying).toBe(false);
 
-    sound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: false });
+    sound.currentStatus = { isLoaded: true, playing: false };
     await RadioService.toggle();
-    expect(sound.playAsync).toHaveBeenCalled();
+    expect(sound.play).toHaveBeenCalled();
     expect(RadioService.isPlaying).toBe(true);
   });
 
-  it('a second play during load unloads the first sound (no orphan)', async () => {
-    const created = [];
-    const gate = [];
-    Audio.Sound.createAsync.mockImplementation(() => new Promise((resolve) => {
-      const sound = mockMakeSound();
-      created.push(sound);
-      gate.push(() => resolve({ sound }));
-    }));
-
-    const p1 = RadioService.playStation(station);
-    await flush();
-    const p2 = RadioService.playStation(station);
-    await flush();
-    gate[0]();
-    gate[1]();
-    await Promise.all([p1, p2]);
-
-    expect(created).toHaveLength(2);
-    expect(created[0].unloadAsync).toHaveBeenCalled();
-    expect(RadioService.sound).toBe(created[1]);
-
-    await RadioService.stop();
-    expect(created[1].unloadAsync).toHaveBeenCalled();
-    expect(RadioService.sound).toBeNull();
+  it('a second play while setting audio mode supersedes the first', async () => {
+    let release;
+    setAudioModeAsync.mockImplementationOnce(() => new Promise((resolve) => { release = resolve; }));
+    const first = RadioService.playStation(station);
+    await RadioService.playStation({ ...station, id: 4 });
+    release();
+    await first;
+    expect(createAudioPlayer).toHaveBeenCalledTimes(1);
+    expect(RadioService.activeStation.id).toBe(4);
+    expect(RadioService.sound).toBe(mockState.lastSound);
+    expect(mockState.lastSound.remove).not.toHaveBeenCalled();
   });
 
-  it('stop supersedes an in-flight play so its sound never leaks', async () => {
-    let resolveCreate;
-    Audio.Sound.createAsync.mockImplementationOnce(() => new Promise((resolve) => {
-      resolveCreate = () => resolve({ sound: mockMakeSound() });
-    }));
-
+  it('stop supersedes a play waiting for audio mode', async () => {
+    let release;
+    setAudioModeAsync.mockImplementationOnce(() => new Promise((resolve) => { release = resolve; }));
     const playing = RadioService.playStation(station);
-    await flush();
     await RadioService.stop();
-    resolveCreate();
+    release();
     await playing;
-
-    const leaked = mockState.lastSound;
-    expect(leaked.unloadAsync).toHaveBeenCalled();
+    expect(createAudioPlayer).not.toHaveBeenCalled();
     expect(RadioService.sound).toBeNull();
     expect(RadioService.activeStation).toBeNull();
   });
 
-  it('flags the station as failed when createAsync rejects and clears on the next successful play', async () => {
+  it('ignores status events from a replaced player', async () => {
+    await RadioService.playStation(station);
+    const stale = mockState.lastSound;
+    await RadioService.playStation({ ...station, id: 4 });
+    stale.cb({ isLoaded: false, error: 'late error' });
+    expect(RadioService.failedStationId).toBeNull();
+    expect(RadioService.isPlaying).toBe(true);
+  });
+
+  it('flags the station as failed when player creation throws and clears on the next successful play', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    Audio.Sound.createAsync.mockImplementationOnce(() => Promise.reject(new Error('HTTP 500')));
+    createAudioPlayer.mockImplementationOnce(() => { throw new Error('HTTP 500'); });
     await RadioService.playStation(station);
     expect(RadioService.failedStationId).toBe(station.id);
     expect(RadioService.isPlaying).toBe(false);
@@ -197,7 +180,7 @@ describe('RadioService', () => {
 
   it('stop clears the failed station flag', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    Audio.Sound.createAsync.mockImplementationOnce(() => Promise.reject(new Error('boom')));
+    createAudioPlayer.mockImplementationOnce(() => { throw new Error('boom'); });
     await RadioService.playStation(station);
     expect(RadioService.failedStationId).toBe(station.id);
     await RadioService.stop();
@@ -209,7 +192,7 @@ describe('RadioService', () => {
     await RadioService.playStation(station);
     const sound = mockState.lastSound;
     await RadioService.stop();
-    expect(sound.unloadAsync).toHaveBeenCalled();
+    expect(sound.remove).toHaveBeenCalled();
     expect(RadioService.sound).toBeNull();
     expect(RadioService.activeStation).toBeNull();
     expect(RadioService.isPlaying).toBe(false);

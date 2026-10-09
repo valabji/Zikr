@@ -2,8 +2,8 @@
 > A comprehensive Islamic mobile application for daily prayers, dhikr (remembrance), and spiritual guidance
 
 [![Status](https://img.shields.io/badge/build-passing-green.svg)](https://github.com/valabji/Zikr)
-[![React Native](https://img.shields.io/badge/React%20Native-v0.81-blue.svg?logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-SDK54-black.svg?logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-v0.86-blue.svg?logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK57-black.svg?logo=expo)](https://expo.dev/)
 [![React Navigation](https://img.shields.io/badge/React%20Navigation-v7-blue.svg?logo=react)](https://reactnavigation.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellowgreen.svg)](http://mit-license.org/)
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green.svg?logo=googleplay)](https://play.google.com/store/apps/details?id=com.valabji.zikr)
@@ -46,7 +46,7 @@
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React Native 0.81 with Expo SDK 54
+- **Framework**: React Native 0.86 with Expo SDK 57
 - **Navigation**: React Navigation 7 (Stack, Drawer, Bottom Tabs)
 - **State Management**: Lightweight custom stores backed by AsyncStorage
 - **Audio**: expo-audio for adhan, Quran recitation, and click sounds
@@ -83,9 +83,9 @@ zikr/
 
 ### Prerequisites
 
-- Node.js 22.x
+- Node.js 22.13 or newer (22.x)
 - Yarn 3.6.4 (Berry) — committed in `.yarn/`; do not use npm
-- For iOS development: Xcode (macOS only)
+- For iOS development: Xcode 26.4 or newer (macOS only)
 - For Android development: Android Studio
 
 ### Installation
@@ -178,6 +178,21 @@ yarn test:coverage
 yarn test:update
 ```
 
+### After upgrading native dependencies
+
+Rebuild development clients before testing on a device. Existing SDK 54 native
+projects and installed clients cannot load the SDK 57 JavaScript bundle.
+`ios/` and `android/` are generated and ignored by Git; preserve any local native
+edits before regenerating them with `yarn prebuild`.
+
+For dependency validation and production bundle checks:
+
+```bash
+yarn expo install --check
+yarn dlx expo-doctor@latest
+yarn expo export --platform all
+```
+
 ## 🌐 Localization
 
 The app supports full localization with:
@@ -190,7 +205,7 @@ The app supports full localization with:
 
 - **Bundle ID**: `com.valabji.zikr`
 - **Version**: 1.1.2
-- **Target Platforms**: iOS 11+, Android 21+
+- **Target Platforms**: iOS 16.4+, Android 7.0+ (API 24)
 - **Google Services**: Firebase Analytics integration
 - **AdMob**: Monetization ready (currently disabled)
 

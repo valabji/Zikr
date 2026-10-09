@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
 import { useColors } from '@/constants/Colors';
@@ -8,28 +8,16 @@ import { SELECTED_ADHAN_KEY, DEFAULT_ADHAN_ID } from '@/constants/AdhanCatalog';
 const audioSource = require('@assets/sound/kikhires.mp3');
 const VOLUME_KEY = '@zikr/click_volume';
 
-/**
- * Sounds - Audio playback utility for prayer reminders
- * 
- * Supports TWO separate audio modes:
- * 1. Short Alert - Auto-plays when notification fires (3-5 sec)
- * 2. Full Adhan - Plays when user taps notification (2-3 min, stoppable)
- * 
- * Why two players?
- * - Prevents conflicts when user taps notification while short alert playing
- * - Allows stopping full adhan without affecting short alerts
- */
 class Sounds {
   constructor() {
-    this.shortAlertSound = null;  // 3-5 second alert
-    this.fullAdhanSound = null;   // 2-3 minute full adhan
+    this.shortAlertSound = null;
+    this.fullAdhanSound = null;
+    this.fullAdhanSubscription = null;
     this.fullAdhanSourceId = DEFAULT_ADHAN_ID;
     this.isInitialized = false;
     this.isPlayingFullAdhan = false;
   }
 
-  // Swap the full-adhan player to the user's selected recitation when one is
-  // downloaded; otherwise keep the bundled adhan. Reloads only on change.
   async _ensureFullAdhanSource() {
     const selected = (await AsyncStorage.getItem(SELECTED_ADHAN_KEY)) || DEFAULT_ADHAN_ID;
     let uri = null;
@@ -40,53 +28,35 @@ class Sounds {
     if (resolvedId === this.fullAdhanSourceId && this.fullAdhanSound) return;
 
     if (this.fullAdhanSound) {
-      try { this.fullAdhanSound.setOnPlaybackStatusUpdate(null); } catch {}
-      try { await this.fullAdhanSound.unloadAsync(); } catch {}
+      try { this.fullAdhanSubscription?.remove(); } catch {}
+      this.fullAdhanSubscription = null;
+      try { this.fullAdhanSound.remove(); } catch {}
       this.fullAdhanSound = null;
     }
 
     const source = uri ? { uri } : require('@assets/sound/adhan_full.mp3');
-    const { sound } = await Audio.Sound.createAsync(source, { shouldPlay: false });
+    const sound = createAudioPlayer(source);
     this.fullAdhanSound = sound;
-    this.fullAdhanSound.setOnPlaybackStatusUpdate(this._onFullAdhanPlaybackUpdate);
+    this.fullAdhanSubscription = this.fullAdhanSound.addListener('playbackStatusUpdate', this._onFullAdhanPlaybackUpdate);
     this.fullAdhanSourceId = resolvedId;
   }
 
-  /**
-   * Initialize audio system
-   * MUST be called before playing any audio
-   */
   async initialize() {
     if (this.isInitialized) {
-      return; // Already initialized
+      return;
     }
 
     try {
-      // Configure audio mode for playback
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,  // CRITICAL: Play even in silent mode
-        staysActiveInBackground: true, // Keep playing in background
-        shouldDuckAndroid: true,      // Lower other audio when playing
-        playThroughEarpieceAndroid: false,
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: 'duckOthers',
+        shouldRouteThroughEarpiece: false,
       });
-
-      // Load short alert sound
-      const { sound: shortSound } = await Audio.Sound.createAsync(
-        require('@assets/sound/adhan_short_alert.mp3'),
-        { shouldPlay: false }
-      );
-      this.shortAlertSound = shortSound;
-
-      // Load full adhan sound
-      const { sound: fullSound } = await Audio.Sound.createAsync(
-        require('@assets/sound/adhan_full.mp3'),
-        { shouldPlay: false }
-      );
-      this.fullAdhanSound = fullSound;
-
-      // Set up playback status listener for full adhan
-      this.fullAdhanSound.setOnPlaybackStatusUpdate(this._onFullAdhanPlaybackUpdate);
+      this.shortAlertSound = createAudioPlayer(require('@assets/sound/adhan_short_alert.mp3'));
+      this.fullAdhanSound = createAudioPlayer(require('@assets/sound/adhan_full.mp3'));
+      this.fullAdhanSubscription = this.fullAdhanSound.addListener('playbackStatusUpdate', this._onFullAdhanPlaybackUpdate);
 
       this.isInitialized = true;
       console.log('✅ Audio system initialized');
@@ -97,12 +67,6 @@ class Sounds {
     }
   }
 
-  /**
-   * Play short alert (auto-plays on notification)
-   * 3-5 seconds, non-interruptible
-   * 
-   * @returns {Promise<void>}
-   */
   async playShortAlert() {
     try {
       if (!this.isInitialized) {
@@ -114,17 +78,14 @@ class Sounds {
         return;
       }
 
-      // Stop and reset if already playing
-      const status = await this.shortAlertSound.getStatusAsync();
-      if (status.isLoaded && status.isPlaying) {
-        await this.shortAlertSound.stopAsync();
+      const status = this.shortAlertSound.currentStatus;
+      if (status.isLoaded && status.playing) {
+        this.shortAlertSound.pause();
       }
 
-      // Reset to beginning
-      await this.shortAlertSound.setPositionAsync(0);
+      await this.shortAlertSound.seekTo(0);
 
-      // Play short alert
-      await this.shortAlertSound.playAsync();
+      this.shortAlertSound.play();
       console.log('🔊 Playing short alert');
 
     } catch (error) {
@@ -132,12 +93,6 @@ class Sounds {
     }
   }
 
-  /**
-   * Play full adhan (plays when user taps notification)
-   * 2-3 minutes, user can stop
-   * 
-   * @returns {Promise<void>}
-   */
   async playFullAdhan() {
     try {
       if (!this.isInitialized) {
@@ -151,17 +106,14 @@ class Sounds {
         return;
       }
 
-      // Stop if already playing
-      const status = await this.fullAdhanSound.getStatusAsync();
-      if (status.isLoaded && status.isPlaying) {
-        await this.fullAdhanSound.stopAsync();
+      const status = this.fullAdhanSound.currentStatus;
+      if (status.isLoaded && status.playing) {
+        this.fullAdhanSound.pause();
       }
 
-      // Reset to beginning
-      await this.fullAdhanSound.setPositionAsync(0);
+      await this.fullAdhanSound.seekTo(0);
 
-      // Play full adhan
-      await this.fullAdhanSound.playAsync();
+      this.fullAdhanSound.play();
       this.isPlayingFullAdhan = true;
       console.log('🔊 Playing full adhan');
 
@@ -171,23 +123,15 @@ class Sounds {
     }
   }
 
-  /**
-   * Stop full adhan playback
-   * User can call this to stop the full adhan
-   * 
-   * @returns {Promise<void>}
-   */
   async stopFullAdhan() {
     try {
       if (!this.fullAdhanSound) {
         return;
       }
 
-      const status = await this.fullAdhanSound.getStatusAsync();
-      if (status.isLoaded && status.isPlaying) {
-        await this.fullAdhanSound.stopAsync();
-        console.log('⏹️ Stopped full adhan');
-      }
+      // Pause even while loading or buffering to cancel queued playback.
+      this.fullAdhanSound.pause();
+      console.log('⏹️ Stopped full adhan');
 
       this.isPlayingFullAdhan = false;
 
@@ -197,26 +141,14 @@ class Sounds {
     }
   }
 
-  /**
-   * Check if full adhan is currently playing
-   * 
-   * @returns {boolean}
-   */
   isFullAdhanPlaying() {
     return this.isPlayingFullAdhan;
   }
 
-  /**
-   * Playback status update handler for full adhan
-   * Automatically updates isPlayingFullAdhan flag
-   * 
-   * @private
-   */
   _onFullAdhanPlaybackUpdate = (status) => {
     if (status.isLoaded) {
-      this.isPlayingFullAdhan = status.isPlaying;
+      this.isPlayingFullAdhan = status.playing;
 
-      // If finished playing, reset
       if (status.didJustFinish) {
         this.isPlayingFullAdhan = false;
         console.log('✅ Full adhan finished');
@@ -224,21 +156,12 @@ class Sounds {
     }
   };
 
-  /**
-   * Play audio based on notification data
-   * Called when notification is received or tapped
-   * 
-   * @param {string} soundType - 'short' or 'full'
-   * @param {boolean} isTapped - True if user tapped notification
-   */
   async playNotificationSound(soundType, isTapped = false) {
     try {
       if (soundType === 'none') return;
       if (isTapped) {
-        // Tapping always plays the full adhan, regardless of mode.
         await this.playFullAdhan();
       } else {
-        // Foreground arrival plays the short alert; never auto-blast the full adhan.
         await this.playShortAlert();
       }
     } catch (error) {
@@ -246,29 +169,22 @@ class Sounds {
     }
   }
 
-  /**
-   * Clean up audio resources
-   * Call when app is closing
-   */
   async cleanup() {
     try {
-      // Detach playback status listener BEFORE unloading so a late callback
-      // can't bridge into a JS thread that's being torn down (e.g. during
-      // a DevSettings.reload). Prevents the "Player is accessed on the
-      // wrong thread" error from expo-av.
       if (this.fullAdhanSound) {
         try {
-          this.fullAdhanSound.setOnPlaybackStatusUpdate(null);
+          this.fullAdhanSubscription?.remove();
+          this.fullAdhanSubscription = null;
         } catch {}
       }
 
       if (this.shortAlertSound) {
-        await this.shortAlertSound.unloadAsync();
+        this.shortAlertSound.remove();
         this.shortAlertSound = null;
       }
 
       if (this.fullAdhanSound) {
-        await this.fullAdhanSound.unloadAsync();
+        this.fullAdhanSound.remove();
         this.fullAdhanSound = null;
       }
 
@@ -282,17 +198,12 @@ class Sounds {
     }
   }
 
-  /**
-   * Legacy method - kept for backwards compatibility
-   * Plays beep sound from existing implementation
-   */
   async playBeep() {
     try {
       if (!this.isInitialized) {
         await this.initialize();
       }
 
-      // Use short alert for beep functionality
       await this.playShortAlert();
     } catch (error) {
       console.error('Error playing beep:', error);
@@ -300,44 +211,20 @@ class Sounds {
   }
 }
 
-// Export singleton instance
 const SoundsService = new Sounds();
 export default SoundsService;
 
-// Keep the existing useAudio hook for backward compatibility
 export function useAudio() {
     const colors = useColors();
     const [volume, setVolume] = useState(0.9);
-    const [player, setPlayer] = useState(null);
+    const player = useAudioPlayer(colors.clickSound ? { uri: colors.clickSound } : audioSource);
 
     useEffect(() => {
         loadVolume();
     }, []);
 
     useEffect(() => {
-        let active = true;
-        let created = null;
-        (async () => {
-            try {
-                const source = colors.clickSound ? { uri: colors.clickSound } : audioSource;
-                const { sound } = await Audio.Sound.createAsync(source, { shouldPlay: false });
-                created = sound;
-                if (active) setPlayer(sound);
-                else sound.unloadAsync();
-            } catch (error) {
-                console.error('Error initializing audio player:', error);
-            }
-        })();
-        return () => {
-            active = false;
-            if (created) created.unloadAsync();
-        };
-    }, [colors.clickSound]);
-
-    useEffect(() => {
-        if (player) {
-            player.setVolumeAsync(volume);
-        }
+        player.volume = volume;
     }, [volume, player]);
 
     const loadVolume = async () => {
@@ -363,23 +250,20 @@ export function useAudio() {
     return {
         playClick: async (customVolume=false) => {
             if (!player) return;
-            
+
             let actualVolume;
             if (customVolume !== false) {
-                // Use custom volume for preview (like slider)
                 actualVolume = customVolume;
-                await player.setVolumeAsync(customVolume);
+                player.volume = customVolume;
             } else {
-                // Use stored volume from AsyncStorage for all other clicks
                 await loadVolume();
                 actualVolume = volume;
-                await player.setVolumeAsync(volume);
+                player.volume = volume;
             }
-            
-            // Only play if volume is greater than 0
+
             if (actualVolume > 0) {
-                await player.setPositionAsync(0);
-                await player.playAsync();
+                await player.seekTo(0);
+                player.play();
             }
         },
         volume,

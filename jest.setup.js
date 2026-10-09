@@ -138,23 +138,8 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-// Mock Audio and Sound
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn(() => Promise.resolve({
-        sound: {
-          playAsync: jest.fn(),
-          unloadAsync: jest.fn(),
-        },
-      })),
-    },
-    setAudioModeAsync: jest.fn(() => Promise.resolve()),
-  },
-  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
-}));
-
 jest.mock('expo-audio', () => ({
+  useAudioPlayer: jest.fn(() => ({ seekTo: jest.fn(async () => {}), play: jest.fn() })),
   createAudioPlayer: jest.fn(() => ({
     play: jest.fn(),
     pause: jest.fn(),

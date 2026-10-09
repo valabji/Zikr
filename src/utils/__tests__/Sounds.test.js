@@ -1,40 +1,29 @@
 // The global jest.setup.js mocks the entire ./utils/Sounds module — undo that for these tests.
 jest.unmock('@/utils/audio/Sounds');
 
-// Provide a richer expo-av mock than the global one (which is missing several APIs).
-jest.mock('expo-av', () => {
-  const makeSound = () => {
-    let isPlaying = false;
-    return {
-      playAsync: jest.fn(async () => {
-        isPlaying = true;
-      }),
-      stopAsync: jest.fn(async () => {
-        isPlaying = false;
-      }),
-      setPositionAsync: jest.fn(async () => {}),
-      setVolumeAsync: jest.fn(async () => {}),
-      setOnPlaybackStatusUpdate: jest.fn(),
-      unloadAsync: jest.fn(async () => {}),
-      getStatusAsync: jest.fn(async () => ({ isLoaded: true, isPlaying })),
+jest.mock('expo-audio', () => {
+  const makePlayer = () => {
+    const player = {
+      currentStatus: { isLoaded: true, playing: false },
+      play: jest.fn(() => { player.currentStatus.playing = true; }),
+      pause: jest.fn(() => { player.currentStatus.playing = false; }),
+      seekTo: jest.fn(async () => {}),
+      addListener: jest.fn(() => ({ remove: jest.fn() })),
+      remove: jest.fn(),
     };
+    return player;
   };
   return {
-    Audio: {
-      setAudioModeAsync: jest.fn(async () => {}),
-      Sound: {
-        createAsync: jest.fn(async () => ({ sound: makeSound() })),
-      },
-    },
+    setAudioModeAsync: jest.fn(async () => {}),
+    createAudioPlayer: jest.fn(makePlayer),
   };
 });
 
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Sounds from '@/utils/audio/Sounds';
 import AdhanDownloader from '@/utils/prayer/AdhanDownloader';
 
-const flush = () => new Promise((r) => setImmediate(r));
 
 describe('Sounds (singleton audio service)', () => {
   beforeEach(async () => {
@@ -46,30 +35,30 @@ describe('Sounds (singleton audio service)', () => {
   describe('initialize()', () => {
     it('configures audio mode for background + silent-mode playback', async () => {
       await Sounds.initialize();
-      expect(Audio.setAudioModeAsync).toHaveBeenCalledWith(
+      expect(setAudioModeAsync).toHaveBeenCalledWith(
         expect.objectContaining({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-          shouldDuckAndroid: true,
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
+          interruptionMode: 'duckOthers',
         })
       );
     });
 
     it('loads both short alert and full adhan sounds', async () => {
       await Sounds.initialize();
-      expect(Audio.Sound.createAsync).toHaveBeenCalledTimes(2);
+      expect(createAudioPlayer).toHaveBeenCalledTimes(2);
     });
 
     it('is idempotent — second call is a no-op', async () => {
       await Sounds.initialize();
-      Audio.Sound.createAsync.mockClear();
+      createAudioPlayer.mockClear();
       await Sounds.initialize();
-      expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+      expect(createAudioPlayer).not.toHaveBeenCalled();
     });
 
-    it('rethrows when expo-av setAudioModeAsync fails', async () => {
+    it('rethrows when expo-audio setAudioModeAsync fails', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      Audio.setAudioModeAsync.mockRejectedValueOnce(new Error('boom'));
+      setAudioModeAsync.mockRejectedValueOnce(new Error('boom'));
       await expect(Sounds.initialize()).rejects.toThrow('boom');
       spy.mockRestore();
     });
@@ -78,29 +67,29 @@ describe('Sounds (singleton audio service)', () => {
   describe('playShortAlert()', () => {
     it('auto-initializes if not already initialized', async () => {
       await Sounds.playShortAlert();
-      expect(Audio.setAudioModeAsync).toHaveBeenCalled();
+      expect(setAudioModeAsync).toHaveBeenCalled();
     });
 
     it('resets to start and plays', async () => {
       await Sounds.initialize();
       const shortSound = Sounds.shortAlertSound;
       await Sounds.playShortAlert();
-      expect(shortSound.setPositionAsync).toHaveBeenCalledWith(0);
-      expect(shortSound.playAsync).toHaveBeenCalled();
+      expect(shortSound.seekTo).toHaveBeenCalledWith(0);
+      expect(shortSound.play).toHaveBeenCalled();
     });
 
     it('stops first if already playing', async () => {
       await Sounds.initialize();
       const shortSound = Sounds.shortAlertSound;
-      shortSound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: true });
+      shortSound.currentStatus = { isLoaded: true, playing: true };
       await Sounds.playShortAlert();
-      expect(shortSound.stopAsync).toHaveBeenCalled();
+      expect(shortSound.pause).toHaveBeenCalled();
     });
 
     it('logs but does not throw on error', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await Sounds.initialize();
-      Sounds.shortAlertSound.playAsync.mockRejectedValueOnce(new Error('boom'));
+      Sounds.shortAlertSound.play.mockImplementationOnce(() => { throw new Error('boom'); });
       await expect(Sounds.playShortAlert()).resolves.toBeUndefined();
       spy.mockRestore();
     });
@@ -116,24 +105,24 @@ describe('Sounds (singleton audio service)', () => {
     it('flips isPlayingFullAdhan back to false on error', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await Sounds.initialize();
-      Sounds.fullAdhanSound.playAsync.mockRejectedValueOnce(new Error('boom'));
+      Sounds.fullAdhanSound.play.mockImplementationOnce(() => { throw new Error('boom'); });
       await Sounds.playFullAdhan();
       expect(Sounds.isFullAdhanPlaying()).toBe(false);
       spy.mockRestore();
     });
 
-    it('stopFullAdhan only stops if currently playing', async () => {
+    it.each([
+      ['paused', { isLoaded: true, playing: false }],
+      ['playing', { isLoaded: true, playing: true }],
+      ['buffering', { isLoaded: false, playing: true, isBuffering: true }],
+      ['loading', { isLoaded: false, playing: false }],
+    ])('stopFullAdhan pauses a %s player to cancel playback', async (_, status) => {
       await Sounds.initialize();
       const fullSound = Sounds.fullAdhanSound;
-      // Not playing
-      fullSound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: false });
+      fullSound.currentStatus = status;
+      Sounds.isPlayingFullAdhan = true;
       await Sounds.stopFullAdhan();
-      expect(fullSound.stopAsync).not.toHaveBeenCalled();
-
-      // Playing
-      fullSound.getStatusAsync.mockResolvedValueOnce({ isLoaded: true, isPlaying: true });
-      await Sounds.stopFullAdhan();
-      expect(fullSound.stopAsync).toHaveBeenCalled();
+      expect(fullSound.pause).toHaveBeenCalledTimes(1);
       expect(Sounds.isFullAdhanPlaying()).toBe(false);
     });
 
@@ -145,7 +134,8 @@ describe('Sounds (singleton audio service)', () => {
     it('stopFullAdhan logs and resets flag on error', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await Sounds.initialize();
-      Sounds.fullAdhanSound.getStatusAsync.mockRejectedValueOnce(new Error('boom'));
+      Sounds.fullAdhanSound.currentStatus.playing = true;
+      Sounds.fullAdhanSound.pause.mockImplementationOnce(() => { throw new Error('boom'); });
       await Sounds.stopFullAdhan();
       expect(Sounds.isFullAdhanPlaying()).toBe(false);
       spy.mockRestore();
@@ -155,26 +145,25 @@ describe('Sounds (singleton audio service)', () => {
   describe('selected recitation source', () => {
     it('reloads the full adhan from the selected downloaded recitation', async () => {
       await Sounds.initialize();
-      Audio.Sound.createAsync.mockClear();
+      createAudioPlayer.mockClear();
       AsyncStorage.getItem.mockResolvedValueOnce('alafasy');
       const spy = jest
         .spyOn(AdhanDownloader, 'getPlayableUri')
         .mockResolvedValueOnce('/mock/document/adhans/alafasy.mp3');
       await Sounds.playFullAdhan();
-      expect(Audio.Sound.createAsync).toHaveBeenCalledWith(
-        { uri: '/mock/document/adhans/alafasy.mp3' },
-        expect.anything()
+      expect(createAudioPlayer).toHaveBeenCalledWith(
+        { uri: '/mock/document/adhans/alafasy.mp3' }
       );
       spy.mockRestore();
     });
 
     it('keeps the bundled adhan when the selection is not downloaded', async () => {
       await Sounds.initialize();
-      Audio.Sound.createAsync.mockClear();
+      createAudioPlayer.mockClear();
       AsyncStorage.getItem.mockResolvedValueOnce('alafasy');
       const spy = jest.spyOn(AdhanDownloader, 'getPlayableUri').mockResolvedValueOnce(null);
       await Sounds.playFullAdhan();
-      expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+      expect(createAudioPlayer).not.toHaveBeenCalled();
       spy.mockRestore();
     });
   });
@@ -182,7 +171,7 @@ describe('Sounds (singleton audio service)', () => {
   describe('_onFullAdhanPlaybackUpdate', () => {
     it('mirrors isPlaying status', () => {
       Sounds.isPlayingFullAdhan = true;
-      Sounds._onFullAdhanPlaybackUpdate({ isLoaded: true, isPlaying: false });
+      Sounds._onFullAdhanPlaybackUpdate({ isLoaded: true, playing: false });
       expect(Sounds.isFullAdhanPlaying()).toBe(false);
     });
 
@@ -190,7 +179,7 @@ describe('Sounds (singleton audio service)', () => {
       Sounds.isPlayingFullAdhan = true;
       Sounds._onFullAdhanPlaybackUpdate({
         isLoaded: true,
-        isPlaying: false,
+        playing: false,
         didJustFinish: true,
       });
       expect(Sounds.isFullAdhanPlaying()).toBe(false);
@@ -264,8 +253,8 @@ describe('Sounds (singleton audio service)', () => {
       const shortSound = Sounds.shortAlertSound;
       const fullSound = Sounds.fullAdhanSound;
       await Sounds.cleanup();
-      expect(shortSound.unloadAsync).toHaveBeenCalled();
-      expect(fullSound.unloadAsync).toHaveBeenCalled();
+      expect(shortSound.remove).toHaveBeenCalled();
+      expect(fullSound.remove).toHaveBeenCalled();
       expect(Sounds.shortAlertSound).toBeNull();
       expect(Sounds.fullAdhanSound).toBeNull();
     });
@@ -277,7 +266,7 @@ describe('Sounds (singleton audio service)', () => {
     it('logs but does not throw on unload error', async () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await Sounds.initialize();
-      Sounds.shortAlertSound.unloadAsync.mockRejectedValueOnce(new Error('boom'));
+      Sounds.shortAlertSound.remove.mockImplementationOnce(() => { throw new Error('boom'); });
       await expect(Sounds.cleanup()).resolves.toBeUndefined();
       spy.mockRestore();
     });
