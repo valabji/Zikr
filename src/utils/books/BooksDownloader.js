@@ -68,8 +68,12 @@ class BooksDownloaderService {
       try {
         const tag = await AsyncStorage.getItem(installedKey(id));
         if (tag === VERSION_TAG) {
-          this._get(id).installed = true;
-        } else if (tag != null) {
+          const info = await FileSystem.getInfoAsync(bookFileUri(id));
+          this._get(id).installed = !!info.exists;
+          if (!info.exists) await AsyncStorage.removeItem(installedKey(id));
+        } else {
+          this._get(id).installed = false;
+          if (tag == null) continue;
           try { await FileSystem.deleteAsync(bookFileUri(id), { idempotent: true }); } catch {}
           await AsyncStorage.removeItem(installedKey(id));
         }
@@ -106,19 +110,27 @@ class BooksDownloaderService {
       };
       const handle = FileSystem.createDownloadResumable(remoteUrl(book.src), tmp, {}, onProgress);
       this.handles[id] = handle;
-      await handle.downloadAsync();
+      const result = await handle.downloadAsync();
       if (this.cancelled[id]) { await this._cleanup(id); return; }
 
+      if (!result || (result.status && result.status >= 400)) throw new Error('Download failed');
       const rawStr = await FileSystem.readAsStringAsync(tmp);
+      if (this.cancelled[id]) { await this._cleanup(id); return; }
       const transformed = transformRawBook(JSON.parse(rawStr));
       if (!transformed.entries.length) throw new Error('empty book');
       await FileSystem.writeAsStringAsync(bookFileUri(id), JSON.stringify({ id, format: DATA_VERSION, ...transformed }));
       try { await FileSystem.deleteAsync(tmp, { idempotent: true }); } catch {}
+      if (this.cancelled[id]) {
+        await FileSystem.deleteAsync(bookFileUri(id), { idempotent: true });
+        await this._cleanup(id);
+        return;
+      }
       await AsyncStorage.setItem(installedKey(id), VERSION_TAG);
       this.state[id] = { installed: true, downloading: false, progress: 1, error: null };
       delete this.handles[id];
       this._emit();
     } catch (e) {
+      if (this.cancelled[id]) { await this._cleanup(id); return; }
       try { await FileSystem.deleteAsync(tmp, { idempotent: true }); } catch {}
       delete this.handles[id];
       this.state[id] = { installed: false, downloading: false, progress: 0, error: String(e && e.message ? e.message : e) };

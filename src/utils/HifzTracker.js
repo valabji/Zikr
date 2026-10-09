@@ -36,9 +36,12 @@ export function getSurahEntry(state, surahId) {
 
 export function getNextReviewDate(entry) {
   if (entry.status !== STATUS.MEMORIZED || !entry.lastReviewedDate) return null;
-  const stage = Math.min(entry.reviewStage, HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS.length - 1);
+  const stage = Math.max(0, Math.min(Number.isFinite(entry.reviewStage) ? Math.floor(entry.reviewStage) : 0, HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS.length - 1));
   const days = HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS[stage];
-  const next = new Date(entry.lastReviewedDate);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(entry.lastReviewedDate);
+  if (!match) return null;
+  const next = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  if (dateKey(next) !== entry.lastReviewedDate) return null;
   next.setDate(next.getDate() + days);
   return next;
 }

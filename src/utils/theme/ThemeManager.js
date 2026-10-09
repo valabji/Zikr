@@ -166,10 +166,12 @@ export const importThemeFromData = async (data, options = {}) => {
   } catch {
     throw new Error('notATheme');
   }
-  if (manifest.format !== 'zikr-theme' || !manifest.theme) throw new Error('notATheme');
+  if (!manifest || manifest.format !== 'zikr-theme' || !manifest.theme) throw new Error('notATheme');
   const error = validateTheme(manifest.theme);
   if (error) throw new Error(error);
   const theme = sanitizeTheme(manifest.theme);
+  // Only extracted archive assets may supply file URIs on this device.
+  FILE_ASSET_KEYS.forEach((key) => { delete theme[key]; });
   const id = generateThemeId();
   if (Platform.OS !== 'web' && manifest.assets) {
     for (const key of FILE_ASSET_KEYS) {

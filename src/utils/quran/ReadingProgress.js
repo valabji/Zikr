@@ -5,6 +5,8 @@ const STORAGE_KEY = QURAN_CONSTANTS.STORAGE_KEYS.READING_PROGRESS;
 const TOTAL_PAGES = QURAN_CONSTANTS.TOTAL_PAGES;
 
 let cached = null;
+let loading = null;
+let writes = Promise.resolve();
 const listeners = new Set();
 
 function todayKey() {
@@ -24,30 +26,14 @@ function computeStats(data) {
   const totalUnique = allPages.size;
   const completionPct = Math.round((totalUnique / TOTAL_PAGES) * 100);
 
-  const days = Object.keys(data).filter((k) => data[k].length > 0).sort();
+  const daySet = new Set(Object.keys(data).filter((k) => data[k].length > 0));
   let streak = 0;
-  if (days.length > 0) {
-    const todayMs = new Date(today).getTime();
-    const dayMs = 86400000;
-    let cursor = todayMs;
-    // streak can end today or yesterday
-    if (
-      new Date(days[days.length - 1]).getTime() < todayMs - dayMs
-    ) {
-      streak = 0;
-    } else {
-      const daySet = new Set(days);
-      let check = todayMs;
-      while (true) {
-        const key = new Date(check).toISOString().slice(0, 10);
-        if (daySet.has(key)) {
-          streak++;
-          check -= dayMs;
-        } else {
-          break;
-        }
-      }
-    }
+  let check = new Date(today).getTime();
+  // Preserve a streak through the morning before today's first reading.
+  if (!daySet.has(today)) check -= 86400000;
+  while (daySet.has(new Date(check).toISOString().slice(0, 10))) {
+    streak++;
+    check -= 86400000;
   }
 
   const dayMs = 86400000;
@@ -62,27 +48,41 @@ function computeStats(data) {
   return { todayCount, streak, totalUnique, completionPct, last7Days };
 }
 
-async function load() {
-  if (cached !== null) return cached;
+async function readStorage() {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? JSON.parse(raw) : {};
+    const parsed = raw ? JSON.parse(raw) : null;
+    cached = {};
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      Object.entries(parsed).forEach(([day, pages]) => {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(day) && Array.isArray(pages)) {
+          cached[day] = [...new Set(pages.filter((p) => Number.isInteger(p) && p >= 1 && p <= TOTAL_PAGES))];
+        }
+      });
+    }
   } catch {
     cached = {};
   }
   return cached;
 }
 
+async function load() {
+  if (cached !== null) return cached;
+  if (!loading) loading = readStorage().finally(() => { loading = null; });
+  return loading;
+}
+
 export async function trackPage(pageNumber) {
+  if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > TOTAL_PAGES) return;
   const data = await load();
   const today = todayKey();
   const existing = data[today] || [];
   if (existing.includes(pageNumber)) return;
   data[today] = [...existing, pageNumber];
   cached = data;
-  try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {}
+  const snapshot = JSON.stringify(data);
+  writes = writes.then(() => AsyncStorage.setItem(STORAGE_KEY, snapshot)).catch(() => {});
+  await writes;
   const stats = computeStats(data);
   listeners.forEach((fn) => { try { fn(stats); } catch {} });
 }

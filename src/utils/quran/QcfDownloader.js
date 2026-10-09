@@ -111,7 +111,7 @@ class QcfDownloaderService {
 
   async start(version) {
     const v = VERSIONS[version];
-    if (!v) return;
+    if (!v || Platform.OS === 'web') return;
     if (this.state[version].downloading || this.state[version].installed) return;
     AsyncStorage.removeItem(v.optOutKey).catch(() => {});
     this.cancelled[version] = false;
@@ -126,18 +126,25 @@ class QcfDownloaderService {
       const queue = [];
       for (let p = 1; p <= TOTAL; p++) queue.push(p);
 
+      let failure = null;
       const worker = async () => {
-        while (queue.length && !this.cancelled[version]) {
+        while (queue.length && !this.cancelled[version] && !failure) {
           const page = queue.shift();
           const dest = localUri(version, page);
           try {
             const info = await FileSystem.getInfoAsync(dest);
             if (!info.exists || info.size < 1000) {
-              await FileSystem.downloadAsync(remoteUrl(version, page), dest);
+              const result = await FileSystem.downloadAsync(remoteUrl(version, page), dest);
+              const downloaded = await FileSystem.getInfoAsync(dest);
+              if (!result || (result.status && result.status >= 400) || !downloaded.exists || downloaded.size < 1000) {
+                await FileSystem.deleteAsync(dest, { idempotent: true });
+                throw new Error(`Invalid font download: page ${page}`);
+              }
             }
           } catch (e) {
             console.warn(`QcfDownloader[${version}]: page ${page} failed`, e);
-            throw e;
+            failure = e;
+            return;
           }
           done++;
           this.state[version].progress = done / units;
@@ -147,6 +154,7 @@ class QcfDownloaderService {
 
       const workers = Array.from({ length: CONCURRENCY }, () => worker());
       await Promise.all(workers);
+      if (failure) throw failure;
 
       if (v.darkFontFamilyPrefix) {
         for (let page = 1; page <= TOTAL && !this.cancelled[version]; page++) {

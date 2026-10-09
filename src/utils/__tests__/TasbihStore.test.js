@@ -25,6 +25,18 @@ describe('TasbihStore', () => {
     AsyncStorage.getItem.mockResolvedValue(undefined);
   });
 
+  it('preserves daily goal and history when deleting a counter', async () => {
+    const mod = await loadAndReset();
+    await mod.loadTasbih();
+    mod.setDailyGoal(500);
+    mod.increment();
+    const before = mod.getCachedTasbih();
+    mod.deleteCounter(before.activeId);
+    expect(mod.getCachedTasbih()).toMatchObject({ dailyGoal: 500, history: before.history });
+    expect(mod.getCachedTasbih().counters).toHaveLength(before.counters.length - 1);
+    mod._resetForTests();
+  });
+
   it('seeds 6 default counters when storage is empty', async () => {
     AsyncStorage.getItem.mockResolvedValue(undefined);
     const mod = await loadAndReset();

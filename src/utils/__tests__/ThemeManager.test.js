@@ -232,3 +232,12 @@ describe('zip export/import round-trip', () => {
     expect(FileSystem.writeAsStringAsync).toHaveBeenCalled();
   });
 });
+
+it('imports only packaged assets, discarding manifest-provided device file paths', async () => {
+  AsyncStorage.getItem.mockResolvedValue(null);
+  const zip = new JSZip();
+  zip.file('theme.json', JSON.stringify({ format: 'zikr-theme', version: 1, theme: makeTheme({ bgImage1: 'file:///private/data.json', clickSound: 'https://example.com/tracker' }) }));
+  const { theme } = await importThemeFromData(await zip.generateAsync({ type: 'uint8array' }));
+  expect(theme.bgImage1).toBeUndefined();
+  expect(theme.clickSound).toBeUndefined();
+});

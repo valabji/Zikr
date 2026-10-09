@@ -172,12 +172,12 @@ class QuranSurahDownloaderService {
     this.cancelled[k] = false;
     this.state[k] = { downloaded: false, downloading: true, progress: 0, error: null, size: 0 };
     this._emit();
-    await this._ensureDir(reciterId);
-    await this._ensurePermissionOnce();
-    this._notifiedPct[k] = 0;
-    this._notify(reciterId, surah, 0);
-
     try {
+      await this._ensureDir(reciterId);
+      await this._ensurePermissionOnce();
+      this._notifiedPct[k] = 0;
+      this._notify(reciterId, surah, 0);
+
       const manifest = await getSurahAudioManifest(reciterId, surah);
       if (!manifest || !manifest.audioUrl) throw new Error('No audio source');
       if (this.cancelled[k]) { this.state[k] = blankState(); this._emit(); hideDownloadProgress(this._notifId(reciterId, surah)); return; }
@@ -212,8 +212,9 @@ class QuranSurahDownloaderService {
         throw new Error(`Download failed (status ${result && result.status})`);
       }
 
-      let size = 0;
-      try { size = (await FileSystem.getInfoAsync(this._localUri(reciterId, surah))).size || 0; } catch {}
+      const info = await FileSystem.getInfoAsync(this._localUri(reciterId, surah));
+      const size = info.size || 0;
+      if (!info.exists || size <= MIN_SIZE) throw new Error('Incomplete audio download');
       this.state[k] = { downloaded: true, downloading: false, progress: 1, error: null, size };
       this._emit();
       hideDownloadProgress(this._notifId(reciterId, surah));

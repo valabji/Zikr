@@ -12,11 +12,17 @@ export function useLocationSearch(onSelect) {
   const [isSearching, setIsSearching] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const searchTimeoutRef = useRef(null);
+  const searchVersion = useRef(0);
 
-  useEffect(() => () => clearTimeout(searchTimeoutRef.current), []);
+  useEffect(() => () => {
+    clearTimeout(searchTimeoutRef.current);
+    searchVersion.current += 1;
+  }, []);
 
   const handleSearch = (query) => {
+    const version = ++searchVersion.current;
     setSearchQuery(query);
+    setIsSearching(false);
     clearTimeout(searchTimeoutRef.current);
 
     if (query.length < PRAYER_CONSTANTS.LOCATION_SEARCH.MIN_QUERY_LENGTH) {
@@ -28,14 +34,15 @@ export function useLocationSearch(onSelect) {
       setIsSearching(true);
       try {
         const results = await searchLocations(query);
+        if (version !== searchVersion.current) return;
         const uniqueResults = results.filter((item, index, self) =>
           index === self.findIndex((r) => r.name === item.name && r.country === item.country)
         );
         setSearchResults(uniqueResults);
       } catch (error) {
-        Alert.alert(t('locationSettings.error'), t('locationSettings.searchError'));
+        if (version === searchVersion.current) Alert.alert(t('locationSettings.error'), t('locationSettings.searchError'));
       } finally {
-        setIsSearching(false);
+        if (version === searchVersion.current) setIsSearching(false);
       }
     }, PRAYER_CONSTANTS.LOCATION_SEARCH.DEBOUNCE_DELAY);
   };

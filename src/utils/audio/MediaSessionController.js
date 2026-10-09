@@ -68,8 +68,8 @@ function applyWeb(meta) {
     mediaSession.metadata = new window.MediaMetadata({ title: meta.title, artist: meta.artist, album: meta.album });
   } catch {}
   mediaSession.playbackState = meta.isPlaying ? 'playing' : 'paused';
-  mediaSession.setActionHandler('play', () => handleCommand('togglePlayPause'));
-  mediaSession.setActionHandler('pause', () => handleCommand('togglePlayPause'));
+  mediaSession.setActionHandler('play', () => handleCommand('play'));
+  mediaSession.setActionHandler('pause', () => handleCommand('pause'));
   mediaSession.setActionHandler('stop', () => handleCommand('stop'));
   mediaSession.setActionHandler('previoustrack', meta.canPrevious ? () => handleCommand('previous') : null);
   mediaSession.setActionHandler('nexttrack', meta.canNext ? () => handleCommand('next') : null);
@@ -123,9 +123,9 @@ function recompute() {
 function handleCommand(command, positionMs) {
   if (activeSource === 'radio') {
     if (command === 'stop') RadioService.stop();
-    else if (command === 'pause') RadioService.toggle();
-    else if (command === 'play') RadioService.toggle();
-    else RadioService.toggle();
+    else if (command === 'pause' && RadioService.isPlaying) RadioService.toggle();
+    else if (command === 'play' && !RadioService.isPlaying) RadioService.toggle();
+    else if (command === 'togglePlayPause') RadioService.toggle();
     return;
   }
   switch (command) {

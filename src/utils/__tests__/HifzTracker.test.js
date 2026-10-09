@@ -23,6 +23,22 @@ describe('HifzTracker', () => {
     AsyncStorage.getItem.mockResolvedValue(undefined);
   });
 
+  it('uses local calendar dates for review deadlines', async () => {
+    const mod = await loadAndReset();
+    const entry = { status: HIFZ_CONSTANTS.STATUS.MEMORIZED, lastReviewedDate: '2026-03-08', reviewStage: 0 };
+    const next = mod.getNextReviewDate(entry);
+    expect(dateKey(next)).toBe('2026-03-09');
+    expect(next.getHours()).toBe(0);
+    expect(mod.isDueForReview(entry, new Date(2026, 2, 8, 23))).toBe(false);
+  });
+
+  it('rejects invalid review dates and clamps malformed stages', async () => {
+    const mod = await loadAndReset();
+    const entry = { status: HIFZ_CONSTANTS.STATUS.MEMORIZED, lastReviewedDate: '2026-02-30', reviewStage: 0 };
+    expect(mod.getNextReviewDate(entry)).toBeNull();
+    expect(dateKey(mod.getNextReviewDate({ ...entry, lastReviewedDate: '2026-03-08', reviewStage: -1 }))).toBe('2026-03-09');
+  });
+
   it('seeds empty state when storage is empty', async () => {
     const mod = await loadAndReset();
     const state = await mod.loadHifzTracker();

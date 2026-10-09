@@ -18,6 +18,10 @@ describe('BooksDownloader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     store = {};
+    BooksDownloader.state = {};
+    BooksDownloader.cancelled = {};
+    BooksDownloader.handles = {};
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: true });
     AsyncStorage.getItem.mockImplementation((k) => Promise.resolve(store[k] ?? null));
     AsyncStorage.setItem.mockImplementation((k, v) => { store[k] = v; return Promise.resolve(); });
     AsyncStorage.removeItem.mockImplementation((k) => { delete store[k]; return Promise.resolve(); });
@@ -26,6 +30,31 @@ describe('BooksDownloader', () => {
       downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })),
       cancelAsync: jest.fn(() => Promise.resolve()),
     });
+  });
+
+  it('clears an installed flag when the downloaded book is missing', async () => {
+    store['@books_installed_missing'] = VERSION_TAG;
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: false });
+    await BooksDownloader.checkInstalled(['missing']);
+    expect(BooksDownloader.isInstalled('missing')).toBe(false);
+    expect(store['@books_installed_missing']).toBeUndefined();
+  });
+
+  it('rejects HTTP error responses even if their body parses as a book', async () => {
+    FileSystem.createDownloadResumable.mockReturnValue({ downloadAsync: jest.fn().mockResolvedValue({ status: 500 }) });
+    await BooksDownloader.start({ id: 'failed', src: 'failed.json' });
+    expect(BooksDownloader.isInstalled('failed')).toBe(false);
+    expect(FileSystem.writeAsStringAsync).not.toHaveBeenCalled();
+  });
+
+  it('does not install a book cancelled while reading the downloaded file', async () => {
+    FileSystem.readAsStringAsync.mockImplementation(async () => {
+      BooksDownloader.cancel('cancelled');
+      return RAW_BOOK;
+    });
+    await BooksDownloader.start({ id: 'cancelled', src: 'cancelled.json' });
+    expect(BooksDownloader.state.cancelled).toEqual({ installed: false, downloading: false, progress: 0, error: null });
+    expect(FileSystem.writeAsStringAsync).not.toHaveBeenCalled();
   });
 
   it('bookFileUri builds a path under the document directory', () => {

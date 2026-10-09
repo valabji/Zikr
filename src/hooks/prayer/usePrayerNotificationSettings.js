@@ -46,19 +46,19 @@ export function usePrayerNotificationSettings() {
       const result = await NotificationService.requestPermissions();
       if (!result.granted) {
         Alert.alert(
-          t('notifications.permissionRequired'),
-          t('notifications.permissionMessage'),
+          t('settings.notifications.permissionRequired'),
+          t('settings.notifications.permissionMessage'),
           [{ text: t('common.ok') }]
         );
         return;
       }
       if (result.needsExactAlarm && Platform.OS === 'android') {
         Alert.alert(
-          t('notifications.exactAlarmRequired'),
-          t('notifications.exactAlarmMessage'),
+          t('settings.notifications.exactAlarmRequired'),
+          t('settings.notifications.exactAlarmMessage'),
           [
             { text: t('common.cancel'), style: 'cancel' },
-            { text: t('notifications.openSettings'), onPress: () => NotificationService.openExactAlarmSettings() },
+            { text: t('settings.notifications.openSettings'), onPress: () => NotificationService.openExactAlarmSettings() },
           ]
         );
       }

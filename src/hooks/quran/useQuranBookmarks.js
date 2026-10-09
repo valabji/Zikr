@@ -10,7 +10,12 @@ export function useQuranBookmarks(currentPage, activeLayoutFile) {
 
   React.useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEYS.BOOKMARKS)
-      .then((raw) => { if (raw) setBookmarks(JSON.parse(raw)); })
+      .then((raw) => {
+        const parsed = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(parsed)) {
+          setBookmarks(parsed.filter((b) => b && Number.isInteger(b.page) && b.page >= 1 && b.page <= QURAN_CONSTANTS.TOTAL_PAGES));
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -24,6 +29,7 @@ export function useQuranBookmarks(currentPage, activeLayoutFile) {
   const toggleBookmark = React.useCallback(() => {
     const exists = bookmarks.some((b) => b.page === currentPage);
     const firstAyah = pageAyahsForLayout(activeLayoutFile, currentPage)[0];
+    if (!exists && !firstAyah) return;
     persist(exists
       ? bookmarks.filter((b) => b.page !== currentPage)
       : [...bookmarks, {

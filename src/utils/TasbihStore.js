@@ -258,7 +258,7 @@ export function deleteCounter(id) {
   if (state.counters.length <= 1) return;
   const counters = state.counters.filter((c) => c.id !== id);
   const activeId = state.activeId === id ? counters[0].id : state.activeId;
-  commit({ counters, activeId });
+  commit({ ...state, counters, activeId });
 }
 
 export function moveCounter(id, direction) {

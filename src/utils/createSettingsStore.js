@@ -2,17 +2,27 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function createSettingsStore(storageKey, defaults) {
   let cached = null;
+  let loading = null;
+  let writes = Promise.resolve();
   const listeners = new Set();
 
   async function load() {
     if (cached) return cached;
-    try {
-      const raw = await AsyncStorage.getItem(storageKey);
-      cached = raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
-    } catch {
-      cached = { ...defaults };
+    if (!loading) {
+      loading = (async () => {
+        try {
+          const raw = await AsyncStorage.getItem(storageKey);
+          const parsed = raw ? JSON.parse(raw) : null;
+          cached = { ...defaults, ...(parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}) };
+        } catch {
+          cached = { ...defaults };
+        } finally {
+          loading = null;
+        }
+        return cached;
+      })();
     }
-    return cached;
+    return loading;
   }
 
   function getCached() {
@@ -20,11 +30,11 @@ export function createSettingsStore(storageKey, defaults) {
   }
 
   async function set(partial) {
-    const current = await load();
-    cached = { ...current, ...partial };
-    try {
-      await AsyncStorage.setItem(storageKey, JSON.stringify(cached));
-    } catch {}
+    await load();
+    cached = { ...cached, ...partial };
+    const snapshot = cached;
+    writes = writes.then(() => AsyncStorage.setItem(storageKey, JSON.stringify(snapshot))).catch(() => {});
+    await writes;
     listeners.forEach((fn) => {
       try { fn(cached); } catch {}
     });

@@ -33,6 +33,24 @@ describe('QuranSurahDownloader', () => {
     jest.clearAllMocks();
   });
 
+  it('rejects incomplete audio files so they can be retried', async () => {
+    const { downloader, FileSystem } = load();
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: true, size: 100 });
+    await downloader.start('alafasy', 108);
+    expect(downloader.isDownloaded('alafasy', 108)).toBe(false);
+    expect(downloader.state['alafasy:108'].error).toBe('Incomplete audio download');
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: true, size: 2000000 });
+    await downloader.start('alafasy', 108);
+    expect(downloader.isDownloaded('alafasy', 108)).toBe(true);
+  });
+
+  it('clears downloading state when permission initialization rejects', async () => {
+    const { downloader } = load();
+    downloader._ensurePermissionOnce = jest.fn().mockRejectedValue(new Error('permission unavailable'));
+    await expect(downloader.start('alafasy', 108)).resolves.toBeUndefined();
+    expect(downloader.state['alafasy:108']).toMatchObject({ downloading: false, downloaded: false, error: 'permission unavailable' });
+  });
+
   it('subscribe emits an empty snapshot before anything is downloaded', () => {
     const { downloader } = load();
     const fn = jest.fn();
