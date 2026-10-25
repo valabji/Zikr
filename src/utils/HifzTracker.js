@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect } from 'react';
 import { HIFZ_CONSTANTS } from '@/constants/HifzConstants';
 import { dateKey } from '@/utils/calendar/HijriCalendar';
@@ -13,7 +12,7 @@ function seedState() {
 }
 
 function normalizeState(raw) {
-  if (!raw || typeof raw !== 'object' || typeof raw.surahs !== 'object' || raw.surahs === null) {
+  if (!raw || typeof raw !== 'object' || typeof raw.surahs !== 'object' || raw.surahs === null || Array.isArray(raw.surahs)) {
     return seedState();
   }
   const surahs = {};
@@ -23,7 +22,7 @@ function normalizeState(raw) {
     surahs[id] = {
       status: entry.status,
       lastReviewedDate: typeof entry.lastReviewedDate === 'string' ? entry.lastReviewedDate : null,
-      reviewStage: Number.isFinite(entry.reviewStage) ? entry.reviewStage : 0,
+      reviewStage: Number.isFinite(entry.reviewStage) ? Math.max(0, Math.min(Math.floor(entry.reviewStage), HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS.length - 1)) : 0,
     };
   });
   return { surahs };
@@ -80,110 +79,43 @@ export function computeHifzStats(state, fromDate = new Date()) {
   };
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
-
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadHifzTracker() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedHifzTracker() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribeHifzTracker(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
+const getState = store.getCached;
+const commit = store.update;
+export const loadHifzTracker = store.load;
+export const getCachedHifzTracker = store.getCached;
+export const subscribeHifzTracker = store.subscribe;
 
 export function setSurahStatus(surahId, status) {
   if (!Object.values(STATUS).includes(status)) return;
-  const state = getState();
-  const next = { ...state.surahs };
-  if (status === STATUS.NOT_STARTED) {
-    delete next[surahId];
-  } else if (status === STATUS.MEMORIZED) {
-    next[surahId] = { status: STATUS.MEMORIZED, lastReviewedDate: dateKey(new Date()), reviewStage: 0 };
-  } else {
-    next[surahId] = { status: STATUS.IN_PROGRESS, lastReviewedDate: null, reviewStage: 0 };
-  }
-  commit({ ...state, surahs: next });
+  const today = dateKey(new Date());
+  commit(state => {
+    const next = { ...state.surahs };
+    if (status === STATUS.NOT_STARTED) delete next[surahId];
+    else next[surahId] = {
+      status,
+      lastReviewedDate: status === STATUS.MEMORIZED ? today : null,
+      reviewStage: 0,
+    };
+    return { ...state, surahs: next };
+  });
 }
 
 export function markSurahReviewed(surahId) {
-  const state = getState();
-  const entry = getSurahEntry(state, surahId);
-  if (entry.status !== STATUS.MEMORIZED) return;
-  const reviewStage = Math.min(entry.reviewStage + 1, HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS.length - 1);
-  commit({
-    ...state,
-    surahs: {
-      ...state.surahs,
-      [surahId]: { ...entry, lastReviewedDate: dateKey(new Date()), reviewStage },
-    },
+  const today = dateKey(new Date());
+  commit(state => {
+    const entry = getSurahEntry(state, surahId);
+    if (entry.status !== STATUS.MEMORIZED) return state;
+    const reviewStage = Math.min(entry.reviewStage + 1, HIFZ_CONSTANTS.REVIEW_INTERVALS_DAYS.length - 1);
+    return {
+      ...state,
+      surahs: { ...state.surahs, [surahId]: { ...entry, lastReviewedDate: today, reviewStage } },
+    };
   });
 }
 
 export function useHifzTracker() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(() => getState());
   useEffect(() => {
     let mounted = true;
     loadHifzTracker().then((s) => { if (mounted) setState(s); });
@@ -193,10 +125,4 @@ export function useHifzTracker() {
   return { state, stats: computeHifzStats(state) };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

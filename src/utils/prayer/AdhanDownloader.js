@@ -20,6 +20,7 @@ class AdhanDownloaderService {
     });
     this.listeners = new Set();
     this.cancelled = {};
+    this.handles = {};
   }
 
   async checkInstalled() {
@@ -78,23 +79,27 @@ class AdhanDownloaderService {
     this.state[id] = { downloaded: false, downloading: true, progress: 0, error: null };
     this._emit();
     await this._ensureDir();
+    const partial = `${localUri(id)}.part`;
 
     try {
+      if (this.cancelled[id]) { this.state[id] = blankState(); this._emit(); return; }
       const dl = FileSystem.createDownloadResumable(
         entry.url,
-        localUri(id),
+        partial,
         {},
         (p) => {
+          if (this.cancelled[id]) return;
           if (p.totalBytesExpectedToWrite > 0) {
             this.state[id].progress = p.totalBytesWritten / p.totalBytesExpectedToWrite;
             this._emit();
           }
         }
       );
+      this.handles[id] = dl;
       const result = await dl.downloadAsync();
 
       if (this.cancelled[id]) {
-        try { await FileSystem.deleteAsync(localUri(id), { idempotent: true }); } catch {}
+        try { await FileSystem.deleteAsync(partial, { idempotent: true }); } catch {}
         this.state[id] = blankState();
         this._emit();
         return;
@@ -104,20 +109,33 @@ class AdhanDownloaderService {
         throw new Error(`Download failed (status ${result && result.status})`);
       }
 
+      const info = await FileSystem.getInfoAsync(partial);
+      if (!info.exists || !(info.size > 1000)) throw new Error('Incomplete audio download');
+      if (this.cancelled[id]) throw new Error('Download cancelled');
+      await FileSystem.moveAsync({ from: partial, to: localUri(id) });
+      if (this.cancelled[id]) {
+        await FileSystem.deleteAsync(localUri(id), { idempotent: true });
+        throw new Error('Download cancelled');
+      }
       this.state[id] = { downloaded: true, downloading: false, progress: 1, error: null };
       this._emit();
     } catch (e) {
-      try { await FileSystem.deleteAsync(localUri(id), { idempotent: true }); } catch {}
-      this.state[id] = {
+      try { await FileSystem.deleteAsync(partial, { idempotent: true }); } catch {}
+      this.state[id] = this.cancelled[id] ? blankState() : {
         downloaded: false, downloading: false, progress: 0,
         error: String(e && e.message ? e.message : e),
       };
       this._emit();
+    } finally {
+      delete this.handles[id];
     }
   }
 
   cancel(id) {
-    if (this.state[id] && this.state[id].downloading) this.cancelled[id] = true;
+    if (this.state[id] && this.state[id].downloading) {
+      this.cancelled[id] = true;
+      this.handles[id]?.cancelAsync?.().catch(() => {});
+    }
   }
 
   async remove(id) {

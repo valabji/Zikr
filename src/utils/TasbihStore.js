@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect, useMemo } from 'react';
 import { TASBIH_CONSTANTS } from '@/constants/TasbihConstants';
 import { t } from '@/locales/i18n';
@@ -56,11 +55,6 @@ export function computeCounterStats(counter) {
   return { weeklyTotal, monthlyTotal };
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
 function genId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -105,74 +99,11 @@ function normalizeState(raw) {
   return { counters, activeId, dailyGoal, history };
 }
 
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
 
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadTasbih() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedTasbih() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribeTasbih(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+export const loadTasbih = store.load;
+export const getCachedTasbih = store.getCached;
+export const subscribeTasbih = store.subscribe;
 
 export function getCounterDisplayName(counter) {
   if (!counter) return '';
@@ -180,47 +111,50 @@ export function getCounterDisplayName(counter) {
 }
 
 export function increment() {
-  const state = getState();
   let result = { completed: false };
   const today = todayKey();
-  const counters = state.counters.map((c) => {
-    if (c.id !== state.activeId) return c;
-    const total = c.total + 1;
-    const counterHistory = { ...(c.history || {}) };
-    counterHistory[today] = (counterHistory[today] || 0) + 1;
-    if (c.target > 0 && c.count + 1 >= c.target) {
-      result = { completed: true };
-      return { ...c, total, rounds: c.rounds + 1, totalRounds: c.totalRounds + 1, count: 0, history: counterHistory };
-    }
-    return { ...c, total, count: c.count + 1, history: counterHistory };
+  store.update((state) => {
+    const counters = state.counters.map((c) => {
+      if (c.id !== state.activeId) return c;
+      const total = c.total + 1;
+      const counterHistory = { ...(c.history || {}) };
+      counterHistory[today] = (counterHistory[today] || 0) + 1;
+      if (c.target > 0 && c.count + 1 >= c.target) {
+        result = { completed: true };
+        return { ...c, total, rounds: c.rounds + 1, totalRounds: c.totalRounds + 1, count: 0, history: counterHistory };
+      }
+      return { ...c, total, count: c.count + 1, history: counterHistory };
+    });
+    const history = { ...(state.history || {}) };
+    history[today] = (history[today] || 0) + 1;
+    return { ...state, counters, history };
   });
-  const history = { ...(state.history || {}) };
-  history[today] = (history[today] || 0) + 1;
-  commit({ ...state, counters, history });
   return result;
 }
 
 export function setDailyGoal(goal) {
-  const state = getState();
-  commit({ ...state, dailyGoal: Number(goal) > 0 ? Number(goal) : DEFAULT_DAILY_GOAL });
+  store.update((state) => {
+    return { ...state, dailyGoal: Number.isFinite(Number(goal)) && Number(goal) > 0 ? Number(goal) : DEFAULT_DAILY_GOAL };
+  });
 }
 
 export function resetActive(resetRounds = false) {
-  const state = getState();
-  const counters = state.counters.map((c) =>
-    c.id === state.activeId ? { ...c, count: 0, rounds: resetRounds ? 0 : c.rounds } : c
-  );
-  commit({ ...state, counters });
+  store.update((state) => {
+    const counters = state.counters.map((c) =>
+      c.id === state.activeId ? { ...c, count: 0, rounds: resetRounds ? 0 : c.rounds } : c
+    );
+    return { ...state, counters };
+  });
 }
 
 export function setActiveId(id) {
-  const state = getState();
-  if (!state.counters.some((c) => c.id === id)) return;
-  commit({ ...state, activeId: id });
+  store.update((state) => {
+    if (!state.counters.some((c) => c.id === id)) return state;
+    return { ...state, activeId: id };
+  });
 }
 
 export function addCounter({ name, target } = {}) {
-  const state = getState();
   const counter = {
     id: genId(),
     nameKey: null,
@@ -233,47 +167,53 @@ export function addCounter({ name, target } = {}) {
     history: {},
     createdAt: Date.now(),
   };
-  commit({ ...state, counters: [...state.counters, counter], activeId: counter.id });
+  store.update((state) => {
+    return { ...state, counters: [...state.counters, counter], activeId: counter.id };
+  });
   return counter;
 }
 
 export function renameCounter(id, name) {
-  const state = getState();
-  const counters = state.counters.map((c) =>
-    c.id === id ? { ...c, name, nameKey: null } : c
-  );
-  commit({ ...state, counters });
+  store.update((state) => {
+    const counters = state.counters.map((c) =>
+      c.id === id ? { ...c, name, nameKey: null } : c
+    );
+    return { ...state, counters };
+  });
 }
 
 export function setTarget(id, target) {
-  const state = getState();
-  const counters = state.counters.map((c) =>
-    c.id === id ? { ...c, target: Number(target) || 0 } : c
-  );
-  commit({ ...state, counters });
+  store.update((state) => {
+    const counters = state.counters.map((c) =>
+      c.id === id ? { ...c, target: Number(target) || 0 } : c
+    );
+    return { ...state, counters };
+  });
 }
 
 export function deleteCounter(id) {
-  const state = getState();
-  if (state.counters.length <= 1) return;
-  const counters = state.counters.filter((c) => c.id !== id);
-  const activeId = state.activeId === id ? counters[0].id : state.activeId;
-  commit({ ...state, counters, activeId });
+  store.update((state) => {
+    if (state.counters.length <= 1) return state;
+    const counters = state.counters.filter((c) => c.id !== id);
+    const activeId = state.activeId === id ? counters[0].id : state.activeId;
+    return { ...state, counters, activeId };
+  });
 }
 
 export function moveCounter(id, direction) {
-  const state = getState();
-  const index = state.counters.findIndex((c) => c.id === id);
-  if (index < 0) return;
-  const target = direction === 'up' ? index - 1 : index + 1;
-  if (target < 0 || target >= state.counters.length) return;
-  const counters = [...state.counters];
-  [counters[index], counters[target]] = [counters[target], counters[index]];
-  commit({ ...state, counters });
+  store.update((state) => {
+    const index = state.counters.findIndex((c) => c.id === id);
+    if (index < 0) return state;
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= state.counters.length) return state;
+    const counters = [...state.counters];
+    [counters[index], counters[target]] = [counters[target], counters[index]];
+    return { ...state, counters };
+  });
 }
 
 export function useTasbih() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(getCachedTasbih);
   useEffect(() => {
     let mounted = true;
     loadTasbih().then((s) => { if (mounted) setState(s); });
@@ -298,10 +238,4 @@ export function useTasbih() {
   };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

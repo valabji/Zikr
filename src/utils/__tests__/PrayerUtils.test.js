@@ -399,3 +399,23 @@ describe('PrayerUtils', () => {
     });
   });
 });
+
+describe('prayer transition boundaries', () => {
+  afterEach(() => jest.useRealTimers());
+  it.each([['fajr', 5, 'dhuhr'], ['dhuhr', 12, 'asr'], ['asr', 15, 'maghrib'], ['maghrib', 18, 'isha'], ['isha', 20, 'fajr']])(
+    'recognizes %s at the exact scheduled instant', (name, hour, nextName) => {
+      const base = moment('2026-06-15T00:00:00');
+      const times = Object.fromEntries([['fajr', 5], ['dhuhr', 12], ['asr', 15], ['maghrib', 18], ['isha', 20]].map(([key, h]) => [key, base.clone().hour(h)]));
+      jest.useFakeTimers().setSystemTime(base.clone().hour(hour).toDate());
+      const result = getCurrentAndNextPrayer(times, 30, 31, 'Africa/Cairo');
+      expect(result.current?.name).toBe(name);
+      expect(result.next?.name).toBe(nextName);
+    }
+  );
+  it.each([[0, 31], [30, 0], [0, 0]])('calculates tomorrow at zero-valued coordinates %s,%s', (latitude, longitude) => {
+    const base = moment('2026-06-15T23:00:00');
+    jest.useFakeTimers().setSystemTime(base.toDate());
+    const times = Object.fromEntries([['fajr', 5], ['dhuhr', 12], ['asr', 15], ['maghrib', 18], ['isha', 20]].map(([key, h]) => [key, base.clone().hour(h)]));
+    expect(getCurrentAndNextPrayer(times, latitude, longitude, 'UTC').next?.name).toBe('fajr');
+  });
+});

@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = '@azkar_history';
@@ -39,11 +38,6 @@ export function computeAzkarStats(history) {
   };
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
 function seedState() {
   return { morning: {}, evening: {} };
 }
@@ -51,91 +45,30 @@ function seedState() {
 function normalizeState(raw) {
   if (!raw || typeof raw !== 'object') return seedState();
   return {
-    morning: raw.morning && typeof raw.morning === 'object' ? raw.morning : {},
-    evening: raw.evening && typeof raw.evening === 'object' ? raw.evening : {},
+    morning: raw.morning && typeof raw.morning === 'object' && !Array.isArray(raw.morning) ? raw.morning : {},
+    evening: raw.evening && typeof raw.evening === 'object' && !Array.isArray(raw.evening) ? raw.evening : {},
   };
 }
 
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
-
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadAzkarHistory() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedAzkarHistory() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribeAzkarHistory(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
+const getState = store.getCached;
+const commit = store.update;
+export const loadAzkarHistory = store.load;
+export const getCachedAzkarHistory = store.getCached;
+export const subscribeAzkarHistory = store.subscribe;
 
 export function logAzkarCompletion(category) {
   const key = category === MORNING_CATEGORY ? 'morning' : category === EVENING_CATEGORY ? 'evening' : null;
   if (!key) return;
-  const state = getState();
   const today = todayKey();
-  if (state[key][today]) return;
-  commit({ ...state, [key]: { ...state[key], [today]: Date.now() } });
+  const timestamp = Date.now();
+  commit(state => state[key][today] ? state : {
+    ...state, [key]: { ...state[key], [today]: timestamp },
+  });
 }
 
 export function useAzkarHistory() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(() => getState());
   useEffect(() => {
     let mounted = true;
     loadAzkarHistory().then((s) => { if (mounted) setState(s); });
@@ -145,10 +78,4 @@ export function useAzkarHistory() {
   return { history: state, stats: computeAzkarStats(state) };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

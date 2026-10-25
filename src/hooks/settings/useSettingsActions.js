@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t, setLanguage } from '@/locales/i18n';
@@ -10,7 +10,7 @@ export function useSettingsActions({ navigation, playClick, form, vibration }) {
   const [initialLang, setInitialLang] = useState('ar');
   const [languageChanged, setLanguageChanged] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(true);
-  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const alertVisibleRef = useRef(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -67,12 +67,9 @@ export function useSettingsActions({ navigation, playClick, form, vibration }) {
   const handleSave = async () => {
     playClick();
     const wasFirstTime = isFirstTime;
-    if (isFirstTime) {
-      await exitFirstTime();
-    }
-
     await form.applyForm();
     await vibration.applyVibration();
+    if (isFirstTime) await exitFirstTime();
 
     if (languageChanged) {
       await setLanguage(currentLang, true);
@@ -96,11 +93,9 @@ export function useSettingsActions({ navigation, playClick, form, vibration }) {
   };
 
   const handleBackPress = async () => {
-    if (isFirstTime) {
-      await exitFirstTime();
-    }
-    if (hasUnsavedChanges() && !isAlertVisible) {
-      setIsAlertVisible(true);
+    if (alertVisibleRef.current) return;
+    if (hasUnsavedChanges()) {
+      alertVisibleRef.current = true;
       Alert.alert(
         t('common.unsavedChanges'),
         t('common.unsavedChangesMessage'),
@@ -108,13 +103,14 @@ export function useSettingsActions({ navigation, playClick, form, vibration }) {
           {
             text: t('common.cancel'),
             style: 'cancel',
-            onPress: () => setIsAlertVisible(false),
+            onPress: () => { alertVisibleRef.current = false; },
           },
           {
             text: t('common.discard'),
             style: 'destructive',
-            onPress: () => {
-              setIsAlertVisible(false);
+            onPress: async () => {
+              alertVisibleRef.current = false;
+              if (isFirstTime) await exitFirstTime();
               navigation.goBack();
             },
           },
@@ -124,18 +120,18 @@ export function useSettingsActions({ navigation, playClick, form, vibration }) {
             onPress: async () => {
               try {
                 await handleSave();
-                setIsAlertVisible(false);
-                navigation.goBack();
+                alertVisibleRef.current = false;
               } catch (error) {
                 console.error('Error saving settings:', error);
-                setIsAlertVisible(false);
-                navigation.goBack();
+                alertVisibleRef.current = false;
               }
             },
           },
-        ]
+        ],
+        { cancelable: true, onDismiss: () => { alertVisibleRef.current = false; } }
       );
     } else {
+      if (isFirstTime) await exitFirstTime();
       navigation.goBack();
     }
   };

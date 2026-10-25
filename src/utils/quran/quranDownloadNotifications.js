@@ -16,10 +16,9 @@ export async function showDownloadProgress(id, title, body) {
         priority: Platform.OS === 'android'
           ? Notifications.AndroidNotificationPriority.LOW
           : undefined,
-        ...(Platform.OS === 'android' && { channelId: DOWNLOAD_CHANNEL }),
         data: { type: 'quran-download' },
       },
-      trigger: null,
+      trigger: Platform.OS === 'android' ? { channelId: DOWNLOAD_CHANNEL } : null,
     });
   } catch (error) {
     console.error('Error showing download progress:', error);

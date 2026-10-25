@@ -18,6 +18,7 @@ const SCHEDULED_IDS_KEY = '@scheduled_prayer_ids';
 class PrayerNotificationScheduler {
   constructor() {
     this.scheduledIds = [];
+    this.operations = Promise.resolve();
   }
 
   async initialize() {
@@ -37,9 +38,19 @@ class PrayerNotificationScheduler {
     await this.initialize();
   }
 
-  async scheduleAll() {
+  _enqueue(operation) {
+    const next = this.operations.then(operation);
+    this.operations = next.catch(() => {});
+    return next;
+  }
+
+  scheduleAll() {
+    return this._enqueue(() => this._scheduleAll());
+  }
+
+  async _scheduleAll() {
     try {
-      await this.cancelAll();
+      await this._cancelAll();
 
       const enabled = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED);
       if (enabled !== 'true') {
@@ -109,14 +120,19 @@ class PrayerNotificationScheduler {
     }
   }
 
-  async cancelAll() {
+  cancelAll() {
+    return this._enqueue(() => this._cancelAll());
+  }
+
+  async _cancelAll() {
     try {
       let ids = this.scheduledIds;
       if (!ids.length) {
         const stored = await AsyncStorage.getItem(SCHEDULED_IDS_KEY);
         if (stored) {
           try {
-            ids = JSON.parse(stored);
+            const parsed = JSON.parse(stored);
+            ids = Array.isArray(parsed) ? parsed.filter(id => typeof id === 'string') : [];
           } catch {
             ids = [];
           }
@@ -164,7 +180,12 @@ class PrayerNotificationScheduler {
   async _getEnabledPrayers() {
     try {
       const stored = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.ENABLED_PRAYERS);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return Object.fromEntries(PRAYER_NAMES.map(name => [name, parsed[name] !== false]));
+        }
+      }
     } catch {}
     return { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true };
   }

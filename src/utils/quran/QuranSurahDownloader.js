@@ -21,6 +21,7 @@ class QuranSurahDownloaderService {
     this.state = {};
     this.listeners = new Set();
     this.cancelled = {};
+    this.handles = {};
     this.checked = {};
     this.bulk = {};
     this._notifiedPct = {};
@@ -168,6 +169,7 @@ class QuranSurahDownloaderService {
   async start(reciterId, surah) {
     if (Platform.OS === 'web' || !reciterHasSurahAudio(reciterId)) return;
     const k = this.key(reciterId, surah);
+    const partial = `${this._localUri(reciterId, surah)}.part`;
     if (this.state[k] && (this.state[k].downloading || this.state[k].downloaded)) return;
     this.cancelled[k] = false;
     this.state[k] = { downloaded: false, downloading: true, progress: 0, error: null, size: 0 };
@@ -184,9 +186,10 @@ class QuranSurahDownloaderService {
 
       const download = FileSystem.createDownloadResumable(
         manifest.audioUrl,
-        this._localUri(reciterId, surah),
+        partial,
         {},
         (p) => {
+          if (this.cancelled[k]) return;
           if (p.totalBytesExpectedToWrite > 0) {
             const progress = p.totalBytesWritten / p.totalBytesExpectedToWrite;
             this.state[k].progress = progress;
@@ -199,10 +202,11 @@ class QuranSurahDownloaderService {
           }
         }
       );
+      this.handles[k] = download;
       const result = await download.downloadAsync();
 
       if (this.cancelled[k]) {
-        try { await FileSystem.deleteAsync(this._localUri(reciterId, surah), { idempotent: true }); } catch {}
+        try { await FileSystem.deleteAsync(partial, { idempotent: true }); } catch {}
         this.state[k] = blankState();
         this._emit();
         hideDownloadProgress(this._notifId(reciterId, surah));
@@ -212,17 +216,25 @@ class QuranSurahDownloaderService {
         throw new Error(`Download failed (status ${result && result.status})`);
       }
 
-      const info = await FileSystem.getInfoAsync(this._localUri(reciterId, surah));
+      const info = await FileSystem.getInfoAsync(partial);
       const size = info.size || 0;
       if (!info.exists || size <= MIN_SIZE) throw new Error('Incomplete audio download');
+      if (this.cancelled[k]) throw new Error('Download cancelled');
+      await FileSystem.moveAsync({ from: partial, to: this._localUri(reciterId, surah) });
+      if (this.cancelled[k]) {
+        await FileSystem.deleteAsync(this._localUri(reciterId, surah), { idempotent: true });
+        throw new Error('Download cancelled');
+      }
       this.state[k] = { downloaded: true, downloading: false, progress: 1, error: null, size };
       this._emit();
       hideDownloadProgress(this._notifId(reciterId, surah));
     } catch (e) {
-      try { await FileSystem.deleteAsync(this._localUri(reciterId, surah), { idempotent: true }); } catch {}
-      this.state[k] = { downloaded: false, downloading: false, progress: 0, error: String(e && e.message ? e.message : e), size: 0 };
+      try { await FileSystem.deleteAsync(partial, { idempotent: true }); } catch {}
+      this.state[k] = this.cancelled[k] ? blankState() : { downloaded: false, downloading: false, progress: 0, error: String(e && e.message ? e.message : e), size: 0 };
       this._emit();
       hideDownloadProgress(this._notifId(reciterId, surah));
+    } finally {
+      delete this.handles[k];
     }
   }
 
@@ -230,6 +242,7 @@ class QuranSurahDownloaderService {
     const k = this.key(reciterId, surah);
     if (this.state[k] && this.state[k].downloading) {
       this.cancelled[k] = true;
+      this.handles[k]?.cancelAsync?.().catch(() => {});
       hideDownloadProgress(this._notifId(reciterId, surah));
     }
   }

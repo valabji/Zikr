@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // Set env var BEFORE any imports so module-load-time reads see a valid value.
 process.env.EXPO_PUBLIC_FIREBASE_CONFIG = JSON.stringify({
   apiKey: 'test',
@@ -70,6 +71,14 @@ describe('firebase/events.LogEvent', () => {
     await LogEvent('boom', {});
     await new Promise((r) => setImmediate(r));
     expect(errSpy).toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
+
+  it('contains synchronous SDK initialization failures', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    getAnalytics.mockImplementationOnce(() => { throw new Error('no default app'); });
+    await expect(LogEvent('test')).resolves.toBeUndefined();
+    expect(logEvent).not.toHaveBeenCalled();
     errSpy.mockRestore();
   });
 
@@ -151,5 +160,31 @@ describe('firebase/load.loadFirebaseAnalytics', () => {
     global.Platform.OS = 'web';
     await loadFirebaseAnalytics().catch(() => {});
     expect(firebase.setReactNativeAsyncStorage).toHaveBeenCalled();
+  });
+});
+
+describe('telemetry preference recovery', () => {
+  const { APP_KEYS } = require('@/constants/StorageKeys');
+  const { loadTelemetryPreference, isTelemetryEnabled } = require('@/utils/firebase/telemetry');
+  const { setAnalyticsCollectionEnabled } = require('@react-native-firebase/analytics');
+
+  afterEach(async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    await setTelemetryEnabled(true);
+  });
+
+  it('applies a saved opt-out even if category JSON is corrupt', async () => {
+    AsyncStorage.getItem.mockImplementation(async key => key === APP_KEYS.TELEMETRY_ENABLED ? 'false' : '{');
+    await expect(loadTelemetryPreference()).resolves.toBeUndefined();
+    expect(isTelemetryEnabled()).toBe(false);
+    expect(setAnalyticsCollectionEnabled).toHaveBeenLastCalledWith(expect.anything(), false);
+  });
+
+  it('contains asynchronous SDK collection failures', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    setAnalyticsCollectionEnabled.mockRejectedValueOnce(new Error('native failure'));
+    await expect(setTelemetryEnabled(false)).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

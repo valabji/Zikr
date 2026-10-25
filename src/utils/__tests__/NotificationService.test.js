@@ -390,7 +390,7 @@ describe('NotificationService', () => {
       expect(id).toBe('id-123');
       const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
       expect(call.content.sound).toBe('adhan_alert.wav');
-      expect(call.content.channelId).toBe('prayer_adhan');
+      expect(call.trigger.channelId).toBe('prayer_adhan');
       expect(call.content.data).toMatchObject({
         notificationId: 'fajr',
         soundType: 'full',
@@ -408,7 +408,7 @@ describe('NotificationService', () => {
       await service.scheduleExactNotification('fajr', 'Fajr', 'Time', future, 'none');
       const call = Notifications.scheduleNotificationAsync.mock.calls[0][0];
       expect(call.content.sound).toBeNull();
-      expect(call.content.channelId).toBe('prayer_silent');
+      expect(call.trigger.channelId).toBe('prayer_silent');
       expect(call.content.data.soundType).toBe('none');
     });
 
@@ -492,9 +492,9 @@ describe('NotificationService', () => {
 
       const scheduleArg = Notifications.scheduleNotificationAsync.mock.calls.at(-1)[0];
       expect(scheduleArg.identifier).toBe('prayer-countdown-persistent');
-      expect(scheduleArg.trigger).toBeNull();
+      expect(scheduleArg.trigger).toEqual({ channelId: 'prayer-countdown' });
       expect(scheduleArg.content.sticky).toBe(true);
-      expect(scheduleArg.content.channelId).toBe('prayer-countdown');
+      expect(scheduleArg.content.channelId).toBeUndefined();
       expect(scheduleArg.content.title).toBe('🕌 Next Prayer');
       expect(scheduleArg.content.body).toBe('Fajr at 5:30 AM\n2h 15m remaining');
       expect(scheduleArg.content.data.prayer).toBe('fajr');

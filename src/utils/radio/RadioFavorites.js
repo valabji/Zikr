@@ -4,18 +4,24 @@ import { RADIO_CONSTANTS } from '@/constants/RadioConstants';
 const { STORAGE_KEYS } = RADIO_CONSTANTS;
 
 let cached = null;
+let loading = null;
+let writes = Promise.resolve();
 const listeners = new Set();
 
 export async function loadRadioFavorites() {
   if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEYS.FAVORITES);
-    const parsed = raw ? JSON.parse(raw) : [];
-    cached = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    cached = [];
+  if (!loading) {
+    loading = (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEYS.FAVORITES);
+        const parsed = raw ? JSON.parse(raw) : [];
+        cached = Array.isArray(parsed) ? [...new Set(parsed)] : [];
+      } catch { cached = []; }
+      finally { loading = null; }
+      return cached;
+    })();
   }
-  return cached;
+  return loading;
 }
 
 export function getCachedRadioFavorites() {
@@ -27,16 +33,17 @@ export function isRadioFavorite(id) {
 }
 
 async function persist() {
-  try {
-    await AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(cached));
-  } catch {}
+  const snapshot = JSON.stringify(cached);
+  writes = writes.then(() => AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, snapshot)).catch(() => {});
+  await writes;
   listeners.forEach((fn) => {
     try { fn(cached); } catch {}
   });
 }
 
 export async function toggleRadioFavorite(id) {
-  const current = await loadRadioFavorites();
+  await loadRadioFavorites();
+  const current = cached;
   cached = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
   await persist();
   return cached;

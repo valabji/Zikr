@@ -57,3 +57,12 @@ describe('RadioFavorites', () => {
     expect(seen).toEqual([[1], [1, 2]]);
   });
 });
+
+it('preserves concurrent favorite toggles during a cold load', async () => {
+  _resetForTests();
+  AsyncStorage.getItem.mockResolvedValue('[9]');
+  AsyncStorage.setItem.mockResolvedValue();
+  await Promise.all([toggleRadioFavorite(1), toggleRadioFavorite(2)]);
+  expect(getCachedRadioFavorites()).toEqual([9, 1, 2]);
+  expect(JSON.parse(AsyncStorage.setItem.mock.calls.at(-1)[1])).toEqual([9, 1, 2]);
+});

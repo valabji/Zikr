@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { updateStoredMap } from '@/utils/updateStoredMap';
 import * as FileSystem from 'expo-file-system/legacy';
 import JSZip from 'jszip';
 import { FONT_FAMILY } from '@/constants/Fonts';
@@ -63,25 +64,24 @@ export const cloneTheme = (source, name, nameAr) => {
 export const loadCustomThemes = async () => {
   try {
     const raw = await AsyncStorage.getItem(CUSTOM_THEMES_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
   } catch {
     return {};
   }
 };
 
 export const persistCustomTheme = async (id, theme) => {
-  const all = await loadCustomThemes();
-  all[id] = theme;
-  await AsyncStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(all));
-  return all;
+  return updateStoredMap(CUSTOM_THEMES_KEY, all => ({ ...all, [id]: theme }));
 };
 
 const themeAssetDir = (id) => `${FileSystem.documentDirectory}themes/${id}/`;
 
 export const removeCustomTheme = async (id) => {
-  const all = await loadCustomThemes();
-  delete all[id];
-  await AsyncStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(all));
+  const all = await updateStoredMap(CUSTOM_THEMES_KEY, current => {
+    delete current[id];
+    return current;
+  });
   if (Platform.OS !== 'web') {
     try { await FileSystem.deleteAsync(themeAssetDir(id), { idempotent: true }); } catch {}
   }

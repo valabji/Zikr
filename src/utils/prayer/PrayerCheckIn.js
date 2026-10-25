@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect } from 'react';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 
@@ -69,116 +68,40 @@ export function getCheckInHistory(state, numDays = 7) {
   return history;
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
 function seedState() {
   return { days: {} };
 }
 
 function normalizeState(raw) {
   if (!raw || typeof raw !== 'object') return seedState();
-  return { days: raw.days && typeof raw.days === 'object' ? raw.days : {} };
+  return { days: raw.days && typeof raw.days === 'object' && !Array.isArray(raw.days) ? raw.days : {} };
 }
 
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
-
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadPrayerCheckIn() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedPrayerCheckIn() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribePrayerCheckIn(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
+const getState = store.getCached;
+const commit = store.update;
+export const loadPrayerCheckIn = store.load;
+export const getCachedPrayerCheckIn = store.getCached;
+export const subscribePrayerCheckIn = store.subscribe;
 
 export function togglePrayerCheckIn(prayerName) {
-  if (!MANDATORY_PRAYERS.includes(prayerName)) return;
-  const state = getState();
-  const today = todayKey();
-  const day = { ...(state.days[today] || {}) };
-  if (day[prayerName]) {
-    delete day[prayerName];
-  } else {
-    day[prayerName] = Date.now();
-  }
-  commit({ ...state, days: { ...state.days, [today]: day } });
+  togglePrayerCheckInForDate(prayerName, todayKey());
 }
 
 export function togglePrayerCheckInForDate(prayerName, dateKey) {
   if (!MANDATORY_PRAYERS.includes(prayerName)) return;
-  const state = getState();
-  const day = { ...(state.days[dateKey] || {}) };
-  if (day[prayerName]) {
-    delete day[prayerName];
-  } else {
-    day[prayerName] = Date.now();
-  }
-  commit({ ...state, days: { ...state.days, [dateKey]: day } });
+  const checked = !getState().days[dateKey]?.[prayerName];
+  const timestamp = Date.now();
+  commit(state => {
+    const day = { ...(state.days[dateKey] || {}) };
+    if (checked) day[prayerName] = day[prayerName] || timestamp;
+    else delete day[prayerName];
+    return { ...state, days: { ...state.days, [dateKey]: day } };
+  });
 }
 
 export function usePrayerCheckIn() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(() => getState());
   useEffect(() => {
     let mounted = true;
     loadPrayerCheckIn().then((s) => { if (mounted) setState(s); });
@@ -188,10 +111,4 @@ export function usePrayerCheckIn() {
   return { state, stats: computePrayerCheckInStats(state) };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

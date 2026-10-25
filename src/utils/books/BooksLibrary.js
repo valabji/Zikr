@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { updateStoredMap } from '@/utils/updateStoredMap';
 import * as FileSystem from 'expo-file-system/legacy';
 import booksCatalog from '@assets/books/data/books.json';
 import { BOOKS_CONSTANTS, NEEDS_VERIFICATION } from '@/constants/BooksConstants';
@@ -91,7 +92,7 @@ export async function getLastRead(bookId) {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEYS.LAST_READ);
     const map = raw ? JSON.parse(raw) : {};
-    return map[bookId] || 0;
+    return Number.isInteger(map?.[bookId]) && map[bookId] >= 0 ? map[bookId] : 0;
   } catch {
     return 0;
   }
@@ -99,10 +100,7 @@ export async function getLastRead(bookId) {
 
 export async function setLastRead(bookId, index) {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEYS.LAST_READ);
-    const map = raw ? JSON.parse(raw) : {};
-    map[bookId] = index;
-    await AsyncStorage.setItem(STORAGE_KEYS.LAST_READ, JSON.stringify(map));
+    await updateStoredMap(STORAGE_KEYS.LAST_READ, map => ({ ...map, [bookId]: index }));
   } catch {}
 }
 
@@ -110,7 +108,7 @@ export async function getBookmarks(bookId) {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEYS.BOOKMARKS);
     const map = raw ? JSON.parse(raw) : {};
-    return map[bookId] || [];
+    return Array.isArray(map?.[bookId]) ? map[bookId] : [];
   } catch {
     return [];
   }
@@ -118,9 +116,6 @@ export async function getBookmarks(bookId) {
 
 export async function setBookmarks(bookId, list) {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEYS.BOOKMARKS);
-    const map = raw ? JSON.parse(raw) : {};
-    map[bookId] = list;
-    await AsyncStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(map));
+    await updateStoredMap(STORAGE_KEYS.BOOKMARKS, map => ({ ...map, [bookId]: list }));
   } catch {}
 }

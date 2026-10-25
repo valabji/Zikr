@@ -116,3 +116,17 @@ describe('WirdPlanner', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });
+
+it('rejects infinite inputs and keeps page counts as whole non-negative numbers', async () => {
+  AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ dailyTargetPages: -2, log: { old: -3, text: '5', valid: 2.9 } }));
+  const mod = await loadAndReset();
+  const loaded = await mod.loadWirdPlanner();
+  expect(loaded).toEqual({ dailyTargetPages: 0, log: { valid: 2 } });
+  mod.setDailyTargetPages(3.9);
+  mod.setDailyTargetPages(Infinity);
+  mod.logPagesToday(2.9);
+  mod.logPagesToday(Infinity);
+  expect(mod.getCachedWirdPlanner().dailyTargetPages).toBe(3);
+  expect(mod.computeWirdStats(mod.getCachedWirdPlanner()).todayPages).toBe(2);
+  mod._resetForTests();
+});

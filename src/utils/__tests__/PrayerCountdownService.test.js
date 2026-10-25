@@ -75,6 +75,49 @@ describe('PrayerCountdownService', () => {
   });
 
   describe('start()', () => {
+    it('shares concurrent startup and creates only one interval', async () => {
+      jest.useFakeTimers();
+      const interval = jest.spyOn(global, 'setInterval');
+      AsyncStorage.getItem.mockResolvedValue(JSON.stringify(LOCATION));
+      const update = jest.spyOn(service, 'updateCountdown').mockResolvedValue();
+      await Promise.all([service.start(), service.start()]);
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(interval).toHaveBeenCalledTimes(1);
+      await service.stop();
+      update.mockRestore();
+      interval.mockRestore();
+      jest.useRealTimers();
+    });
+
+    it('does not restart after stop while location is still loading', async () => {
+      let resolveLocation;
+      const location = jest.spyOn(service, 'getLocation').mockImplementationOnce(() => new Promise(resolve => { resolveLocation = resolve; }));
+      const update = jest.spyOn(service, 'updateCountdown').mockResolvedValue();
+      const starting = service.start();
+      await service.stop();
+      resolveLocation(LOCATION);
+      await starting;
+      expect(service.isServiceRunning()).toBe(false);
+      expect(update).not.toHaveBeenCalled();
+      expect(service.updateInterval).toBeNull();
+      update.mockRestore();
+      location.mockRestore();
+    });
+
+    it('does not create an interval after stop during the initial notification update', async () => {
+      AsyncStorage.getItem.mockResolvedValue(JSON.stringify(LOCATION));
+      let resolveUpdate;
+      const update = jest.spyOn(service, 'updateCountdown').mockImplementationOnce(() => new Promise(resolve => { resolveUpdate = resolve; }));
+      const starting = service.start();
+      while (!resolveUpdate) await Promise.resolve();
+      await service.stop();
+      resolveUpdate();
+      await starting;
+      expect(service.updateInterval).toBeNull();
+      expect(service.isServiceRunning()).toBe(false);
+      update.mockRestore();
+    });
+
     it('does nothing if already running', async () => {
       AsyncStorage.getItem
         .mockResolvedValueOnce(JSON.stringify(LOCATION))

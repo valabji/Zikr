@@ -94,7 +94,9 @@ class NotificationService {
 
   // Audio is played by these listeners, not the notification itself, so iOS doesn't double-play
   setupNotificationListener() {
-    Notifications.addNotificationReceivedListener(async (notification) => {
+    this.receivedSubscription?.remove();
+    this.responseSubscription?.remove();
+    this.receivedSubscription = Notifications.addNotificationReceivedListener(async (notification) => {
       const currentId = notification.request.identifier;
       console.log('📩 Notification received:', currentId);
 
@@ -105,10 +107,10 @@ class NotificationService {
       }
     });
 
-    Notifications.addNotificationResponseReceivedListener(async (response) => {
+    this.responseSubscription = Notifications.addNotificationResponseReceivedListener(async (response) => {
       console.log('👆 Notification tapped:', response.notification.request.identifier);
 
-      const { soundType } = response.notification.request.content.data;
+      const { soundType } = response.notification.request.content.data || {};
       if (soundType) {
         await Sounds.playNotificationSound(soundType, true);
       }
@@ -136,7 +138,7 @@ class NotificationService {
 
   async scheduleExactNotification(id, title, body, triggerDate, sound = 'short') {
     try {
-      if (!(triggerDate instanceof Date) || triggerDate.getTime() <= Date.now()) {
+      if (!(triggerDate instanceof Date) || !Number.isFinite(triggerDate.getTime()) || triggerDate.getTime() <= Date.now()) {
         console.error('Invalid trigger date:', triggerDate);
         return null;
       }
@@ -159,12 +161,12 @@ class NotificationService {
           ? Notifications.AndroidNotificationPriority.HIGH
           : undefined,
         categoryIdentifier: 'prayer_reminder',
-        ...(Platform.OS === 'android' && { channelId: isSilent ? SILENT_CHANNEL : ADHAN_CHANNEL }),
       };
 
       const trigger = {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: triggerDate,
+        ...(Platform.OS === 'android' && { channelId: isSilent ? SILENT_CHANNEL : ADHAN_CHANNEL }),
       };
 
       // Deterministic identifier so cancelNotification(id) works
@@ -241,13 +243,12 @@ class NotificationService {
             ? Notifications.AndroidNotificationPriority.LOW
             : undefined,
           sticky: true,
-          ...(Platform.OS === 'android' && { channelId: 'prayer-countdown' }),
           data: {
             type: 'countdown',
             ...(prayer && { prayer }),
           },
         },
-        trigger: null,
+        trigger: Platform.OS === 'android' ? { channelId: 'prayer-countdown' } : null,
       });
 
       console.log(`📊 Updated persistent countdown: ${prayer || ''}`);

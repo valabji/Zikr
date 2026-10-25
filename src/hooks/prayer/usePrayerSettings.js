@@ -13,8 +13,13 @@ export function usePrayerSettings() {
       AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD),
       AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB),
     ]);
-    const parsedLocation = savedLocation ? JSON.parse(savedLocation) : null;
-    if (parsedLocation) setLocation(parsedLocation);
+    let parsedLocation = null;
+    try { parsedLocation = savedLocation ? JSON.parse(savedLocation) : null; } catch {}
+    if (!parsedLocation || !Number.isFinite(parsedLocation.latitude) || !Number.isFinite(parsedLocation.longitude)
+      || Math.abs(parsedLocation.latitude) > 90 || Math.abs(parsedLocation.longitude) > 180) {
+      parsedLocation = null;
+    }
+    setLocation(parsedLocation);
     if (savedMethod) setCalculationMethod(savedMethod);
     if (savedMadhab) setMadhab(savedMadhab);
     return {

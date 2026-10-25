@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect } from 'react';
 import { WIRD_CONSTANTS } from '@/constants/WirdConstants';
 
@@ -18,9 +17,15 @@ function seedState() {
 
 function normalizeState(raw) {
   if (!raw || typeof raw !== 'object') return seedState();
+  const log = {};
+  if (raw.log && typeof raw.log === 'object' && !Array.isArray(raw.log)) {
+    Object.entries(raw.log).forEach(([day, pages]) => {
+      if (Number.isFinite(pages) && pages >= 0) log[day] = Math.floor(pages);
+    });
+  }
   return {
-    dailyTargetPages: Number.isFinite(raw.dailyTargetPages) ? raw.dailyTargetPages : 0,
-    log: raw.log && typeof raw.log === 'object' ? raw.log : {},
+    dailyTargetPages: Number.isFinite(raw.dailyTargetPages) ? Math.max(0, Math.floor(raw.dailyTargetPages)) : 0,
+    log,
   };
 }
 
@@ -56,101 +61,37 @@ export function computeWirdStats(state, fromDate = new Date()) {
   };
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
-
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadWirdPlanner() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedWirdPlanner() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribeWirdPlanner(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
+const getState = store.getCached;
+const commit = store.update;
+export const loadWirdPlanner = store.load;
+export const getCachedWirdPlanner = store.getCached;
+export const subscribeWirdPlanner = store.subscribe;
 
 export function setDailyTargetPages(pages) {
-  const state = getState();
-  const dailyTargetPages = Math.max(0, Number(pages) || 0);
-  commit({ ...state, dailyTargetPages });
+  const value = Number(pages);
+  if (!Number.isFinite(value)) return;
+  const dailyTargetPages = Math.max(0, Math.floor(value));
+  commit(state => ({ ...state, dailyTargetPages }));
 }
 
 export function logPagesToday(pages) {
-  const state = getState();
+  const value = Number(pages);
+  if (!Number.isFinite(value)) return;
   const key = todayKey();
-  const current = state.log[key] || 0;
-  const next = Math.max(0, current + (Number(pages) || 0));
-  commit({ ...state, log: { ...state.log, [key]: next } });
+  commit(state => {
+    const current = state.log[key] || 0;
+    const next = Math.max(0, current + Math.trunc(value));
+    return { ...state, log: { ...state.log, [key]: next } };
+  });
 }
 
 export function resetKhatmah() {
-  const state = getState();
-  commit({ ...state, log: {} });
+  commit(state => ({ ...state, log: {} }));
 }
 
 export function useWirdPlanner() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(() => getState());
   useEffect(() => {
     let mounted = true;
     loadWirdPlanner().then((s) => { if (mounted) setState(s); });
@@ -160,10 +101,4 @@ export function useWirdPlanner() {
   return { state, stats: computeWirdStats(state) };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

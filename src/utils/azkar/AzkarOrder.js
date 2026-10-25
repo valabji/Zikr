@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { updateStoredMap } from '@/utils/updateStoredMap';
 
 const STORAGE_KEY = '@azkar_order';
 const ITEM_STORAGE_KEY = '@azkar_item_order';
@@ -66,12 +67,6 @@ export async function loadAzkarItemOrder(category) {
 
 export async function saveAzkarItemOrder(category, order) {
   try {
-    let map = {};
-    try {
-      const raw = await AsyncStorage.getItem(ITEM_STORAGE_KEY);
-      map = raw ? JSON.parse(raw) : {};
-    } catch (e) { }
-    map[category] = order;
-    await AsyncStorage.setItem(ITEM_STORAGE_KEY, JSON.stringify(map));
+    await updateStoredMap(ITEM_STORAGE_KEY, map => ({ ...map, [category]: order }));
   } catch (e) { }
 }

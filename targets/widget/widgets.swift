@@ -90,6 +90,16 @@ struct PrayerItem: Identifiable, Hashable {
 }
 
 let isoFormatter = ISO8601DateFormatter()
+let fractionalISOFormatter: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter
+}()
+
+func parsePrayerDate(_ value: String) -> Date? {
+    // JS Date.toISOString() includes milliseconds; retain support for older snapshots.
+    fractionalISOFormatter.date(from: value) ?? isoFormatter.date(from: value)
+}
 
 func loadPrayerWidgetData() -> PrayerWidgetData? {
     guard let defaults = UserDefaults(suiteName: widgetAppGroup) else { return nil }
@@ -134,7 +144,7 @@ func buildEntries(from data: PrayerWidgetData?) -> [SimpleEntry] {
     }
 
     let parsed = data.prayers.compactMap { entry -> (String, Date)? in
-        guard let date = isoFormatter.date(from: entry.time) else { return nil }
+        guard let date = parsePrayerDate(entry.time) else { return nil }
         return (entry.name, date)
     }
 

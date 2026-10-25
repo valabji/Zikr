@@ -131,10 +131,10 @@ export const getCurrentAndNextPrayer = (prayerTimes, latitude, longitude, timezo
   }
 
   // Check if we're after Isha - get tomorrow's Fajr
-  if (now.isAfter(prayers[prayers.length - 1].time)) {
+  if (now.isSameOrAfter(prayers[prayers.length - 1].time)) {
     current = prayers[prayers.length - 1];
     // Calculate tomorrow's prayer times to get next Fajr
-    if (latitude && longitude && timezone) {
+    if (Number.isFinite(latitude) && Number.isFinite(longitude) && timezone) {
       const tomorrow = moment().add(1, 'day').toDate();
       const tomorrowPrayerTimes = calculatePrayerTimes(latitude, longitude, timezone, tomorrow, calculationMethod, madhab);
       if (tomorrowPrayerTimes && tomorrowPrayerTimes.fajr) {
@@ -146,7 +146,7 @@ export const getCurrentAndNextPrayer = (prayerTimes, latitude, longitude, timezo
 
   // Find current prayer period
   for (let i = 0; i < prayers.length - 1; i++) {
-    if (now.isAfter(prayers[i].time) && now.isBefore(prayers[i + 1].time)) {
+    if (now.isSameOrAfter(prayers[i].time) && now.isBefore(prayers[i + 1].time)) {
       current = prayers[i];
       next = prayers[i + 1];
       break;

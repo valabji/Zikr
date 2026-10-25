@@ -32,7 +32,8 @@ describe('AdhanDownloader', () => {
   });
 
   it('start() downloads a remote adhan and marks it downloaded', async () => {
-    const { downloader } = load();
+    const { downloader, FileSystem } = load();
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: true, size: 50000 });
     await downloader.start(firstRemote);
     expect(downloader.isDownloaded(firstRemote)).toBe(true);
   });
@@ -79,6 +80,7 @@ describe('AdhanDownloader', () => {
 
   it('remove deletes the file and resets state', async () => {
     const { downloader, FileSystem } = load();
+    FileSystem.getInfoAsync.mockResolvedValue({ exists: true, size: 50000 });
     await downloader.start(firstRemote);
     expect(downloader.isDownloaded(firstRemote)).toBe(true);
     await downloader.remove(firstRemote);

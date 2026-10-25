@@ -9,7 +9,6 @@ import {
 import NotificationService from '@/utils/notifications/NotificationService';
 import { syncWidgetData } from '@/utils/prayer/PrayerWidgetService';
 import { t } from '@/locales/i18n';
-import moment from 'moment-timezone';
 
 /**
  * PrayerCountdownService - Manages persistent countdown notification
@@ -21,6 +20,8 @@ class PrayerCountdownService {
   constructor() {
     this.updateInterval = null;
     this.isRunning = false;
+    this.starting = null;
+    this.generation = 0;
   }
 
   /**
@@ -41,7 +42,18 @@ class PrayerCountdownService {
   /**
    * Start the countdown service
    */
-  async start() {
+  start() {
+    if (this.starting) return this.starting;
+    const generation = this.generation;
+    const operation = this._start(generation);
+    this.starting = operation;
+    operation.finally(() => {
+      if (this.starting === operation) this.starting = null;
+    });
+    return operation;
+  }
+
+  async _start(generation) {
     if (this.isRunning) {
       console.log('📊 Countdown service already running');
       return;
@@ -53,6 +65,7 @@ class PrayerCountdownService {
       const calculationMethod = await this.getCalculationMethod();
       const madhab = await this.getMadhab();
 
+      if (generation !== this.generation) return;
       if (!location) {
         console.log('📊 No location set, countdown service not started');
         return;
@@ -63,6 +76,7 @@ class PrayerCountdownService {
 
       // Initial update
       await this.updateCountdown(location, calculationMethod, madhab);
+      if (generation !== this.generation) return;
 
       // Set up periodic updates (every 60 seconds)
       this.updateInterval = setInterval(async () => {
@@ -75,7 +89,7 @@ class PrayerCountdownService {
 
     } catch (error) {
       console.error('Error starting countdown service:', error);
-      this.isRunning = false;
+      if (generation === this.generation) this.isRunning = false;
     }
   }
 
@@ -83,6 +97,8 @@ class PrayerCountdownService {
    * Stop the countdown service
    */
   async stop() {
+    this.generation++;
+    this.starting = null;
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;

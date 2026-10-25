@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
+import { createProgressStore } from '@/utils/createProgressStore';
 import { useState, useEffect } from 'react';
 import { ISLAMIC_CALENDAR_CONSTANTS } from '@/constants/IslamicCalendarConstants';
 import { dateKey, isWithinRamadan, getRamadanRange, toHijri } from '@/utils/calendar/HijriCalendar';
@@ -12,97 +11,30 @@ function seedState() {
 
 function normalizeState(raw) {
   if (!raw || typeof raw !== 'object') return seedState();
-  return { days: raw.days && typeof raw.days === 'object' ? raw.days : {} };
+  return { days: raw.days && typeof raw.days === 'object' && !Array.isArray(raw.days) ? raw.days : {} };
 }
 
-let cached = null;
-let persistTimer = null;
-let appStateListenerRegistered = false;
-const listeners = new Set();
-
-function emit() {
-  listeners.forEach((fn) => {
-    try { fn(cached); } catch {}
-  });
-}
-
-function flushPersist() {
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-  if (!cached) return;
-  const snapshot = cached;
-  try {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))?.catch?.(() => {});
-  } catch {}
-}
-
-function schedulePersist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    flushPersist();
-  }, 500);
-}
-
-function registerAppStateListener() {
-  if (appStateListenerRegistered) return;
-  try {
-    AppState?.addEventListener?.('change', (next) => {
-      if (next === 'background' || next === 'inactive') flushPersist();
-    });
-    appStateListenerRegistered = true;
-  } catch {}
-}
-
-function getState() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-function commit(next) {
-  cached = next;
-  emit();
-  schedulePersist();
-}
-
-export async function loadFastingTracker() {
-  registerAppStateListener();
-  if (cached) return cached;
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    cached = raw ? normalizeState(JSON.parse(raw)) : seedState();
-  } catch {
-    cached = seedState();
-  }
-  return cached;
-}
-
-export function getCachedFastingTracker() {
-  if (!cached) cached = seedState();
-  return cached;
-}
-
-export function subscribeFastingTracker(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
+const store = createProgressStore(STORAGE_KEY, seedState, normalizeState);
+const getState = store.getCached;
+const commit = store.update;
+export const loadFastingTracker = store.load;
+export const getCachedFastingTracker = store.getCached;
+export const subscribeFastingTracker = store.subscribe;
 
 export function isFastDay(key) {
   return !!getState().days[key];
 }
 
 export function toggleFastDay(key) {
-  const state = getState();
-  const days = { ...state.days };
-  if (days[key]) {
-    delete days[key];
-  } else {
-    days[key] = Date.now();
-  }
-  commit({ ...state, days });
-  return !!days[key];
+  const checked = !isFastDay(key);
+  const timestamp = Date.now();
+  const next = commit(state => {
+    const days = { ...state.days };
+    if (checked) days[key] = days[key] || timestamp;
+    else delete days[key];
+    return { ...state, days };
+  });
+  return !!next.days[key];
 }
 
 export function computeFastingStats(state, fromDate = new Date()) {
@@ -127,7 +59,7 @@ export function computeFastingStats(state, fromDate = new Date()) {
 }
 
 export function useFastingTracker() {
-  const [state, setState] = useState(() => cached || seedState());
+  const [state, setState] = useState(() => getState());
   useEffect(() => {
     let mounted = true;
     loadFastingTracker().then((s) => { if (mounted) setState(s); });
@@ -137,10 +69,4 @@ export function useFastingTracker() {
   return { state, stats: computeFastingStats(state) };
 }
 
-export function _resetForTests() {
-  cached = null;
-  if (persistTimer) {
-    clearTimeout(persistTimer);
-    persistTimer = null;
-  }
-}
+export const _resetForTests = store.reset;

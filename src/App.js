@@ -18,7 +18,7 @@ function AppContent() {
   const { isThemeLoaded } = useTheme();
   const [isResourcesLoaded, setResourcesLoaded] = React.useState(false);
 
-  let [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Cairo_400Regular,
   });
   
@@ -44,25 +44,23 @@ function AppContent() {
     return () => sub.remove();
   }, []);
 
-  // Hide splash screen when both theme and resources are loaded
+  // A failed font load must not leave the app behind the splash indefinitely.
+  const fontsReady = fontsLoaded || !!fontError;
   React.useEffect(() => {
-    const hideSplashScreen = async () => {
-      if (isResourcesLoaded && isThemeLoaded && fontsLoaded) {
-        // Add a small delay to ensure theme is fully applied
-        setTimeout(async () => {
-          try {
-            await SplashScreen.hideAsync();
-          } catch (error) {
-            console.warn('Error hiding splash screen:', error);
-          }
-        }, 100); // Small delay to ensure theme is applied
-      }
-    };
+    if (fontError) console.warn('Failed to load Cairo font:', fontError);
+  }, [fontError]);
 
-    hideSplashScreen();
-  }, [isResourcesLoaded, isThemeLoaded, fontsLoaded]);
-  
-  if (!isResourcesLoaded || !isThemeLoaded || !fontsLoaded) {
+  React.useEffect(() => {
+    if (!isResourcesLoaded || !isThemeLoaded || !fontsReady) return;
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync().catch((error) => {
+        console.warn('Error hiding splash screen:', error);
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [isResourcesLoaded, isThemeLoaded, fontsReady]);
+
+  if (!isResourcesLoaded || !isThemeLoaded || !fontsReady) {
     return null;
   }
 

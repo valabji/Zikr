@@ -1,52 +1,47 @@
 import * as React from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QURAN_CONSTANTS } from '@/constants/QuranConstants';
 import { pageAyahsForLayout } from '@/utils/quran/mushafIndex';
+import { createProgressStore } from '@/utils/createProgressStore';
 
-const { STORAGE_KEYS } = QURAN_CONSTANTS;
+const store = createProgressStore(QURAN_CONSTANTS.STORAGE_KEYS.BOOKMARKS, () => [], parsed => (
+  Array.isArray(parsed)
+    ? parsed.filter(b => b && Number.isInteger(b.page) && b.page >= 1 && b.page <= QURAN_CONSTANTS.TOTAL_PAGES)
+    : []
+));
+
+export const _resetForTests = store.reset;
 
 export function useQuranBookmarks(currentPage, activeLayoutFile) {
-  const [bookmarks, setBookmarks] = React.useState([]);
+  const [bookmarks, setBookmarks] = React.useState(store.getCached);
 
   React.useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEYS.BOOKMARKS)
-      .then((raw) => {
-        const parsed = raw ? JSON.parse(raw) : [];
-        if (Array.isArray(parsed)) {
-          setBookmarks(parsed.filter((b) => b && Number.isInteger(b.page) && b.page >= 1 && b.page <= QURAN_CONSTANTS.TOTAL_PAGES));
-        }
-      })
-      .catch(() => {});
+    const unsubscribe = store.subscribe(setBookmarks);
+    let mounted = true;
+    store.load().then(state => { if (mounted) setBookmarks(state); });
+    return () => { mounted = false; unsubscribe(); };
   }, []);
 
-  const persist = React.useCallback((next) => {
-    setBookmarks(next);
-    AsyncStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(next)).catch(() => {});
-  }, []);
-
-  const isBookmarked = bookmarks.some((b) => b.page === currentPage);
+  const isBookmarked = bookmarks.some(b => b.page === currentPage);
 
   const toggleBookmark = React.useCallback(() => {
-    const exists = bookmarks.some((b) => b.page === currentPage);
+    const exists = store.getCached().some(b => b.page === currentPage);
     const firstAyah = pageAyahsForLayout(activeLayoutFile, currentPage)[0];
-    if (!exists && !firstAyah) return;
-    persist(exists
-      ? bookmarks.filter((b) => b.page !== currentPage)
-      : [...bookmarks, {
-          page: currentPage,
-          surah: firstAyah.surah,
-          ayah: firstAyah.ayah,
-          addedAt: Date.now(),
-        }]);
-  }, [bookmarks, currentPage, activeLayoutFile, persist]);
+    if (!firstAyah && !exists) return;
+    const addedAt = Date.now();
+    store.update(current => {
+      if (exists) return current.filter(b => b.page !== currentPage);
+      if (current.some(b => b.page === currentPage)) return current;
+      return [...current, { page: currentPage, surah: firstAyah.surah, ayah: firstAyah.ayah, addedAt }];
+    });
+  }, [currentPage, activeLayoutFile]);
 
-  const removeBookmark = React.useCallback((page) => {
-    persist(bookmarks.filter((b) => b.page !== page));
-  }, [bookmarks, persist]);
+  const removeBookmark = React.useCallback(page => {
+    store.update(current => current.filter(b => b.page !== page));
+  }, []);
 
   const updateBookmarkNote = React.useCallback((page, note) => {
-    persist(bookmarks.map((b) => (b.page === page ? { ...b, note } : b)));
-  }, [bookmarks, persist]);
+    store.update(current => current.map(b => b.page === page ? { ...b, note } : b));
+  }, []);
 
   return { bookmarks, isBookmarked, toggleBookmark, removeBookmark, updateBookmarkNote };
 }

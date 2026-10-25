@@ -34,7 +34,11 @@ export function usePrayerNotificationSettings() {
     setNotificationsEnabled(savedNotifications === 'true');
     if (savedAudioMode) setAudioMode(savedAudioMode);
     if (savedAdhan) setSelectedAdhan(savedAdhan);
-    if (savedTimes) setNotificationTimes(JSON.parse(savedTimes));
+    let parsedTimes;
+    try { parsedTimes = savedTimes ? JSON.parse(savedTimes) : null; } catch {}
+    setNotificationTimes(Object.fromEntries(Object.entries(DEFAULT_PRAYER_TOGGLES).map(([prayer, fallback]) => [
+      prayer, typeof parsedTimes?.[prayer] === 'boolean' ? parsedTimes[prayer] : fallback,
+    ])));
     setShowPersistentCountdown(savedCountdown === 'true');
     if (Platform.OS === 'android') {
       setHasExactAlarm(await NotificationService.checkExactAlarmPermission());

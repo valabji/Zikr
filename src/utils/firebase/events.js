@@ -17,10 +17,11 @@ export default async function LogEvent(title, params = {}) {
             ...params
         }
     }
-    const analytics = getAnalytics();
-    logEvent(analytics, title, eventParams).then(() => {
+    try {
+        const analytics = getAnalytics();
+        await logEvent(analytics, title, eventParams);
         console.log(`Logged event: ${title}`, eventParams);
-    }).catch((error) => {
+    } catch (error) {
         console.error(`Error logging event: ${title}`, error);
-    });
+    }
 }

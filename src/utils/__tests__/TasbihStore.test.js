@@ -25,6 +25,48 @@ describe('TasbihStore', () => {
     AsyncStorage.getItem.mockResolvedValue(undefined);
   });
 
+  it('loads saved counters even when the UI read the provisional cache first', async () => {
+    const mod = await loadAndReset();
+    const provisional = mod.getCachedTasbih();
+    expect(mod.getCachedTasbih()).toBe(provisional);
+    AsyncStorage.getItem.mockResolvedValueOnce(JSON.stringify({
+      counters: [{ id: 'saved', count: 17, total: 17 }], activeId: 'saved',
+    }));
+    const loaded = await mod.loadTasbih();
+    expect(loaded.counters[0]).toMatchObject({ id: 'saved', count: 17 });
+    mod._resetForTests();
+  });
+
+  it('replays early increments and additions over saved progress using one disk read', async () => {
+    const mod = await loadAndReset();
+    let resolveRead;
+    AsyncStorage.getItem.mockImplementationOnce(() => new Promise(resolve => { resolveRead = resolve; }));
+    const loading = mod.loadTasbih();
+    const secondLoad = mod.loadTasbih();
+    mod.increment();
+    const added = mod.addCounter({ name: 'New', target: 10 });
+    mod.increment();
+    resolveRead(JSON.stringify({ counters: [{ id: 'saved', count: 17, total: 17 }], activeId: 'saved' }));
+    await Promise.all([loading, secondLoad]);
+    expect(AsyncStorage.getItem).toHaveBeenCalledTimes(1);
+    expect(mod.getCachedTasbih().counters).toEqual([
+      expect.objectContaining({ id: 'saved', count: 18, total: 18 }),
+      expect.objectContaining({ id: added.id, count: 1, total: 1 }),
+    ]);
+    mod._resetForTests();
+  });
+
+  it('preserves provisional counter ids when a new installation finishes loading', async () => {
+    const mod = await loadAndReset();
+    const id = mod.getCachedTasbih().counters[1].id;
+    mod.setActiveId(id);
+    mod.setTarget(id, 7);
+    await mod.loadTasbih();
+    expect(mod.getCachedTasbih().activeId).toBe(id);
+    expect(mod.getCachedTasbih().counters[1].target).toBe(7);
+    mod._resetForTests();
+  });
+
   it('preserves daily goal and history when deleting a counter', async () => {
     const mod = await loadAndReset();
     await mod.loadTasbih();

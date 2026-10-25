@@ -11,12 +11,12 @@ function getCrashModule() {
     }
 }
 
-export function setCrashCollection(enabled) {
+export async function setCrashCollection(enabled) {
     collectionEnabled = enabled;
     const mod = getCrashModule();
     if (!mod) return;
     try {
-        mod.setCrashlyticsCollectionEnabled(mod.getCrashlytics(), enabled);
+        await mod.setCrashlyticsCollectionEnabled(mod.getCrashlytics(), enabled);
     } catch (error) {
         console.warn('Failed to toggle crashlytics collection:', error);
     }

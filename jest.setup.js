@@ -177,6 +177,7 @@ jest.mock('expo-file-system/legacy', () => ({
   downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
   deleteAsync: jest.fn(() => Promise.resolve()),
   copyAsync: jest.fn(() => Promise.resolve()),
+  moveAsync: jest.fn(() => Promise.resolve()),
   EncodingType: { Base64: 'base64', UTF8: 'utf8' },
   readDirectoryAsync: jest.fn(() => Promise.resolve([])),
   readAsStringAsync: jest.fn(() => Promise.resolve('{"entries":[]}')),

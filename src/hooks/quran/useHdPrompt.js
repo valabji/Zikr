@@ -19,14 +19,14 @@ export function useHdPrompt({ ready, settings, qcfState, onOpenSettings }) {
       return;
     }
     let cancelled = false;
+    let timer;
     AsyncStorage.getItem(HD_PROMPT_DISMISSED_KEY(v)).then((flag) => {
       if (cancelled || flag === '1') return;
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         if (!cancelled) setHdPromptVersion(v);
       }, 1200);
-      return () => clearTimeout(timer);
     }).catch(() => {});
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [ready, settings.mushafEdition, qcfState]);
 
   const handleHdPromptDownload = React.useCallback((dontAskAgain) => {
