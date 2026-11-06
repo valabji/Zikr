@@ -8,7 +8,8 @@ End-to-end tests against the real Android app, run in CI on every PR.
 2. Start an Android emulator (or plug in a device with USB debugging).
 3. Build a release APK (debug-signed; release variant is required — see below):
    ```
-   npx expo prebuild --platform android --clean --non-interactive
+   CI=1 GOOGLE_SERVICES_JSON="$PWD/.maestro/google-services.e2e.json" \
+     npx expo prebuild --platform android --clean
    cd android && ./gradlew assembleRelease --no-daemon \
      -x lint -x lintVitalRelease -x lintVitalAnalyzeRelease
    ```
@@ -32,5 +33,9 @@ debug keystore, so no extra signing setup is needed.
 `master` and on manual dispatch. It builds the release APK via `expo prebuild`
 + `./gradlew assembleRelease`, boots an Android 13 (API 33) emulator, installs
 the APK, and runs the flows.
+
+CI uses `google-services.e2e.json`, a dummy Firebase config for UI tests that
+requires no secrets. It does not connect to a real Firebase project or verify
+Analytics/Crashlytics delivery. Production builds must use their own config.
 
 The Android package id under test is `com.valabji.zikr`.

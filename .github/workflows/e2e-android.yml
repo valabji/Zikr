@@ -17,10 +17,9 @@ jobs:
     timeout-minutes: 45
 
     env:
-      # app.config.js reads these. Without them Expo passes `undefined` for the
-      # googleServicesFile, which would skip Firebase wiring in the Android build.
-      GOOGLE_SERVICES_JSON: ${{ github.workspace }}/google-services.json
-      GOOGLE_SERVICES_PLIST: ${{ github.workspace }}/GoogleService-Info.plist
+      CI: '1'
+      # Dummy Firebase config keeps UI tests independent of production credentials.
+      GOOGLE_SERVICES_JSON: ${{ github.workspace }}/.maestro/google-services.e2e.json
       # AdMob is referenced in app.config.js; a dummy value is fine for E2E.
       ADMOB_APPID: ca-app-pub-0000000000000000~0000000000
 
@@ -59,7 +58,7 @@ jobs:
             gradle-${{ runner.os }}-
 
       - name: Expo prebuild (Android)
-        run: npx expo prebuild --platform android --clean --non-interactive
+        run: npx expo prebuild --platform android --clean
 
       - name: Build release APK
         # Release is signed with the debug keystore (see android/app/build.gradle).
