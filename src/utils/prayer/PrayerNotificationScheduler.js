@@ -1,19 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment-timezone';
+import { Platform } from 'react-native';
+import * as BackgroundTask from 'expo-background-task';
+import * as TaskManager from 'expo-task-manager';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { calculatePrayerTimes } from '@/utils/prayer/PrayerUtils';
 import NotificationService from '@/utils/notifications/NotificationService';
-import { t } from '@/locales/i18n';
+import { t, initializeLanguage } from '@/locales/i18n';
+import { normalizePrayerLocation, prayerDate } from '@/utils/prayer/prayerTimeZone';
+import { refreshFastDayNotifications } from '@/utils/calendar/IftarSuhoorNotifications';
 
-const SCHEDULE_HORIZON_DAYS = 3;
 const PRAYER_NAMES = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const SCHEDULED_IDS_KEY = '@scheduled_prayer_ids';
+export const PRAYER_REFRESH_TASK = 'zikr-prayer-schedule-refresh';
+const RENEWAL_ID = 'prayer-schedule-renewal';
+const isPrayerId = id => id === RENEWAL_ID || /^prayer-(fajr|dhuhr|asr|maghrib|isha)-/.test(id);
 
 /**
  * PrayerNotificationScheduler - reads user settings and schedules
- * exact-time notifications for each upcoming prayer within a rolling
- * horizon (today + next 2 days). Refresh on app boot and on foreground
- * so the horizon stays ahead.
+ * Keeps a rolling offline schedule, renewed at boot, on foreground and by
+ * the OS background task. A renewal reminder covers suspended background work.
  */
 class PrayerNotificationScheduler {
   constructor() {
@@ -21,21 +27,34 @@ class PrayerNotificationScheduler {
     this.operations = Promise.resolve();
   }
 
-  async initialize() {
+  initialize() {
+    return this._enqueue(() => this._initialize());
+  }
+
+  async _initialize() {
+    if (Platform.OS === 'web') return true;
     try {
       const enabled = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED);
-      if (enabled === 'true') {
-        await this.scheduleAll();
-      } else {
-        await this.cancelAll();
+      try {
+        if (enabled === 'true') {
+          await BackgroundTask.registerTaskAsync(PRAYER_REFRESH_TASK, { minimumInterval: 12 * 60 });
+        } else {
+          await BackgroundTask.unregisterTaskAsync(PRAYER_REFRESH_TASK);
+        }
+      } catch (error) {
+        console.warn('Prayer background refresh unavailable:', error);
       }
+      const fastingUpdated = await refreshFastDayNotifications();
+      const prayersUpdated = enabled === 'true' ? await this._scheduleAll() : await this._cancelAll();
+      return fastingUpdated && prayersUpdated;
     } catch (error) {
       console.error('Error initializing prayer notification scheduler:', error);
+      return false;
     }
   }
 
   async refresh() {
-    await this.initialize();
+    return this.initialize();
   }
 
   _enqueue(operation) {
@@ -50,18 +69,15 @@ class PrayerNotificationScheduler {
 
   async _scheduleAll() {
     try {
-      await this._cancelAll();
-
       const enabled = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED);
       if (enabled !== 'true') {
-        console.log('🔕 Prayer notifications disabled');
-        return;
+        return await this._cancelAll();
       }
 
       const location = await this._getLocation();
       if (!location) {
         console.log('📍 No prayer location set, skipping scheduling');
-        return;
+        return false;
       }
 
       const calculationMethod = await this._getCalculationMethod();
@@ -70,10 +86,17 @@ class PrayerNotificationScheduler {
       const audioMode = await this._getAudioMode();
 
       const now = Date.now();
+      const scheduled = await NotificationService.getScheduledNotifications();
+      const previousIds = new Set([...this.scheduledIds, ...scheduled.map(n => n.identifier).filter(isPrayerId)]);
+      // iOS keeps 64 pending notifications; reserve one for renewal and retain other features' reminders.
+      const available = Platform.OS === 'ios'
+        ? Math.max(0, 63 - scheduled.filter(n => !isPrayerId(n.identifier)).length) : 150;
+      const days = Platform.OS === 'ios' ? 10 : 30;
+      const planned = [];
       const newIds = [];
 
-      for (let dayOffset = 0; dayOffset < SCHEDULE_HORIZON_DAYS; dayOffset++) {
-        const date = moment().add(dayOffset, 'days').toDate();
+      for (let dayOffset = 0; dayOffset < days; dayOffset++) {
+        const date = prayerDate(location.timezone, dayOffset);
         const times = calculatePrayerTimes(
           location.latitude,
           location.longitude,
@@ -98,25 +121,44 @@ class PrayerNotificationScheduler {
           const title = this._getTitle(prayer);
           const body = this._getBody(prayer, time);
 
-          const scheduledId = await NotificationService.scheduleExactNotification(
-            id,
-            title,
-            body,
-            triggerDate,
-            audioMode,
-          );
-
-          if (scheduledId) {
-            newIds.push(id);
-          }
+          planned.push({ id, title, body, triggerDate });
         }
       }
 
+      if (!PRAYER_NAMES.some(prayer => enabledPrayers[prayer])) {
+        return await this._cancelAll();
+      }
+      const upcoming = planned.sort((a, b) => a.triggerDate - b.triggerDate).slice(0, available);
+      if (!upcoming.length) return false;
+      const keep = new Set([...upcoming.map(n => n.id), RENEWAL_ID]);
+      for (const id of previousIds) {
+        if (!keep.has(id)) await NotificationService.cancelNotification(id);
+      }
+      let lastScheduled;
+      for (const { id, title, body, triggerDate } of upcoming) {
+        if (await NotificationService.scheduleExactNotification(id, title, body, triggerDate, audioMode)) {
+          newIds.push(id);
+          lastScheduled = triggerDate;
+        }
+      }
+      if (lastScheduled) {
+        const renewalDate = new Date(Math.max(now + 1000, lastScheduled.getTime() - 86400000));
+        const renewal = await NotificationService.scheduleExactNotification(
+          RENEWAL_ID,
+          t('settings.notifications.renewalTitle'),
+          t('settings.notifications.renewalBody', { date: moment(lastScheduled).tz(location.timezone).format('LL') }),
+          renewalDate,
+          'none',
+        );
+        if (renewal) newIds.push(RENEWAL_ID);
+      }
       this.scheduledIds = newIds;
       await AsyncStorage.setItem(SCHEDULED_IDS_KEY, JSON.stringify(newIds));
       console.log(`🕌 Scheduled ${newIds.length} prayer notifications`);
+      return newIds.length === upcoming.length + 1;
     } catch (error) {
       console.error('Error scheduling prayer notifications:', error);
+      return false;
     }
   }
 
@@ -141,10 +183,16 @@ class PrayerNotificationScheduler {
       for (const id of ids) {
         await NotificationService.cancelNotification(id);
       }
+      const scheduled = await NotificationService.getScheduledNotifications();
+      for (const { identifier } of scheduled) {
+        if (isPrayerId(identifier) && !ids.includes(identifier)) await NotificationService.cancelNotification(identifier);
+      }
       this.scheduledIds = [];
       await AsyncStorage.removeItem(SCHEDULED_IDS_KEY);
+      return true;
     } catch (error) {
       console.error('Error cancelling prayer notifications:', error);
+      return false;
     }
   }
 
@@ -161,7 +209,7 @@ class PrayerNotificationScheduler {
   async _getLocation() {
     try {
       const stored = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION);
-      return stored ? JSON.parse(stored) : null;
+      return stored ? normalizePrayerLocation(JSON.parse(stored)) : null;
     } catch {
       return null;
     }
@@ -178,8 +226,8 @@ class PrayerNotificationScheduler {
   }
 
   async _getEnabledPrayers() {
+    const stored = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.ENABLED_PRAYERS);
     try {
-      const stored = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.ENABLED_PRAYERS);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
@@ -195,4 +243,21 @@ class PrayerNotificationScheduler {
   }
 }
 
-export default new PrayerNotificationScheduler();
+const scheduler = new PrayerNotificationScheduler();
+
+if (Platform.OS !== 'web') {
+  TaskManager.defineTask(PRAYER_REFRESH_TASK, async ({ error } = {}) => {
+    if (error) return BackgroundTask.BackgroundTaskResult.Failed;
+    try {
+      await initializeLanguage();
+      await NotificationService.initializeChannels();
+      return await scheduler.refresh()
+        ? BackgroundTask.BackgroundTaskResult.Success : BackgroundTask.BackgroundTaskResult.Failed;
+    } catch (error) {
+      console.error('Background prayer refresh failed:', error);
+      return BackgroundTask.BackgroundTaskResult.Failed;
+    }
+  });
+}
+
+export default scheduler;

@@ -2,6 +2,7 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculatePrayerTimes } from '@/utils/prayer/PrayerUtils';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
+import { normalizePrayerLocation, prayerDate } from '@/utils/prayer/prayerTimeZone';
 
 export const THEME_VARIANT_KEYS = ['fajr', 'duha', 'asr', 'isha'];
 
@@ -22,16 +23,14 @@ export const getCurrentPrayerVariant = async (now = moment()) => {
       AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB),
     ]);
     if (!rawLocation) return null;
-    const location = JSON.parse(rawLocation);
-    if (!location || typeof location.latitude !== 'number' || typeof location.longitude !== 'number') {
-      return null;
-    }
-    const timezone = location.timezone || 'UTC';
+    const location = normalizePrayerLocation(JSON.parse(rawLocation));
+    if (!location) return null;
+    const timezone = location.timezone;
     const times = calculatePrayerTimes(
       location.latitude,
       location.longitude,
       timezone,
-      now.toDate(),
+      prayerDate(timezone, 0, now.toDate()),
       method || PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD,
       madhab || PRAYER_CONSTANTS.DEFAULT_MADHAB
     );

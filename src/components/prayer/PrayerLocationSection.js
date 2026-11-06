@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment-timezone';
 import { View, TextInput, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/constants/Colors';
@@ -6,12 +7,14 @@ import { t, getRTLTextAlign } from '@/locales/i18n';
 import { textStyles } from '@/constants/Fonts';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { SPACING, RADIUS, withAlpha } from '@/constants/settingsTokens';
-import { SettingsSection, SettingsRow, SettingsField } from '@/components/settings';
+import { SettingsSection, SettingsRow, SettingsField, SettingsSelect } from '@/components/settings';
 
 const locationLabel = (loc) => loc.name || `${loc.city}, ${loc.country}`;
+const timezones = moment.tz.names().map(id => ({ id, label: id.replace(/_/g, ' ') }));
 
 export default function PrayerLocationSection({ location, selectedLocation, onSelectLocation, search }) {
   const colors = useColors();
+  const activeLocation = selectedLocation || location;
   const {
     searchQuery, searchResults, isSearching, isGettingLocation,
     handleSearch, getCurrentLocation, getIPLocation,
@@ -29,6 +32,16 @@ export default function PrayerLocationSection({ location, selectedLocation, onSe
           icon="navigation"
           label={t('locationSettings.newLocation')}
           value={locationLabel(selectedLocation)}
+        />
+      ) : null}
+      {activeLocation ? (
+        <SettingsSelect
+          label={t('locationSettings.timezone')}
+          title={t('locationSettings.timezone')}
+          description={t('locationSettings.timezoneDescription')}
+          value={activeLocation.timezone}
+          options={timezones}
+          onChange={timezone => onSelectLocation({ ...activeLocation, timezone, timezoneOverride: true })}
         />
       ) : null}
       <SettingsField label={t('locationSettings.searchLocation')}>

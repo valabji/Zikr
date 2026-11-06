@@ -316,7 +316,17 @@ describe('PrayerUtils', () => {
         country: 'Egypt',
         latitude: 30.0444,
         longitude: 31.2357,
+        timezone: 'Africa/Cairo',
       });
+    });
+
+    it('uses the searched city time zone rather than the phone time zone', async () => {
+      jest.spyOn(moment.tz, 'guess').mockReturnValue('Africa/Cairo');
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [{ lat: '51.5074', lon: '-0.1278', address: { city: 'London', country: 'UK' } }],
+      });
+      expect((await searchLocations('London'))[0].timezone).toBe('Europe/London');
     });
 
     it('prioritises exact city-name matches above importance', async () => {

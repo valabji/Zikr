@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { canScheduleExactAlarms } from '@modules/expo-exact-alarm';
 
 const LAST_BATTERY_CHECK_KEY = 'lastBatteryCheck';
 
@@ -56,23 +57,9 @@ export const permissionMethods = {
     }
   },
 
-  // Android 12+: without SCHEDULE_EXACT_ALARM, notifications can be delayed 15-30 min by Doze
   async checkExactAlarmPermission() {
-    if (Platform.OS !== 'android') return true;
-
     try {
-      if (Platform.Version >= 31) {
-        // expo-notifications can't read SCHEDULE_EXACT_ALARM; notification permission is the best proxy
-        const hasPermission = await Notifications.getPermissionsAsync();
-        const canScheduleExact = hasPermission.granted;
-        if (!canScheduleExact) {
-          console.warn('Notification permission not granted');
-        }
-        return canScheduleExact;
-      }
-
-      return true;
-
+      return canScheduleExactAlarms();
     } catch (error) {
       console.error('Error checking exact alarm permission:', error);
       return false;

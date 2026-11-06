@@ -1300,7 +1300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.25.0":
+"@babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.25.0":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 934b0a0460f7d06637d93fcd1a44ac49adc33518d17253b5a0b55ff4cb90a45d8fe78bf034b448911dbec7aff2a90b918697559f78d21c99ff8dbadae9565b55
@@ -3130,6 +3130,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@photostructure/tz-lookup@npm:11.7.0":
+  version: 11.7.0
+  resolution: "@photostructure/tz-lookup@npm:11.7.0"
+  checksum: cc42e05c6155faeaafc0855b292f5f3b0fac393b9f18908a25c01ad47b46ec228373fd8b7980c0be77192b5a04b5e4993b51aad25b8bd63cb96e00dbe15c503b
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -3554,20 +3561,6 @@ __metadata:
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
   checksum: b7a940601d3549874786e3d4b1977c218d2870360695e4714a0eafe529491054fbd5080ed4abf20de706b1c7df573435e0c3619e8c6a490414c843fb68fdad25
-  languageName: node
-  linkType: hard
-
-"@react-navigation/web@npm:^1.0.0-alpha.9":
-  version: 1.0.0-alpha.9
-  resolution: "@react-navigation/web@npm:1.0.0-alpha.9"
-  dependencies:
-    history: ^4.7.2
-    query-string: ^6.2.0
-  peerDependencies:
-    "@react-navigation/core": ^3.0.0-alpha.13
-    react: "*"
-    react-dom: "*"
-  checksum: 26789147438b812e7d6ad0e5f9016fa2081e26d2fe2d98fe8172bd1c75f3beaac1a98f47295a2820b21cf0a6282497cf093257f98af3acdce0c0ff78ca0e95be
   languageName: node
   linkType: hard
 
@@ -4897,7 +4890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decode-uri-component@npm:^0.2.0, decode-uri-component@npm:^0.2.2":
+"decode-uri-component@npm:^0.2.2":
   version: 0.2.2
   resolution: "decode-uri-component@npm:0.2.2"
   checksum: 95476a7d28f267292ce745eac3524a9079058bbb35767b76e3ee87d42e34cd0275d2eb19d9d08c3e167f97556e8a2872747f5e65cbebcac8b0c98d83e285f139
@@ -5277,6 +5270,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-background-task@npm:~57.0.21":
+  version: 57.0.21
+  resolution: "expo-background-task@npm:57.0.21"
+  dependencies:
+    expo-task-manager: ~57.0.21
+  peerDependencies:
+    expo: "*"
+  checksum: 2b71310a7fa1461b15fe608bec7126308f6f85a431a006ae08afc8593f0806f636ecc2b007ce82946d728b8920e325daf1f46d52caf2fc62b01015787073c128
+  languageName: node
+  linkType: hard
+
 "expo-build-properties@npm:~57.0.22":
   version: 57.0.22
   resolution: "expo-build-properties@npm:57.0.22"
@@ -5612,6 +5616,18 @@ __metadata:
   version: 57.0.1
   resolution: "expo-structured-headers@npm:57.0.1"
   checksum: d5f04c6343d8d0607cf398bd9dc024e7beaff35ebbd351aba1935bc528713814af8b08b4ba64f0c0053bfd8c0d8d798ea2b6a1fe340fcde69235339240d307dd
+  languageName: node
+  linkType: hard
+
+"expo-task-manager@npm:~57.0.21":
+  version: 57.0.21
+  resolution: "expo-task-manager@npm:57.0.21"
+  dependencies:
+    unimodules-app-loader: ~57.0.2
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: c9f073e78d7d1998e2ae4f0cfadd408ba2dc80d5382ee8ce5eed643fcb22e646f297f6316cdfc9a59e1a98891c8af8b50110589d7993216a3c562f6af84a7071
   languageName: node
   linkType: hard
 
@@ -6251,20 +6267,6 @@ __metadata:
   dependencies:
     hermes-estree: 0.36.1
   checksum: f0898177dcaf5b4b2d742a067265a15607f04ca1bb58e6b14159b61dd5b3bd3212f873ebdb6ba2185d6df78c2b735daec8272409acbfe44ea1fbcd552ea04774
-  languageName: node
-  linkType: hard
-
-"history@npm:^4.7.2":
-  version: 4.10.1
-  resolution: "history@npm:4.10.1"
-  dependencies:
-    "@babel/runtime": ^7.1.2
-    loose-envify: ^1.2.0
-    resolve-pathname: ^3.0.0
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
-    value-equal: ^1.0.1
-  checksum: addd84bc4683929bae4400419b5af132ff4e4e9b311a0d4e224579ea8e184a6b80d7f72c55927e4fa117f69076a9e47ce082d8d0b422f1a9ddac7991490ca1d0
   languageName: node
   linkType: hard
 
@@ -7435,7 +7437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.2.0, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -8869,7 +8871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.6.2":
+"prop-types@npm:^15.6.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -8904,18 +8906,6 @@ __metadata:
   version: 6.1.0
   resolution: "pure-rand@npm:6.1.0"
   checksum: 8d53bc02bed99eca0b65b505090152ee7e9bd67dd74f8ff32ba1c883b87234067c5bf68d2614759fb217d82594d7a92919e6df80f97885e7b12b42af4bd3316a
-  languageName: node
-  linkType: hard
-
-"query-string@npm:^6.2.0":
-  version: 6.14.1
-  resolution: "query-string@npm:6.14.1"
-  dependencies:
-    decode-uri-component: ^0.2.0
-    filter-obj: ^1.1.0
-    split-on-first: ^1.0.0
-    strict-uri-encode: ^2.0.0
-  checksum: f2c7347578fa0f3fd4eaace506470cb4e9dc52d409a7ddbd613f614b9a594d750877e193b5d5e843c7477b3b295b857ec328903c943957adc41a3efb6c929449
   languageName: node
   linkType: hard
 
@@ -9114,15 +9104,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 6438a3e05e6da7891d9170a3e4bb4c75efa48270b2af926eb0dbf0c8f64bea659c28e008f1ceafefd157213344b54fb6b007fbce6817feed7fb9f550f015189e
-  languageName: node
-  linkType: hard
-
-"react-native-swiper@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "react-native-swiper@npm:1.6.0"
-  dependencies:
-    prop-types: ^15.5.10
-  checksum: 21e7a270dce6d249f718377a8aa2578c9a89b2b076710f6a60dc849ace5b47ade9e071345607947e738c0fdb06b17d9dad6ef99a8f76d7072b13bf3655026225
   languageName: node
   linkType: hard
 
@@ -9407,13 +9388,6 @@ __metadata:
   version: 5.0.0
   resolution: "resolve-from@npm:5.0.0"
   checksum: 4ceeb9113e1b1372d0cd969f3468fa042daa1dd9527b1b6bb88acb6ab55d8b9cd65dbf18819f9f9ddf0db804990901dcdaade80a215e7b2c23daae38e64f5bdf
-  languageName: node
-  linkType: hard
-
-"resolve-pathname@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "resolve-pathname@npm:3.0.0"
-  checksum: 6147241ba42c423dbe83cb067a2b4af4f60908c3af57e1ea567729cc71416c089737fe2a73e9e79e7a60f00f66c91e4b45ad0d37cd4be2d43fec44963ef14368
   languageName: node
   linkType: hard
 
@@ -10167,20 +10141,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.0.2":
-  version: 1.3.3
-  resolution: "tiny-invariant@npm:1.3.3"
-  checksum: 5e185c8cc2266967984ce3b352a4e57cb89dad5a8abb0dea21468a6ecaa67cd5bb47a3b7a85d08041008644af4f667fb8b6575ba38ba5fb00b3b5068306e59fe
-  languageName: node
-  linkType: hard
-
-"tiny-warning@npm:^1.0.0":
-  version: 1.0.3
-  resolution: "tiny-warning@npm:1.0.3"
-  checksum: da62c4acac565902f0624b123eed6dd3509bc9a8d30c06e017104bedcf5d35810da8ff72864400ad19c5c7806fc0a8323c68baf3e326af7cb7d969f846100d71
-  languageName: node
-  linkType: hard
-
 "tinyglobby@npm:^0.2.12":
   version: 0.2.15
   resolution: "tinyglobby@npm:0.2.15"
@@ -10380,6 +10340,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unimodules-app-loader@npm:~57.0.2":
+  version: 57.0.2
+  resolution: "unimodules-app-loader@npm:57.0.2"
+  checksum: 74072c3b15caaae845a35fb88827c385dec5f816315345a490509a7936317a21fc98500c485f99f312c6855f8d063ea8af3ed9ed79b39690c0fa03ace49884d0
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^5.0.0":
   version: 5.0.0
   resolution: "unique-filename@npm:5.0.0"
@@ -10507,13 +10474,6 @@ __metadata:
   version: 5.0.1
   resolution: "validate-npm-package-name@npm:5.0.1"
   checksum: 0d583a1af23aeffea7748742cf22b6802458736fb8b60323ba5949763824d46f796474b0e1b9206beb716f9d75269e19dbd7795d6b038b29d561be95dd827381
-  languageName: node
-  linkType: hard
-
-"value-equal@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "value-equal@npm:1.0.1"
-  checksum: bb7ae1facc76b5cf8071aeb6c13d284d023fdb370478d10a5d64508e0e6e53bb459c4bbe34258df29d82e6f561f874f0105eba38de0e61fe9edd0bdce07a77a2
   languageName: node
   linkType: hard
 
@@ -10826,6 +10786,7 @@ __metadata:
     "@expo-google-fonts/cairo": ^0.1.0
     "@expo/metro-runtime": ~57.0.16
     "@expo/vector-icons": ^15.0.2
+    "@photostructure/tz-lookup": 11.7.0
     "@react-native-async-storage/async-storage": 2.2.0
     "@react-native-community/slider": 5.2.0
     "@react-native-firebase/analytics": ^23.8.8
@@ -10836,7 +10797,6 @@ __metadata:
     "@react-navigation/drawer": ^7.5.6
     "@react-navigation/native": ^7.1.17
     "@react-navigation/stack": ^7.4.5
-    "@react-navigation/web": ^1.0.0-alpha.9
     "@testing-library/jest-native": ^5.4.3
     "@testing-library/react-native": ^13.2.2
     adhan: ^4.4.3
@@ -10847,6 +10807,7 @@ __metadata:
     expo-application: ~57.0.3
     expo-asset: ~57.0.19
     expo-audio: ~57.0.5
+    expo-background-task: ~57.0.21
     expo-build-properties: ~57.0.22
     expo-constants: ~57.0.21
     expo-dev-client: ~57.0.19
@@ -10864,6 +10825,7 @@ __metadata:
     expo-sharing: ~57.0.22
     expo-speech-recognition: ^57.1.0
     expo-splash-screen: ~57.0.9
+    expo-task-manager: ~57.0.21
     expo-updates: ~57.0.25
     expo-web-browser: ~57.0.3
     gh-pages: ^6.3.0
@@ -10882,7 +10844,6 @@ __metadata:
     react-native-screens: ~4.26.0
     react-native-shared-group-preferences: 1.1.24
     react-native-svg: 15.15.4
-    react-native-swiper: ^1.6.0
     react-native-view-shot: 5.1.0
     react-native-web: ^0.21.0
     react-native-web-swiper: ^2.2.4

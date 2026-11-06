@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from '@/locales/i18n';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
@@ -21,6 +21,17 @@ export function usePrayerNotificationSettings() {
   useEffect(() => {
     AdhanDownloader.checkInstalled();
     return AdhanDownloader.subscribe(setAdhanState);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    let mounted = true;
+    const sub = AppState?.addEventListener('change', async state => {
+      if (state !== 'active') return;
+      const allowed = await NotificationService.checkExactAlarmPermission();
+      if (mounted) setHasExactAlarm(allowed);
+    });
+    return () => { mounted = false; sub?.remove(); };
   }, []);
 
   const loadNotificationSettings = useCallback(async () => {
@@ -48,6 +59,7 @@ export function usePrayerNotificationSettings() {
   const handleNotificationsToggle = async (value) => {
     if (value) {
       const result = await NotificationService.requestPermissions();
+      if (Platform.OS === 'android') setHasExactAlarm(result.exactAlarmGranted === true);
       if (!result.granted) {
         Alert.alert(
           t('settings.notifications.permissionRequired'),
@@ -83,9 +95,7 @@ export function usePrayerNotificationSettings() {
 
   const openExactAlarmSettings = async () => {
     await NotificationService.openExactAlarmSettings();
-    setTimeout(async () => {
-      setHasExactAlarm(await NotificationService.checkExactAlarmPermission());
-    }, 1000);
+    setHasExactAlarm(await NotificationService.checkExactAlarmPermission());
   };
 
   const openBatterySettings = () => NotificationService.openBatterySettings();

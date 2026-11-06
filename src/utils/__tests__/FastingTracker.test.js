@@ -28,6 +28,16 @@ describe('FastingTracker', () => {
     expect(state).toEqual({ days: {} });
   });
 
+  it('blocks reminder updates after a failed read and preserves pending selections on retry', async () => {
+    const mod = await loadAndReset();
+    AsyncStorage.getItem.mockRejectedValue(new Error('unavailable'));
+    mod.toggleFastDay('2026-11-02');
+    await expect(mod.loadFastingDays()).rejects.toThrow('Fasting history is unavailable');
+    AsyncStorage.getItem.mockResolvedValue('{"days":{"2026-11-01":1}}');
+    expect(await mod.loadFastingDays()).toEqual({ '2026-11-01': 1, '2026-11-02': expect.any(Number) });
+    mod._resetForTests();
+  });
+
   it('normalizes malformed stored JSON', async () => {
     AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ days: 'bad' }));
     const mod = await loadAndReset();

@@ -10,6 +10,8 @@ const ADHAN_CHANNEL = 'prayer_adhan';
 const SILENT_CHANNEL = 'prayer_silent';
 
 class NotificationService {
+  scheduling = Promise.resolve();
+
   async initialize() {
     Notifications.setNotificationHandler({
       handleNotification: async (notification) => {
@@ -136,14 +138,26 @@ class NotificationService {
     await this._dismissOtherAlarms(null);
   }
 
-  async scheduleExactNotification(id, title, body, triggerDate, sound = 'short') {
+  scheduleExactNotification(...args) {
+    // Queue capacity must be checked together with scheduling, including calls from other screens.
+    const next = this.scheduling.then(() => this._scheduleExactNotification(...args));
+    this.scheduling = next.catch(() => {});
+    return next;
+  }
+
+  async _scheduleExactNotification(id, title, body, triggerDate, sound = 'short') {
     try {
       if (!(triggerDate instanceof Date) || !Number.isFinite(triggerDate.getTime()) || triggerDate.getTime() <= Date.now()) {
         console.error('Invalid trigger date:', triggerDate);
         return null;
       }
 
-      await this.cancelNotification(id);
+      if (Platform.OS === 'ios') {
+        const pending = await this.getScheduledNotifications();
+        if (pending.length >= 64 && !pending.some(n => n.identifier === id)) {
+          throw new Error('The notification queue is full');
+        }
+      }
 
       // Silent mode shows the reminder with no sound; every other mode plays the bundled adhan natively
       const isSilent = sound === 'none';
@@ -169,7 +183,7 @@ class NotificationService {
         ...(Platform.OS === 'android' && { channelId: isSilent ? SILENT_CHANNEL : ADHAN_CHANNEL }),
       };
 
-      // Deterministic identifier so cancelNotification(id) works
+      // Reusing the identifier replaces the request without deleting it before a possible failure.
       const notificationId = await Notifications.scheduleNotificationAsync({
         identifier: id,
         content,
@@ -186,12 +200,7 @@ class NotificationService {
   }
 
   async cancelNotification(identifier) {
-    try {
-      await Notifications.cancelScheduledNotificationAsync(identifier);
-      console.log(`❌ Cancelled notification: ${identifier}`);
-    } catch (error) {
-      console.error(`Error cancelling notification "${identifier}":`, error);
-    }
+    await Notifications.cancelScheduledNotificationAsync(identifier);
   }
 
   async cancelAllNotifications() {
@@ -204,13 +213,7 @@ class NotificationService {
   }
 
   async getScheduledNotifications() {
-    try {
-      const notifications = await Notifications.getAllScheduledNotificationsAsync();
-      return notifications;
-    } catch (error) {
-      console.error('Error getting scheduled notifications:', error);
-      return [];
-    }
+    return Notifications.getAllScheduledNotificationsAsync();
   }
 
   async createNotificationChannel(id, name, description) {

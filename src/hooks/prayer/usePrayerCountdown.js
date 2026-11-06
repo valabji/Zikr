@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { AppState } from 'react-native';
 import moment from 'moment-timezone';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { calculatePrayerTimes, getCurrentAndNextPrayer, getTimeUntilNextPrayer } from '@/utils/prayer/PrayerUtils';
@@ -19,7 +20,7 @@ export function usePrayerCountdown({ location, calculationMethod, madhab }) {
       locationData.latitude,
       locationData.longitude,
       locationData.timezone,
-      new Date(),
+      undefined,
       method,
       madhab2
     );
@@ -43,8 +44,13 @@ export function usePrayerCountdown({ location, calculationMethod, madhab }) {
 
   useEffect(() => {
     const updateCountdown = () => {
-      if (!nextPrayer || !nextPrayer.time) return '';
       try {
+        const now = location?.timezone ? moment().tz(location.timezone) : moment();
+        if (prayerTimes && !prayerTimes.dhuhr.isSame(now, 'day')) {
+          updatePrayerTimes();
+          return '';
+        }
+        if (!nextPrayer || !nextPrayer.time) return '';
         const timeRemaining = getTimeUntilNextPrayer(nextPrayer.time);
         setTimeUntilNext(timeRemaining || '');
         if ((!timeRemaining || timeRemaining === '') && prayerTimes && location) {
@@ -77,20 +83,17 @@ export function usePrayerCountdown({ location, calculationMethod, madhab }) {
       updateInterval = 10000;
     }
 
-    const interval = setInterval(() => {
-      try {
-        updateCountdown();
-        const now = moment();
-        if (now.hours() === 0 && now.minutes() === 0) {
-          updatePrayerTimes();
-        }
-      } catch (error) {
-        console.error('Error in countdown interval:', error);
-      }
-    }, updateInterval);
+    const interval = setInterval(updateCountdown, updateInterval);
 
     return () => clearInterval(interval);
   }, [nextPrayer, updatePrayerTimes, prayerTimes, location, calculationMethod, madhab]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') updatePrayerTimes();
+    });
+    return () => sub.remove();
+  }, [updatePrayerTimes]);
 
   useEffect(() => {
     if (location) {

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createProgressStore } from '@/utils/createProgressStore';
+import { AppState } from 'react-native';
 
 let store;
 beforeEach(() => {
@@ -31,4 +32,22 @@ it('serializes persistence and continues after a failed write', async () => {
   await jest.advanceTimersByTimeAsync(0);
   expect(AsyncStorage.setItem).toHaveBeenCalledTimes(2);
   expect(AsyncStorage.setItem).toHaveBeenLastCalledWith('progress', '{"count":12}');
+});
+
+it('preserves disk data and pending edits across failed reads, then retries on foreground', async () => {
+  AsyncStorage.getItem.mockRejectedValue(new Error('temporarily unavailable'));
+  store.update(s => ({ count: s.count + 1 }));
+  await store.load();
+  store.update(s => ({ count: s.count + 1 }));
+  await store.load();
+  const onState = AppState.addEventListener.mock.calls[0][1];
+  onState('background');
+  await jest.advanceTimersByTimeAsync(1000);
+  expect(AsyncStorage.setItem).not.toHaveBeenCalled();
+
+  AsyncStorage.getItem.mockResolvedValue('{"count":100}');
+  onState('active');
+  expect(await store.load()).toEqual({ count: 102 });
+  await jest.advanceTimersByTimeAsync(500);
+  expect(AsyncStorage.setItem).toHaveBeenLastCalledWith('progress', '{"count":102}');
 });

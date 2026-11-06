@@ -2,6 +2,7 @@ import { Coordinates, PrayerTimes, CalculationMethod, Madhab } from 'adhan';
 import moment from 'moment-timezone';
 import { Platform } from 'react-native';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
+import { normalizePrayerLocation, prayerDate } from '@/utils/prayer/prayerTimeZone';
 
 /**
  * Calculate Qibla direction from given coordinates
@@ -74,13 +75,13 @@ export const getMadhab = (madhabName) => {
  * @param {string} madhab - Madhab
  * @returns {Object} Prayer times object
  */
-export const calculatePrayerTimes = (latitude, longitude, timezone, date = new Date(), calculationMethod = PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD, madhab = PRAYER_CONSTANTS.DEFAULT_MADHAB) => {
+export const calculatePrayerTimes = (latitude, longitude, timezone, date, calculationMethod = PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD, madhab = PRAYER_CONSTANTS.DEFAULT_MADHAB) => {
   try {
     const coordinates = new Coordinates(latitude, longitude);
     const params = getCalculationMethod(calculationMethod);
     params.madhab = getMadhab(madhab);
 
-    const prayerTimes = new PrayerTimes(coordinates, date, params);
+    const prayerTimes = new PrayerTimes(coordinates, date || prayerDate(timezone), params);
     
     // Convert times to moment objects with timezone
     const times = {
@@ -135,7 +136,7 @@ export const getCurrentAndNextPrayer = (prayerTimes, latitude, longitude, timezo
     current = prayers[prayers.length - 1];
     // Calculate tomorrow's prayer times to get next Fajr
     if (Number.isFinite(latitude) && Number.isFinite(longitude) && timezone) {
-      const tomorrow = moment().add(1, 'day').toDate();
+      const tomorrow = prayerDate(timezone, 1);
       const tomorrowPrayerTimes = calculatePrayerTimes(latitude, longitude, timezone, tomorrow, calculationMethod, madhab);
       if (tomorrowPrayerTimes && tomorrowPrayerTimes.fajr) {
         next = { name: 'fajr', time: tomorrowPrayerTimes.fajr };
@@ -207,14 +208,15 @@ export const getLocationFromIP = async () => {
     
     if (data.loc) {
       const [latitude, longitude] = data.loc.split(',').map(coord => parseFloat(coord));
-      return {
+      const location = normalizePrayerLocation({
         latitude,
         longitude,
         city: data.city,
         region: data.region,
         country: data.country,
         timezone: data.timezone
-      };
+      });
+      if (location) return location;
     }
     throw new Error('Location not found in response');
   } catch (error) {
@@ -266,7 +268,6 @@ export const searchLocations = async (query) => {
         country: country,
         latitude: parseFloat(item.lat),
         longitude: parseFloat(item.lon),
-        timezone: moment.tz.guess(), // Fallback to device timezone
         importance: item.importance || 0 // OpenStreetMap provides importance score
       };
     });
@@ -277,6 +278,7 @@ export const searchLocations = async (query) => {
         !isNaN(loc.latitude) && !isNaN(loc.longitude) &&
         Math.abs(loc.latitude) <= 90 && Math.abs(loc.longitude) <= 180
       )
+      .map(normalizePrayerLocation)
       .sort((a, b) => {
         // First prioritize exact city name matches
         const queryLower = query.toLowerCase();
@@ -321,25 +323,23 @@ export const getBrowserLocation = async () => {
           // Try to get city name from reverse geocoding or IP
           try {
             const ipLocation = await getLocationFromIP();
-            resolve({
+            resolve(normalizePrayerLocation({
               latitude,
               longitude,
               city: ipLocation.city || 'Unknown',
               region: ipLocation.region || 'Unknown',
               country: ipLocation.country || 'Unknown',
-              timezone: ipLocation.timezone || moment.tz.guess(),
               name: `${ipLocation.city || 'Current Location'}, ${ipLocation.country || 'Unknown'}`
-            });
+            }));
           } catch (error) {
-            resolve({
+            resolve(normalizePrayerLocation({
               latitude,
               longitude,
               city: 'Current Location',
               region: 'Unknown',
               country: 'Unknown',
-              timezone: moment.tz.guess(),
               name: 'Current Location'
-            });
+            }));
           }
         } catch (error) {
           reject(error);

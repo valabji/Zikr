@@ -29,7 +29,7 @@ function AppContent() {
   }, []);
 
   // Refresh the prayer notification schedule when the app comes back to
-  // foreground so the rolling horizon (today + next 2 days) stays ahead.
+  // foreground so the rolling schedule stays ahead.
   React.useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {

@@ -21,6 +21,13 @@ export const loadFastingTracker = store.load;
 export const getCachedFastingTracker = store.getCached;
 export const subscribeFastingTracker = store.subscribe;
 
+// Reminder updates must not mistake an unreadable history for an empty selection.
+export async function loadFastingDays() {
+  const state = await store.load();
+  if (!store.isLoaded()) throw new Error('Fasting history is unavailable');
+  return state.days;
+}
+
 export function isFastDay(key) {
   return !!getState().days[key];
 }

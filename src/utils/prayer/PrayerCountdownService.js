@@ -9,6 +9,7 @@ import {
 import NotificationService from '@/utils/notifications/NotificationService';
 import { syncWidgetData } from '@/utils/prayer/PrayerWidgetService';
 import { t } from '@/locales/i18n';
+import { normalizePrayerLocation, prayerDate } from '@/utils/prayer/prayerTimeZone';
 
 /**
  * PrayerCountdownService - Manages persistent countdown notification
@@ -118,7 +119,7 @@ class PrayerCountdownService {
         location.latitude,
         location.longitude,
         location.timezone,
-        new Date(),
+        undefined,
         calculationMethod,
         madhab
       );
@@ -150,8 +151,7 @@ class PrayerCountdownService {
       if (!timeRemaining) {
         console.log('No time remaining, recalculating...');
         // Recalculate for next day
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrow = prayerDate(location.timezone, 1);
         const tomorrowTimes = calculatePrayerTimes(
           location.latitude,
           location.longitude,
@@ -229,7 +229,7 @@ class PrayerCountdownService {
   async getLocation() {
     try {
       const savedLocation = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION);
-      return savedLocation ? JSON.parse(savedLocation) : null;
+      return savedLocation ? normalizePrayerLocation(JSON.parse(savedLocation)) : null;
     } catch (error) {
       console.error('Error getting location:', error);
       return null;

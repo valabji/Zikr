@@ -23,10 +23,11 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
       try {
         await loadPrayerSettings();
         await loadNotificationSettings();
+        setSettingsLoaded(true);
       } catch (error) {
         console.error('Error loading settings:', error);
+        Alert.alert(t('common.error'), t('common.settingsLoadError'));
       }
-      setSettingsLoaded(true);
     };
     load();
   }, []);
@@ -46,6 +47,7 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
     if (selectedLocation) {
       if (!baseline.location) return true;
       if (selectedLocation.latitude !== baseline.location.latitude || selectedLocation.longitude !== baseline.location.longitude) return true;
+      if (selectedLocation.timezone !== baseline.location.timezone) return true;
     }
     return calculationMethod !== baseline.calculationMethod
       || madhab !== baseline.madhab
@@ -57,6 +59,7 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
   }, [baseline, selectedLocation, calculationMethod, madhab, notificationsEnabled, audioMode, selectedAdhan, notificationTimes, showPersistentCountdown]);
 
   const saveAllSettings = useCallback(async () => {
+    if (!settingsLoaded) return false;
     if (!selectedLocation && !location) {
       Alert.alert(t('locationSettings.error'), t('locationSettings.noLocationSelected'));
       return false;
@@ -76,7 +79,10 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
 
       await PrayerCountdownService.stop();
       if (showPersistentCountdown) await PrayerCountdownService.start();
-      await PrayerNotificationScheduler.refresh();
+      if (!await PrayerNotificationScheduler.refresh()) {
+        Alert.alert(t('common.error'), t('prayerSettings.remindersError'));
+        return false;
+      }
 
       setBaseline({
         location: selectedLocation || location,
@@ -89,7 +95,7 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
       Alert.alert(t('common.error'), t('prayerSettings.saveError'));
       return false;
     }
-  }, [selectedLocation, location, calculationMethod, madhab, notificationsEnabled, audioMode, selectedAdhan, notificationTimes, showPersistentCountdown, setLocation]);
+  }, [settingsLoaded, selectedLocation, location, calculationMethod, madhab, notificationsEnabled, audioMode, selectedAdhan, notificationTimes, showPersistentCountdown, setLocation]);
 
   const { skipGuard } = useUnsavedChangesGuard(navigation, hasUnsavedChanges, saveAllSettings);
 
@@ -104,5 +110,5 @@ export function usePrayerSettingsSave({ navigation, prayer, notif, selectedLocat
     }
   };
 
-  return { handleSave, canSave: !!(selectedLocation || location) };
+  return { handleSave, canSave: settingsLoaded && !!(selectedLocation || location) };
 }

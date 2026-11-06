@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
+import { normalizePrayerLocation } from '@/utils/prayer/prayerTimeZone';
 
 export function usePrayerSettings() {
   const [location, setLocation] = useState(null);
@@ -15,10 +16,7 @@ export function usePrayerSettings() {
     ]);
     let parsedLocation = null;
     try { parsedLocation = savedLocation ? JSON.parse(savedLocation) : null; } catch {}
-    if (!parsedLocation || !Number.isFinite(parsedLocation.latitude) || !Number.isFinite(parsedLocation.longitude)
-      || Math.abs(parsedLocation.latitude) > 90 || Math.abs(parsedLocation.longitude) > 180) {
-      parsedLocation = null;
-    }
+    parsedLocation = normalizePrayerLocation(parsedLocation);
     setLocation(parsedLocation);
     if (savedMethod) setCalculationMethod(savedMethod);
     if (savedMadhab) setMadhab(savedMadhab);

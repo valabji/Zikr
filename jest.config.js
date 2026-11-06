@@ -18,6 +18,7 @@ module.exports = {
     '^@react-native-firebase/crashlytics$': '<rootDir>/__mocks__/firebase-crashlytics.js',
     'modules/expo-media-session$': '<rootDir>/__mocks__/expo-media-session.js',
     'modules/expo-strong-vibration$': '<rootDir>/__mocks__/expo-strong-vibration.js',
+    'modules/expo-exact-alarm$': '<rootDir>/__mocks__/expo-exact-alarm.js',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@assets/(.*)$': '<rootDir>/assets/$1',
     '^@modules/(.*)$': '<rootDir>/modules/$1',

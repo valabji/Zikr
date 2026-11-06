@@ -40,7 +40,8 @@ export default function PrayerTimesScreen({ navigation }) {
 
   useEffect(() => {
     loadSettings();
-  }, []);
+    return navigation.addListener('focus', loadSettings);
+  }, [navigation, loadSettings]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -116,7 +117,7 @@ export default function PrayerTimesScreen({ navigation }) {
               textAlign: getRTLTextAlign('left'),
               opacity: 0.8
             }}>
-              {formatArabicDate(moment())}
+              {formatArabicDate(prayerTimes?.dhuhr || moment())}
             </Text>
           </View>
 

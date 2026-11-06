@@ -4,6 +4,7 @@ import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { calculatePrayerTimes } from '@/utils/prayer/PrayerUtils';
 import { themes } from '@/constants/themes';
 import { APP_KEYS } from '@/constants/StorageKeys';
+import { normalizePrayerLocation, prayerDate } from '@/utils/prayer/prayerTimeZone';
 
 export const WIDGET_APP_GROUP = 'group.com.valabji.zikr.widget';
 export const WIDGET_DATA_KEY = 'prayerWidgetData';
@@ -28,11 +29,10 @@ export const getWidgetThemeColors = async () => {
 // Today's 5 prayers plus tomorrow's fajr, sorted ascending, so a stale reader
 // (native widget code that can't run the adhan JS library) always has a "next" entry.
 export const buildWidgetSchedule = (location, calculationMethod, madhab) => {
-  const today = calculatePrayerTimes(location.latitude, location.longitude, location.timezone, new Date(), calculationMethod, madhab);
+  const today = calculatePrayerTimes(location.latitude, location.longitude, location.timezone, undefined, calculationMethod, madhab);
   if (!today) return null;
 
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowDate = prayerDate(location.timezone, 1);
   const tomorrow = calculatePrayerTimes(location.latitude, location.longitude, location.timezone, tomorrowDate, calculationMethod, madhab);
 
   const prayers = PRAYER_ORDER.map((name) => ({ name, time: today[name].toISOString() }));
@@ -50,7 +50,8 @@ export const buildWidgetSchedule = (location, calculationMethod, madhab) => {
 export const getWidgetPrayerData = async () => {
   const savedLocation = await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION);
   if (!savedLocation) return null;
-  const location = JSON.parse(savedLocation);
+  const location = normalizePrayerLocation(JSON.parse(savedLocation));
+  if (!location) return null;
 
   const calculationMethod = (await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.CALCULATION_METHOD)) || PRAYER_CONSTANTS.DEFAULT_CALCULATION_METHOD;
   const madhab = (await AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.MADHAB)) || PRAYER_CONSTANTS.DEFAULT_MADHAB;

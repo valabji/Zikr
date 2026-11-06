@@ -60,6 +60,7 @@
     "reminders": "Suhoor & Iftar Reminders",
     "remindersDescription": "Get notified at suhoor and iftar time on days you mark as fasting.",
     "remindersNeedLocation": "Set your prayer location in Prayer Times settings to enable reminders.",
+    "remindersError": "Some reminders could not be updated. Check notification permissions or reduce the number of planned reminders, then try again.",
     "events": {
       "islamicNewYear": "Islamic New Year",
       "ashura": "Day of Ashura",
@@ -240,6 +241,9 @@
       "title": "🔔 Prayer Notifications",
       "enabled": "Enable Notifications",
       "enabledDescription": "Receive prayer time reminders",
+      "renewalTitle": "Keep prayer reminders active",
+      "renewalDescription": "Zikr refreshes reminders in the background when your phone allows it. If refresh is paused, a reminder will ask you to reopen Zikr before the saved schedule ends.",
+      "renewalBody": "Open Zikr to renew your prayer reminders. Your saved schedule ends on {date}.",
       "audioMode": "Audio Mode",
       "adhanRecitation": "Adhan Recitation",
       "downloading": "Downloading",
@@ -335,6 +339,7 @@
     }
   },
   "common": {
+    "settingsLoadError": "Your saved settings could not be loaded. Reopen this screen to try again.",
     "unsavedChanges": "Unsaved Changes",
     "unsavedChangesMessage": "You have unsaved changes. What would you like to do?",
     "cancel": "Cancel",
@@ -479,6 +484,8 @@
   },
   "locationSettings": {
     "title": "Location Settings",
+    "timezone": "Time zone",
+    "timezoneDescription": "Detected from the location. Check it if you are near a time-zone boundary.",
     "currentLocation": "Current Location",
     "noLocationSet": "No location set",
     "autoLocate": "Auto Locate",
@@ -520,6 +527,7 @@
     "resetError": "Failed to reset settings. Please try again.",
     "saveError": "Failed to save settings. Please try again.",
     "saveSuccess": "Your prayer settings have been saved.",
+    "remindersError": "Settings were saved, but some reminders could not be updated. Check notification permissions or reduce other planned reminders, then save again.",
     "prayerSettingsSaveError": "Failed to save prayer settings. Please try again.",
     "prayerSettingsSaveSuccess": "Prayer settings saved successfully!",
     "saveAllSettings": "Save & Restart App",

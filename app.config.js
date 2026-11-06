@@ -130,6 +130,7 @@ export default {
         }
       ],
       "expo-asset",
+      "expo-background-task",
       ["expo-font", {
         fonts: [
           "./node_modules/@expo-google-fonts/cairo/Cairo_400Regular.ttf",

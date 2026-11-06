@@ -18,7 +18,7 @@ jest.mock('expo-location', () => ({
 }));
 
 import React from 'react';
-import { render, waitFor, fireEvent } from '@testing-library/react-native';
+import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PrayerTimesScreen from '@/screens/prayer/PrayerTimesScreen';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
@@ -88,5 +88,17 @@ describe('PrayerTimesScreen', () => {
     await waitFor(() => expect(errSpy).toHaveBeenCalled());
     expect(toJSON()).toBeTruthy();
     errSpy.mockRestore();
+  });
+
+  it('reloads the selected city when returning from settings', async () => {
+    AsyncStorage.getItem.mockImplementation(async key => key === PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION ? LOC : null);
+    const navigation = buildNav();
+    const screen = render(<PrayerTimesScreen navigation={navigation} />);
+    await waitFor(() => expect(screen.getByText('New York, USA')).toBeTruthy());
+    const updated = JSON.stringify({ latitude: 35.6762, longitude: 139.6503, timezone: 'Asia/Tokyo', city: 'Tokyo', country: 'Japan' });
+    AsyncStorage.getItem.mockImplementation(async key => key === PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION ? updated : null);
+    const onFocus = navigation.addListener.mock.calls.find(([event]) => event === 'focus')[1];
+    await act(async () => { await onFocus(); });
+    expect(screen.getByText('Tokyo, Japan')).toBeTruthy();
   });
 });

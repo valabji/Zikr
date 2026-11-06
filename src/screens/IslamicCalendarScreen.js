@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
@@ -19,6 +19,7 @@ import {
 } from '@/utils/calendar/HijriCalendar';
 import { useFastingTracker, toggleFastDay } from '@/utils/calendar/FastingTracker';
 import { scheduleFastDayNotifications, cancelFastDayNotifications } from '@/utils/calendar/IftarSuhoorNotifications';
+import { normalizePrayerLocation } from '@/utils/prayer/prayerTimeZone';
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -36,17 +37,36 @@ export default function IslamicCalendarScreen({ navigation }) {
   const [selectedKey, setSelectedKey] = useState(dateKey(new Date()));
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [hasLocation, setHasLocation] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [updatingReminders, setUpdatingReminders] = useState(false);
+  const updatingRef = useRef(false);
 
   const { state: fastingState, stats } = useFastingTracker();
 
   useEffect(() => {
-    AsyncStorage.getItem(ISLAMIC_CALENDAR_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED).then((v) => {
-      setRemindersEnabled(v === 'true');
-    });
-    AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION).then((v) => {
-      setHasLocation(!!v);
-    });
-  }, []);
+    let generation = 0;
+    const load = async () => {
+      if (updatingRef.current) return;
+      const current = ++generation;
+      setSettingsLoaded(false);
+      try {
+        const [enabled, rawLocation] = await Promise.all([
+          AsyncStorage.getItem(ISLAMIC_CALENDAR_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED),
+          AsyncStorage.getItem(PRAYER_CONSTANTS.STORAGE_KEYS.LOCATION),
+        ]);
+        if (current !== generation) return;
+        const location = rawLocation ? normalizePrayerLocation(JSON.parse(rawLocation)) : null;
+        setRemindersEnabled(enabled === 'true');
+        setHasLocation(!!location);
+        setSettingsLoaded(true);
+      } catch {
+        if (current === generation) Alert.alert(t('common.error'), t('common.settingsLoadError'));
+      }
+    };
+    load();
+    const unsubscribe = navigation.addListener('focus', load);
+    return () => { generation++; unsubscribe(); };
+  }, [navigation]);
 
   const grid = useMemo(() => getHijriMonthGrid(iYear, iMonth), [iYear, iMonth]);
   const upcomingEvents = useMemo(() => getUpcomingEvents(new Date()), []);
@@ -70,38 +90,58 @@ export default function IslamicCalendarScreen({ navigation }) {
   }, []);
 
   const onToggleFasting = useCallback(async () => {
+    if (!settingsLoaded || updatingRef.current) return;
+    updatingRef.current = true;
+    setUpdatingReminders(true);
     const isNowFasting = toggleFastDay(selectedKey);
-    if (remindersEnabled) {
-      const selectedDate = new Date(`${selectedKey}T00:00:00`);
-      if (isNowFasting) {
-        await scheduleFastDayNotifications(selectedDate);
-      } else {
-        await cancelFastDayNotifications(selectedDate);
+    try {
+      if (remindersEnabled) {
+        const selectedDate = new Date(`${selectedKey}T00:00:00`);
+        if (isNowFasting) {
+          if (!await scheduleFastDayNotifications(selectedDate)) throw new Error('Reminder scheduling failed');
+        } else {
+          await cancelFastDayNotifications(selectedDate);
+        }
       }
+    } catch {
+      Alert.alert(t('common.error'), t('islamicCalendar.remindersError'));
+    } finally {
+      updatingRef.current = false;
+      setUpdatingReminders(false);
     }
-  }, [selectedKey, remindersEnabled]);
+  }, [selectedKey, remindersEnabled, settingsLoaded]);
 
   const onToggleReminders = useCallback(async () => {
+    if (!settingsLoaded || updatingRef.current) return;
     if (!remindersEnabled && !hasLocation) {
       Alert.alert(t('islamicCalendar.title'), t('islamicCalendar.remindersNeedLocation'));
       return;
     }
     const next = !remindersEnabled;
-    setRemindersEnabled(next);
-    await AsyncStorage.setItem(ISLAMIC_CALENDAR_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED, String(next));
+    updatingRef.current = true;
+    setUpdatingReminders(true);
+    try {
+      await AsyncStorage.setItem(ISLAMIC_CALENDAR_CONSTANTS.STORAGE_KEYS.NOTIFICATIONS_ENABLED, String(next));
+      setRemindersEnabled(next);
 
-    const fastDayKeys = Object.keys((fastingState && fastingState.days) || {}).filter(
-      (key) => key >= dateKey(new Date())
-    );
-    for (const key of fastDayKeys) {
-      const date = new Date(`${key}T00:00:00`);
-      if (next) {
-        await scheduleFastDayNotifications(date);
-      } else {
-        await cancelFastDayNotifications(date);
+      const fastDayKeys = Object.keys((fastingState && fastingState.days) || {}).filter(
+        (key) => key >= dateKey(new Date())
+      ).sort();
+      for (const key of fastDayKeys) {
+        const date = new Date(`${key}T00:00:00`);
+        if (next) {
+          if (!await scheduleFastDayNotifications(date)) throw new Error('Reminder scheduling failed');
+        } else {
+          await cancelFastDayNotifications(date);
+        }
       }
+    } catch {
+      Alert.alert(t('common.error'), t('islamicCalendar.remindersError'));
+    } finally {
+      updatingRef.current = false;
+      setUpdatingReminders(false);
     }
-  }, [remindersEnabled, hasLocation, fastingState]);
+  }, [remindersEnabled, hasLocation, fastingState, settingsLoaded]);
 
   const isSelectedFasting = !!(fastingState && fastingState.days && fastingState.days[selectedKey]);
 
@@ -199,7 +239,10 @@ export default function IslamicCalendarScreen({ navigation }) {
           <TouchableOpacity
             testID="toggle-fasting-button"
             onPress={onToggleFasting}
+            disabled={!settingsLoaded || updatingReminders}
+            accessibilityState={{ disabled: !settingsLoaded || updatingReminders, busy: updatingReminders }}
             style={{
+              opacity: !settingsLoaded || updatingReminders ? 0.5 : 1,
               flexDirection: 'row',
               alignItems: 'center',
               marginTop: 14,
@@ -267,7 +310,10 @@ export default function IslamicCalendarScreen({ navigation }) {
         <TouchableOpacity
           testID="toggle-reminders-button"
           onPress={onToggleReminders}
+          disabled={!settingsLoaded || updatingReminders}
+          accessibilityState={{ disabled: !settingsLoaded || updatingReminders, busy: updatingReminders }}
           style={{
+            opacity: !settingsLoaded || updatingReminders ? 0.5 : 1,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',

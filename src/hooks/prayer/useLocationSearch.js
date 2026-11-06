@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as Location from 'expo-location';
-import moment from 'moment-timezone';
+import { normalizePrayerLocation } from '@/utils/prayer/prayerTimeZone';
 import { t } from '@/locales/i18n';
 import { PRAYER_CONSTANTS } from '@/constants/PrayerConstants';
 import { searchLocations, getLocationFromIP, getBrowserLocation } from '@/utils/prayer/PrayerUtils';
@@ -78,14 +78,13 @@ export function useLocationSearch(onSelect) {
             latitude: locationData.coords.latitude,
             longitude: locationData.coords.longitude,
           });
-          onSelect({
+          onSelect(normalizePrayerLocation({
             latitude: locationData.coords.latitude,
             longitude: locationData.coords.longitude,
             city: geocoded[0]?.city || 'Unknown',
             region: geocoded[0]?.region || 'Unknown',
             country: geocoded[0]?.country || 'Unknown',
-            timezone: moment.tz.guess(),
-          });
+          }));
           return;
         } catch (locationError) {
           console.warn('Expo location failed:', locationError);

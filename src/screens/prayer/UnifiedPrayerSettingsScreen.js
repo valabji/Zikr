@@ -131,6 +131,13 @@ export default function UnifiedPrayerSettingsScreen({ navigation }) {
             trailing={<SettingsToggle value={notificationsEnabled} onValueChange={handleNotificationsToggle} />}
           />
           {notificationsEnabled ? (
+            <SettingsCallout
+              tone="info"
+              title={t('settings.notifications.renewalTitle')}
+              body={t('settings.notifications.renewalDescription')}
+            />
+          ) : null}
+          {notificationsEnabled ? (
             <SettingsSelect
               label={t('settings.notifications.audioMode')}
               title={t('settings.notifications.audioMode')}

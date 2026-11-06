@@ -38,7 +38,33 @@ function fontFamily(version, page, dark) {
 }
 
 function localUri(version, page, dark) {
-  return `${VERSIONS[version].localDir}p${page}${dark ? 'd' : ''}.ttf`;
+  const v = VERSIONS[version];
+  return `${v.localDir}p${page}${dark && v.darkFontFamilyPrefix ? 'd' : ''}.ttf`;
+}
+
+// Check the font's table bounds so old, interrupted downloads cannot pass a size-only check.
+async function isCompleteFont(uri) {
+  const info = await FileSystem.getInfoAsync(uri);
+  if (!info.exists || info.size < 12) return false;
+  const read = async (position, length) => base64ToBytes(await FileSystem.readAsStringAsync(uri, {
+    encoding: FileSystem.EncodingType.Base64, position, length,
+  }));
+  const header = await read(0, 12);
+  if (header.length !== 12) return false;
+  const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
+  if (![0x00010000, 0x4f54544f].includes(view.getUint32(0))) return false;
+  const count = view.getUint16(4);
+  const directoryEnd = 12 + count * 16;
+  if (!count || directoryEnd > info.size) return false;
+  const tables = await read(12, count * 16);
+  if (tables.length !== count * 16) return false;
+  const records = new DataView(tables.buffer, tables.byteOffset, tables.byteLength);
+  for (let i = 0; i < count; i++) {
+    const offset = records.getUint32(i * 16 + 8);
+    const length = records.getUint32(i * 16 + 12);
+    if (offset < directoryEnd || offset + length > info.size) return false;
+  }
+  return true;
 }
 
 function remoteUrl(version, page) {
@@ -131,19 +157,20 @@ class QcfDownloaderService {
         while (queue.length && !this.cancelled[version] && !failure) {
           const page = queue.shift();
           const dest = localUri(version, page);
+          const partial = `${dest}.part`;
           try {
-            const info = await FileSystem.getInfoAsync(dest);
-            if (!info.exists || info.size < 1000) {
-              const result = await FileSystem.downloadAsync(remoteUrl(version, page), dest);
-              const downloaded = await FileSystem.getInfoAsync(dest);
-              if (!result || (result.status && result.status >= 400) || !downloaded.exists || downloaded.size < 1000) {
-                await FileSystem.deleteAsync(dest, { idempotent: true });
+            if (!await isCompleteFont(dest)) {
+              await FileSystem.deleteAsync(partial, { idempotent: true });
+              const result = await FileSystem.downloadAsync(remoteUrl(version, page), partial);
+              if (!result || result.status !== 200 || !await isCompleteFont(partial)) {
                 throw new Error(`Invalid font download: page ${page}`);
               }
+              await FileSystem.moveAsync({ from: partial, to: dest });
             }
           } catch (e) {
+            try { await FileSystem.deleteAsync(partial, { idempotent: true }); } catch {}
             console.warn(`QcfDownloader[${version}]: page ${page} failed`, e);
-            failure = e;
+            failure ||= e;
             return;
           }
           done++;
@@ -159,11 +186,13 @@ class QcfDownloaderService {
       if (v.darkFontFamilyPrefix) {
         for (let page = 1; page <= TOTAL && !this.cancelled[version]; page++) {
           const dest = localUri(version, page, true);
-          const info = await FileSystem.getInfoAsync(dest);
-          if (!info.exists || info.size < 1000) {
+          if (!await isCompleteFont(dest)) {
             const b64 = await FileSystem.readAsStringAsync(localUri(version, page), { encoding: FileSystem.EncodingType.Base64 });
             const bytes = patchQcf4Dark(base64ToBytes(b64));
-            await FileSystem.writeAsStringAsync(dest, bytesToBase64(bytes), { encoding: FileSystem.EncodingType.Base64 });
+            const partial = `${dest}.part`;
+            await FileSystem.writeAsStringAsync(partial, bytesToBase64(bytes), { encoding: FileSystem.EncodingType.Base64 });
+            if (!await isCompleteFont(partial)) throw new Error(`Invalid dark font: page ${page}`);
+            await FileSystem.moveAsync({ from: partial, to: dest });
           }
           done++;
           this.state[version].progress = done / units;
@@ -211,7 +240,14 @@ class QcfDownloaderService {
   async loadPageFont(version, page, dark) {
     const family = fontFamily(version, page, dark);
     if (!Font.isLoaded(family)) {
-      await Font.loadAsync({ [family]: localUri(version, page, dark) });
+      const uri = localUri(version, page, dark);
+      if (!await isCompleteFont(uri)) {
+        this.state[version].installed = false;
+        this._emit();
+        await AsyncStorage.removeItem(VERSIONS[version].installedKey);
+        throw new Error(`Incomplete font: ${version} page ${page}`);
+      }
+      await Font.loadAsync({ [family]: uri });
     }
     return family;
   }

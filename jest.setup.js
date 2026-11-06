@@ -214,6 +214,14 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { DATE: 'date' },
 }), { virtual: true });
 
+jest.mock('expo-background-task', () => ({
+  registerTaskAsync: jest.fn(() => Promise.resolve()),
+  unregisterTaskAsync: jest.fn(() => Promise.resolve()),
+  BackgroundTaskResult: { Success: 1, Failed: 2 },
+}));
+
+jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+
 jest.mock('expo-intent-launcher', () => ({
   startActivityAsync: jest.fn(() => Promise.resolve()),
   ActivityAction: {
@@ -382,6 +390,9 @@ jest.mock('react-native', () => {
     BackHandler: {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
+    },
+    AppState: {
+      addEventListener: jest.fn(() => ({ remove: jest.fn() })),
     },
     DevSettings: {
       reload: jest.fn(),

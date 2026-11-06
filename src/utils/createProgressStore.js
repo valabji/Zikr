@@ -52,15 +52,23 @@ export function createProgressStore(storageKey, seedState, normalizeState) {
     if (!appStateSubscription) {
       appStateSubscription = AppState?.addEventListener?.('change', next => {
         if (next === 'background' || next === 'inactive') flush();
+        if (next === 'active' && !loaded) load();
       });
     }
     if (loaded) return Promise.resolve(cached);
     if (!loading) {
       const currentGeneration = generation;
       loading = (async () => {
+        let raw;
+        try {
+          raw = await AsyncStorage.getItem(storageKey);
+        } catch (error) {
+          // A failed read is not empty storage; keep edits pending until a retry succeeds.
+          console.warn('Failed to read progress:', storageKey, error);
+          return getCached();
+        }
         let state;
         try {
-          const raw = await AsyncStorage.getItem(storageKey);
           state = raw ? normalizeState(JSON.parse(raw)) : seed();
         } catch { state = seed(); }
         if (currentGeneration !== generation) return state;
@@ -69,11 +77,10 @@ export function createProgressStore(storageKey, seedState, normalizeState) {
         pending = [];
         cached = state;
         loaded = true;
-        loading = null;
         emit();
         if (hasEdits) schedulePersist();
         return cached;
-      })();
+      })().finally(() => { if (currentGeneration === generation) loading = null; });
     }
     return loading;
   }
@@ -109,5 +116,5 @@ export function createProgressStore(storageKey, seedState, normalizeState) {
     listeners.clear();
   }
 
-  return { load, getCached, update, subscribe, reset };
+  return { load, isLoaded: () => loaded, getCached, update, subscribe, reset };
 }

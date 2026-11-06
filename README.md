@@ -185,6 +185,22 @@ projects and installed clients cannot load the SDK 57 JavaScript bundle.
 `ios/` and `android/` are generated and ignored by Git; preserve any local native
 edits before regenerating them with `yarn prebuild`.
 
+Prayer reminders use a local exact-alarm bridge on Android and Expo background
+tasks on both native platforms. Changes to these modules require rebuilt clients.
+The scheduler keeps up to 10 days on iOS (within its shared notification limit)
+and 30 days on Android, and requests background renewal every 12 hours. The OS
+can defer renewal or stop it after force-quitting the app. A local reminder asks
+the user to reopen Zikr before the saved schedule expires.
+Refresh also retimes queued suhoor and iftar reminders using the current location
+and calculation settings, and removes reminders whose new time has already passed.
+
+Prayer locations use an offline time-zone lookup, including previously saved
+locations. Its compact boundaries can be approximate near borders; users can
+correct the time zone in Location Settings. Explicit corrections are preserved.
+
+`yarn build:ios` uses the device/store production profile. For a simulator build,
+use `yarn eas build --profile ios-simulator --platform ios`.
+
 For dependency validation and production bundle checks:
 
 ```bash

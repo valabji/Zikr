@@ -44,6 +44,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import Sounds from '@/utils/audio/Sounds';
 import service from '@/utils/notifications/NotificationService';
+import { canScheduleExactAlarms } from '@modules/expo-exact-alarm';
 
 // Helper to swap Platform.OS + Version for a single test
 const setPlatform = (os, version) => {
@@ -67,6 +68,7 @@ describe('NotificationService', () => {
     Sounds.playNotificationSound.mockResolvedValue(undefined);
     // Reset Platform to iOS by default
     setPlatform('ios', 15);
+    canScheduleExactAlarms.mockImplementation(() => global.Platform.OS !== 'android' || global.Platform.Version < 31);
   });
 
   afterAll(() => {
@@ -181,11 +183,8 @@ describe('NotificationService', () => {
 
     it('flags needsExactAlarm when granted on Android 12+ without exact alarm', async () => {
       setPlatform('android', 33);
-      // First call: notification permission check during requestPermissions
-      Notifications.getPermissionsAsync
-        .mockResolvedValueOnce({ status: 'granted', granted: true })
-        // Second call: inside checkExactAlarmPermission
-        .mockResolvedValueOnce({ granted: false });
+      Notifications.getPermissionsAsync.mockResolvedValue({ status: 'granted', granted: true });
+      canScheduleExactAlarms.mockReturnValue(false);
       const result = await service.requestPermissions();
       expect(result).toMatchObject({
         granted: true,
@@ -196,9 +195,8 @@ describe('NotificationService', () => {
 
     it('returns full success when Android exact alarm is granted', async () => {
       setPlatform('android', 33);
-      Notifications.getPermissionsAsync
-        .mockResolvedValueOnce({ status: 'granted', granted: true })
-        .mockResolvedValueOnce({ granted: true });
+      Notifications.getPermissionsAsync.mockResolvedValue({ status: 'granted', granted: true });
+      canScheduleExactAlarms.mockReturnValue(true);
       const result = await service.requestPermissions();
       expect(result).toMatchObject({ granted: true, exactAlarmGranted: true });
     });
@@ -224,16 +222,18 @@ describe('NotificationService', () => {
       await expect(service.checkExactAlarmPermission()).resolves.toBe(true);
     });
 
-    it('checks notification permission on Android 12+', async () => {
+    it('checks the native alarm permission on Android 12+', async () => {
       setPlatform('android', 33);
-      Notifications.getPermissionsAsync.mockResolvedValue({ granted: true });
+      canScheduleExactAlarms.mockReturnValue(true);
       await expect(service.checkExactAlarmPermission()).resolves.toBe(true);
+      expect(Notifications.getPermissionsAsync).not.toHaveBeenCalled();
     });
 
-    it('returns false on Android 12+ when notification permission missing', async () => {
+    it('returns false when exact alarms are denied even with notification permission', async () => {
       setPlatform('android', 33);
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      Notifications.getPermissionsAsync.mockResolvedValue({ granted: false });
+      Notifications.getPermissionsAsync.mockResolvedValue({ granted: true });
+      canScheduleExactAlarms.mockReturnValue(false);
       await expect(service.checkExactAlarmPermission()).resolves.toBe(false);
       warn.mockRestore();
     });
@@ -241,7 +241,7 @@ describe('NotificationService', () => {
     it('returns false on error', async () => {
       setPlatform('android', 33);
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      Notifications.getPermissionsAsync.mockRejectedValue(new Error('boom'));
+      canScheduleExactAlarms.mockImplementation(() => { throw new Error('boom'); });
       await expect(service.checkExactAlarmPermission()).resolves.toBe(false);
       spy.mockRestore();
     });
@@ -376,10 +376,29 @@ describe('NotificationService', () => {
       spy.mockRestore();
     });
 
-    it('cancels any existing notification with the same id before scheduling', async () => {
+    it('keeps the existing reminder if replacing it fails', async () => {
       const future = new Date(Date.now() + 60_000);
-      await service.scheduleExactNotification('fajr', 'Fajr', 'Time', future, 'short');
-      expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('fajr');
+      Notifications.scheduleNotificationAsync.mockRejectedValue(new Error('unavailable'));
+      expect(await service.scheduleExactNotification('fajr', 'Fajr', 'Time', future, 'short')).toBeNull();
+      expect(Notifications.cancelScheduledNotificationAsync).not.toHaveBeenCalled();
+    });
+
+    it('serializes concurrent iOS requests so the last free slot cannot be claimed twice', async () => {
+      const pending = Array.from({ length: 63 }, (_, i) => ({ identifier: `existing-${i}` }));
+      Notifications.getAllScheduledNotificationsAsync.mockImplementation(async () => [...pending]);
+      Notifications.scheduleNotificationAsync.mockImplementation(async request => {
+        pending.push(request);
+        return request.identifier;
+      });
+      const future = new Date(Date.now() + 60_000);
+      const results = await Promise.all(['suhoor', 'iftar'].map(id => service.scheduleExactNotification(id, 'T', 'B', future)));
+      expect(results).toEqual(['suhoor', null]);
+      expect(pending).toHaveLength(64);
+    });
+
+    it('can replace an existing iOS reminder when the queue is full', async () => {
+      Notifications.getAllScheduledNotificationsAsync.mockResolvedValue(Array.from({ length: 64 }, (_, i) => ({ identifier: `existing-${i}` })));
+      expect(await service.scheduleExactNotification('existing-0', 'T', 'B', new Date(Date.now() + 60_000))).toBe('scheduled-id');
     });
 
     it('schedules with the bundled adhan sound and adhan channel for audible modes', async () => {
@@ -428,11 +447,9 @@ describe('NotificationService', () => {
       expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('fajr');
     });
 
-    it('logs errors but does not throw', async () => {
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    it('reports failed cancellation so settings cannot claim reminders were disabled', async () => {
       Notifications.cancelScheduledNotificationAsync.mockRejectedValue(new Error('no'));
-      await expect(service.cancelNotification('x')).resolves.toBeUndefined();
-      spy.mockRestore();
+      await expect(service.cancelNotification('x')).rejects.toThrow('no');
     });
   });
 
@@ -456,11 +473,9 @@ describe('NotificationService', () => {
       await expect(service.getScheduledNotifications()).resolves.toEqual([{ id: 'fajr' }]);
     });
 
-    it('returns [] on error', async () => {
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    it('rejects a failed read so callers cannot mistake it for an empty queue', async () => {
       Notifications.getAllScheduledNotificationsAsync.mockRejectedValue(new Error('no'));
-      await expect(service.getScheduledNotifications()).resolves.toEqual([]);
-      spy.mockRestore();
+      await expect(service.getScheduledNotifications()).rejects.toThrow('no');
     });
   });
 
