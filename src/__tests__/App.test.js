@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, act } from '@testing-library/react-native';
-import { useFonts } from '@expo-google-fonts/cairo';
+import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import App from '@/App';
 
-jest.mock('@expo-google-fonts/cairo', () => ({ useFonts: jest.fn(), Cairo_400Regular: 1 }));
+jest.mock('expo-font', () => ({ useFonts: jest.fn() }));
 jest.mock('expo-splash-screen', () => ({ hideAsync: jest.fn().mockResolvedValue() }));
 jest.mock('@/utils/load', () => ({ loadResourcesAndDataAsync: jest.fn().mockResolvedValue() }));
 jest.mock('@/constants/Colors', () => ({ useTheme: () => ({ isThemeLoaded: true }) }));

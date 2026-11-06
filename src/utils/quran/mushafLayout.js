@@ -1,18 +1,9 @@
 import { Dimensions } from 'react-native';
+import { getLayout } from './layoutData';
+
+export { getLayout } from './layoutData';
 
 export const SCREEN_WIDTH = Dimensions.get('window').width;
-
-const layoutCache = {};
-export function getLayout(layoutFile) {
-  if (!layoutCache[layoutFile]) {
-    if (layoutFile === 'pages_lines_v2') {
-      layoutCache[layoutFile] = require('@assets/quran/data/pages_lines_v2.json');
-    } else {
-      layoutCache[layoutFile] = require('@assets/quran/data/pages_lines_v1.json');
-    }
-  }
-  return layoutCache[layoutFile];
-}
 
 const PAGE_CHROME_PX = 12 /* top padding */ + 1 /* border */ + 18 /* footer */;
 
@@ -25,10 +16,10 @@ function visibleArabicLen(s) {
 }
 
 // Per-page line metrics for the heuristic first-paint estimate and scroll offsets; rendered sizes come from probe measurement in MushafPage.
-const PAGE_DATA = (() => {
-  const out = {};
-  for (const file of ['pages_lines_v1', 'pages_lines_v2']) {
-    const pages = getLayout(file);
+const pageData = {};
+function getPageMetrics(layoutFile) {
+  if (!pageData[layoutFile]) {
+    const pages = getLayout(layoutFile);
     const pageMetrics = new Array(pages.length);
     for (let p = 0; p < pages.length; p++) {
       const lineLens = new Array(pages[p].lines.length);
@@ -53,20 +44,20 @@ const PAGE_DATA = (() => {
       }
       pageMetrics[p] = { visibleLen: bestLen, lineLens, lineSpaces, lineCodeSpaces };
     }
-    out[file] = pageMetrics;
+    pageData[layoutFile] = pageMetrics;
   }
-  return out;
-})();
+  return pageData[layoutFile];
+}
 
 export function getPageProbeLen(layoutFile, pageIndex) {
-  const pageMetrics = PAGE_DATA[layoutFile];
+  const pageMetrics = getPageMetrics(layoutFile);
   const entry = pageMetrics && pageMetrics[pageIndex];
   return entry ? entry.visibleLen : 0;
 }
 
 // Natural fit of line i = pageFitSize × (densestLen / lineLen_i), capped at the page average so short surah-ending lines don't balloon; non-text lines get pageFitSize as a placeholder.
 export function perLineFontSizesForPage(layoutFile, pageIndex, pageFitSize) {
-  const entry = PAGE_DATA[layoutFile] && PAGE_DATA[layoutFile][pageIndex];
+  const entry = getPageMetrics(layoutFile)[pageIndex];
   if (!entry || !entry.visibleLen) {
     const len = entry ? entry.lineLens.length : 0;
     return new Array(len).fill(pageFitSize);
@@ -104,7 +95,7 @@ export function justifiedSpaceExtrasForPage(layoutFile, pageIndex, availWidth, s
   const tables = getLineWidths(layoutFile);
   const table = qcfTable ? tables[qcfTable] : tables.hafs;
   const row = table && table[pageIndex];
-  const entry = PAGE_DATA[layoutFile] && PAGE_DATA[layoutFile][pageIndex];
+  const entry = getPageMetrics(layoutFile)[pageIndex];
   if (!row || !entry) return null;
   // Extra 7px: per-gap letterSpacing pixel-snapping widens the drawn line, and in RTL the excess clips the final glyph.
   const target = availWidth - FIT_GUARD_PX - 7;
@@ -142,7 +133,7 @@ export function estimatedLineSizesForPage(layoutFile, pageIndex, availWidth, qcf
   const table = qcfTable ? tables[qcfTable] : tables.hafs;
   const row = table && table[pageIndex];
   if (!row || !row.length) return null;
-  const { lineSpaces, lineCodeSpaces } = PAGE_DATA[layoutFile][pageIndex];
+  const { lineSpaces, lineCodeSpaces } = getPageMetrics(layoutFile)[pageIndex];
   const widths = {};
   for (let i = 0; i < row.length; i++) {
     if (row[i] > 0) {

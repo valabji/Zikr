@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors, getItemColors } from '@/constants/Colors';
@@ -9,8 +9,16 @@ import { getDailyHadith } from '@/utils/books/DailyHadith';
 
 export default function DailyHadithCard() {
   const colors = useColors();
-  const hadith = useMemo(() => getDailyHadith(), []);
+  const [hadith, setHadith] = useState(null);
   const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDailyHadith().then((value) => {
+      if (!cancelled) setHadith(value);
+    }).catch((error) => console.warn('Failed to load daily hadith:', error));
+    return () => { cancelled = true; };
+  }, []);
 
   if (!hadith) return null;
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  getBooksCatalog, getBookMeta, loadBook,
+  getBooksCatalog, getBookMeta, loadBookAsync,
   normalizeArabic, searchBook,
   getLastRead, setLastRead,
   getBookmarks, setBookmarks,
@@ -26,15 +26,15 @@ describe('BooksLibrary', () => {
     expect(getBookMeta('does-not-exist')).toBeNull();
   });
 
-  it('loadBook returns entries and caches the same instance', () => {
-    const a = loadBook('nawawi40');
+  it('loadBookAsync returns entries and caches the same instance', async () => {
+    const a = await loadBookAsync('nawawi40');
     expect(a).toBeTruthy();
     expect(a.entries.length).toBeGreaterThan(0);
     expect(a.entries[0]).toHaveProperty('n');
     expect(a.entries[0]).toHaveProperty('textAr');
-    const b = loadBook('nawawi40');
+    const b = await loadBookAsync('nawawi40');
     expect(b).toBe(a);
-    expect(loadBook('nope')).toBeNull();
+    expect(await loadBookAsync('nope')).toBeNull();
   });
 
   it('normalizeArabic strips diacritics and folds letters', () => {
@@ -43,7 +43,8 @@ describe('BooksLibrary', () => {
     expect(normalizeArabic('نِيَّةٌ')).toBe('نيه');
   });
 
-  it('searchBook finds Arabic matches by normalized term intersection', () => {
+  it('searchBook finds Arabic matches by normalized term intersection', async () => {
+    await loadBookAsync('nawawi40');
     const results = searchBook('nawawi40', 'الأعمال');
     expect(results.length).toBeGreaterThanOrEqual(1);
     results.forEach((e) => {
@@ -51,7 +52,8 @@ describe('BooksLibrary', () => {
     });
   });
 
-  it('searchBook finds English matches by substring', () => {
+  it('searchBook finds English matches by substring', async () => {
+    await loadBookAsync('nawawi40');
     const results = searchBook('nawawi40', 'messenger');
     expect(results.length).toBeGreaterThanOrEqual(1);
     results.forEach((e) => {

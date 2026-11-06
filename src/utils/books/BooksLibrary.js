@@ -8,10 +8,10 @@ import { bookFileUri } from '@/utils/books/BooksDownloader';
 const { STORAGE_KEYS } = BOOKS_CONSTANTS;
 
 const contentLoaders = {
-  nawawi40: () => require('@assets/books/data/nawawi40.json'),
-  riyad_assalihin: () => require('@assets/books/data/riyad_assalihin.json'),
-  aladab_almufrad: () => require('@assets/books/data/aladab_almufrad.json'),
-  shamail_muhammadiyah: () => require('@assets/books/data/shamail_muhammadiyah.json'),
+  nawawi40: () => import('@assets/books/data/nawawi40.json'),
+  riyad_assalihin: () => import('@assets/books/data/riyad_assalihin.json'),
+  aladab_almufrad: () => import('@assets/books/data/aladab_almufrad.json'),
+  shamail_muhammadiyah: () => import('@assets/books/data/shamail_muhammadiyah.json'),
 };
 
 const bookCache = {};
@@ -24,26 +24,22 @@ export function getBookMeta(id) {
   return booksCatalog.find((b) => b.id === id) || null;
 }
 
-export function loadBook(id) {
-  if (bookCache[id]) return bookCache[id];
-  const meta = getBookMeta(id);
-  const loader = contentLoaders[id];
-  if (!meta || !loader) return null;
-  const content = loader();
-  const book = { ...meta, entries: content.entries || [], chapters: content.chapters || [] };
-  bookCache[id] = book;
-  return book;
-}
-
 export async function loadBookAsync(id) {
   if (bookCache[id]) return bookCache[id];
   const meta = getBookMeta(id);
   if (!meta) return null;
-  if (meta.bundled) return loadBook(id);
   try {
-    const info = await FileSystem.getInfoAsync(bookFileUri(id));
-    if (!info.exists) return null;
-    const content = JSON.parse(await FileSystem.readAsStringAsync(bookFileUri(id)));
+    let content;
+    if (meta.bundled) {
+      const loader = contentLoaders[id];
+      if (!loader) return null;
+      content = (await loader()).default;
+    } else {
+      const info = await FileSystem.getInfoAsync(bookFileUri(id));
+      if (!info.exists) return null;
+      content = JSON.parse(await FileSystem.readAsStringAsync(bookFileUri(id)));
+    }
+    if (bookCache[id]) return bookCache[id];
     const book = { ...meta, entries: content.entries || [], chapters: content.chapters || [] };
     bookCache[id] = book;
     return book;
@@ -68,7 +64,7 @@ export function normalizeArabic(text) {
 const HAS_ARABIC_RE = /[ء-ي]/;
 
 export function searchBook(id, query) {
-  const book = bookCache[id] || loadBook(id);
+  const book = bookCache[id];
   if (!book) return [];
   const raw = (query || '').trim();
   if (raw.length < 2) return [];

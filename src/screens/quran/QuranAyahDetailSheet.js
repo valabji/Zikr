@@ -9,7 +9,7 @@ import { t, isRTL, toArabicDigits } from '@/locales/i18n';
 import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '@/constants/QuranConstants';
 import { setQuranSettings } from '@/utils/quran/QuranSettings';
 import { arForHafs } from '@/utils/quran/mushafText';
-import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '@/utils/quran/tafsirLoader';
+import { loadBundledTafsir, fetchApiTafsir } from '@/utils/quran/tafsirLoader';
 import TafsirDropdown from '@/components/quran/TafsirDropdown';
 import pagesData from '@assets/quran/data/pages.json';
 import surahsData from '@assets/quran/data/surahs.json';
@@ -58,23 +58,24 @@ export default function QuranAyahDetailSheet({ ayah, onClose, tafsirId, onShare 
   const key = ayah ? `${ayah.surah}:${ayah.ayah}` : null;
 
   React.useEffect(() => {
-    if (!key) return;
+    if (!key || tab !== 'tafsir') return;
     const config = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);
-    if (!config || config.source === 'bundle') {
-      setTafsirText((BUNDLED_TAFSIR_DATA[effectiveTafsirId] || BUNDLED_TAFSIR_DATA.muyassar_ar)[key] ?? null);
-      setTafsirLoading(false);
-      return;
-    }
     let cancelled = false;
     setTafsirLoading(true);
     setTafsirText(null);
-    fetchApiTafsir(config.apiId, key).then((text) => {
+    const result = !config || config.source === 'bundle'
+      ? loadBundledTafsir(effectiveTafsirId).then((data) => data[key] ?? null)
+      : fetchApiTafsir(config.apiId, key);
+    result.catch((error) => {
+      console.warn('Failed to load tafsir:', error);
+      return null;
+    }).then((text) => {
       if (cancelled) return;
       setTafsirText(text);
       setTafsirLoading(false);
     });
     return () => { cancelled = true; };
-  }, [key, effectiveTafsirId]);
+  }, [key, effectiveTafsirId, tab]);
 
   if (!ayah) return null;
   const surah = surahsData[ayah.surah - 1];

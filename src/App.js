@@ -2,7 +2,7 @@ import * as React from 'react';
 import { AppState } from 'react-native';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts, Cairo_400Regular } from '@expo-google-fonts/cairo';
+import { useFonts } from 'expo-font';
 import { loadResourcesAndDataAsync } from './utils/load';
 import { AppContainer } from './navigation/Main';
 import { ThemeProvider } from './constants/ThemeProvider';
@@ -19,7 +19,7 @@ function AppContent() {
   const [isResourcesLoaded, setResourcesLoaded] = React.useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
-    Cairo_400Regular,
+    Cairo_400Regular: require('@expo-google-fonts/cairo/Cairo_400Regular.ttf'),
   });
   
   React.useEffect(() => {

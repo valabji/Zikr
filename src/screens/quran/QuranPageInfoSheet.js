@@ -7,7 +7,7 @@ import { QURAN_CONSTANTS, TAFSIRS, DEFAULT_TAFSIR_ID } from '@/constants/QuranCo
 import { setQuranSettings } from '@/utils/quran/QuranSettings';
 import { arForHafs } from '@/utils/quran/mushafText';
 import { pageAyahsForLayout } from '@/utils/quran/mushafIndex';
-import { BUNDLED_TAFSIR_DATA, fetchApiTafsir } from '@/utils/quran/tafsirLoader';
+import { loadBundledTafsir, fetchApiTafsir } from '@/utils/quran/tafsirLoader';
 import TafsirDropdown from '@/components/quran/TafsirDropdown';
 import { CONTENT_MAX_WIDTH, webCursor } from '@/constants/settingsTokens';
 import pagesData from '@assets/quran/data/pages.json';
@@ -104,36 +104,30 @@ export default function QuranPageInfoSheet({ visible, onClose, currentPage, layo
   );
 
   React.useEffect(() => {
-    if (tab !== 'tafsir' || !pageAyahs.length) return;
+    if (!visible || tab !== 'tafsir' || !pageAyahs.length) return;
     const config = TAFSIRS.find((tf) => tf.id === effectiveTafsirId);
-
-    if (!config || config.source === 'bundle') {
-      const data = BUNDLED_TAFSIR_DATA[effectiveTafsirId] || BUNDLED_TAFSIR_DATA.muyassar_ar;
-      const texts = {};
-      for (const a of pageAyahs) {
-        const k = `${a.surah}:${a.ayah}`;
-        texts[k] = data[k] ?? null;
-      }
-      setTafsirTexts(texts);
-      setTafsirLoading(false);
-      return;
-    }
-
     let cancelled = false;
     setTafsirLoading(true);
     setTafsirTexts({});
-    Promise.all(
-      pageAyahs.map((a) => {
-        const k = `${a.surah}:${a.ayah}`;
-        return fetchApiTafsir(config.apiId, k).then((text) => [k, text]);
-      })
-    ).then((pairs) => {
+    const result = !config || config.source === 'bundle'
+      ? loadBundledTafsir(effectiveTafsirId).then((data) => pageAyahs.map((a) => {
+          const k = `${a.surah}:${a.ayah}`;
+          return [k, data[k] ?? null];
+        }))
+      : Promise.all(pageAyahs.map((a) => {
+          const k = `${a.surah}:${a.ayah}`;
+          return fetchApiTafsir(config.apiId, k).then((text) => [k, text]);
+        }));
+    result.catch((error) => {
+      console.warn('Failed to load tafsir:', error);
+      return [];
+    }).then((pairs) => {
       if (cancelled) return;
       setTafsirTexts(Object.fromEntries(pairs));
       setTafsirLoading(false);
     });
     return () => { cancelled = true; };
-  }, [tab, effectiveTafsirId, pageAyahs]);
+  }, [visible, tab, effectiveTafsirId, pageAyahs]);
 
   const firstSurah = pageAyahs.length ? surahById[pageAyahs[0].surah] : null;
   const headerTitle = firstSurah

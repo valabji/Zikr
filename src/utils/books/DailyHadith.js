@@ -1,41 +1,28 @@
-import { getBooksCatalog, loadBook } from '@/utils/books/BooksLibrary';
+import { getBooksCatalog, loadBookAsync } from '@/utils/books/BooksLibrary';
 import { BOOK_CATEGORIES } from '@/constants/BooksConstants';
 
 const MS_PER_DAY = 86400000;
 
-let pool = null;
-
-function buildPool() {
-  if (pool) return pool;
-  const flat = [];
-  getBooksCatalog()
-    .filter((b) => b.category === BOOK_CATEGORIES.HADITH && b.bundled)
-    .forEach((meta) => {
-      const book = loadBook(meta.id);
-      (book?.entries || []).forEach((entry) => {
-        if (!entry.textAr) return;
-        flat.push({
-          bookId: meta.id,
-          bookNameAr: meta.nameAr,
-          bookNameEn: meta.nameEn,
-          n: entry.n,
-          textAr: entry.textAr,
-          textEn: entry.textEn || '',
-        });
-      });
-    });
-  pool = flat;
-  return pool;
-}
-
-export function getDailyHadith(date = new Date()) {
-  const items = buildPool();
-  if (!items.length) return null;
+export async function getDailyHadith(date = new Date()) {
+  const books = getBooksCatalog().filter((b) => b.category === BOOK_CATEGORIES.HADITH && b.bundled);
+  const count = books.reduce((sum, b) => sum + b.count, 0);
+  if (!count) return null;
   const epochDay = Math.floor(date.getTime() / MS_PER_DAY);
-  const index = ((epochDay % items.length) + items.length) % items.length;
-  return items[index];
-}
-
-export function _resetForTests() {
-  pool = null;
+  let index = ((epochDay % count) + count) % count;
+  // Catalog counts select the book without downloading the entire hadith library.
+  for (const meta of books) {
+    if (index >= meta.count) { index -= meta.count; continue; }
+    const book = await loadBookAsync(meta.id);
+    const entry = book?.entries[index];
+    if (!entry?.textAr) return null;
+    return {
+      bookId: meta.id,
+      bookNameAr: meta.nameAr,
+      bookNameEn: meta.nameEn,
+      n: entry.n,
+      textAr: entry.textAr,
+      textEn: entry.textEn || '',
+    };
+  }
+  return null;
 }

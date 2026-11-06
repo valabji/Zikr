@@ -1,14 +1,14 @@
-import tafsirMuyassarAr from '@assets/quran/data/tafsir_ar.json';
-import tafsirSaadiAr from '@assets/quran/data/tafsir_saadi_ar.json';
-import tafsirBaghawiAr from '@assets/quran/data/tafsir_baghawi_ar.json';
-import tafsirWahiduddinEn from '@assets/quran/data/tafsir_wahiduddin_en.json';
-
-export const BUNDLED_TAFSIR_DATA = {
-  muyassar_ar:   tafsirMuyassarAr,
-  saadi_ar:      tafsirSaadiAr,
-  baghawi_ar:    tafsirBaghawiAr,
-  wahiduddin_en: tafsirWahiduddinEn,
+const bundledLoaders = {
+  muyassar_ar: () => import('@assets/quran/data/tafsir_ar.json'),
+  saadi_ar: () => import('@assets/quran/data/tafsir_saadi_ar.json'),
+  baghawi_ar: () => import('@assets/quran/data/tafsir_baghawi_ar.json'),
+  wahiduddin_en: () => import('@assets/quran/data/tafsir_wahiduddin_en.json'),
 };
+
+export async function loadBundledTafsir(id) {
+  const loader = Object.hasOwn(bundledLoaders, id) ? bundledLoaders[id] : bundledLoaders.muyassar_ar;
+  return (await loader()).default;
+}
 
 const API_BASE = 'https://api.quran.com/api/v4';
 const cache = {};

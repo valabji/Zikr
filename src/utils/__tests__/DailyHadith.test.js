@@ -1,44 +1,55 @@
-import { getDailyHadith, _resetForTests } from '@/utils/books/DailyHadith';
+import { getDailyHadith } from '@/utils/books/DailyHadith';
+import * as library from '@/utils/books/BooksLibrary';
+import { BOOK_CATEGORIES } from '@/constants/BooksConstants';
 
-describe('DailyHadith', () => {
-  beforeEach(() => {
-    _resetForTests();
-  });
+const books = library.getBooksCatalog().filter(b => b.bundled && b.category === BOOK_CATEGORIES.HADITH);
+const day = 86400000;
+let pool;
 
-  it('returns a hadith with arabic text and source reference', () => {
-    const hadith = getDailyHadith(new Date('2026-06-18T00:00:00.000Z'));
-    expect(hadith).toBeTruthy();
-    expect(typeof hadith.textAr).toBe('string');
-    expect(hadith.textAr.length).toBeGreaterThan(0);
-    expect(typeof hadith.bookId).toBe('string');
-    expect(typeof hadith.n).toBe('number');
-  });
+beforeAll(async () => {
+  pool = (await Promise.all(books.map(async meta => {
+    const book = await library.loadBookAsync(meta.id);
+    expect(book.entries).toHaveLength(meta.count);
+    expect(book.entries.every(entry => !!entry.textAr)).toBe(true);
+    return book.entries.map(entry => ({
+      bookId: meta.id, bookNameAr: meta.nameAr, bookNameEn: meta.nameEn,
+      n: entry.n, textAr: entry.textAr, textEn: entry.textEn || '',
+    }));
+  }))).flat();
+});
 
-  it('is deterministic for the same calendar day', () => {
-    const a = getDailyHadith(new Date('2026-06-18T01:00:00.000Z'));
-    const b = getDailyHadith(new Date('2026-06-18T23:00:00.000Z'));
-    expect(a).toEqual(b);
-  });
+afterEach(() => jest.restoreAllMocks());
 
-  it('changes across different days', () => {
-    const day1 = getDailyHadith(new Date('2026-06-18T00:00:00.000Z'));
-    const day2 = getDailyHadith(new Date('2026-06-19T00:00:00.000Z'));
-    expect(day1).not.toEqual(day2);
-  });
+it('preserves the original daily selection, including book boundaries and negative dates', async () => {
+  let offset = 0;
+  const indices = [-1, 0, 20622];
+  for (const book of books) {
+    indices.push(offset, offset + book.count - 1);
+    offset += book.count;
+  }
+  for (const index of indices) {
+    expect(await getDailyHadith(new Date(index * day)))
+      .toEqual(pool[((index % pool.length) + pool.length) % pool.length]);
+  }
+});
 
-  it('cycles back to the same hadith after a full pool rotation', () => {
-    const start = new Date('2026-06-18T00:00:00.000Z');
-    const first = getDailyHadith(start);
-    const poolSize = (() => {
-      let i = 1;
-      let cur = getDailyHadith(new Date(start.getTime() + i * 86400000));
-      while (JSON.stringify(cur) !== JSON.stringify(first)) {
-        i += 1;
-        cur = getDailyHadith(new Date(start.getTime() + i * 86400000));
-      }
-      return i;
-    })();
-    const wrapped = getDailyHadith(new Date(start.getTime() + poolSize * 86400000));
-    expect(wrapped).toEqual(first);
-  });
+it('loads only the book containing today\'s hadith', async () => {
+  const load = jest.spyOn(library, 'loadBookAsync');
+  const hadith = await getDailyHadith(new Date(books[0].count * day));
+  expect(hadith.bookId).toBe(books[1].id);
+  expect(load).toHaveBeenCalledTimes(1);
+  expect(load).toHaveBeenCalledWith(books[1].id);
+});
+
+it('stays stable within a UTC day and cycles after the full library', async () => {
+  const start = new Date('2026-06-18T00:00:00.000Z');
+  const first = await getDailyHadith(start);
+  expect(await getDailyHadith(new Date(start.getTime() + day - 1))).toEqual(first);
+  expect(await getDailyHadith(new Date(start.getTime() + day))).not.toEqual(first);
+  expect(await getDailyHadith(new Date(start.getTime() + pool.length * day))).toEqual(first);
+});
+
+it('returns null if the selected book cannot be loaded', async () => {
+  jest.spyOn(library, 'loadBookAsync').mockResolvedValue(null);
+  expect(await getDailyHadith()).toBeNull();
 });
