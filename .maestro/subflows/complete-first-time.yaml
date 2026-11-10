@@ -8,6 +8,13 @@ name: "Subflow: complete first-time setup"
     visible:
       id: "settings-screen"
     timeout: 90000
+# First boot stages Arabic RTL for the next launch; apply it before navigating.
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: "settings-screen"
+    timeout: 90000
 - tapOn:
     id: "auto-save-toggle"
 - extendedWaitUntil:

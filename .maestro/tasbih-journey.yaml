@@ -69,25 +69,10 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
 - assertVisible:
     id: "tasbih-counter-value"
     text: "10"
-# drawer-shows-all-items-from-tasbih — drawer from Tasbih still has all 6 entries.
+# Check the current scrollable drawer.
 - tapOn:
     id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "drawer-container"
-    timeout: 5000
-- assertVisible:
-    id: "tasbih-screen"
-- assertVisible:
-    id: "main-screen"
-- assertVisible:
-    id: "fav-screen"
-- assertVisible:
-    id: "prayer-times-screen"
-- assertVisible:
-    id: "qibla-screen"
-- assertVisible:
-    id: "contribute-screen"
+- runFlow: subflows/assert-drawer-items.yaml
 # tasbih-drawer-close-stays — closing the drawer keeps Tasbih mounted with counter intact.
 - back
 - extendedWaitUntil:
@@ -96,25 +81,18 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
     timeout: 5000
 - assertVisible:
     id: "menu-button"
-# drawer-tasbih-to-contribute — drawer → contribute → back to tasbih.
-- tapOn:
-    id: "menu-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "10"
+# Contribute is reached through About, then back through About to Tasbih.
+- runFlow: subflows/contribute-roundtrip.yaml
 - extendedWaitUntil:
     visible:
-      id: "contribute-screen"
-    timeout: 5000
-- tapOn:
-    id: "contribute-screen"
-- extendedWaitUntil:
-    visible:
-      id: "contribute-screen-root"
+      id: "tasbih-counter-value"
     timeout: 10000
-- tapOn:
-    id: "back-button"
-- extendedWaitUntil:
-    visible:
-      id: "tasbih-screen"
-    timeout: 10000
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "10"
 # drawer-tasbih-to-settings + settings-from-tasbih-back — drawer → settings,
 # then back returns to Tasbih.
 - tapOn:
@@ -123,6 +101,11 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
     visible:
       id: "drawer-container"
     timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "settings-screen"
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: "settings-screen"
 - extendedWaitUntil:
@@ -135,19 +118,25 @@ name: Tasbih journey — counter, drawer-from-tasbih, navigation to other screen
     visible:
       id: "tasbih-screen"
     timeout: 10000
-# drawer-tasbih-then-favorites + drawer-favorites-from-tasbih — drawer → favorites
-# shows seeded items.
+# Drawer → Azkar → Favorites uses the header filter.
 - tapOn:
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "fav-screen"
+      id: "drawer-container"
     timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "main-screen"
+    direction: UP
+    timeout: 10000
 - tapOn:
-    id: "fav-screen"
+    id: "main-screen"
 - extendedWaitUntil:
     visible:
-      id: "home-screen"
+      id: "favorites-toggle"
     timeout: 10000
+- tapOn:
+    id: "favorites-toggle"
 - assertVisible:
     id: "zikr-item"

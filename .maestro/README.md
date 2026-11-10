@@ -16,6 +16,10 @@ End-to-end tests against the real Android app, run in CI on every PR.
 4. Install: `adb install -r android/app/build/outputs/apk/release/app-release.apk`
 5. Run a flow: `maestro test .maestro/smoke.yaml`
 
+The shared first-time setup relaunches once after Settings appears to apply the
+Arabic RTL setting staged on first boot. Navigation flows then run with the
+persisted layout direction, avoiding drawer overlays intercepting header taps.
+
 ### Why release, not debug?
 
 A debug APK enables React Native's dev support manager, which keeps polling

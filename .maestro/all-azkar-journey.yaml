@@ -159,54 +159,21 @@ name: All Azkar journey — list, search variations, azkar-detail roundtrip, fav
     visible:
       id: "home-screen"
     timeout: 5000
-# drawer-allazkar-to-contribute — Contribute is a Stack screen, so back returns
-# to the active drawer screen (All Azkar) predictably.
-- tapOn:
-    id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "contribute-screen"
-    timeout: 5000
-- tapOn:
-    id: "contribute-screen"
-- extendedWaitUntil:
-    visible:
-      id: "contribute-screen-root"
-    timeout: 10000
-- tapOn:
-    id: "back-button"
+# Contribute is reached through About, then back through About to All Azkar.
+- runFlow: subflows/contribute-roundtrip.yaml
 - extendedWaitUntil:
     visible:
       id: "home-screen"
     timeout: 10000
-# fav-toggle-adds-favorite — the fav we added earlier should be visible in Favorites
-# alongside the pre-seeded items. Verify BEFORE jumping into Settings because
-# back-from-Settings via the drawer is non-deterministic (drawer history).
+# Favorites is a header filter; return to All Azkar before opening Settings.
 - tapOn:
-    id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "fav-screen"
-    timeout: 5000
+    id: "favorites-toggle"
+- assertVisible:
+    id: "zikr-item"
 - tapOn:
-    id: "fav-screen"
-- extendedWaitUntil:
-    visible:
-      id: "zikr-item"
-    timeout: 10000
-# Return to All Azkar so the next drawer-to-settings step starts from there.
-- tapOn:
-    id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "main-screen"
-    timeout: 5000
-- tapOn:
-    id: "main-screen"
-- extendedWaitUntil:
-    visible:
-      id: "zikr-item"
-    timeout: 10000
+    id: "favorites-toggle"
+- assertVisible:
+    id: "zikr-item"
 # drawer-allazkar-to-settings — terminal step: just verify the entry. Settings'
 # back-button calls navigation.goBack() on the inner drawer, which lands on
 # whatever the drawer history surfaces (Tasbih in our setup) — not a behavior
@@ -217,6 +184,11 @@ name: All Azkar journey — list, search variations, azkar-detail roundtrip, fav
     visible:
       id: "drawer-container"
     timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "settings-screen"
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: "settings-screen"
 - extendedWaitUntil:
