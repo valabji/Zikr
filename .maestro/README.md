@@ -34,9 +34,11 @@ debug keystore, so no extra signing setup is needed.
 ## CI
 
 `.github/workflows/e2e-android.yml` runs every flow in this directory on PR to
-`master` and on manual dispatch. It builds the release APK via `expo prebuild`
-+ `./gradlew assembleRelease`, boots an Android 13 (API 33) emulator, installs
-the APK, and runs the flows.
+`master` and on manual dispatch. The build job creates the release APK via
+`expo prebuild` + `./gradlew assembleRelease` and uploads it as an artifact.
+The dependent Maestro job downloads the APK, boots an Android 13 (API 33)
+emulator, installs the APK, and runs the flows. Both jobs use GitHub Actions'
+default timeout. APK and failure-debug artifacts are retained for 7 days.
 
 CI uses `google-services.e2e.json`, a dummy Firebase config for UI tests that
 requires no secrets. It does not connect to a real Firebase project or verify
