@@ -7,7 +7,10 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
-      },
+      }
+    },
+    "ios-simulator": {
+      "extends": "production",
       "ios": {
         "simulator": true
       }

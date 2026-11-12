@@ -1,0 +1,190 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// Set env var BEFORE any imports so module-load-time reads see a valid value.
+process.env.EXPO_PUBLIC_FIREBASE_CONFIG = JSON.stringify({
+  apiKey: 'test',
+  storageBucket: 'gs://test.appspot.com',
+});
+
+jest.mock('@react-native-firebase/analytics', () => ({
+  logEvent: jest.fn(() => Promise.resolve()),
+  getAnalytics: jest.fn(() => ({ __isAnalytics: true })),
+  setAnalyticsCollectionEnabled: jest.fn(),
+}));
+
+jest.mock('@react-native-firebase/app', () => ({
+  __esModule: true,
+  default: {
+    setReactNativeAsyncStorage: jest.fn(),
+    initializeApp: jest.fn(),
+  },
+}));
+
+jest.mock('expo-application', () => ({ nativeApplicationVersion: '1.2.3' }));
+jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '1.2.4' } } }));
+
+const { logEvent, getAnalytics } = require('@react-native-firebase/analytics');
+const firebase = require('@react-native-firebase/app').default;
+import LogEvent from '@/utils/firebase/events';
+import loadFirebaseAnalytics from '@/utils/firebase/load';
+import { setTelemetryCategory, setTelemetryEnabled } from '@/utils/firebase/telemetry';
+
+describe('firebase/events.LogEvent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.Platform.OS = 'ios';
+  });
+
+  it('logs the event with version, platform, notes, and extra params', async () => {
+    await LogEvent('screen_view', { screen_name: 'Home' });
+    // Allow the .then() in logEvent to settle
+    await new Promise((r) => setImmediate(r));
+    expect(logEvent).toHaveBeenCalledTimes(1);
+    const [analytics, title, params] = logEvent.mock.calls[0];
+    expect(analytics).toEqual({ __isAnalytics: true });
+    expect(title).toBe('screen_view');
+    expect(params).toMatchObject({
+      version: '1.2.3',
+      platform: 'ios',
+      screen_name: 'Home',
+      notes: '1.2.3 - ios',
+    });
+  });
+
+  it('falls back to expoConfig.version when nativeApplicationVersion is missing', async () => {
+    // Override the value on the module instance instead of resetModules
+    const expoApp = require('expo-application');
+    const originalVersion = expoApp.nativeApplicationVersion;
+    expoApp.nativeApplicationVersion = null;
+    try {
+      await LogEvent('test', {});
+      await new Promise((r) => setImmediate(r));
+      // expo-constants mock returns version: '1.2.4'
+      expect(logEvent.mock.calls.at(-1)[2].version).toBe('1.2.4');
+    } finally {
+      expoApp.nativeApplicationVersion = originalVersion;
+    }
+  });
+
+  it('logs and does not throw if logEvent rejects', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    logEvent.mockReturnValueOnce(Promise.reject(new Error('analytics down')));
+    await LogEvent('boom', {});
+    await new Promise((r) => setImmediate(r));
+    expect(errSpy).toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
+
+  it('contains synchronous SDK initialization failures', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    getAnalytics.mockImplementationOnce(() => { throw new Error('no default app'); });
+    await expect(LogEvent('test')).resolves.toBeUndefined();
+    expect(logEvent).not.toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
+
+  it('skips custom events when the events category is disabled', async () => {
+    await setTelemetryCategory('events', false);
+    try {
+      await LogEvent('some_event', {});
+      expect(logEvent).not.toHaveBeenCalled();
+      await LogEvent('screen_view', { screen_name: 'Home' });
+      expect(logEvent).toHaveBeenCalledTimes(1);
+    } finally {
+      await setTelemetryCategory('events', true);
+    }
+  });
+
+  it('skips screen views when the screens category is disabled', async () => {
+    await setTelemetryCategory('screens', false);
+    try {
+      await LogEvent('screen_view', { screen_name: 'Home' });
+      expect(logEvent).not.toHaveBeenCalled();
+    } finally {
+      await setTelemetryCategory('screens', true);
+    }
+  });
+
+  it('omits device params when the device category is disabled', async () => {
+    await setTelemetryCategory('device', false);
+    try {
+      await LogEvent('some_event', { extra: 'yes' });
+      const params = logEvent.mock.calls[0][2];
+      expect(params).toEqual({ extra: 'yes' });
+    } finally {
+      await setTelemetryCategory('device', true);
+    }
+  });
+
+  it('skips everything when telemetry is disabled', async () => {
+    await setTelemetryEnabled(false);
+    try {
+      await LogEvent('screen_view', {});
+      await LogEvent('some_event', {});
+      expect(logEvent).not.toHaveBeenCalled();
+    } finally {
+      await setTelemetryEnabled(true);
+    }
+  });
+});
+
+describe('firebase/load.loadFirebaseAnalytics', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env.EXPO_PUBLIC_FIREBASE_CONFIG = JSON.stringify({
+      apiKey: 'test',
+      storageBucket: 'gs://test.appspot.com',
+    });
+  });
+
+  afterEach(() => {
+    global.Platform.OS = 'ios';
+  });
+
+  it('on native, only logs the app-loaded event', async () => {
+    global.Platform.OS = 'ios';
+    await loadFirebaseAnalytics();
+    expect(firebase.initializeApp).not.toHaveBeenCalled();
+    expect(logEvent).toHaveBeenCalledWith(
+      { __isAnalytics: true },
+      'App_Loaded_Successfully',
+      expect.objectContaining({ my_note: 'working from env' })
+    );
+  });
+
+  // load.js reads `process.env.EXPO_PUBLIC_FIREBASE_CONFIG`, which babel-preset-expo
+  // inlines at compile time. Whether it inlines as `undefined` or a real JSON string
+  // depends on the env the test runner was launched with (e.g. act loads .env), so we
+  // can't predict whether the function resolves or rejects — just that setReactNativeAsyncStorage
+  // runs first on web.
+  it('on web, invokes setReactNativeAsyncStorage', async () => {
+    global.Platform.OS = 'web';
+    await loadFirebaseAnalytics().catch(() => {});
+    expect(firebase.setReactNativeAsyncStorage).toHaveBeenCalled();
+  });
+});
+
+describe('telemetry preference recovery', () => {
+  const { APP_KEYS } = require('@/constants/StorageKeys');
+  const { loadTelemetryPreference, isTelemetryEnabled } = require('@/utils/firebase/telemetry');
+  const { setAnalyticsCollectionEnabled } = require('@react-native-firebase/analytics');
+
+  afterEach(async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    await setTelemetryEnabled(true);
+  });
+
+  it('applies a saved opt-out even if category JSON is corrupt', async () => {
+    AsyncStorage.getItem.mockImplementation(async key => key === APP_KEYS.TELEMETRY_ENABLED ? 'false' : '{');
+    await expect(loadTelemetryPreference()).resolves.toBeUndefined();
+    expect(isTelemetryEnabled()).toBe(false);
+    expect(setAnalyticsCollectionEnabled).toHaveBeenLastCalledWith(expect.anything(), false);
+  });
+
+  it('contains asynchronous SDK collection failures', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    setAnalyticsCollectionEnabled.mockRejectedValueOnce(new Error('native failure'));
+    await expect(setTelemetryEnabled(false)).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});

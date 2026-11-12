@@ -8,12 +8,17 @@ End-to-end tests against the real Android app, run in CI on every PR.
 2. Start an Android emulator (or plug in a device with USB debugging).
 3. Build a release APK (debug-signed; release variant is required — see below):
    ```
-   npx expo prebuild --platform android --clean --non-interactive
+   CI=1 GOOGLE_SERVICES_JSON="$PWD/.maestro/google-services.e2e.json" \
+     npx expo prebuild --platform android --clean
    cd android && ./gradlew assembleRelease --no-daemon \
      -x lint -x lintVitalRelease -x lintVitalAnalyzeRelease
    ```
 4. Install: `adb install -r android/app/build/outputs/apk/release/app-release.apk`
 5. Run a flow: `maestro test .maestro/smoke.yaml`
+
+The shared first-time setup relaunches once after Settings appears to apply the
+Arabic RTL setting staged on first boot. Navigation flows then run with the
+persisted layout direction, avoiding drawer overlays intercepting header taps.
 
 ### Why release, not debug?
 
@@ -29,8 +34,14 @@ debug keystore, so no extra signing setup is needed.
 ## CI
 
 `.github/workflows/e2e-android.yml` runs every flow in this directory on PR to
-`master` and on manual dispatch. It builds the release APK via `expo prebuild`
-+ `./gradlew assembleRelease`, boots an Android 13 (API 33) emulator, installs
-the APK, and runs the flows.
+`master` and on manual dispatch. The build job creates the release APK via
+`expo prebuild` + `./gradlew assembleRelease` and uploads it as an artifact.
+The dependent Maestro job downloads the APK, boots an Android 13 (API 33)
+emulator, installs the APK, and runs the flows. Both jobs use GitHub Actions'
+default timeout. APK and failure-debug artifacts are retained for 7 days.
+
+CI uses `google-services.e2e.json`, a dummy Firebase config for UI tests that
+requires no secrets. It does not connect to a real Firebase project or verify
+Analytics/Crashlytics delivery. Production builds must use their own config.
 
 The Android package id under test is `com.valabji.zikr`.

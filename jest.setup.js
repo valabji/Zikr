@@ -138,20 +138,21 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-// Mock Audio and Sound
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn(() => Promise.resolve({
-        sound: {
-          playAsync: jest.fn(),
-          unloadAsync: jest.fn(),
-        },
-      })),
-    },
-    setAudioModeAsync: jest.fn(() => Promise.resolve()),
-  },
-  InterruptionModeIOS: { MixWithOthers: 0, DoNotMix: 1, DuckOthers: 2 },
+jest.mock('expo-audio', () => ({
+  useAudioPlayer: jest.fn(() => ({ seekTo: jest.fn(async () => {}), play: jest.fn() })),
+  createAudioPlayer: jest.fn(() => ({
+    play: jest.fn(),
+    pause: jest.fn(),
+    remove: jest.fn(),
+    seekTo: jest.fn(() => Promise.resolve()),
+    setPlaybackRate: jest.fn(),
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
+    playing: false,
+    currentTime: 0,
+    duration: 0,
+    currentStatus: { isLoaded: true, playing: false, playbackState: 'readyToPlay' },
+  })),
+  setAudioModeAsync: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('expo-font', () => ({
@@ -175,10 +176,22 @@ jest.mock('expo-file-system/legacy', () => ({
   makeDirectoryAsync: jest.fn(() => Promise.resolve()),
   downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file', status: 200 })),
   deleteAsync: jest.fn(() => Promise.resolve()),
+  copyAsync: jest.fn(() => Promise.resolve()),
+  moveAsync: jest.fn(() => Promise.resolve()),
+  EncodingType: { Base64: 'base64', UTF8: 'utf8' },
   readDirectoryAsync: jest.fn(() => Promise.resolve([])),
   readAsStringAsync: jest.fn(() => Promise.resolve('{"entries":[]}')),
   writeAsStringAsync: jest.fn(() => Promise.resolve()),
   createDownloadResumable: jest.fn(() => ({ downloadAsync: jest.fn(() => Promise.resolve({ uri: '/mock/file' })) })),
+}), { virtual: true });
+
+jest.mock('expo-document-picker', () => ({
+  getDocumentAsync: jest.fn(() => Promise.resolve({ canceled: true })),
+}), { virtual: true });
+
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest.fn(() => Promise.resolve({ canceled: true })),
+  MediaTypeOptions: { Images: 'Images' },
 }), { virtual: true });
 
 jest.mock('expo-notifications', () => ({
@@ -201,6 +214,14 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { DATE: 'date' },
 }), { virtual: true });
 
+jest.mock('expo-background-task', () => ({
+  registerTaskAsync: jest.fn(() => Promise.resolve()),
+  unregisterTaskAsync: jest.fn(() => Promise.resolve()),
+  BackgroundTaskResult: { Success: 1, Failed: 2 },
+}));
+
+jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+
 jest.mock('expo-intent-launcher', () => ({
   startActivityAsync: jest.fn(() => Promise.resolve()),
   ActivityAction: {
@@ -210,7 +231,7 @@ jest.mock('expo-intent-launcher', () => ({
 }), { virtual: true });
 
 // Mock Sound functionality and utils
-jest.mock('./utils/Sounds', () => ({
+jest.mock('./src/utils/audio/Sounds', () => ({
   useAudio: jest.fn(() => ({
     playSound: jest.fn(),
     stopSound: jest.fn(),
@@ -370,6 +391,9 @@ jest.mock('react-native', () => {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     },
+    AppState: {
+      addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+    },
     DevSettings: {
       reload: jest.fn(),
       addMenuItem: jest.fn(),
@@ -475,54 +499,29 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   getAllKeys: jest.fn(),
 }));
 
-// Mock Redux Store
-jest.mock('./redux/store', () => {
-  let testState = {
-    obj: {
-      Azkar: [{
-        id: 1,
-        name: 'Test Zikr',
-        count: '1',
-        zekr: 'Test Zikr Text',
-        category: 'Test Category',
-        description: 'Test Description',
-        reference: 'Test Reference',
-        fav: false
-      }]
-    }
-  };
-  
+jest.mock('./src/utils/azkar/AzkarStore', () => {
+  let azkar = [{
+    id: 1,
+    name: 'Test Zikr',
+    count: '1',
+    zekr: 'Test Zikr Text',
+    category: 'Test Category',
+    description: 'Test Description',
+    reference: 'Test Reference',
+    fav: false
+  }];
+  const listeners = new Set();
   return {
-    mystore: {
-      getState: jest.fn(() => testState),
-      dispatch: jest.fn((action) => {
-        switch (action.type) {
-          case 'SET_AZKAR':
-            testState = {
-              ...testState,
-              obj: {
-                ...testState.obj,
-                Azkar: action.payload
-              }
-            };
-            break;
-          case 'RESET_STATE':
-            testState = {
-              obj: {
-                Azkar: []
-              }
-            };
-            break;
-          case 'change':
-            testState = {
-              ...testState,
-              ...action.obj ? { obj: action.obj } : {}
-            };
-            break;
-        }
-      }),
-      subscribe: jest.fn(),
-    },
+    loadAzkar: jest.fn(() => Promise.resolve(azkar)),
+    getAzkar: jest.fn(() => azkar),
+    setAzkar: jest.fn((list) => {
+      azkar = list;
+      listeners.forEach((fn) => fn(azkar));
+    }),
+    subscribeAzkar: jest.fn((fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    }),
   };
 });
 

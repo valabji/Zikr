@@ -4,7 +4,7 @@ export default {
     slug: "Zikr",
     privacy: "public",
     platforms: ["ios", "android", "web"],
-    version: "1.1.26",
+    version: "1.2.0",
     orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
@@ -44,7 +44,7 @@ export default {
     android: {
       package: "com.valabji.zikr",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 29,
+      versionCode: 30,
       adaptiveIcon: {
         foregroundImage: "./assets/images/splash_noname.png",
         monochromeImage: "./assets/images/logo_noname.png",
@@ -130,14 +130,23 @@ export default {
         }
       ],
       "expo-asset",
+      "expo-background-task",
       ["expo-font", {
         fonts: [
           "./node_modules/@expo-google-fonts/cairo/Cairo_400Regular.ttf",
           "./node_modules/@expo-google-fonts/cairo/Cairo_700Bold.ttf"
         ]
       }],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "Used to pick a custom background image for your themes."
+        }
+      ],
       "expo-web-browser",
+      "expo-sharing",
       "@react-native-firebase/app",
+      "@react-native-firebase/crashlytics",
       [
         "expo-build-properties",
         {
@@ -187,8 +196,8 @@ export default {
       "@bacons/apple-targets"
     ],
     locales: {
-      "ar": "./locales/native/ar.json",
-      "en": "./locales/native/en.json"
+      "ar": "./src/locales/native/ar.json",
+      "en": "./src/locales/native/en.json"
     }
   },
 };

@@ -1,7 +1,7 @@
 appId: com.valabji.zikr
-name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contribute
+name: Favorites journey — landing, search, azkar-detail, drawer, fav-toggle, contribute
 # Covers: first-time-to-home, favorites-default-shows-seeded, menu-button-on-favorites,
-# search-from-favorites, screen2-from-favorites, screen2-back-to-favorites,
+# search-from-favorites, azkar-detail-from-favorites, azkar-detail-back-to-favorites,
 # drawer-opens, drawer-open-close, fav-toggle-then-untoggle,
 # drawer-favorites-to-contribute, contribute-screen, contribute-back-to-home,
 # contribute-from-favorites-back.
@@ -37,13 +37,13 @@ name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contri
     visible:
       id: "search-toggle"
     timeout: 5000
-# screen2-from-favorites + screen2-back-to-favorites — tap a fav zikr, then back.
+# azkar-detail-from-favorites + azkar-detail-back-to-favorites — tap a fav zikr, then back.
 - tapOn:
     id: "zikr-item"
     index: 0
 - extendedWaitUntil:
     visible:
-      id: "screen2-container"
+      id: "azkar-detail-container"
     timeout: 10000
 - tapOn:
     id: "back-button"
@@ -53,25 +53,10 @@ name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contri
     timeout: 5000
 - assertVisible:
     id: "search-toggle"
-# drawer-opens — all six destinations are present in the drawer.
+# Check the current scrollable drawer.
 - tapOn:
     id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "drawer-container"
-    timeout: 5000
-- assertVisible:
-    id: "screen3"
-- assertVisible:
-    id: "main-screen"
-- assertVisible:
-    id: "fav-screen"
-- assertVisible:
-    id: "prayer-times-screen"
-- assertVisible:
-    id: "qibla-screen"
-- assertVisible:
-    id: "contribute-screen"
+- runFlow: subflows/assert-drawer-items.yaml
 # drawer-open-close — system back closes the drawer and returns to home.
 - back
 - extendedWaitUntil:
@@ -89,37 +74,17 @@ name: Favorites journey — landing, search, screen2, drawer, fav-toggle, contri
 - tapOn:
     id: "fav-toggle"
     index: 0
-# Re-enter Favorites via the drawer — list should still be populated (multiple seeded items).
+# Favorites is a header filter; toggle to All Azkar and back.
 - tapOn:
-    id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "fav-screen"
-    timeout: 5000
-- tapOn:
-    id: "fav-screen"
-- extendedWaitUntil:
-    visible:
-      id: "zikr-item"
-    timeout: 10000
-# drawer-favorites-to-contribute + contribute-screen — drawer → contribute → see body.
-- tapOn:
-    id: "menu-button"
-- extendedWaitUntil:
-    visible:
-      id: "contribute-screen"
-    timeout: 5000
-- tapOn:
-    id: "contribute-screen"
-- extendedWaitUntil:
-    visible:
-      id: "contribute-screen-root"
-    timeout: 10000
+    id: "favorites-toggle"
 - assertVisible:
-    id: "copy-email"
-# contribute-back-to-home + contribute-from-favorites-back — back returns to favorites.
+    id: "zikr-item"
 - tapOn:
-    id: "back-button"
+    id: "favorites-toggle"
+- assertVisible:
+    id: "zikr-item"
+# Contribute is reached through About, then back through About to Favorites.
+- runFlow: subflows/contribute-roundtrip.yaml
 - extendedWaitUntil:
     visible:
       id: "home-screen"

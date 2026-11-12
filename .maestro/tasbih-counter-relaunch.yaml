@@ -1,6 +1,5 @@
 appId: com.valabji.zikr
-name: Tasbih counter does not persist across launches
-# Standalone because it relaunches the app to verify the counter resets.
+name: Tasbih manager preserves active counter, counts, and rounds across launches
 ---
 - launchApp:
     clearState: true
@@ -9,14 +8,17 @@ name: Tasbih counter does not persist across launches
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "screen3"
+      id: "tasbih-screen"
     timeout: 5000
 - tapOn:
-    id: "screen3"
+    id: "tasbih-screen"
 - extendedWaitUntil:
     visible:
-      id: "tasbih-screen"
+      id: "tasbih-counter-value"
     timeout: 10000
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "0"
 - tapOn:
     id: "tasbih-counter-button"
 - tapOn:
@@ -26,7 +28,38 @@ name: Tasbih counter does not persist across launches
 - assertVisible:
     id: "tasbih-counter-value"
     text: "3"
-# Counter lives in local React state; relaunch without clearing should reset it.
+# Each counter keeps its own progress; a target of 33 starts a new round.
+- tapOn:
+    id: "tasbih-active-name"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-counters-sheet"
+    timeout: 5000
+- tapOn: ".*(Subhan Allah|سبحان الله).*"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "0"
+- assertVisible: "0 / 33"
+- repeat:
+    times: 33
+    commands:
+      - tapOn:
+          id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "0"
+- assertVisible: "(Rounds|الجولات): 1"
+- repeat:
+    times: 2
+    commands:
+      - tapOn:
+          id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "2"
+# Backgrounding flushes progress before a cold launch without clearing data.
+- pressKey: HOME
+- stopApp
 - launchApp:
     clearState: false
 - extendedWaitUntil:
@@ -37,14 +70,44 @@ name: Tasbih counter does not persist across launches
     id: "menu-button"
 - extendedWaitUntil:
     visible:
-      id: "screen3"
+      id: "tasbih-screen"
     timeout: 5000
 - tapOn:
-    id: "screen3"
+    id: "tasbih-screen"
 - extendedWaitUntil:
     visible:
       id: "tasbih-counter-value"
     timeout: 10000
 - assertVisible:
     id: "tasbih-counter-value"
-    text: "0"
+    text: "2"
+- assertVisible: ".*(Subhan Allah|سبحان الله).*"
+- assertVisible: "2 / 33"
+- assertVisible: "(Rounds|الجولات): 1"
+# Switching back restores the independent untargeted counter's value.
+- tapOn:
+    id: "tasbih-active-name"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-counters-sheet"
+    timeout: 5000
+- tapOn: "(Counter|عداد).*"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "3"
+- tapOn:
+    id: "tasbih-counter-button"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "4"
+- tapOn:
+    id: "tasbih-active-name"
+- extendedWaitUntil:
+    visible:
+      id: "tasbih-counters-sheet"
+    timeout: 5000
+- tapOn: ".*(Subhan Allah|سبحان الله).*"
+- assertVisible:
+    id: "tasbih-counter-value"
+    text: "2"
+- assertVisible: "(Rounds|الجولات): 1"

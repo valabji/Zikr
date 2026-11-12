@@ -1,0 +1,44 @@
+appId: com.valabji.zikr
+name: "Subflow: drawer to About to Contribute and back"
+---
+- tapOn:
+    id: "menu-button"
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "about-screen"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "about-screen"
+- extendedWaitUntil:
+    visible:
+      id: "about-screen-root"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "about-contribute-link"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "about-contribute-link"
+- extendedWaitUntil:
+    visible:
+      id: "contribute-screen-root"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "copy-email"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "back-button"
+- extendedWaitUntil:
+    visible:
+      id: "about-screen-root"
+    timeout: 10000
+- tapOn:
+    id: "back-button"

@@ -1,0 +1,56 @@
+appId: com.valabji.zikr
+name: "Subflow: current default drawer items"
+---
+- extendedWaitUntil:
+    visible:
+      id: "drawer-container"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "quran-screen"
+    direction: UP
+    timeout: 10000
+- assertVisible:
+    id: "books-screen"
+- assertVisible:
+    id: "radio-screen"
+- assertVisible:
+    id: "tasbih-screen"
+- assertVisible:
+    id: "main-screen"
+- scrollUntilVisible:
+    element:
+      id: "prayer-times-screen"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "qibla-screen"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "islamic-calendar-screen-link"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "wird-planner-screen-link"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "hifz-tracker-screen-link"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "about-screen"
+    direction: DOWN
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "settings-screen"
+    direction: DOWN
+    timeout: 10000
+- assertVisible: "English|عربي"

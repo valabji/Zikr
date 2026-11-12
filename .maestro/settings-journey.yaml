@@ -13,6 +13,11 @@ name: Settings journey — drawer entry, back button, auto-save cycle, language 
     visible:
       id: "drawer-container"
     timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "settings-screen"
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: "settings-screen"
 - extendedWaitUntil:

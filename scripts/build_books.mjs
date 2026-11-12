@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { transformRawBook } from '../utils/booksTransform.js';
+import { transformRawBook } from '../src/utils/books/booksTransform.js';
 
 const SHA = '70b83d6d21995bb32f8d7271cd75501be5a922a7';
 const RAW_BASE = `https://cdn.jsdelivr.net/gh/AhmedBaset/hadith-json@${SHA}/db/by_book`;

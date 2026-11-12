@@ -2,8 +2,8 @@
 > A comprehensive Islamic mobile application for daily prayers, dhikr (remembrance), and spiritual guidance
 
 [![Status](https://img.shields.io/badge/build-passing-green.svg)](https://github.com/valabji/Zikr)
-[![React Native](https://img.shields.io/badge/React%20Native-v0.79.5-blue.svg?logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-SDK53.0.0-black.svg?logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-v0.86-blue.svg?logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK57-black.svg?logo=expo)](https://expo.dev/)
 [![React Navigation](https://img.shields.io/badge/React%20Navigation-v7-blue.svg?logo=react)](https://reactnavigation.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellowgreen.svg)](http://mit-license.org/)
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green.svg?logo=googleplay)](https://play.google.com/store/apps/details?id=com.valabji.zikr)
@@ -46,10 +46,10 @@
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React Native 0.79.5 with Expo SDK 53
+- **Framework**: React Native 0.86 with Expo SDK 57
 - **Navigation**: React Navigation 7 (Stack, Drawer, Bottom Tabs)
-- **State Management**: Redux Toolkit
-- **Audio**: Expo Audio for prayer beads sound effects
+- **State Management**: Lightweight custom stores backed by AsyncStorage
+- **Audio**: expo-audio for adhan, Quran recitation, and click sounds
 - **Internationalization**: Custom i18n implementation with JSON translations
 - **Storage**: AsyncStorage for user preferences and favorites
 - **UI Components**: Custom components with Linear Gradients
@@ -60,52 +60,32 @@
 
 ```
 zikr/
-├── assets/                    # Images, fonts, and audio assets
-│   ├── fonts/                # Cairo font for Arabic text
-│   ├── images/               # App icons, backgrounds, UI elements
-│   └── sound/                # Prayer beads click sound effects
-├── components/               # Reusable UI components
-│   ├── CHeader.js           # Custom header component
-│   ├── Hbg.js              # Header background component
-│   └── TabBarIcon.js       # Tab bar icon component
-├── constants/               # App constants and data
-│   ├── Azkar.js/.json      # Complete collection of Islamic prayers
-│   ├── Colors.js           # App color scheme
-│   └── Layout.js           # Screen layout constants
-├── locales/                # Internationalization
-│   ├── ar.json             # Arabic translations
-│   ├── en.json             # English translations
-│   └── i18n.js             # i18n configuration and utilities
-├── navigation/             # Navigation configuration
-│   ├── Main.js             # Main navigation container
-│   ├── DrawerNavigation.js # Drawer navigation setup
-│   └── useLinking.js       # Deep linking configuration
-├── screens/                # App screens
-│   ├── MainScreen.js       # All Azkar categories screen
-│   ├── Screen2.js          # Individual prayer/dhikr viewer
-│   ├── Screen3.js          # Digital Tasbih counter
-│   ├── Fav.js              # Favorite prayers screen
-│   └── SettingsScreen.js   # App settings and preferences
-├── redux/                  # State management
-│   └── store.js            # Redux store configuration
-├── utils/                  # Utility functions
-│   ├── Sounds.js           # Audio management hooks
-│   ├── load.js             # App loading utilities
-│   └── restart.js          # App restart functionality
-└── __tests__/              # Test files and mocks
-    ├── components/         # Component tests
-    ├── screens/           # Screen tests
-    └── __mocks__/         # Test mocks and setup
+├── src/
+│   ├── App.js              # Root component and boot sequence
+│   ├── components/         # Reusable UI components
+│   ├── constants/          # Themes, colors, Azkar data, prayer constants
+│   ├── hooks/              # Shared React hooks
+│   ├── locales/            # Custom i18n (ar/en JSON + utilities)
+│   ├── navigation/         # Stack + drawer navigation
+│   ├── screens/            # App screens (Azkar, Tasbih, Quran, Prayer, ...)
+│   ├── utils/              # Services: audio, notifications, prayer times, stores
+│   ├── widgets/            # Home-screen widget code
+│   └── __tests__/          # Component/screen/hook tests
+├── assets/                 # Images, fonts, sounds, Quran data
+├── modules/                # Local Expo native modules
+├── plugins/                # Expo config plugins
+├── targets/                # iOS widget target
+├── __mocks__/              # Jest mocks for native deps
+└── app.config.js           # Expo app config (permissions, plugins, version)
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (16.x or higher)
-- npm or yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- For iOS development: Xcode (macOS only)
+- Node.js 22.13 or newer (22.x)
+- Yarn 3.6.4 (Berry) — committed in `.yarn/`; do not use npm
+- For iOS development: Xcode 26.4 or newer (macOS only)
 - For Android development: Android Studio
 
 ### Installation
@@ -118,28 +98,24 @@ zikr/
 
 2. **Install dependencies:**
    ```bash
-   npm install
-   # or
    yarn install
    ```
 
 3. **Start the development server:**
    ```bash
-   npm start
-   # or
-   expo start
+   yarn start
    ```
 
 4. **Run on specific platforms:**
    ```bash
    # iOS (requires macOS and Xcode)
-   npm run ios
+   yarn ios
    
-   # Android (requires Android Studio/SDK)
-   npm run android
+   # Android (requires Android Studio/SDK — deletes and regenerates android/)
+   yarn android
    
    # Web browser
-   npm run web
+   yarn web
    ```
 
 ### Building for Production
@@ -190,16 +166,47 @@ The app includes comprehensive test coverage:
 
 ```bash
 # Run all tests
-npm test
+yarn test
 
 # Run tests in watch mode
-npm run test:watch
+yarn test:watch
 
 # Generate coverage report
-npm run test:coverage
+yarn test:coverage
 
 # Update snapshots
-npm run test:update
+yarn test:update
+```
+
+### After upgrading native dependencies
+
+Rebuild development clients before testing on a device. Existing SDK 54 native
+projects and installed clients cannot load the SDK 57 JavaScript bundle.
+`ios/` and `android/` are generated and ignored by Git; preserve any local native
+edits before regenerating them with `yarn prebuild`.
+
+Prayer reminders use a local exact-alarm bridge on Android and Expo background
+tasks on both native platforms. Changes to these modules require rebuilt clients.
+The scheduler keeps up to 10 days on iOS (within its shared notification limit)
+and 30 days on Android, and requests background renewal every 12 hours. The OS
+can defer renewal or stop it after force-quitting the app. A local reminder asks
+the user to reopen Zikr before the saved schedule expires.
+Refresh also retimes queued suhoor and iftar reminders using the current location
+and calculation settings, and removes reminders whose new time has already passed.
+
+Prayer locations use an offline time-zone lookup, including previously saved
+locations. Its compact boundaries can be approximate near borders; users can
+correct the time zone in Location Settings. Explicit corrections are preserved.
+
+`yarn build:ios` uses the device/store production profile. For a simulator build,
+use `yarn eas build --profile ios-simulator --platform ios`.
+
+For dependency validation and production bundle checks:
+
+```bash
+yarn expo install --check
+yarn dlx expo-doctor@latest
+yarn expo export --platform all
 ```
 
 ## 🌐 Localization
@@ -214,7 +221,7 @@ The app supports full localization with:
 
 - **Bundle ID**: `com.valabji.zikr`
 - **Version**: 1.1.2
-- **Target Platforms**: iOS 11+, Android 21+
+- **Target Platforms**: iOS 16.4+, Android 7.0+ (API 24)
 - **Google Services**: Firebase Analytics integration
 - **AdMob**: Monetization ready (currently disabled)
 
